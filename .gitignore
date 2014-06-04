@@ -2,3 +2,5 @@ venv/
 .DS_STORE
 __pycache__
 env
+config.pyc
+*.pyc

@@ -1,0 +1,47 @@
+{% extends "layouts/layout.html" %}
+
+{% block head %}
+<script>
+  var runs = {{ runs | tojson }};
+</script>
+<style>
+.tick {
+  font-size: 7px;
+}
+path {
+  fill: none;
+  stroke-width: 1;
+  stroke: black;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<h3>Caller: {{ caller_name }}</h3>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Run ID</th>
+      <th>Submitted On</th>
+      <th>Hash</th>
+      <th>f1score</th>
+      <th>precision</th>
+      <th>recall</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for run in  runs %}
+    <tr>
+      <td>{{ run['id'] }}</td>
+      <td>{{ run['submitted_at'] }}</td>
+      <td>{{ run['variant_caller_SHA1'] }}</td>
+      <td>{{ run['f1score'] }}</td>
+      <td>{{ run['precision'] }}</td>
+      <td>{{ run['recall'] }}</td>
+    </tr>
+{% endfor %}
+  </tbody>
+</table>
+
+<script src="{{ url_for('static', filename='js/trend.js') }}"></script>
+{% endblock %}

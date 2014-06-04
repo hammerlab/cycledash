@@ -1,21 +1,19 @@
+# -*- coding: utf-8 -*-
 import datetime
 import json
 import os
 
-from flask import request, Response
+from flask import request, Response, render_template
 
 from cycledash import app, db
 from cycledash.models import Run
+import cycledash.utils as utils
 
-
-
-def plaintext(string):
-    return Response(string, mimetype='text/plain')
 
 
 @app.route('/')
 def home():
-    return """<html><pre>
+    return utils.plaintext("""
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 | Welcome to CycleDash. |
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -24,10 +22,15 @@ We use JSON. Recommend using httpie[1] to interface with this from the CLI.
 
 You may be looking for...
 
-POST    /runs                       -- submit a new run to cycledash [<a href="/format">format spec.</a>]
-GET     <a href="/runs">/runs</a>                       -- list all runs
-GET     <a href="/runs/1,2,3">/runs/&lt;run_id&gt;(,&lt;run_id&gt;)*</a>  -- display concordance of given runs [TODO]
-GET     <a href="/run/1">/run/&lt;run_id&gt;</a>               -- return a particular run
+POST    /runs                       -- submit a new run to cycledash
+                                       c.f. /docs/format
+GET     /runs/submit                -- display form to submit a run
+GET     /runs                       -- list all runs
+GET     /runs/<run_id>              -- return a particular run
+GET     /runs/<run_id>(,<run_id>)*  -- display concordance of given runs [TODO]
+GET     /callers                    -- list all callers and latest scores
+GET     /callers/<caller_name>      -- display runs for and a graph of scores
+                                       for runs of a given caller
 
 -------- __@      __@       __@       __@      __~@
 ----- _`\<,_    _`\<,_    _`\<,_     _`\<,_    _`\<,_
@@ -35,39 +38,70 @@ GET     <a href="/run/1">/run/&lt;run_id&gt;</a>               -- return a parti
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 [1]: http://httpie.org
-"""
+""")
+
+
+@app.route('/docs/format')
+def format():
+    return utils.plaintext("""
+POST to /runs a JSON object of the below format:
+
+    {
+      "name": "name of the variant caller",
+      "sha1": "hash of git commit for this run",
+      "f1score": 0.xxx,
+      "precision": 0.xxx,
+      "recall": 0.xxx,
+    }
+
+NOTE: Be careful that 'name' is constant between submissions for the same
+caller, otherwise data will not be aggregated correctly.
+""")
 
 
 @app.route('/runs', methods=['POST', 'GET'])
 def runs():
     if request.method == 'POST':
-        data = request.json
-        print(data)
+        data = request.json or request.form
+        print data
+        # TODO(ihodes): validation
         run = Run(data.get('name'), data.get('sha1'),
-                  data.get('f1score'), data.get('precision'), data.get('recall'))
+                  float(data.get('f1score')),
+                  float(data.get('precision')),
+                  float(data.get('recall')))
         db.session.add(run)
         db.session.commit()
-        return plaintext(json.dumps(run.json(), indent=4))
+        return utils.json(json.dumps(run.json(), indent=4))
     elif request.method == 'GET':
         runs = [run.json() for run in Run.query.all()]
-        return plaintext(json.dumps({'runs': runs}, indent=4))
+        return utils.json(json.dumps({'runs': runs}, indent=4))
 
-@app.route('/runs/<run_ids>')
-def concordance(run_ids):
-    return u"Concordance: ▂▁▄▃▆▅█▇"
 
-@app.route('/format')
-def format():
-    return plaintext("""
-{
-  "name": "name of the variant caller",
-  "sha1": "hash of git commit for this run",
-  "f1score": 0.xxx,
-  "precision": 0.xxx,
-  "recall": 0.xxx,
-}
-""")
-
-@app.route('/run/<run_id>')
+@app.route('/runs/<run_id>')
 def run(run_id):
-    return plaintext(json.dumps(Run.query.get(run_id).json(), indent=4))
+    run = Run.query.get(run_id).json()
+    return utils.json(json.dumps(run, indent=4))
+
+
+@app.route('/runs/submit')
+def submit_run():
+    return render_template('submit_run.html')
+
+
+@app.route('/callers')
+def callers():
+    callers = db.engine.execute("""
+SELECT variant_caller_name, f1score, precision, recall
+FROM run
+GROUP BY variant_caller_name
+ORDER BY submitted_at ASC
+""").fetchall()
+    return render_template('callers.html', callers=callers)
+
+
+@app.route('/callers/<caller_name>')
+def trends(caller_name):
+    runs = Run.query.filter_by(variant_caller_name=caller_name)
+    runs = runs.order_by(Run.submitted_at.desc())
+    runs = [run.json() for run in runs]
+    return render_template('trend.html', runs=runs, caller_name=caller_name)

@@ -11,7 +11,7 @@ class Run(db.Model):
 
     variant_caller_name = db.Column(db.Text(), nullable=False)
     variant_caller_SHA1 = db.Column(db.String(40))
-    submitted_at = db.Column(db.Date(), default=datetime.datetime.now())
+    submitted_at = db.Column(db.DateTime(), default=datetime.datetime.now)
 
     f1score = db.Column(db.Float(asdecimal=True))
     precision = db.Column(db.Float(asdecimal=True))
@@ -52,8 +52,8 @@ class Run(db.Model):
 def jsonable(val):
     if type(val) == decimal.Decimal:
         return float(val)
-    if type(val) == datetime.date:
+    if type(val) in [datetime.date, datetime.datetime]:
         return str(val)
-    if type(val) in [int, float, str, bool] or val == None:
+    if type(val) in [int, float, str, bool, unicode] or val == None:
         return val
     raise TypeError("Unexpected Type: "+str(type(val)))

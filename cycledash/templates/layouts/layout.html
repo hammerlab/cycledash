@@ -1,0 +1,21 @@
+{%- from 'macros/flash.html' import flash with context -%}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>{% block title %}CycleDash{% endblock %}</title>
+
+    <script src="{{ url_for('static', filename='js/jquery-1.11.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/d3.min.js') }}"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    {% block head %}{% endblock %}
+  </head>
+
+  <body>
+    {% block body %}{% endblock %}
+  </body>
+</html>

@@ -1,0 +1,27 @@
+{% extends "layouts/layout.html" %}
+
+{% block body %}
+<form method="POST" action="/runs" role="form">
+  <div class="form-group">
+    <label>Variant Caller Name:</label>
+    <input class="form-control" type="text" name="name">
+  </div>
+  <div class="form-group">
+    <label>SHA1 commit hash:</label>
+    <input class="form-control" type="text" name="sha1">
+  </div>
+  <div class="form-group">
+    <label>f1score:</label>
+    <input class="form-control" type="text" name="f1score">
+  </div>
+  <div class="form-group">
+    <label>precision:</label>
+    <input class="form-control" type="text" name="precision">
+  </div>
+  <div class="form-group">
+    <label>recall:</label>
+    <input class="form-control" type="text" name="recall">
+  </div>
+  <button type="submit" class="btn btn-default">Submit</button>
+</form>
+{% endblock %}
