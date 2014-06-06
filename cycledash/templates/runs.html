@@ -15,14 +15,14 @@ form#submit {
   top: 67px;
 }
 .runs.table {
-  margin-top: 79px;
+  margin-top: 23px;
 }
 </style>
 {% endblock %}
 
 {% block body %}
 {{ nav("runs") }}
-
+<h3>Runs <small>Every Variant Call Run</small></h3>
 <button id="show-submit" class="btn btn-default">Submit New Run</button>
 <form method="POST" action="/runs" role="form" id="submit">
   <h2>Add a new run:<button type="button" class="close" aria-hidden="true">&times;</button></h3>
