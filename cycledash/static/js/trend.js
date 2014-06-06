@@ -1,11 +1,9 @@
-$(document).ready(function(){
-
-  var SCORE_TYPES = ['f1score', 'recall', 'precision'];
-  var SCORE_COLORS = ['red', 'green', 'blue'];
-  var WIDTH = 800,
+  var SCORE_TYPES = ['f1score', 'recall', 'precision'],
+      SCORE_COLORS = ['firebrick', 'forestgreen', 'darkorchid'],
+      WIDTH = 800,
       HEIGHT = 150,
-      RUNS_NUM = 30,
-      data = runs.slice(0, 30)
+      RUNS_NUM = 10,
+      data = runs.slice(0, RUNS_NUM).reverse(),
       colors = d3.scale.ordinal()
                  .domain(SCORE_TYPES)
                  .range(SCORE_COLORS),
@@ -28,13 +26,13 @@ $(document).ready(function(){
                 .tickValues(d3.range(RUNS_NUM))
                 .tickFormat(d3.format("s")),
       yAxis = d3.svg.axis().scale(y).orient('left'),
-      line = window.line = function(yval) {
+      line = window.line = function(score_type) {
         return d3.svg.line()
                  .x(function(d, i) {
                    return x(i);
                  })
                  .y(function(d, i) {
-                   return y(d[yval]);
+                   return y(d[score_type]);
                  })
       };
 
@@ -43,7 +41,7 @@ $(document).ready(function(){
       .attr('height', HEIGHT)
     .append('g')
       .attr('transform',
-            'translate('+margin.left+','+margin.top+')');
+            'translate(' + margin.left + ',' + margin.top + ')');
 
   var trends = svg.selectAll('.trend')
       .data(SCORE_TYPES)
@@ -55,7 +53,7 @@ $(document).ready(function(){
       });
 
   svg.append('g')
-      .attr("transform", "translate(0, " + (chartHeight+5) + ")")
+      .attr("transform", "translate(0, " + (chartHeight + 5) + ")")
       .call(xAxis);
 
   svg.append('g')
@@ -63,10 +61,10 @@ $(document).ready(function(){
 
   svg.append("g")
       .attr("transform",
-            "translate("+(chartWidth/2)+", "+(HEIGHT-20)+")")
+            "translate(" + (chartWidth / 2) + ", " + (HEIGHT - 20) + ")")
     .append("text")
       .style("text-anchor", "middle")
-      .text("Last "+RUNS_NUM+" Scores")
+      .text("Last " + RUNS_NUM + " Scores")
 
   var legend = svg.selectAll(".legend")
       .data(colors.domain().slice().reverse())
@@ -89,4 +87,3 @@ $(document).ready(function(){
       .text(function(d) {
         return d;
       });
-});

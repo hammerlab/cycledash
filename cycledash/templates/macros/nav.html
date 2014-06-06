@@ -1,0 +1,13 @@
+{% macro nav(active) -%}
+<ul class="nav nav-tabs">
+  <li class="{{ 'active' if active == 'home' else '' }}">
+    <a href="/">Home</a>
+  </li>
+  <li class="{{ 'active' if active == 'runs' else '' }}">
+    <a href="/runs">Runs</a>
+  </li>
+  <li class="{{ 'active' if active == 'callers' else '' }}">
+    <a href="/callers">Callers</a>
+  </li>
+</ul>
+{%- endmacro %}

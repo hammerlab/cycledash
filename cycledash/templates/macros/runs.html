@@ -1,0 +1,87 @@
+{% macro runs_table(runs) -%}
+<style>
+  tr.run {
+    background: white;
+    cursor: pointer;
+  }
+  tr.run.selected {
+    font-weight: 500;
+  }
+  tr.run-info {
+    display: none;
+    background: rgb(247, 252, 253);
+    text-align: center;
+  }
+  tr.run-info li {
+    list-style-type: none;
+    display: inline;
+  }
+  tr.run-info li:after {
+    content: ", ";
+  }
+  tr.run-info li:last-child:after {
+    content: " ";
+  }
+</style>
+
+<table class="runs table">
+  <thead>
+    <tr>
+      <th>Run ID</th>
+      <th>Submitted On</th>
+      <th>Dataset</th>
+      <th>Hash</th>
+      <th>f1score</th>
+      <th>precision</th>
+      <th>recall</th>
+    </tr>
+  </thead>
+  <tbody>
+{%- for run, addl in  runs %}
+    <tr class="run">
+      <td><a href="/runs/{{ run['id'] }}">{{ run['id'] }}</a></td>
+      <td>{{ run['submittedAt'] }}</td>
+      <td>{{ run['dataset'] }}</td>
+      <td>{{ run['SHA1'] }}</td>
+      <td>{{ run['f1score'] }}</td>
+      <td>{{ run['precision'] }}</td>
+      <td>{{ run['recall'] }}</td>
+    </tr>
+    <tr class="run-info">
+      <td colspan=7>
+        {%- if addl %}
+        <ul style="display: inline-block">
+          {% for name, val in addl.iteritems() %}
+          {%- if val %}
+          <li>{{ name }} {{ val }}</li>
+          {% endif -%}
+          {% endfor %}
+        </ul>
+        {% else %}
+        <span>&mdash; No additional data. &mdash;</span>
+        {% endif %}
+      </td>
+    </tr>
+{% endfor -%}
+  </tbody>
+</table>
+
+<script>
+  d3.selectAll('tr.run')
+    .on('click', function(d, i) {
+      var selected = d3.select(this).attr('data-selected');
+      var $this = d3.select(this);
+      if (selected == 'true') {
+        $this.attr('data-selected', false)
+            .attr('class', 'run');
+        d3.select($this.node().nextElementSibling)
+            .style('display', 'none');
+        } else {
+          $this.attr('data-selected', true)
+              .attr('class', 'run selected');
+          d3.select($this.node().nextElementSibling)
+              .style('display', 'table-row');
+        }
+    });
+</script>
+{%- endmacro %}

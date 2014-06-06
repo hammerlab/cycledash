@@ -1,0 +1,77 @@
+{% extends "layouts/layout.html" %}
+{%- from 'macros/runs.html' import runs_table -%}
+{%- from 'macros/nav.html' import nav -%}
+
+{% block head %}
+<style>
+form#submit {
+  margin: 0 auto 27px auto;
+  display: none;
+  max-width: 500px;
+}
+#show-submit {
+  position: absolute;
+  right: 7px;
+  top: 67px;
+}
+.runs.table {
+  margin-top: 79px;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+{{ nav("runs") }}
+
+<button id="show-submit" class="btn btn-default">Submit New Run</button>
+<form method="POST" action="/runs" role="form" id="submit">
+  <h3>Add a new run:<button type="button" class="close" aria-hidden="true">&times;</button></h3>
+  <div class="form-group">
+    <label>Variant Caller Name:</label>
+    <input class="form-control" type="text" name="name">
+  </div>
+  <div class="form-group">
+    <label>SHA1 commit hash:</label>
+    <input class="form-control" type="text" name="sha1">
+  </div>
+  <div class="form-group">
+    <label>Dataset Name:</label>
+    <input class="form-control" type="text" name="dataset">
+  </div>
+  <div class="form-group">
+    <label>f1score:</label>
+    <input class="form-control" type="text" name="f1score">
+  </div>
+  <div class="form-group">
+    <label>precision:</label>
+    <input class="form-control" type="text" name="precision">
+  </div>
+  <div class="form-group">
+    <label>recall:</label>
+    <input class="form-control" type="text" name="recall">
+  </div>
+  <button type="submit" class="btn btn-success">Submit</button>
+</form>
+
+{{ runs_table(runs) }}
+
+<script>
+  d3.select('#show-submit')
+      .on('click', function() {
+        console.log('show')
+        d3.select(this)
+            .style('display', 'none');
+        d3.select('form#submit')
+            .style('display', 'block');
+      });
+
+  d3.select('form#submit .close')
+      .on('click', function() {
+        d3.select('form#submit')
+            .style('display', 'none')
+        d3.select('#show-submit')
+            .style('display', 'block');
+      });
+</script>
+
+{% endblock %}

@@ -1,47 +1,52 @@
 {% extends "layouts/layout.html" %}
+{%- from 'macros/runs.html' import runs_table -%}
+{%- from 'macros/nav.html' import nav -%}
 
 {% block head %}
-<script>
-  var runs = {{ runs | tojson }};
-</script>
 <style>
-.tick {
-  font-size: 7px;
-}
-path {
-  fill: none;
-  stroke-width: 1;
-  stroke: black;
-}
+  tr.run {
+    background: white;
+    cursor: pointer;
+  }
+  tr.run.selected {
+    font-weight: 500;
+  }
+  tr.run-info {
+    display: none;
+    background: rgb(247, 252, 253);
+    text-align: center;
+  }
+  tr.run-info li {
+    list-style-type: none;
+    display: inline;
+  }
+  tr.run-info li:after {
+    content: ", ";
+  }
+  tr.run-info li:last-child:after {
+    content: " ";
+  }
+
+  .tick {
+    font-size: 7px;
+  }
+  path {
+    fill: none;
+    stroke-width: 1;
+    stroke: black;
+  }
 </style>
 {% endblock %}
 
 {% block body %}
+{{ nav("callers") }}
 <h3>Caller: {{ caller_name }}</h3>
-<table class="table">
-  <thead>
-    <tr>
-      <th>Run ID</th>
-      <th>Submitted On</th>
-      <th>Hash</th>
-      <th>f1score</th>
-      <th>precision</th>
-      <th>recall</th>
-    </tr>
-  </thead>
-  <tbody>
-{% for run in  runs %}
-    <tr>
-      <td>{{ run['id'] }}</td>
-      <td>{{ run['submitted_at'] }}</td>
-      <td>{{ run['variant_caller_SHA1'] }}</td>
-      <td>{{ run['f1score'] }}</td>
-      <td>{{ run['precision'] }}</td>
-      <td>{{ run['recall'] }}</td>
-    </tr>
-{% endfor %}
-  </tbody>
-</table>
+
+{{ runs_table(runs) }}
+
+<script>
+  var runs = {{ runs_json | tojson }};
+</script>
 
 <script src="{{ url_for('static', filename='js/trend.js') }}"></script>
 {% endblock %}

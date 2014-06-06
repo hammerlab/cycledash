@@ -1,4 +1,5 @@
 from flask import Flask
+from flask.ext.sqlalchemy import SQLAlchemy
 
 
 
@@ -14,8 +15,8 @@ def _configure_application(app):
     app.config.from_object('config')
 
 
-
 app = initialize_application()
+db = SQLAlchemy(app)
 
-from cycledash.database import db
+
 from cycledash.views import *
