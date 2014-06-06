@@ -33,7 +33,12 @@ def runs():
                   float(data.get('f1score')),
                   float(data.get('precision')),
                   float(data.get('recall')),
-                  dataset=data.get('dataset'))
+                  dataset=data.get('dataset'),
+                  vcf_path=data.get('vcf_path'),
+                  tumor_path=data.get('tumor_path'),
+                  normal_path=data.get('normal_path'),
+                  reference_path=data.get('reference_path'),
+                  notes=data.get('notes'))
         db.session.add(run)
         db.session.commit()
         return jsonify(run.to_camel_dict(), indent=4)

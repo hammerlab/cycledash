@@ -53,12 +53,12 @@
         <ul style="display: inline-block">
           {% for name, val in addl.iteritems() %}
           {%- if val %}
-          <li>{{ name }} {{ val }}</li>
+          <li><strong>{{ name }}:</strong> {{ val }}</li>
           {% endif -%}
           {% endfor %}
         </ul>
         {% else %}
-        <span>&mdash; No additional data. &mdash;</span>
+        <span>&mdash; <em>No additional data.</em> &mdash;</span>
         {% endif %}
       </td>
     </tr>
