@@ -28,6 +28,7 @@
   <thead>
     <tr>
       <th>Run ID</th>
+      <th>Caller Name</th>
       <th>Submitted On</th>
       <th>Dataset</th>
       <th>Hash</th>
@@ -40,6 +41,7 @@
 {%- for run, addl in  runs %}
     <tr class="run">
       <td><a href="/runs/{{ run['id'] }}">{{ run['id'] }}</a></td>
+      <td>{{ run['variantCallerName'] }}</td>
       <td>{{ run['submittedAt'] }}</td>
       <td>{{ run['dataset'] }}</td>
       <td>{{ run['SHA1'] }}</td>

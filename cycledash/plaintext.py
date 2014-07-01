@@ -39,6 +39,7 @@ POST to /runs a JSON object of the format below:
       "f1score": 0.xxx,
       "precision": 0.xxx,
       "recall": 0.xxx,
+      "notes": "params and config the caller was invoked with"
     }
 
 NOTE: Be careful that 'name' is constant between submissions for the same
