@@ -20,22 +20,27 @@ class Run(db.Model):
     notes = db.Column(db.Text())
 
     vcf_path = db.Column(db.Text())
+    truth_vcf_path = db.Column(db.Text())
+
     reference_path = db.Column(db.Text())
     dataset = db.Column(db.Text())
     tumor_path = db.Column(db.Text())
     normal_path = db.Column(db.Text())
+
     params = db.Column(db.Text())
 
-    def __init__(self, variant_caller_name, SHA1, f1score, precision, recall,
-                 notes=None, vcf_path=None, reference_path=None,
-                 tumor_path=None, normal_path=None, params=None, dataset=None):
+    def __init__(self, variant_caller_name=None, sha1=None, f1score=None,
+                 precision=None, recall=None, notes=None, vcf_path=None,
+                 truth_vcf_path=None, reference_path=None, tumor_path=None,
+                 normal_path=None, params=None, dataset=None):
         self.variant_caller_name = variant_caller_name
-        self.SHA1 = SHA1
+        self.SHA1 = sha1
         self.f1score = f1score
         self.precision = precision
         self.recall = recall
         self.notes = notes
         self.vcf_path = vcf_path
+        self.truth_vcf_path = truth_vcf_path
         self.reference_path = reference_path
         self.tumor_path = tumor_path
         self.normal_path = normal_path

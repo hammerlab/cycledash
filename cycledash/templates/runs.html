@@ -28,49 +28,45 @@ form#submit {
   <h2>Add a new run:<button type="button" class="close" aria-hidden="true">&times;</button></h3>
   <div class="form-group">
     <label>Variant Caller Name:</label>
-    <input class="form-control" type="text" name="name">
+    <input class="form-control" type="text" name="name"
+           placeholder="Guacamole::Somatic">
   </div>
   <div class="form-group">
     <label>Git Revision Hash, or Caller Version:</label>
-    <input class="form-control" type="text" name="sha1">
+    <input class="form-control" type="text" name="sha1"
+           placeholder="1a81044ef7">
   </div>
   <div class="form-group">
     <label>Dataset Name:</label>
-    <input class="form-control" type="text" name="dataset">
+    <input class="form-control" type="text" name="dataset"
+           placeholder="DREAM training chr20">
   </div>
   <div class="form-group">
-    <label>f1score:</label>
-    <input class="form-control" type="text" name="f1score">
+    <label>VCF Path:</label>
+    <input class="form-control" type="text" name="vcf_path"
+           placeholder="/data/somevcf.vcf">
   </div>
   <div class="form-group">
-    <label>Precision:</label>
-    <input class="form-control" type="text" name="precision">
-  </div>
-  <div class="form-group">
-    <label>Recall:</label>
-    <input class="form-control" type="text" name="recall">
+    <label>Truth VCF Path:</label>
+    <input class="form-control" type="text" name="truth_vcf_path"
+           placeholder="/data/true_somevcf.vcf">
   </div>
   <br/>
   <h4>Optional <small>all paths should be HDFS paths to canonical data</small></h4>
   <div class="form-group">
-    <label>VCF Output:</label>
-    <input class="form-control" type="text" name="vcf_path">
-  </div>
-  <div class="form-group">
-    <label>Reference:</label>
-    <input class="form-control" type="text" name="reference_path">
-  </div>
-  <div class="form-group">
     <label>Tumor BAM:</label>
-    <input class="form-control" type="text" name="tumor_path">
+    <input class="form-control" type="text" name="tumor_path"
+           placeholder="/data/dream/tumor.chr20.bam">
   </div>
   <div class="form-group">
     <label>Normal BAM:</label>
-    <input class="form-control" type="text" name="normal_path">
+    <input class="form-control" type="text" name="normal_path"
+           placeholder="/data/dream/normal.chr20.bam">
   </div>
   <div class="form-group">
     <label>Notes, Config, Params:</label>
-    <textarea class="form-control" rows="3" name="notes"></textarea>
+    <textarea class="form-control" rows="3" name="notes"
+              placeholder="command line parameters here"></textarea>
   </div>
 
   <button type="submit" class="btn btn-success">Submit</button>
