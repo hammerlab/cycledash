@@ -58,7 +58,6 @@ def concordance(vcfs):
        returns map of concordances ... c.f. vcf_to_concordance
     """
     vcf_readers = _open_vcfs(vcfs)
-    vcf_names = vcf_readers.keys()
 
     passing_records = {}  # Look at only calls that PASS the filters.
     for vcf, records in vcf_readers.iteritems():

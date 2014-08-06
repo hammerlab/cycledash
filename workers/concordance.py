@@ -38,7 +38,7 @@ def concordance(run_ids_key):
             raise KeyError
         vcfs[run['variantCallerName']] = hdfsToLocalPath(run['vcfPath'])
     results = workers.scripts.concordance_counter.concordance(vcfs)
-    concordance_data = {'concordance_json': results}
+    concordance_data = {'concordance_json': json.dumps(results)}
     request_url = 'http://localhost:{}/runs/concordance/{}'.format(PORT, run_ids_key)
     requests.put(request_url, data=concordance_data)
     return json.dumps(concordance_data)

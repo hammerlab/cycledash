@@ -62,7 +62,8 @@ def concordance(run_ids_key):
     runs.sort()
     run_ids_key = ','.join(map(str, runs))
     if request.method == 'PUT':
-        concordance = Concordance.query.get(run_ids_key)
+        concordance = Concordance.query.filter_by(run_ids_key=run_ids_key).first()
+        print request.form
         if not concordance or not request.form.get('concordance_json'):
             # TODO(ihodes): handle error properly
             raise KeyError
@@ -72,7 +73,7 @@ def concordance(run_ids_key):
             db.session.add(concordance)
             db.session.commit()
     if request.method == 'GET':
-        concordance = Concordance.query.get(run_ids_key)
+        concordance = Concordance.query.filter_by(run_ids_key=run_ids_key).first()
         if not concordance:
             concordance = Concordance(run_ids_key=run_ids_key)
             db.session.add(concordance)
