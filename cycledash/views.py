@@ -6,10 +6,11 @@ import os
 from flask import request, redirect, Response, render_template, jsonify, url_for
 
 from cycledash import app, db
-from cycledash.models import Run
+from cycledash.models import Run, Concordance
 import cycledash.plaintext as plaintext
 
-from workers import scorer
+import workers.concordance
+import workers.scorer
 
 
 
@@ -41,7 +42,9 @@ def runs():
                   notes=data.get('notes'))
         db.session.add(run)
         db.session.commit()
-        scorer.score.delay(run.id, data.get('vcf_path'), data.get('truth_vcf_path'))
+        workers.scorer.score.delay(run.id,
+                                   data.get('vcf_path'),
+                                   data.get('truth_vcf_path'))
         return redirect(url_for('run', run_id=run.id))
     elif request.method == 'GET':
         runs = [(run.to_camel_dict(), _additional_info(run.to_camel_dict()))
@@ -50,6 +53,32 @@ def runs():
             return render_template('runs.html', runs=runs)
         elif 'application/json' in request.accept_mimetypes:
             return jsonify({'runs': [run[0] for run in runs]})
+
+
+@app.route('/runs/concordance/<run_ids_key>', methods=['GET', 'PUT'])
+def concordance(run_ids_key):
+    # TODO(ihodes): validation.
+    runs = map(int, run_ids_key.split(','))
+    runs.sort()
+    run_ids_key = ','.join(map(str, runs))
+    if request.method == 'PUT':
+        concordance = Concordance.query.get(run_ids_key)
+        if not concordance or not request.form.get('concordance_json'):
+            # TODO(ihodes): handle error properly
+            raise KeyError
+        else:
+            concordance.concordance_json = request.form.get('concordance_json')
+            concordance.state = 'complete'
+            db.session.add(concordance)
+            db.session.commit()
+    if request.method == 'GET':
+        concordance = Concordance.query.get(run_ids_key)
+        if not concordance:
+            concordance = Concordance(run_ids_key=run_ids_key)
+            db.session.add(concordance)
+            db.session.commit()
+            workers.concordance.concordance.delay(run_ids_key)
+    return jsonify(concordance.to_camel_dict())
 
 
 @app.route('/runs/<run_id>', methods=['GET', 'PUT'])
