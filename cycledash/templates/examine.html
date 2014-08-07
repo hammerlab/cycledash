@@ -1,0 +1,12 @@
+{% extends "layouts/layout.html" %}
+{%- from 'macros/nav.html' import nav -%}
+
+{% block head %}
+{% endblock %}
+
+{% block body %}
+{{ nav("runs") }}
+
+Examine run  #{{ run['id'] }}.
+
+{% endblock %}

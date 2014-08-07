@@ -42,9 +42,10 @@ def runs():
                   notes=data.get('notes'))
         db.session.add(run)
         db.session.commit()
-        workers.scorer.score.delay(run.id,
-                                   data.get('vcf_path'),
-                                   data.get('truth_vcf_path'))
+        if data.get('truth_vcf_path'):
+            workers.scorer.score.delay(run.id,
+                                       data.get('vcf_path'),
+                                       data.get('truth_vcf_path'))
         return redirect(url_for('runs'))
     elif request.method == 'GET':
         runs = [(run.to_camel_dict(), _additional_info(run.to_camel_dict()))
@@ -53,6 +54,12 @@ def runs():
             return render_template('runs.html', runs=runs)
         elif 'application/json' in request.accept_mimetypes:
             return jsonify({'runs': [run[0] for run in runs]})
+
+
+@app.route('/runs/<run_id>/examine')
+def examine(run_id):
+    run = Run.query.get(run_id)
+    return render_template('examine.html', run=run)
 
 
 @app.route('/runs/<run_ids_key>/concordance', methods=['GET', 'PUT'])
