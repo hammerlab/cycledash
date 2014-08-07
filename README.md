@@ -12,13 +12,16 @@ For now, see `/` in the running webapp.
 
 ### Running
 
-Start the webserver:
+(After setting up your virtual environment and sourcing your environment
+variables, below) Start the webserver:
 
 `python run.py`
 
-Start worker:
+Start workers:
 
-`celery -A workers.scorer worker --loglevel=info`
+`celery -A workers.scorer worker.scorer.1 --loglevel=info`
+
+`celery -A workers.concordance worker.concordance.1 --loglevel=info`
 
 
 ### Config
@@ -26,6 +29,7 @@ Start worker:
 Environment variables which must be exported:
 
 ```
+export PORT=5000
 export DATABASE_URL='sqlite:///test.db'
 export CELERY_BACKEND='db+sqlite:///celery.db'
 export CELERY_BROKER='amqp://localhost'
