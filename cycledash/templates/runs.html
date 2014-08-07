@@ -1,5 +1,4 @@
 {% extends "layouts/layout.html" %}
-{%- from 'macros/runs.html' import runs_table -%}
 {%- from 'macros/nav.html' import nav -%}
 
 {% block head %}
@@ -18,6 +17,7 @@ form#submit {
   margin-top: 23px;
 }
 </style>
+<script src="{{ url_for('static', filename='js/underscore-min.js') }}"></script>
 {% endblock %}
 
 {% block body %}
@@ -72,12 +72,126 @@ form#submit {
   <button type="submit" class="btn btn-success">Submit</button>
 </form>
 
-{{ runs_table(runs) }}
+<button id="concordance" class="btn btn-info">Concordance on Selected</button>
+<button id="delete" class="btn btn-danger">Delete Selected</button>
+
+<script>
+  d3.select("#concordance")
+    .on("click", function() {
+      var runs = document.querySelectorAll("input[type=checkbox]:checked");
+      runs = Array.prototype.slice.call(runs).map(function(v) { return v.value; });
+      if (runs.length != 0) {
+        var run_ids_key = runs.join(",");
+        window.location.href = "/runs/" + run_ids_key + "/concordance";
+      }
+    });
+
+  d3.select("#delete")
+    .on("click", function() {
+      var runs = document.querySelectorAll("input[type=checkbox]:checked");
+      runs = Array.prototype.slice.call(runs).map(function(v) { return v.value; });
+      runs.map(function(id) {
+        var rows = document.querySelectorAll("tr[data-runId=\"" + id + "\"]");
+        rows = Array.prototype.slice.call(rows);
+        rows.map(function(row) { row.remove(); });
+        d3.xhr("/runs/" + id).send("DELETE");
+      });
+    });
+</script>
+
+<style>
+  tr.run {
+    background: white;
+    cursor: pointer;
+  }
+  tr.run.selected {
+    font-weight: 500;
+  }
+  tr.run-info {
+    display: none;
+    background: rgb(247, 252, 253);
+    text-align: center;
+  }
+  tr.run-info li {
+    list-style-type: none;
+    display: inline;
+  }
+  tr.run-info li:after {
+    content: ", ";
+  }
+  tr.run-info li:last-child:after {
+    content: " ";
+  }
+</style>
+
+<table class="runs table">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Run ID</th>
+      <th>Caller Name</th>
+      <th>Submitted On</th>
+      <th>Dataset</th>
+      <th>Hash</th>
+      <th>f1score</th>
+      <th>precision</th>
+      <th>recall</th>
+    </tr>
+  </thead>
+  <tbody>
+{%- for run, addl in  runs %}
+    <tr class="run" data-runId="{{ run['id'] }}">
+      <td><input type="checkbox" value="{{ run['id'] }}"></td>
+      <td><a href="/runs/{{ run['id'] }}">{{ run['id'] }}</a></td>
+      <td>{{ run['variantCallerName'] }}</td>
+      <td>{{ run['submittedAt'] }}</td>
+      <td>{{ run['dataset'] }}</td>
+      <td>{{ run['SHA1'] }}</td>
+      <td>{{ run['f1score'] }}</td>
+      <td>{{ run['precision'] }}</td>
+      <td>{{ run['recall'] }}</td>
+    </tr>
+    <tr class="run-info" data-runId="{{ run['id'] }}">
+      <td colspan=9>
+        {%- if addl %}
+        <ul style="display: inline-block">
+          {% for name, val in addl.iteritems() %}
+          {%- if val %}
+          <li><strong>{{ name }}:</strong> {{ val }}</li>
+          {% endif -%}
+          {% endfor %}
+        </ul>
+        {% else %}
+        <span>&mdash; <em>No additional data.</em> &mdash;</span>
+        {% endif %}
+      </td>
+    </tr>
+{% endfor -%}
+  </tbody>
+</table>
+
+<script>
+  d3.selectAll('tr.run')
+    .on('click', function(d, i) {
+      var selected = d3.select(this).attr('data-selected');
+      var $this = d3.select(this);
+      if (selected == 'true') {
+        $this.attr('data-selected', false)
+            .attr('class', 'run');
+        d3.select($this.node().nextElementSibling)
+            .style('display', 'none');
+        } else {
+          $this.attr('data-selected', true)
+              .attr('class', 'run selected');
+          d3.select($this.node().nextElementSibling)
+              .style('display', 'table-row');
+        }
+    });
+</script>
 
 <script>
   d3.select('#show-submit')
       .on('click', function() {
-        console.log('show')
         d3.select(this)
             .style('display', 'none');
         d3.select('form#submit')

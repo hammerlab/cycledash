@@ -61,6 +61,32 @@ class Run(db.Model):
                 for col in self.__table__.columns}
 
 
+class Concordance(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    # comma-separated, numerically sorted list of Run IDs.
+    run_ids_key = db.Column(db.Text(), unique=True, nullable=False)
+
+    # JSON blob of concordance data.
+    concordance_json = db.Column(db.Text())
+
+    # FSM: pending -> complete | failed
+    # Used to see if the concordance background processing has started or
+    # completed (or failed).
+    state = db.Column(db.Text(), default="pending")
+
+    def __init__(self, run_ids_key=None, concordance_json=None):
+        self.run_ids_key = run_ids_key
+        self.concordance_json = concordance_json
+
+    def __repr__(self):
+        return '<Concordance id={} runs={}>'.format(self.id, self.run_ids_key)
+
+    def to_camel_dict(self):
+        return {camelcase(col.name): jsonnit(getattr(self, col.name))
+                for col in self.__table__.columns}
+
+
 def camelcase(string):
     return ''.join([c.upper() if p == '_' else c
                     for p, c in zip(' '+string, string) if c != '_'])

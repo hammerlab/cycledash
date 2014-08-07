@@ -1,0 +1,115 @@
+{% extends "layouts/layout.html" %}
+{%- from 'macros/nav.html' import nav -%}
+
+{% block head %}
+<style>
+#concordance {
+  font: 10px sans-serif;
+}
+
+rect {
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+  stroke: black;
+}
+
+.bar text {
+    font-size: 1.2em;
+    text-anchor: middle;
+}
+
+.legend rect {
+  stroke: none;
+}
+
+.legend text {
+  font-size: 1.1em;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path, .x.axis line {
+  display: none;
+}
+
+.x.axis .title {
+  font-weight: 700;
+}
+
+.chart > .title {
+    font-weight: 700;
+    font-size: 15px;
+}
+
+text.score-text {
+    font-size: 1em;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    text-shadow: 1px 1px 1px rgba(0,0,0,.2);
+    -webkit-font-smoothing: antialiased;
+    fill: white;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+{{ nav() }}
+<h3>Concordance</h3>
+
+<h5 id="concordance-info"></h5>
+<div id="concordance"></div>
+<div id="concordance-loader"></div>
+
+<script src="{{ url_for('static', filename='js/underscore-min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/d3.bar-chart.js') }}"></script>
+<script>
+  var concordanceJson = JSON.parse({{ concordance_json | tojson }}),
+      run_ids_key = "{{ run_ids_key }}";
+
+  if (!concordanceJson) {
+    var loader =  new Image();
+    loader.onload = function() {
+      document.getElementById("concordance-info").innerText = "Processing (page will refresh when complete)";
+      document.getElementById("concordance-loader").appendChild(loader);
+    }
+    loader.src = "{{ url_for('static', filename='img/loader.gif') }}";
+
+    setInterval(function() {
+       d3.json("/runs/" + run_ids_key + "/concordance")
+         .header("Accept", "application/json")
+         .get(function(err, data) {
+          console.log(data, err);
+          if (data["state"] === "complete") window.location.reload();
+       });
+    }, 1000)
+  } else {
+    var concordanceData = _.reduce(concordanceJson, function(acc, val, key) {
+      for (var k in val) {
+        acc.push({caller: key, calls: val[k], numConc: k});
+      }
+      return acc;
+    }, []);
+
+    var concordanceChart = d3.chart.bars()
+      .interGroupPadding(.3)
+      .stackLabel(function(vals, key, idx) { return d3.sum(vals, function(d) { return d.calls; }); })
+      .stackLabelPosition('top')
+      .interStackSorter(function(a,b) { return a.numConc < b.numConc;  } )
+      .legendLabeler(function(val) { return val + " caller(s) in concordance."})
+      .colors(['#FBA6FC', '#410078'])
+      .yLabel('Number Variants Called')
+      .barValue('calls')
+      .groupBy('caller')
+      .stackBy('caller')
+      .colorBy('numConc');
+
+    d3.select("#concordance")
+      .datum(concordanceData)
+      .call(concordanceChart);
+  }
+</script>
+{% endblock %}
