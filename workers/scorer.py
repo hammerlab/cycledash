@@ -8,6 +8,7 @@ import uuid
 
 import celery
 import pysam
+import requests
 import vcf
 
 import workers.scripts.dream_evaluator as dream

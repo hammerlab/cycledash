@@ -58,13 +58,54 @@ text.score-text {
 {% block body %}
 <h3>Concordance</h3>
 
+<h5 id="concordance-info"></h5>
 <div id="concordance"></div>
-
-<script>
-  var concordanceJson = JSON.parse({{ concordance_json | tojson }});
-</script>
+<div id="concordance-loader"></div>
 
 <script src="{{ url_for('static', filename='js/underscore-min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/d3.bar-chart.js') }}"></script>
-<script src="{{ url_for('static', filename='js/concordance.js') }}"></script>
+<script>
+  var concordanceJson = JSON.parse({{ concordance_json | tojson }}),
+      run_ids_key = "{{ run_ids_key }}";
+
+  if (!concordanceJson) {
+    var loader =  new Image();
+    loader.onload = function() {
+      document.getElementById("concordance-info").innerText = "Processing (page will refresh when complete)";
+      document.getElementById("concordance-loader").appendChild(loader);
+    }
+    loader.src = "{{ url_for('static', filename='img/loader.gif') }}";
+
+    setInterval(function() {
+       d3.json("/runs/concordance/" + run_ids_key, function(err, data) {
+          if (data["state"] != "complete") return;
+          else window.location.reload();
+       });
+    }, 1000)
+  } else {
+    var concordanceData = _.reduce(concordanceJson, function(acc, val, key) {
+      for (var k in val) {
+        acc.push({caller: key, calls: val[k], numConc: k});
+      }
+      return acc;
+    }, []);
+
+    var concordanceChart = d3.chart.bars()
+      .interGroupPadding(.3)
+      .stackLabel(function(vals, key, idx) { return d3.sum(vals, function(d) { return d.calls; }); })
+      .stackLabelPosition('top')
+      .interStackSorter(function(a,b) { return a.numConc < b.numConc;  } )
+      .legendLabeler(function(val) { return val + " caller(s) in concordance."})
+      .colors(['#FBA6FC', '#410078'])
+      .yLabel('Number Variants Called')
+      .barValue('calls')
+      .groupBy('caller')
+      .stackBy('caller')
+      .colorBy('numConc');
+
+    d3.select("#concordance")
+      .datum(concordanceData)
+      .call(concordanceChart);
+  }
+</script>
 {% endblock %}

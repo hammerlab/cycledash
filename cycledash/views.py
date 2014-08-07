@@ -45,7 +45,7 @@ def runs():
         workers.scorer.score.delay(run.id,
                                    data.get('vcf_path'),
                                    data.get('truth_vcf_path'))
-        return redirect(url_for('run', run_id=run.id))
+        return redirect(url_for('runs'))
     elif request.method == 'GET':
         runs = [(run.to_camel_dict(), _additional_info(run.to_camel_dict()))
                 for run in Run.query.all()]
@@ -61,15 +61,10 @@ def concordance_visualization(run_ids_key):
     runs.sort()
     run_ids_key = ','.join(map(str, runs))
     concordance = Concordance.query.filter_by(run_ids_key=run_ids_key).first()
-    # TODO(ihodes): Better information, automatic reloading and state monitoring
-    #               in JS.
-    if concordance and concordance.state == 'complete':
-        return render_template('concordance.html',
-                               concordance_json=concordance.concordance_json)
-    elif concordance:
-        return "Still processing... reload in a few seconds."
-    else:
-        return redirect(url_for('concordance', run_ids_key=run_ids_key))
+    return render_template('concordance.html',
+                           concordance_json=concordance.concordance_json if concordance else None,
+                           run_ids_key=run_ids_key)
+
 
 @app.route('/runs/concordance/<run_ids_key>', methods=['GET', 'PUT'])
 def concordance(run_ids_key):
@@ -98,7 +93,7 @@ def concordance(run_ids_key):
     return jsonify(concordance.to_camel_dict())
 
 
-@app.route('/runs/<run_id>', methods=['GET', 'PUT'])
+@app.route('/runs/<run_id>', methods=['GET', 'PUT', 'DELETE'])
 def run(run_id):
     run = Run.query.get(run_id)
     if request.method == 'PUT':
@@ -106,6 +101,9 @@ def run(run_id):
         run.precision = data.get('precision')
         run.recall = data.get('recall')
         run.f1score = data.get('f1score')
+        db.session.commit()
+    if request.method == 'DELETE':
+        db.session.delete(run)
         db.session.commit()
     return jsonify(run.to_camel_dict())
 

@@ -15,7 +15,7 @@ import workers.scripts.concordance_counter
 from workers.shared import hdfsToLocalPath
 
 
-# TODO(ihodes): do we really need to keep results?
+# TODO(ihodes): Do we really need to keep results?
 CELERY_BACKEND = os.environ.get('CELERY_BACKEND')
 CELERY_BROKER = os.environ.get('CELERY_BROKER')
 
@@ -26,10 +26,9 @@ worker = celery.Celery('concordance',
 
 @worker.task
 def concordance(run_ids_key):
-    # TODO(ihodes): If all runs share a truth VCF, then process the truth VCF as
-    # well, automatically.
     run_ids = map(int, run_ids_key.split(','))
     vcfs = {}
+    truth_vcfs = set()
     for run_id in run_ids:
         run_json = requests.get('http://localhost:{}/runs/{}'.format(PORT, str(run_id))).text
         run = json.loads(run_json)
@@ -37,6 +36,9 @@ def concordance(run_ids_key):
             # TODO(ihodes): throw &|| record error
             raise KeyError
         vcfs[run['variantCallerName']] = hdfsToLocalPath(run['vcfPath'])
+        truth_vcfs.add(run['truthVcfPath'])
+    if len(truth_vcfs) == 1:
+        vcfs['Truth'] = hdfsToLocalPath(truth_vcfs.pop())
     results = workers.scripts.concordance_counter.concordance(vcfs)
     concordance_data = {'concordance_json': json.dumps(results)}
     request_url = 'http://localhost:{}/runs/concordance/{}'.format(PORT, run_ids_key)
