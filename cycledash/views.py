@@ -55,6 +55,22 @@ def runs():
             return jsonify({'runs': [run[0] for run in runs]})
 
 
+@app.route('/runs/concordance/<run_ids_key>/viz')
+def concordance_visualization(run_ids_key):
+    runs = map(int, run_ids_key.split(','))
+    runs.sort()
+    run_ids_key = ','.join(map(str, runs))
+    concordance = Concordance.query.filter_by(run_ids_key=run_ids_key).first()
+    # TODO(ihodes): Better information, automatic reloading and state monitoring
+    #               in JS.
+    if concordance and concordance.state == 'complete':
+        return render_template('concordance.html',
+                               concordance_json=concordance.concordance_json)
+    elif concordance:
+        return "Still processing... reload in a few seconds."
+    else:
+        return redirect(url_for('concordance', run_ids_key=run_ids_key))
+
 @app.route('/runs/concordance/<run_ids_key>', methods=['GET', 'PUT'])
 def concordance(run_ids_key):
     # TODO(ihodes): validation.

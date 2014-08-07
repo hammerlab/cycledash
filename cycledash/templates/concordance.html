@@ -1,0 +1,70 @@
+{% extends "layouts/layout.html" %}
+
+{% block head %}
+<style>
+body {
+  font: 10px sans-serif;
+}
+
+rect {
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+  stroke: black;
+}
+
+.bar text {
+    font-size: 1.2em;
+    text-anchor: middle;
+}
+
+.legend rect {
+  stroke: none;
+}
+
+.legend text {
+  font-size: 1.1em;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path, .x.axis line {
+  display: none;
+}
+
+.x.axis .title {
+  font-weight: 700;
+}
+
+.chart > .title {
+    font-weight: 700;
+    font-size: 15px;
+}
+
+text.score-text {
+    font-size: 1em;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    text-shadow: 1px 1px 1px rgba(0,0,0,.2);
+    -webkit-font-smoothing: antialiased;
+    fill: white;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<h3>Concordance</h3>
+
+<div id="concordance"></div>
+
+<script>
+  var concordanceJson = JSON.parse({{ concordance_json | tojson }});
+</script>
+
+<script src="{{ url_for('static', filename='js/underscore-min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/d3.bar-chart.js') }}"></script>
+<script src="{{ url_for('static', filename='js/concordance.js') }}"></script>
+{% endblock %}
