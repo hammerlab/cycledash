@@ -55,18 +55,7 @@ def runs():
             return jsonify({'runs': [run[0] for run in runs]})
 
 
-@app.route('/runs/concordance/<run_ids_key>/viz')
-def concordance_visualization(run_ids_key):
-    runs = map(int, run_ids_key.split(','))
-    runs.sort()
-    run_ids_key = ','.join(map(str, runs))
-    concordance = Concordance.query.filter_by(run_ids_key=run_ids_key).first()
-    return render_template('concordance.html',
-                           concordance_json=concordance.concordance_json if concordance else None,
-                           run_ids_key=run_ids_key)
-
-
-@app.route('/runs/concordance/<run_ids_key>', methods=['GET', 'PUT'])
+@app.route('/runs/<run_ids_key>/concordance', methods=['GET', 'PUT'])
 def concordance(run_ids_key):
     # TODO(ihodes): validation.
     runs = map(int, run_ids_key.split(','))
@@ -83,6 +72,7 @@ def concordance(run_ids_key):
             concordance.state = 'complete'
             db.session.add(concordance)
             db.session.commit()
+        return redirect(url_for('concordance'), run_ids_key=run_ids_key)
     if request.method == 'GET':
         concordance = Concordance.query.filter_by(run_ids_key=run_ids_key).first()
         if not concordance:
@@ -90,7 +80,17 @@ def concordance(run_ids_key):
             db.session.add(concordance)
             db.session.commit()
             workers.concordance.concordance.delay(run_ids_key)
-    return jsonify(concordance.to_camel_dict())
+
+        print request.accept_mimetypes
+        if 'text/html' in request.accept_mimetypes:
+            concordance_json = None
+            if concordance:
+                concordance_json = concordance.concordance_json
+            return render_template('concordance.html',
+                                   concordance_json=concordance_json,
+                                   run_ids_key=run_ids_key)
+        else: # then 'application/json' in request.accept_mimetypes:
+            return jsonify(concordance.to_camel_dict())
 
 
 @app.route('/runs/<run_id>', methods=['GET', 'PUT', 'DELETE'])

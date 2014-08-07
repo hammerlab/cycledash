@@ -14,8 +14,10 @@ POST    /runs                       -- submit a new run to cycledash
                                        c.f. /docs/format (json or form encoded)
 GET     /runs                       -- list all runs
 GET     /runs/<run_id>              -- return a particular run
-GET     /runs/compare/<run_id>(,<run_id>)*   -- display concordance of given
-                                                runs (html only)  [TODO]
+PUT     /runs/<run_id>              -- update a run with score info
+GET     /runs/<run_id>(,<run_id>)*/concordance   -- display concordance of given
+                                                    runs (html only)
+PUT     /runs/<run_id>(,<run_id>)*/concordance   -- update concordance info
 GET     /callers                    -- list all callers and latest scores
 GET     /callers/<caller_name>      -- display runs for and a graph of scores
                                        for runs of a given caller

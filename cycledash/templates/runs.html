@@ -1,5 +1,4 @@
 {% extends "layouts/layout.html" %}
-{%- from 'macros/runs.html' import runs_table -%}
 {%- from 'macros/nav.html' import nav -%}
 
 {% block head %}
@@ -83,7 +82,7 @@ form#submit {
       runs = Array.prototype.slice.call(runs).map(function(v) { return v.value; });
       if (runs.length != 0) {
         var run_ids_key = runs.join(",");
-        window.location.href = "/runs/concordance/" + run_ids_key + "/viz";
+        window.location.href = "/runs/" + run_ids_key + "/concordance";
       }
     });
 

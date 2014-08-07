@@ -1,8 +1,9 @@
 {% extends "layouts/layout.html" %}
+{%- from 'macros/nav.html' import nav -%}
 
 {% block head %}
 <style>
-body {
+#concordance {
   font: 10px sans-serif;
 }
 
@@ -56,6 +57,7 @@ text.score-text {
 {% endblock %}
 
 {% block body %}
+{{ nav() }}
 <h3>Concordance</h3>
 
 <h5 id="concordance-info"></h5>
@@ -77,9 +79,11 @@ text.score-text {
     loader.src = "{{ url_for('static', filename='img/loader.gif') }}";
 
     setInterval(function() {
-       d3.json("/runs/concordance/" + run_ids_key, function(err, data) {
-          if (data["state"] != "complete") return;
-          else window.location.reload();
+       d3.json("/runs/" + run_ids_key + "/concordance")
+         .header("Accept", "application/json")
+         .get(function(err, data) {
+          console.log(data, err);
+          if (data["state"] === "complete") window.location.reload();
        });
     }, 1000)
   } else {
