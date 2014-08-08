@@ -59,7 +59,7 @@ def runs():
 @app.route('/runs/<run_id>/examine')
 def examine(run_id):
     run = Run.query.get(run_id)
-    return render_template('examine.html', run=run)
+    return render_template('examine.html', run=run.to_camel_dict())
 
 
 @app.route('/runs/<run_ids_key>/concordance', methods=['GET', 'PUT'])
@@ -108,6 +108,8 @@ def run(run_id):
         run.precision = data.get('precision')
         run.recall = data.get('recall')
         run.f1score = data.get('f1score')
+        run.true_positive = data.get('truePositive')
+        run.false_positive = data.get('falsePositive')
         db.session.commit()
     if request.method == 'DELETE':
         db.session.delete(run)

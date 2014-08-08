@@ -152,4 +152,5 @@ def evaluate(submission_path, truth_path, vtype='SNV', ignorechroms=None,
     fdr       = 1.0 - float(fpcount) / float(subrecs)
     f1score   = 0.0 if tpcount == 0 else 2.0*(precision*recall)/(precision+recall)
 
-    return {'precision': precision, 'recall': recall, 'f1score': f1score}
+    return {'precision': precision, 'recall': recall, 'f1score': f1score,
+            'truePositive': tpcount, 'falsePositive': fpcount}

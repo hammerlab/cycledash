@@ -2,11 +2,145 @@
 {%- from 'macros/nav.html' import nav -%}
 
 {% block head %}
+<script src="{{ url_for('static', filename='js/underscore-min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/d3.bar-chart.js') }}"></script>
+<script src="{{ url_for('static', filename='js/vcf.js') }}"></script>
+<script src="{{ url_for('static', filename='js/vcf.tools.js') }}"></script>
+
+<style>
+.mini {
+  width: 250px;
+}
+.grid tbody td:first-child {
+  font-weight: 700;
+}
+</style>
 {% endblock %}
 
 {% block body %}
 {{ nav("runs") }}
 
-Examine run  #{{ run['id'] }}.
+<div id="info">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Run ID</th>
+        <th>Caller Name</th>
+        <th>Submitted On</th>
+        <th>Dataset</th>
+        <th>Hash</th>
+        <th>f1score</th>
+        <th>precision</th>
+        <th>recall</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a href="/runs/{{ run['id'] }}">{{ run['id'] }}</a></td>
+        <td>{{ run['variantCallerName'] }}</td>
+        <td>{{ run['submittedAt'] }}</td>
+        <td>{{ run['dataset'] }}</td>
+        <td>{{ run['SHA1'] }}</td>
+        <td>{{ run['f1score'] }}</td>
+        <td>{{ run['precision'] }}</td>
+        <td>{{ run['recall'] }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div id="range" class="form">
+  <div class="radio">
+    <label>
+      <input name="range-type" value="all" type="radio" checked>
+      The entire genome.
+    </label>
+  </div>
+
+  <div class="radio">
+    <label>
+      <input name="range-type" value="chromosome" type="radio">
+      A single chromosome:
+      <select name="chromosome">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+        <option value="11">11</option>
+        <option value="12">12</option>
+        <option value="13">13</option>
+        <option value="14">14</option>
+        <option value="15">15</option>
+        <option value="16">16</option>
+        <option value="17">17</option>
+        <option value="18">18</option>
+        <option value="19">19</option>
+        <option value="20">20</option>
+        <option value="21">23</option>
+        <option value="22">22</option>
+        <option value="M">M</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="radio">
+    <label>
+      <input name="range-type" value="start-end" type="radio">
+      A <strong>start</strong> and <strong>end</strong> reference position:
+      <input type="text" name="start" placeholder="start" value="1">
+      <input type="text" name="end" placeholder="end" value="200">
+    </label>
+  </div>
+</div>
+
+<hr>
+
+<div id="display">
+  <div>
+    <table class="table mini">
+      <thead>
+        <tr>
+          <th>Precision</th>
+          <th>Recall</th>
+          <th>f1 Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>X</td>
+          <td>Y</td>
+          <td>Z</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <table class="table mini grid">
+    <thead>
+      <tr>
+        <th></th>
+        <th>True</th>
+        <th>False</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Postive</td>
+        <td>X</td>
+        <td>X</td>
+      </tr>
+      <tr>
+        <td>Negative</td>
+        <td>X</td>
+        <td>X</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
 {% endblock %}
