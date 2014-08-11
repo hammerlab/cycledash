@@ -4,6 +4,8 @@ import json
 import os
 
 from flask import request, redirect, Response, render_template, jsonify, url_for
+import requests
+import uuid
 
 from cycledash import app, db
 from cycledash.models import Run, Concordance
@@ -152,10 +154,28 @@ def trends(caller_name):
         return jsonify({'runs': runs_json})
 
 
+@app.route('/vcf/<path:vcf_path>') # must not start with a / (added on automatically...)
+def hdfs_vcf(vcf_path):
+    # TODO(ihodes): Yes, this is a hack. Should cache this somewhere and use
+    #               this cache with the workers as well. Should catch errors
+    #               etc.
+    url = 'http://demeter.hpc.mssm.edu:14000/webhdfs/v1/'
+    url += vcf_path
+    url += '?user.name=hodesi01&op=OPEN'
+    result = requests.get(url).text
+    local_vcf_path = '/tmp/' + uuid.uuid4().get_hex() + '.vcf'
+    fsock = open(local_vcf_path, 'w')
+    fsock.write(result)
+    fsock.close()
+    return local_vcf_path
+
+
 def _additional_info(run):
     addl = {'Tumor BAM': run['tumorPath'], 'Normal BAM': run['tumorPath'],
             'Reference': run['referencePath'], 'VCF': run['vcfPath'],
-            'Notes': run['notes']}
+            'Notes': run['notes'], 'False Positive': run['falsePositive'],
+            'True Positive': run['truePositive'],
+            'Truth VCF': run['truthVcfPath']}
     if any(addl.itervalues()):
         return addl
     else:

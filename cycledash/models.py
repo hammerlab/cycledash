@@ -16,8 +16,8 @@ class Run(db.Model):
     f1score = db.Column(db.Float(asdecimal=True))
     precision = db.Column(db.Float(asdecimal=True))
     recall = db.Column(db.Float(asdecimal=True))
-    true_positive = db.Column(db.Float(asdecimal=True))
-    false_positive = db.Column(db.Float(asdecimal=True))
+    true_positive = db.Column(db.Integer())
+    false_positive = db.Column(db.Integer())
 
     notes = db.Column(db.Text())
 
