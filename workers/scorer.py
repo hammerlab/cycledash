@@ -21,7 +21,7 @@ CELERY_BROKER = os.environ.get('CELERY_BROKER')
 
 PORT = os.environ.get('PORT')
 
-worker = celery.Celery('scorer',
+worker = celery.Celery('score',
                        broker=CELERY_BROKER, backend=CELERY_BACKEND)
 
 

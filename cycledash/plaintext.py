@@ -14,6 +14,7 @@ POST    /runs                       -- submit a new run to cycledash
                                        c.f. /docs/format (json or form encoded)
 GET     /runs                       -- list all runs
 GET     /runs/<run_id>              -- return a particular run
+GET     /runs/<run_id>/examine      -- summary stats and more for a run
 PUT     /runs/<run_id>              -- update a run with score info
 GET     /runs/<run_id>(,<run_id>)*/concordance   -- display concordance of given
                                                     runs (html only)

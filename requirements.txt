@@ -1,7 +1,10 @@
+Cython==0.20.2
 Flask==0.10.1
+Flask-Cache==0.13.1
 Flask-SQLAlchemy==1.0
 Jinja2==2.7.2
 MarkupSafe==0.23
+PyVCF==0.6.7
 SQLAlchemy==0.9.4
 Werkzeug==0.9.4
 amqp==1.4.5
@@ -10,5 +13,7 @@ billiard==3.3.0.18
 celery==3.1.12
 itsdangerous==0.24
 kombu==3.0.20
+pysam==0.7.8
 pytz==2014.4
+requests==2.3.0
 wsgiref==0.1.2

@@ -4,8 +4,10 @@ import json
 import os
 
 from flask import request, redirect, Response, render_template, jsonify, url_for
+import requests
+import uuid
 
-from cycledash import app, db
+from cycledash import app, db, cache
 from cycledash.models import Run, Concordance
 import cycledash.plaintext as plaintext
 
@@ -42,9 +44,10 @@ def runs():
                   notes=data.get('notes'))
         db.session.add(run)
         db.session.commit()
-        workers.scorer.score.delay(run.id,
-                                   data.get('vcf_path'),
-                                   data.get('truth_vcf_path'))
+        if data.get('truth_vcf_path'):
+            workers.scorer.score.delay(run.id,
+                                       data.get('vcf_path'),
+                                       data.get('truth_vcf_path'))
         return redirect(url_for('runs'))
     elif request.method == 'GET':
         runs = [(run.to_camel_dict(), _additional_info(run.to_camel_dict()))
@@ -53,6 +56,13 @@ def runs():
             return render_template('runs.html', runs=runs)
         elif 'application/json' in request.accept_mimetypes:
             return jsonify({'runs': [run[0] for run in runs]})
+
+
+@app.route('/runs/<run_id>/examine')
+def examine(run_id):
+    run = Run.query.get(run_id).to_camel_dict()
+    addl_info = _additional_info(run)
+    return render_template('examine.html', run=run, addl=addl_info)
 
 
 @app.route('/runs/<run_ids_key>/concordance', methods=['GET', 'PUT'])
@@ -101,6 +111,8 @@ def run(run_id):
         run.precision = data.get('precision')
         run.recall = data.get('recall')
         run.f1score = data.get('f1score')
+        run.true_positive = data.get('truePositive')
+        run.false_positive = data.get('falsePositive')
         db.session.commit()
     if request.method == 'DELETE':
         db.session.delete(run)
@@ -143,10 +155,25 @@ def trends(caller_name):
         return jsonify({'runs': runs_json})
 
 
+@app.route('/vcf/<path:vcf_path>') # must not start with a / (added on automatically...)
+@cache.cached()
+def hdfs_vcf(vcf_path):
+    # TODO(ihodes): Yes, this is a hack. Should cache this somewhere and use
+    #               this cache with the workers as well. Should catch errors
+    #               etc.
+    url = 'http://demeter.hpc.mssm.edu:14000/webhdfs/v1/'
+    url += vcf_path
+    url += '?user.name=hodesi01&op=OPEN'
+    result = requests.get(url).text
+    return result
+
+
 def _additional_info(run):
     addl = {'Tumor BAM': run['tumorPath'], 'Normal BAM': run['tumorPath'],
             'Reference': run['referencePath'], 'VCF': run['vcfPath'],
-            'Notes': run['notes']}
+            'Notes': run['notes'], 'False Positive': run['falsePositive'],
+            'True Positive': run['truePositive'],
+            'Truth VCF': run['truthVcfPath']}
     if any(addl.itervalues()):
         return addl
     else:

@@ -22,6 +22,10 @@ form#submit {
 
 {% block body %}
 {{ nav("runs") }}
+<br/>
+<button id="concordance" class="btn btn-info">Concordance on Selected</button>
+<button id="examine" class="btn btn-info">Examine Selected</button>
+<button id="delete" class="btn btn-danger">Delete Selected</button>
 <h3>Runs <small>Every Variant Call Run</small></h3>
 <button id="show-submit" class="btn btn-default">Submit New Run</button>
 <form method="POST" action="/runs" role="form" id="submit">
@@ -72,9 +76,6 @@ form#submit {
   <button type="submit" class="btn btn-success">Submit</button>
 </form>
 
-<button id="concordance" class="btn btn-info">Concordance on Selected</button>
-<button id="delete" class="btn btn-danger">Delete Selected</button>
-
 <script>
   d3.select("#concordance")
     .on("click", function() {
@@ -84,6 +85,12 @@ form#submit {
         var run_ids_key = runs.join(",");
         window.location.href = "/runs/" + run_ids_key + "/concordance";
       }
+    });
+
+  d3.select("#examine")
+    .on("click", function() {
+      var run = document.querySelector("input[type=checkbox]:checked");
+      window.location.href = "/runs/" + run.value + "/examine";
     });
 
   d3.select("#delete")

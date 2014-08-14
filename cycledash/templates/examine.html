@@ -1,0 +1,253 @@
+{% extends "layouts/layout.html" %}
+{%- from 'macros/nav.html' import nav -%}
+
+{% block head %}
+<script src="{{ url_for('static', filename='js/underscore-min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/d3.bar-chart.js') }}"></script>
+<script src="{{ url_for('static', filename='js/vcf.js') }}"></script>
+<script src="{{ url_for('static', filename='js/vcf.tools.js') }}"></script>
+
+<style>
+.mini {
+  width: 300px;
+}
+.grid tbody td:first-child {
+  font-weight: 700;
+}
+
+#histogram {
+  font: 10px sans-serif;
+}
+
+.legend {
+  display: none;
+}
+
+rect {
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+  stroke: black;
+}
+
+.bar text {
+    font-size: 1.2em;
+    text-anchor: middle;
+}
+
+           .axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path, .x.axis line {
+  display: none;
+}
+
+.x.axis .title {
+  font-weight: 700;
+}
+
+.chart > .title {
+    font-weight: 700;
+    font-size: 15px;
+}
+
+#read-depth-chart {
+  margin-left: 23px;
+}
+
+#read-depth-chart line {
+  stroke-width: 1;
+  stroke: black;
+}
+
+#read-depth-chart rect {
+  fill: none;
+  stroke: 1;
+  stroke: black;
+}
+
+#read-depth-chart text {
+  font: 10px sans-serif;
+}
+
+#read-depth-chart .domain {
+  stroke: none;
+  fill: none;
+}
+
+#read-depth-chart {
+  shape-rendering: crispEdges;
+  text-rendering: optimizeLegibility;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+{{ nav("runs") }}
+<input type="hidden" value="{{ run['vcfPath'] }}" id="vcf-path">
+<input type="hidden" value="{{ run['truthVcfPath'] }}" id="truth-path">
+
+<div id="info">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Run ID</th>
+        <th>Caller Name</th>
+        <th>Submitted On</th>
+        <th>Dataset</th>
+        <th>Hash</th>
+        <th>f1score</th>
+        <th>precision</th>
+        <th>recall</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a href="/runs/{{ run['id'] }}">{{ run['id'] }}</a></td>
+        <td>{{ run['variantCallerName'] }}</td>
+        <td>{{ run['submittedAt'] }}</td>
+        <td>{{ run['dataset'] }}</td>
+        <td>{{ run['SHA1'] }}</td>
+        <td>{{ run['f1score'] }}</td>
+        <td>{{ run['precision'] }}</td>
+        <td>{{ run['recall'] }}</td>
+      </tr>
+      <tr class="run-info" data-runId="{{ run['id'] }}">
+        <td colspan=9>
+          {%- if addl %}
+          <ul style="display: inline-block">
+            {% for name, val in addl.iteritems() %}
+            {%- if val %}
+            <li><strong>{{ name }}:</strong> {{ val }}</li>
+            {% endif -%}
+            {% endfor %}
+          </ul>
+          {% else %}
+          <span>&mdash; <em>No additional data.</em> &mdash;</span>
+          {% endif %}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div id="range-selector" class="form">
+  <img id="loader" style="display: none;" src="{{ url_for('static', filename='img/loader.gif') }}">
+  <div class="radio">
+    <label>
+      <input name="range-type" value="all" type="radio" disabled="disabled" checked>
+      The entire genome.
+    </label>
+  </div>
+
+  <div class="radio">
+    <label>
+      <input name="range-type" value="start-end" type="radio" disabled="disabled">
+      A <strong>start</strong> and <strong>end</strong> reference position:
+      <select name="chromosome" disabled="disabled">
+      </select>
+       start: <input type="text" name="start" placeholder="start" value="1" disabled="disabled">
+       end: <input type="text" name="end" placeholder="end" value="200" disabled="disabled">
+    </label>
+  </div>
+</div>
+
+<hr>
+
+<div id="display">
+  <div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Precision</th>
+          <th>Recall</th>
+          <th>f1 Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="precision">...</td>
+          <td id="recall">...</td>
+          <td id="f1score">...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div>
+    <table class="table">
+      <thead>
+        <tr colspan=5>
+          <th><h4>Read Depth</h4></th>
+        </tr>
+        <tr>
+          <th>Min</th>
+          <th>First Quartile</th>
+          <th>Median</th>
+          <th>Third Quartile</th>
+          <th>Max</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="dp-min">...</td>
+          <td id="dp-first-q">...</td>
+          <td id="dp-median">...</td>
+          <td id="dp-third-q">...</td>
+          <td id="dp-max">...</td>
+        </tr>
+      </tbody>
+      <thead>
+        <tr>
+          <th>Mean</th>
+          <th>Standard Dev.</th>
+          <th>Sum</th>
+          <th>Records</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="dp-mean">...</td>
+          <td id="dp-sd">...</td>
+          <td id="dp-sum">...</td>
+          <td id="dp-len">...</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div>
+  <table class="table mini grid">
+    <thead>
+      <tr>
+        <th></th>
+        <th>True</th>
+        <th>False</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr id="positive">
+        <td>Postive</td>
+        <td class="true">...</td>
+        <td class="false">...</td>
+      </tr>
+      <tr id="negative">
+        <td>Negative</td>
+        <td class="true">N/A</td>
+        <td class="false">...</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div id="read-depth-chart">
+  <h5>Read depth box-plots, by chromosome</h5>
+</div>
+
+<script src="{{ url_for('static', filename='js/examine.js') }}"></script>
+
+{% endblock %}
