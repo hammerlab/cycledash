@@ -7,7 +7,7 @@ from flask import request, redirect, Response, render_template, jsonify, url_for
 import requests
 import uuid
 
-from cycledash import app, db
+from cycledash import app, db, cache
 from cycledash.models import Run, Concordance
 import cycledash.plaintext as plaintext
 
@@ -60,8 +60,9 @@ def runs():
 
 @app.route('/runs/<run_id>/examine')
 def examine(run_id):
-    run = Run.query.get(run_id)
-    return render_template('examine.html', run=run.to_camel_dict())
+    run = Run.query.get(run_id).to_camel_dict()
+    addl_info = _additional_info(run)
+    return render_template('examine.html', run=run, addl=addl_info)
 
 
 @app.route('/runs/<run_ids_key>/concordance', methods=['GET', 'PUT'])
@@ -155,6 +156,7 @@ def trends(caller_name):
 
 
 @app.route('/vcf/<path:vcf_path>') # must not start with a / (added on automatically...)
+@cache.cached()
 def hdfs_vcf(vcf_path):
     # TODO(ihodes): Yes, this is a hack. Should cache this somewhere and use
     #               this cache with the workers as well. Should catch errors
@@ -163,11 +165,7 @@ def hdfs_vcf(vcf_path):
     url += vcf_path
     url += '?user.name=hodesi01&op=OPEN'
     result = requests.get(url).text
-    local_vcf_path = '/tmp/' + uuid.uuid4().get_hex() + '.vcf'
-    fsock = open(local_vcf_path, 'w')
-    fsock.write(result)
-    fsock.close()
-    return local_vcf_path
+    return result
 
 
 def _additional_info(run):

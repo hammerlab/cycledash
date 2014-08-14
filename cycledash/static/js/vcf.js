@@ -286,9 +286,9 @@ function Record(line, header) {
 
   record.variantType = function() {
     if (record.isSnv()) return 'SNV';
+    if (record.isSv()) return 'SV';
     if (record.isIndel()) return record.isDeletion() ? 'DELETION' : 'INSERTION';
-    if (record.isCnv()) return 'CNV';
-    return null;
+    return 'UNKNOWN';
   }
 
   record.isSnv = function() {
@@ -301,11 +301,13 @@ function Record(line, header) {
   }
 
   record.isSv = function() {
-    throw {name: 'NotImplemented', message: 'Method not yet implemented.'};
+    if (record.INFO && record.INFO.SVTYPE) return true;
+    return false;
   }
 
   record.isCnv = function() {
-    throw {name: 'NotImplemented', message: 'Method not yet implemented.'};
+    if (record.INFO && record.INFO.SVTYPE === 'CNV') return true;
+    return false;
   }
 
   record.isIndel = function() {
@@ -313,11 +315,27 @@ function Record(line, header) {
   }
 
   record.isDeletion = function() {
-    throw {name: 'NotImplemented', message: 'Method not yet implemented.'};
+    if (record.isSv()) return false;
+    if (record.ALT && record.ALT.length > 1) return false;
+    if (record.REF && record.ALT && record.ALT.length <= 1) {
+      if (record.REF.length > record.ALT[0].length) return true;
+    }
+    return false;
   }
 
   record.isInsertion = function() {
-    throw {name: 'NotImplemented', message: 'Method not yet implemented.'};
+    if (record.isSv()) return false;
+    if (record.REF && record.ALT && record.ALT.length >= 1) {
+      if (record.REF.length < record.ALT[0].length) return true;
+    }
+    return false;
+  }
+
+  record.filter = {};
+  record.filter.passed = function() {
+    // TODO(ihodes): Is this a good fn to have? more like it, or move to main
+    //               namespace.
+    return !record.FILTER || _.contains(record.FILTER, 'PASS');
   }
 
   return record;
@@ -330,7 +348,11 @@ function parseVCF(text) {
   //    `header` - an object of the metadata parsed from the VCF header.
   //
   // `text` - VCF plaintext.
-  var partitions = _.partition(text.split('\n'), function(line) {
+  var lines = _.reject(text.split('\n'), function(line) {
+    return line === '';
+  })
+
+  var partitions = _.partition(lines, function(line) {
     return line[0] === '#';
   });
 
@@ -373,24 +395,49 @@ function vcf() {
   var data = {},
       header = [];
 
-  function vfc() {
-    return vcf;
+  var vcf_ = function() {
+    return this;
   }
 
-  vcf.header = function() {
+  vcf_.header = function() {
     return header;
   };
 
-  vcf.data = function(text, type) {
+  vcf_.data = function(text, type) {
     if (!arguments.length)  return data;
 
     var result = parseData(text, type || DEFAULT_TYPE);
     data = result.data;
     header = result.header;
-    return vcf;
+    return vcf_;
+  };
+  vcf_.fetch = function(chromosome, start, end) {
+    // O(N) time. TODO(ihodes): Add sorted option to get O(lnN),
+    //                          fallback to O(N).
+    return _.filter(data, function(record) {
+      if (chromosome != record.CHROM)
+        return false;
+
+      if (record.POS < end) {
+        if (record.POS >= start)
+          return true;
+        if (record.INFO && record.INFO.END &&
+            record.INFO.END >= start && record.POS < end)
+          return true;
+      }
+      return false;
+    });
+  };
+  vcf_.get = function(idx) {
+    return this.data()[idx];
+  };
+  vcf_.filter = function(fn) {
+    // TODO(ihodes): Should this return a vcf object with new data internally
+    //               instead of a plain array? Not sure I like this API.
+    return _.filter(data, fn);
   };
 
-  return vcf;
+  return vcf_;
 }
 
 if (typeof define === "function" && define.amd) {

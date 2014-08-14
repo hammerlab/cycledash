@@ -101,6 +101,10 @@ def evaluate(submission_path, truth_path, vtype='SNV', ignorechroms=None,
     subrecs = 0
     trurecs = 0
 
+    notrel = 0
+    notpass = 0
+    svmasked = 0
+
     truchroms = {}
 
     ''' count records in truth vcf, track contigs/chromosomes '''
@@ -146,6 +150,13 @@ def evaluate(submission_path, truth_path, vtype='SNV', ignorechroms=None,
                 fpcount += 1 # FP counting method needs to change for real tumors
                 if printfp:
                     print "FP:", subrec
+            else:
+                if not relevant(subrec, vtype, ignorechroms):
+                    notrel += 1
+                elif not passfilter(subrec, disabled=ignorepass):
+                    notpass += 1
+                elif svmask(subrec, truvcfh, truchroms):
+                    svmasked += 1
 
     recall    = float(tpcount) / float(trurecs)
     precision = float(tpcount) / float(tpcount + fpcount)
@@ -153,4 +164,5 @@ def evaluate(submission_path, truth_path, vtype='SNV', ignorechroms=None,
     f1score   = 0.0 if tpcount == 0 else 2.0*(precision*recall)/(precision+recall)
 
     return {'precision': precision, 'recall': recall, 'f1score': f1score,
-            'truePositive': tpcount, 'falsePositive': fpcount}
+            'truePositive': tpcount, 'falsePositive': fpcount,
+            'notrel': notrel, 'notpas': notpass, 'svmasked': svmasked}
