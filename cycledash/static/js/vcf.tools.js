@@ -171,7 +171,7 @@ function difference(a, b) {
   var ai = 0, bi = 0,
       result = [];
 
-  while (bi < b.length) {
+  while (ai < a.length && bi < b.length) {
     if (recordKey(a[ai]) < recordKey(b[bi])) {
       result.push(a[ai]);
       ai++;

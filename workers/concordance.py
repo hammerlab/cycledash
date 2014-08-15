@@ -28,8 +28,10 @@ def concordance(run_ids_key):
         if not run:
             # TODO(ihodes): throw &|| record error
             raise KeyError
-        vcfs[run['variantCallerName']] = hdfsToLocalPath(run['vcfPath'])
-        truth_vcfs.add(run['truthVcfPath'])
+        concordance_name = run['variantCallerName'] + String(run['id'])
+        vcfs[concordance_name] = hdfsToLocalPath(run['vcfPath'])
+        if run['truthVcfPath']:
+            truth_vcfs.add(run['truthVcfPath'])
     if len(truth_vcfs) == 1:
         vcfs['Truth'] = hdfsToLocalPath(truth_vcfs.pop())
     results = workers.scripts.concordance_counter.concordance(vcfs)
