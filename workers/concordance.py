@@ -28,7 +28,7 @@ def concordance(run_ids_key):
         if not run:
             # TODO(ihodes): throw &|| record error
             raise KeyError
-        concordance_name = run['variantCallerName'] + String(run['id'])
+        concordance_name = run['variantCallerName'] + str(run['id'])
         vcfs[concordance_name] = hdfsToLocalPath(run['vcfPath'])
         if run['truthVcfPath']:
             truth_vcfs.add(run['truthVcfPath'])
