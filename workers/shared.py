@@ -1,7 +1,14 @@
+import os
 import requests
 import uuid
 
+import celery
 
+
+CELERY_BACKEND = os.environ.get('CELERY_BACKEND')
+CELERY_BROKER = os.environ.get('CELERY_BROKER')
+
+worker = celery.Celery(broker=CELERY_BROKER, backend=CELERY_BACKEND)
 
 def lookup(obj, *args):
     return (obj[attr] for attr in args)

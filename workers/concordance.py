@@ -6,23 +6,16 @@ concordance script on them, posting the calls in common back to CycleDash.
 import os
 import uuid
 
-import celery
 import json
 import requests
 import vcf
 
 import workers.scripts.concordance_counter
-from workers.shared import hdfsToLocalPath
+from workers.shared import hdfsToLocalPath, worker
 
 
-# TODO(ihodes): Do we really need to keep results?
-CELERY_BACKEND = os.environ.get('CELERY_BACKEND')
-CELERY_BROKER = os.environ.get('CELERY_BROKER')
 
 PORT = os.environ.get('PORT')
-
-worker = celery.Celery('concordance',
-                       broker=CELERY_BROKER, backend=CELERY_BACKEND)
 
 @worker.task
 def concordance(run_ids_key):

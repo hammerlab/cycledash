@@ -6,24 +6,16 @@ against and posts the f1score, recall, and precision scores to CycleDash.
 import os
 import uuid
 
-import celery
 import pysam
 import requests
 import vcf
 
 import workers.scripts.dream_evaluator as dream
-from workers.shared import hdfsToLocalPath
+from workers.shared import hdfsToLocalPath, worker
 
 
-
-CELERY_BACKEND = os.environ.get('CELERY_BACKEND')
-CELERY_BROKER = os.environ.get('CELERY_BROKER')
 
 PORT = os.environ.get('PORT')
-
-worker = celery.Celery('score',
-                       broker=CELERY_BROKER, backend=CELERY_BACKEND)
-
 
 @worker.task
 def score(run_id, hdfs_vcf_path, hdfs_truth_vcf_path):
