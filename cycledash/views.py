@@ -34,20 +34,20 @@ def runs():
     if request.method == 'POST':
         data = request.json or request.form
         # TODO(ihodes): Validation.
-        run = Run(variant_caller_name=data.get('name'),
+        run = Run(variant_caller_name=data.get('variantCallerName'),
                   dataset=data.get('dataset'),
-                  vcf_path=data.get('vcf_path'),
-                  truth_vcf_path=data.get('truth_vcf_path'),
-                  tumor_path=data.get('tumor_path'),
-                  normal_path=data.get('normal_path'),
-                  reference_path=data.get('reference_path'),
-                  notes=data.get('notes'))
+                  vcf_path=data.get('vcfPath'),
+                  truth_vcf_path=data.get('truthVcfPath'),
+                  tumor_path=data.get('tumorPath'),
+                  normal_path=data.get('normalPath'),
+                  reference_path=data.get('referencePath'),
+                  notes=data.get('params'))
         db.session.add(run)
         db.session.commit()
-        if data.get('truth_vcf_path'):
+        if data.get('truthVcfPath'):
             workers.scorer.score.delay(run.id,
-                                       data.get('vcf_path'),
-                                       data.get('truth_vcf_path'))
+                                       data.get('vcfPath'),
+                                       data.get('truthVcfPath'))
         return redirect(url_for('runs'))
     elif request.method == 'GET':
         runs = [(run.to_camel_dict(), _additional_info(run.to_camel_dict()))
