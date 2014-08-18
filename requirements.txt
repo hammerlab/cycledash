@@ -16,4 +16,5 @@ kombu==3.0.20
 pysam==0.7.8
 pytz==2014.4
 requests==2.3.0
+voluptuous==0.8.5
 wsgiref==0.1.2

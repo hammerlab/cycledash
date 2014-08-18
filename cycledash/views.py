@@ -8,8 +8,10 @@ import requests
 import uuid
 
 from cycledash import app, db, cache
+from cycledash.helpers import prepare_data
 from cycledash.models import Run, Concordance
 import cycledash.plaintext as plaintext
+import cycledash.validations as validate
 
 import workers.concordance
 import workers.scorer
@@ -32,22 +34,17 @@ def format_doc():
 @app.route('/runs', methods=['POST', 'GET'])
 def runs():
     if request.method == 'POST':
-        data = request.json or request.form
-        # TODO(ihodes): Validation.
-        run = Run(variant_caller_name=data.get('variantCallerName'),
-                  dataset=data.get('dataset'),
-                  vcf_path=data.get('vcfPath'),
-                  truth_vcf_path=data.get('truthVcfPath'),
-                  tumor_path=data.get('tumorPath'),
-                  normal_path=data.get('normalPath'),
-                  reference_path=data.get('referencePath'),
-                  notes=data.get('params'))
+        data = prepare_data(request.json or request.form)
+        try:
+            data = validate.CreateRunSchema(data)
+        except Exception as e:
+            return jsonify({'error': 'Run validation',
+                            'message': str(e)})
+        run = Run(**data)
         db.session.add(run)
         db.session.commit()
-        if data.get('truthVcfPath'):
-            workers.scorer.score.delay(run.id,
-                                       data.get('vcfPath'),
-                                       data.get('truthVcfPath'))
+        if run.truth_vcf_path:
+            workers.scorer.score.delay(run.id, run.vcf_path, run.truth_vcf_path)
         return redirect(url_for('runs'))
     elif request.method == 'GET':
         runs = [(run.to_camel_dict(), _additional_info(run.to_camel_dict()))
@@ -68,9 +65,9 @@ def examine(run_id):
 @app.route('/runs/<run_ids_key>/concordance', methods=['GET', 'PUT'])
 def concordance(run_ids_key):
     # TODO(ihodes): validation.
-    runs = map(int, run_ids_key.split(','))
+    runs = [int(run) for run in run_ids_key.split(',')]
     runs.sort()
-    run_ids_key = ','.join(map(str, runs))
+    run_ids_key = ','.join(str(run) for run in runs)
     if request.method == 'PUT':
         concordance = Concordance.query.filter_by(run_ids_key=run_ids_key).first()
         print request.form
