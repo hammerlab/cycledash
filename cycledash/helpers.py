@@ -44,10 +44,11 @@ def remove_empty_strings(d):
             if (len(val) > 0 if isinstance(val, basestring) else True)}
 
 
-def prepare_data(d):
+def prepare_request_data(request):
     """Return a dictionary taken from Flask's request.form or request.json in a
     more easily usable form. That is, removes empty strings and empty lists; if
     a list is of length 0, it is removed. If it is of length 1, it is
     deconstructed. All keys are "underscorized" from camelCase.
     """
-    return compose(dict, parsimonious_dict, remove_empty_strings, underscorize_keys)(d)
+    data = request.json or request.form
+    return compose(dict, parsimonious_dict, remove_empty_strings, underscorize_keys)(data)

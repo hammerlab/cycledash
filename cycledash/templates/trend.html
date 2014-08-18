@@ -42,10 +42,10 @@
 {{ nav("callers") }}
 <h3>Caller: {{ caller_name }}</h3>
 
-{{ runs_table(runs) }}
+{{ runs_table(runs, run_kvs) }}
 
 <script>
-  var runs = {{ runs_json | tojson }};
+  var runs = {{ runs | tojson }};
 </script>
 
 <script src="{{ url_for('static', filename='js/trend.js') }}"></script>

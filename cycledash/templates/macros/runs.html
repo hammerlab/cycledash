@@ -1,4 +1,4 @@
-{% macro runs_table(runs) -%}
+{% macro runs_table(runs, run_kvs) -%}
 <style>
   tr.run {
     background: white;
@@ -38,7 +38,7 @@
     </tr>
   </thead>
   <tbody>
-{%- for run, addl in  runs %}
+{%- for run in runs %}
     <tr class="run">
       <td><a href="/runs/{{ run['id'] }}">{{ run['id'] }}</a></td>
       <td>{{ run['variantCallerName'] }}</td>
@@ -51,17 +51,13 @@
     </tr>
     <tr class="run-info">
       <td colspan=7>
-        {%- if addl %}
         <ul style="display: inline-block">
-          {% for name, val in addl.iteritems() %}
-          {%- if val %}
-          <li><strong>{{ name }}:</strong> {{ val }}</li>
+          {% for name, key in run_kvs.iteritems() %}
+          {%- if run.get(key) %}
+          <li><strong>{{ name }}:</strong> {{ run[key] }}</li>
           {% endif -%}
           {% endfor %}
         </ul>
-        {% else %}
-        <span>&mdash; <em>No additional data.</em> &mdash;</span>
-        {% endif %}
       </td>
     </tr>
 {% endfor -%}
