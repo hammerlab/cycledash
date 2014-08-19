@@ -20,7 +20,7 @@ def compose(*funcs, **kwargs):
 
 
 def underscorize(value):
-    """Returs underscored version of a camelCase string.
+    """Returns underscored version of a camelCase string.
 
     Raises ValueError if a value other than a string is passed.
     """
