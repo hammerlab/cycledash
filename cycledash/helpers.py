@@ -1,22 +1,10 @@
-"""Module containing helper methods for the app in general.
-"""
+"""Module containing helper methods for the app in general."""
+
 import re
 
 
-
-def compose(*funcs, **kwargs):
-    """Return a function composed of funcs from left to right.
-
-    If rev is passed & truthy, composes functions from right to left.
-    """
-    if kwargs.get('rev'): funcs = funcs[::-1]
-    def fn(*args, **kwargs):
-        fn = funcs[0]
-        res = fn(*args, **kwargs)
-        for fn in funcs[1:]:
-            res = fn(res)
-        return res
-    return fn
+RE_CAMELCASE_1 = re.compile('((?!^)[A-Z](?=[a-z0-9][^A-Z])|(?<=[a-z])[A-Z])')
+RE_CAMELCASE_2 = re.compile('([a-z]+[0-9]+)([A-Z])')
 
 
 def underscorize(value):
@@ -24,10 +12,9 @@ def underscorize(value):
 
     Raises ValueError if a value other than a string is passed.
     """
-    if isinstance(value, basestring):
-        return re.sub(r'([A-Z])', r'_\1', value).lower()
-    else:
-        raise ValueError("'value' must be one of str, basestring, unicode.")
+    res = RE_CAMELCASE_1.sub(r'_\1', value)
+    res = RE_CAMELCASE_2.sub(r'\1_\2', res)
+    return res.lower()
 
 
 def underscorize_keys(value):
@@ -49,8 +36,7 @@ def parsimonious_dict(d):
 
 
 def remove_empty_strings(d):
-    """Return dict without empty string vals.
-    """
+    """Return dict without empty string vals."""
     return {key: val
             for key, val in dict(d).iteritems()
             if (len(val) > 0 if isinstance(val, basestring) else True)}
@@ -62,5 +48,7 @@ def prepare_request_data(request):
     a list is of length 0, it is removed. If it is of length 1, it is
     deconstructed. All keys are "underscorized" from camelCase.
     """
-    data = request.json or request.form
-    return compose(dict, parsimonious_dict, underscorize_keys)(data)
+    data = dict(request.json or request.form)
+    simplified_dict = parsimonious_dict(data)
+    stringval_dict = remove_empty_strings(simplified_dict)
+    return underscorize_keys(no_empty_stringval_dict)
