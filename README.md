@@ -40,15 +40,15 @@ The primary endpoint for posting data to from an external source is `/runs`.
 
 JSON should be posted to this URL with following fields:
 
-**Required**
-`vcfPath` -- The path on HDFS where the VCF can be found. This should be immutable, as CycleDash expects to be able to find the VCF here at any time.
-`variantCallerName` -- The name of the variant caller which produced this VCF. This should remain constrant between VCFs with the same caller in order to compare runs to one another.
+**Required**<br />
+`vcfPath` -- The path on HDFS where the VCF can be found. This should be immutable, as CycleDash expects to be able to find the VCF here at any time.<br />
+`variantCallerName` -- The name of the variant caller which produced this VCF. This should remain constrant between VCFs with the same caller in order to compare runs to one another.<br />
 
-**Optional, highly recommended if truth VCF exists**
-`truthVcfPath` -- The path on HDFS for the truth (or "reference") VCF. This should be immutable.
+**Optional, highly recommended if truth VCF exists**<br />
+`truthVcfPath` -- The path on HDFS for the truth (or "reference") VCF. This should be immutable.<br />
 
-**Optional**
-`dataset` -- The name of the dataset on which the caller was run (e.g. Dream Chromosome 20).
-`tumorPath` -- The path on HDFS of the tumor BAM on which the caller was run.
-`normalPath` -- The path on HDFS of the normalBAM on which the caller was run.
-`params` -- Params that the caller was run with, or other notes relevant to the run.
+**Optional**<br />
+`dataset` -- The name of the dataset on which the caller was run (e.g. Dream Chromosome 20).<br />
+`tumorPath` -- The path on HDFS of the tumor BAM on which the caller was run.<br />
+`normalPath` -- The path on HDFS of the normalBAM on which the caller was run.<br />
+`params` -- Params that the caller was run with, or other notes relevant to the run.<br />
