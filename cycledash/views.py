@@ -89,7 +89,7 @@ def concordance(run_ids_key):
             workers.concordance.concordance.delay(run_ids_key)
 
     if 'text/html' in request.accept_mimetypes:
-        return render_template('concordance.html', run_ids_key=run_ids_key
+        return render_template('concordance.html', run_ids_key=run_ids_key,
                                concordance_json=concordance.concordance_json)
     elif 'application/json' in request.accept_mimetypes:
         return jsonify(concordance.to_camel_dict())
