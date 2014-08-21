@@ -116,17 +116,13 @@ rect {
       </tr>
       <tr class="run-info" data-runId="{{ run['id'] }}">
         <td colspan=9>
-          {%- if addl %}
           <ul style="display: inline-block">
-            {% for name, val in addl.iteritems() %}
-            {%- if val %}
-            <li><strong>{{ name }}:</strong> {{ val }}</li>
+            {% for name, key in run_kvs.iteritems() %}
+            {%- if run.get(key) %}
+            <li><strong>{{ name }}:</strong> {{ run[key] }}</li>
             {% endif -%}
             {% endfor %}
           </ul>
-          {% else %}
-          <span>&mdash; <em>No additional data.</em> &mdash;</span>
-          {% endif %}
         </td>
       </tr>
     </tbody>
