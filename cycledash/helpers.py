@@ -1,10 +1,18 @@
 """Module containing helper methods for the app in general."""
-
 import re
 
 
 RE_CAMELCASE_1 = re.compile('((?!^)[A-Z](?=[a-z0-9][^A-Z])|(?<=[a-z])[A-Z])')
 RE_CAMELCASE_2 = re.compile('([a-z]+[0-9]+)([A-Z])')
+
+
+def hasattr(obj, attr):
+    try:
+        getattr(obj, attr)
+    except AttributeError:
+        return False
+    else:
+        return True
 
 
 def underscorize(value):
@@ -30,9 +38,10 @@ def parsimonious_dict(d):
 
     Used to tidy up ImmutableMultiDicts used in Flask's request.{form,json}.
     """
-    return {key: val
-            if len(val) > 1 else val[0]
-            for key, val in dict(d).iteritems() if len(val) > 0}
+    return {key: val[0]
+            if isinstance(val, list) and len(val) == 1 else val
+            for key, val in dict(d).iteritems()
+            if not hasattr(val, '__len__') or len(val) > 0}
 
 
 def remove_empty_strings(d):
@@ -51,4 +60,4 @@ def prepare_request_data(request):
     data = dict(request.json or request.form)
     simplified_dict = parsimonious_dict(data)
     stringval_dict = remove_empty_strings(simplified_dict)
-    return underscorize_keys(no_empty_stringval_dict)
+    return underscorize_keys(stringval_dict)

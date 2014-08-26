@@ -78,12 +78,18 @@ text.score-text {
     }
     loader.src = "{{ url_for('static', filename='img/loader.gif') }}";
 
-    setInterval(function() {
+    var interval = setInterval(function() {
        d3.json("/runs/" + run_ids_key + "/concordance")
          .header("Accept", "application/json")
          .get(function(err, data) {
           console.log(data, err);
-          if (data["state"] === "complete") window.location.reload();
+          if (data["state"] === "complete") {
+            window.location.reload();
+          } else if (data["state"] === "failed") {
+            document.getElementById("concordance-info").innerText = "Concordance Failed: " + data["error"];
+            document.getElementById("concordance-loader").remove();
+            clearInterval(interval);
+          }
        });
     }, 1000)
   } else {

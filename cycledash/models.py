@@ -77,6 +77,8 @@ class Concordance(db.Model):
     # completed (or failed).
     state = db.Column(db.Text(), default="pending")
 
+    error = db.Column(db.Text())
+
     def __init__(self, run_ids_key=None, concordance_json=None):
         self.run_ids_key = run_ids_key
         self.concordance_json = concordance_json

@@ -3,7 +3,6 @@
 This worker accepts several run IDs with a common truth VCF and executes the
 concordance script on them, posting the calls in common back to CycleDash.
 """
-import os
 import uuid
 
 import json
@@ -11,31 +10,38 @@ import requests
 import vcf
 
 import workers.scripts.concordance_counter
-from workers.shared import hdfsToLocalPath, worker
+from workers.shared import (hdfsToLocalPath, worker, CYCLEDASH_PORT, RUNS_URL,
+                            CONCORDANCE_URL)
 
-
-
-PORT = os.environ.get('PORT')
 
 @worker.task
 def concordance(run_ids_key):
-    run_ids = map(int, run_ids_key.split(','))
+    """Run concordance on the VCFs identified by a comma-separated string of run
+    ids and PUT the result to CycleDash.
+    """
+    submit_url = CONCORDANCE_URL.format(CYCLEDASH_PORT, run_ids_key)
     vcfs = {}
     truth_vcfs = set()
-    for run_id in run_ids:
-        run_json = requests.get('http://localhost:{}/runs/{}'.format(PORT, str(run_id))).text
-        run = json.loads(run_json)
-        if not run:
-            # TODO(ihodes): throw &|| record error
-            raise KeyError
-        concordance_name = run['variantCallerName'] + str(run['id'])
-        vcfs[concordance_name] = hdfsToLocalPath(run['vcfPath'])
-        if run['truthVcfPath']:
-            truth_vcfs.add(run['truthVcfPath'])
-    if len(truth_vcfs) == 1:
-        vcfs['Truth'] = hdfsToLocalPath(truth_vcfs.pop())
-    results = workers.scripts.concordance_counter.concordance(vcfs)
-    concordance_data = {'concordance_json': json.dumps(results)}
-    request_url = 'http://localhost:{}/runs/{}/concordance'.format(PORT, run_ids_key)
-    requests.put(request_url, data=concordance_data)
-    return json.dumps(concordance_data)
+    try:
+        run_ids = (int(run_id) for run_id in run_ids_key.split(','))
+        for run_id in run_ids:
+            run_json = requests.get(RUNS_URL.format(CYCLEDASH_PORT, run_id)).text
+            run = json.loads(run_json)
+            concordance_name = run['variantCallerName'] + '-' + str(run['id'])
+            vcfs[concordance_name] = hdfsToLocalPath(run['vcfPath'])
+            if run['truthVcfPath']:
+                truth_vcfs.add(run['truthVcfPath'])
+        if len(truth_vcfs) == 1:
+            vcfs['Truth'] = hdfsToLocalPath(truth_vcfs.pop())
+        concordance_data = workers.scripts.concordance_counter.concordance(vcfs)
+        print concordance_data
+        results = {'concordance_json': concordance_data,
+                   'state': 'complete'}
+    except Exception as e:
+        error_message = str(e)
+        results = {'error': error_message, 'state': 'failed'}
+        raise e
+    finally:
+        requests.put(submit_url, data=json.dumps(results),
+                     headers={'Content-Type': 'application/json'})
+    return json.dumps(results)

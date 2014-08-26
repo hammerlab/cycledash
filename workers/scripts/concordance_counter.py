@@ -42,7 +42,7 @@ def _variants_to_caller_mapper(vcfname_to_records_dict):
 
 
 def _vcf_to_concordance(variants_to_vcfs_dict):
-    """Returns a mapping from each VCF caller to a mapping of the number of
+    """Return a mapping from each VCF caller to a mapping of the number of
     VCFs in concordance to the number of calls they concord on.
     """
     concordance_counts = collections.defaultdict(lambda: collections.defaultdict(int))
@@ -53,9 +53,11 @@ def _vcf_to_concordance(variants_to_vcfs_dict):
 
 
 def concordance(vcfs):
-    """vcfs -- {vcf_name: vcf_filename ... } mapping of VCFs to be examined
+    """Return map of concordances.
 
-       returns map of concordances ... c.f. vcf_to_concordance
+    c.f. vcf_to_concordance
+
+    vcfs -- {vcf_name: vcf_filename ... } mapping of VCFs to be examined
     """
     vcf_readers = _open_vcfs(vcfs)
 
