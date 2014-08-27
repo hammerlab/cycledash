@@ -6,15 +6,6 @@ RE_CAMELCASE_1 = re.compile('((?!^)[A-Z](?=[a-z0-9][^A-Z])|(?<=[a-z])[A-Z])')
 RE_CAMELCASE_2 = re.compile('([a-z]+[0-9]+)([A-Z])')
 
 
-def hasattr(obj, attr):
-    try:
-        getattr(obj, attr)
-    except AttributeError:
-        return False
-    else:
-        return True
-
-
 def underscorize(value):
     """Returns underscored version of a camelCase string.
 
