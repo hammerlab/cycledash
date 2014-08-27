@@ -20,7 +20,8 @@ import workers.scorer
 
 
 DEMETER_WEBHDFS_URL = 'http://demeter.hpc.mssm.edu:14000/webhdfs/v1/'
-DEMETER_OPEN_OP = '?user.name=hodesi01&op=OPEN'
+# user.name is required for any WebHDFS operation to work.
+DEMETER_OPEN_OP = '?user.name={}&op=OPEN'.format(app.config['WEBHDFS_USER'])
 RUN_ADDL_KVS = {'Tumor BAM': 'tumorPath', 'Normal BAM': 'tumorPath',
                 'Reference': 'referencePath', 'VCF': 'vcfPath',
                 'Notes': 'notes', 'False Positive': 'falsePositive',
