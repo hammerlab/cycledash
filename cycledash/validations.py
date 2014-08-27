@@ -9,7 +9,11 @@ PathString = All(unicode, Length(min=1), Msg(truth(lambda s: s[0] == '/'),
 
 
 def Castable(t):
-    @message("key must be castable to " + str(t))
+    """Assert that a value must be type castable to the given type.
+
+    This is a validator function.
+    """
+    @message("value must be castable to " + str(t))
     def _Castable(v):
         try:
             t(v)
