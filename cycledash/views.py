@@ -20,6 +20,7 @@ import workers.scorer
 
 
 DEMETER_WEBHDFS_URL = 'http://demeter.hpc.mssm.edu:14000/webhdfs/v1/'
+DEMETER_OPEN_OP = '?user.name=hodesi01&op=OPEN'
 RUN_ADDL_KVS = {'Tumor BAM': 'tumorPath', 'Normal BAM': 'tumorPath',
                 'Reference': 'referencePath', 'VCF': 'vcfPath',
                 'Notes': 'notes', 'False Positive': 'falsePositive',
@@ -153,6 +154,6 @@ def trends(caller_name):
 @app.route('/vcf/<path:vcf_path>')
 @cache.cached()
 def hdfs_vcf(vcf_path):
-    url = DEMETER_WEBHDFS_URL + vcf_path + '?user.name=hodesi01&op=OPEN'
+    url = DEMETER_WEBHDFS_URL + vcf_path + DEMETER_OPEN_OP
     result = requests.get(url)
     return result.text
