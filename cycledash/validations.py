@@ -1,10 +1,26 @@
 import json
 
-from voluptuous import Schema, All, Required, Length, Range, truth, Msg
+from voluptuous import (Schema, All, Required, Length, Range, truth, message,
+                        Msg, Coerce)
 
 
+PathString = All(unicode, Length(min=1), Msg(truth(lambda s: s[0] == '/'),
+                                             'path must start with "/"'))
 
-PathString = All(unicode, Length(min=1), Msg(truth(lambda s: s[0] == '/'), 'path must start with \'\\\''))
+
+def Castable(t):
+    """Assert that a value must be type castable to the given type.
+
+    This is a validator function.
+    """
+    @message("value must be castable to " + str(t))
+    def _Castable(v):
+        try:
+            t(v)
+        except:
+            raise ValueError
+        return v
+    return _Castable()
 
 
 CreateRunSchema = Schema({
@@ -19,12 +35,13 @@ CreateRunSchema = Schema({
     'sha1': unicode
 })
 
+
 UpdateRunSchema = Schema({
-    'precision': float,
-    'recall': float,
-    'f1score': float,
-    'true_positive': int,
-    'false_positive': int,
+    'precision': Coerce(float),
+    'recall': Coerce(float),
+    'f1score': Coerce(float),
+    'true_positive': Coerce(int),
+    'false_positive': Coerce(int),
 
     'variant_caller_name': unicode,
     'vcf_path': PathString,
@@ -37,6 +54,11 @@ UpdateRunSchema = Schema({
     'sha1': unicode
 })
 
+
 UpdateConcordanceSchema = Schema({
-    Required('concordance_json'): All(unicode, json.loads)
+    'concordance_json': All({
+        unicode: { Castable(int): int }
+    }, json.dumps),
+    'error': unicode,
+    'state': unicode
 })

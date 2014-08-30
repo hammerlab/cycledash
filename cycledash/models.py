@@ -5,7 +5,6 @@ import json
 from cycledash import db
 
 
-
 class Run(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
@@ -76,6 +75,8 @@ class Concordance(db.Model):
     # Used to see if the concordance background processing has started or
     # completed (or failed).
     state = db.Column(db.Text(), default="pending")
+
+    error = db.Column(db.Text())
 
     def __init__(self, run_ids_key=None, concordance_json=None):
         self.run_ids_key = run_ids_key

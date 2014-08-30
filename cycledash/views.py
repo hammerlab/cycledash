@@ -1,9 +1,10 @@
-# -*- coding: utf-8 -*-
+"""Defines all views for CycleDash."""
 import datetime
 import json
 import os
 
-from flask import request, redirect, Response, render_template, jsonify, url_for, abort
+from flask import (request, redirect, Response, render_template, jsonify,
+                   url_for, abort)
 import requests
 import uuid
 
@@ -11,13 +12,16 @@ from cycledash import app, db, cache
 from cycledash.helpers import prepare_request_data
 from cycledash.models import Run, Concordance
 import cycledash.plaintext as plaintext
-from cycledash.validations import UpdateRunSchema, CreateRunSchema, UpdateConcordanceSchema
+from cycledash.validations import (UpdateRunSchema, CreateRunSchema,
+                                   UpdateConcordanceSchema)
 
 import workers.concordance
 import workers.scorer
 
 
-
+DEMETER_WEBHDFS_URL = 'http://demeter.hpc.mssm.edu:14000/webhdfs/v1/'
+# user.name is required for any WebHDFS operation to work.
+DEMETER_OPEN_OP = '?user.name={}&op=OPEN'.format(app.config['WEBHDFS_USER'])
 RUN_ADDL_KVS = {'Tumor BAM': 'tumorPath', 'Normal BAM': 'tumorPath',
                 'Reference': 'referencePath', 'VCF': 'vcfPath',
                 'Notes': 'notes', 'False Positive': 'falsePositive',
@@ -43,7 +47,8 @@ def runs():
         try:
             data = CreateRunSchema(prepare_request_data(request))
         except Exception as e:
-            return jsonify({'error': 'Run validation', 'message': str(e)})
+            return jsonify({'error': 'Run validation',
+                            'message': str(e)})
         run = Run(**data)
         db.session.add(run)
         db.session.commit()
@@ -60,7 +65,7 @@ def runs():
 
 @app.route('/runs/<run_id>/examine')
 def examine(run_id):
-    run = Run.query.get(run_id).to_camel_dict()
+    run = Run.query.get_or_404(run_id).to_camel_dict()
     return render_template('examine.html', run=run, run_kvs=RUN_ADDL_KVS)
 
 
@@ -78,9 +83,8 @@ def concordance(run_ids_key):
         except Exception as e:
             return jsonify({'error': 'Concordance update validation',
                             'message': str(e)})
-        concordance.update(dict({'state': 'complete'}, **data))
+        concordance.query.update(data)
         db.session.commit()
-        return redirect(url_for('concordance'), run_ids_key=run_ids_key)
     elif request.method == 'GET':
         if not concordance:
             concordance = Concordance(run_ids_key=run_ids_key)
@@ -104,7 +108,7 @@ def run(run_id):
         except Exception as e:
             return jsonify({'error': 'Run update validation',
                             'message': str(e)})
-        run.update(data)
+        run.query.update(data)
         db.session.commit()
     elif request.method == 'DELETE':
         db.session.delete(run)
@@ -145,11 +149,12 @@ def trends(caller_name):
         return jsonify({'runs': runs_json})
 
 
-@app.route('/vcf/<path:vcf_path>') # Path must not start with a / (added on automatically...)
+# Path must not start with a '/'.
+# Flask seems to have some trouble dealing with forward-slashes in URLs.
+# (It is added on automatically when requesting a HDFS file).
+@app.route('/vcf/<path:vcf_path>')
 @cache.cached()
 def hdfs_vcf(vcf_path):
-    url = 'http://demeter.hpc.mssm.edu:14000/webhdfs/v1/'
-    url += vcf_path
-    url += '?user.name=hodesi01&op=OPEN'
-    result = requests.get(url).text
-    return result
+    url = DEMETER_WEBHDFS_URL + vcf_path + DEMETER_OPEN_OP
+    result = requests.get(url)
+    return result.text
