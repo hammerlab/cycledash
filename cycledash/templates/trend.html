@@ -2,51 +2,64 @@
 {%- from 'macros/runs.html' import runs_table -%}
 {%- from 'macros/nav.html' import nav -%}
 
-{% block head %}
-<style>
-  tr.run {
-    background: white;
-    cursor: pointer;
-  }
-  tr.run.selected {
-    font-weight: 500;
-  }
-  tr.run-info {
-    display: none;
-    background: rgb(247, 252, 253);
-    text-align: center;
-  }
-  tr.run-info li {
-    list-style-type: none;
-    display: inline;
-  }
-  tr.run-info li:after {
-    content: ", ";
-  }
-  tr.run-info li:last-child:after {
-    content: " ";
-  }
-
-  .tick {
-    font-size: 7px;
-  }
-  path {
-    fill: none;
-    stroke-width: 1;
-    stroke: black;
-  }
-</style>
-{% endblock %}
-
 {% block body %}
 {{ nav("callers") }}
-<h3>Caller: {{ caller_name }}</h3>
 
-{{ runs_table(runs, run_kvs) }}
+<h2>{{ caller_name }}</h2>
+<script type="template/html" id="dataset-holder">
+  <h3><%= datasetName %></h3>
+  <div class="trendlines"></div>
+  <table class="table table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Run ID</th>
+        <th>Submitted At</th>
+        <th>f1score</th>
+        <th>precision</th>
+        <th>recall</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% for (var idx in runs) { %>
+        <% var run = runs[idx],
+               submittedAt = run.submittedAt,
+               runId = run.id,
+               f1score = run.f1score,
+               precision = run.precision,
+               recall = run.recall; %>
+      <tr>
+        <td><a href="/runs/<%= runId %>"><%= runId %></a></td>
+        <td><%= submittedAt %></td>
+        <td><%= f1score %></td>
+        <td><%= precision %></td>
+        <td><%= recall %></td>
+      </tr>
+      <% } %>
+    </tbody>
+  </table>
+</script>
 
 <script>
-  var runs = {{ runs | tojson }};
+  var datasetRuns = {{ dataset_runs | tojson }};
 </script>
 
 <script src="{{ url_for('static', filename='js/trend.js') }}"></script>
+{% endblock %}
+
+
+{% block head %}
+<style>
+path {
+  fill: none;
+  stroke-width: 1;
+}
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+text {
+  font-size: 10px;
+}
+</style>
 {% endblock %}
