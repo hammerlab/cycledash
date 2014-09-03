@@ -13,13 +13,13 @@ function trendlines() {
          .orient("left")
          .ticks([5]);
 
-  function line(attr) {
+  function line(type) {
     return d3.svg.line()
-      .y(function(d) { return y(d[attr]); })
+      .y(function(d) { return y(d[type]); })
       .x(function(d,i) { return x(i); });
   }
 
-  function filler(type) {
+  function colorForType(type) {
     switch (type) {
       case 'f1score':
         return 'green';
@@ -47,17 +47,17 @@ function trendlines() {
           .datum(function(d) { return d; })
           .attr('class', type)
           .attr('d', line(type))
-          .attr('stroke', filler(type));
+          .attr('stroke', colorForType(type));
 
       legend.append('rect')
           .attr('x', 0)
-          .attr('y', idx*12)
+          .attr('y', idx * 12)
           .attr('width', 10)
           .attr('height', 10)
-          .attr('fill', filler(type));
+          .attr('fill', colorForType(type));
       legend.append('text')
           .attr('x', 15)
-          .attr('y', idx*12 + 8)
+          .attr('y', idx * 12 + 8)
           .text(type);
     });
 

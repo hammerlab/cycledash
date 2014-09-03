@@ -2,6 +2,25 @@
 {%- from 'macros/runs.html' import runs_table -%}
 {%- from 'macros/nav.html' import nav -%}
 
+
+{% block head %}
+<style>
+path {
+  fill: none;
+  stroke-width: 1;
+}
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+text {
+  font-size: 10px;
+}
+</style>
+{% endblock %}
+
+
 {% block body %}
 {{ nav("callers") }}
 
@@ -44,22 +63,4 @@
 </script>
 
 <script src="{{ url_for('static', filename='js/trend.js') }}"></script>
-{% endblock %}
-
-
-{% block head %}
-<style>
-path {
-  fill: none;
-  stroke-width: 1;
-}
-.axis path, .axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
-text {
-  font-size: 10px;
-}
-</style>
 {% endblock %}
