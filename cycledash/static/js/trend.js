@@ -1,11 +1,5 @@
 (function(exports) {
 "use strict";
-function getter(attr) {
-  return function(d) { return d[attr]; };
-}
-
-var datasetTemplate  = _.template(document.getElementById('dataset-holder').text),
-    body = document.getElementsByTagName('body')[0];
 
 
 function trendlines() {
@@ -42,7 +36,8 @@ function trendlines() {
           .attr('height', height)
         .append('g')
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')'),
-      legend = svg.append('g').attr('transform', 'translate(' + (width - (margin.left * 5))  + ',0)');
+      legend = svg.append('g').attr('transform',
+                                    'translate(' + (width - (margin.left * 5))  + ',0)');
 
     _.each(['f1score', 'precision', 'recall'], function(type, idx) {
       x.domain([0, selection.datum().length]);
@@ -68,25 +63,33 @@ function trendlines() {
 
     svg.append("g")
         .attr("class", "y axis")
-        .call(yAxis)
+        .call(yAxis);
   }
   return _trendlines;
 }
 
-_.each(datasetRuns, function(runs, datasetName) {
-  var renderedDataset = datasetTemplate({datasetName: datasetName, runs: runs}),
-      div = document.createElement('div'),
-      chart = trendlines();
-  div.innerHTML = renderedDataset;
+
+function main() {
+  var datasetTemplate  = _.template(document.getElementById('dataset-holder').text),
+      body = document.getElementsByTagName('body')[0];
+
+  _.each(datasetRuns, function(runs, datasetName) {
+    var renderedDataset = datasetTemplate({datasetName: datasetName, runs: runs}),
+        div = document.createElement('div'),
+        chart = trendlines();
+    div.innerHTML = renderedDataset;
+
+    d3.select(div)
+      .select('.trendlines')
+        .datum(runs)
+        .call(chart);
+
+    body.appendChild(div);
+  });
+}
 
 
-  d3.select(div)
-    .select('.trendlines')
-      .datum(runs)
-      .call(chart);
-
-  body.appendChild(div);
-});
+main();
 
 
 })(this);
