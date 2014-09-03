@@ -1,4 +1,5 @@
 """Defines all views for CycleDash."""
+import collections
 import datetime
 import json
 import os
@@ -141,9 +142,13 @@ ORDER BY submitted_at ASC
 def trends(caller_name):
     runs = Run.query.filter_by(variant_caller_name=caller_name)
     runs = runs.order_by(Run.submitted_at.desc())
-    runs = [run.to_camel_dict() for run in runs]
+    runs = sorted((run.to_camel_dict() for run in runs), key=lambda r: r['id'])
     if 'text/html' in request.accept_mimetypes:
-        return render_template('trend.html', runs=runs, run_kvs=RUN_ADDL_KVS,
+        datasets = collections.defaultdict(list)
+        for run in runs:
+            datasets[run.get('dataset')].append(run)
+        return render_template('trend.html', runs=runs,
+                               dataset_runs=datasets,
                                caller_name=caller_name)
     else:
         return jsonify({'runs': runs_json})

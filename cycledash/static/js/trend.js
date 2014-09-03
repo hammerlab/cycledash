@@ -1,89 +1,95 @@
-  var SCORE_TYPES = ['f1score', 'recall', 'precision'],
-      SCORE_COLORS = ['firebrick', 'forestgreen', 'darkorchid'],
-      WIDTH = 800,
-      HEIGHT = 150,
-      RUNS_NUM = 10,
-      data = runs.slice(0, RUNS_NUM).reverse(),
-      colors = d3.scale.ordinal()
-                 .domain(SCORE_TYPES)
-                 .range(SCORE_COLORS),
-      margin = {top: 20, left: 50, right: 120, bottom: 50},
-      chartWidth = WIDTH - margin.left - margin.right,
-      chartHeight = HEIGHT - margin.top - margin.bottom,
-      ys = window.ys = [d3.min(SCORE_TYPES.map(function(type) {
-        return d3.min(data.map(function(d){ return d[type]; }));
-      })),
-      d3.max(SCORE_TYPES.map(function(type) {
-        return d3.max(data.map(function(d){ return d[type]; }));
-      }))],
-      x = d3.scale.linear()
-            .domain([0, RUNS_NUM])
-            .range([0, chartWidth]),
-      y = d3.scale.linear()
-            .domain(ys)
-            .range([chartHeight, 0]),
-      xAxis = d3.svg.axis().scale(x).orient('bottom')
-                .tickValues(d3.range(RUNS_NUM))
-                .tickFormat(d3.format("s")),
-      yAxis = d3.svg.axis().scale(y).orient('left'),
-      line = window.line = function(score_type) {
-        return d3.svg.line()
-                 .x(function(d, i) {
-                   return x(i);
-                 })
-                 .y(function(d, i) {
-                   return y(d[score_type]);
-                 })
-      };
+(function(exports) {
+"use strict";
 
-  var svg = d3.select('body').append('svg')
-      .attr('width', WIDTH)
-      .attr('height', HEIGHT)
-    .append('g')
-      .attr('transform',
-            'translate(' + margin.left + ',' + margin.top + ')');
 
-  var trends = svg.selectAll('.trend')
-      .data(SCORE_TYPES)
-    .enter().append('path')
-      .attr('class', 'trend')
-      .style('stroke', colors)
-      .attr('d', function(scoreType, i) {
-        return line(scoreType)(data);
-      });
+function trendlines() {
+  var margin = {top: 20, bottom: 20, right: 80, left: 50},
+      width = 1000,
+      height = 100,
+      x = d3.scale.linear().range([0, width - margin.right - margin.left]),
+      y = d3.scale.linear().range([height - margin.top - margin.bottom, 0]),
+      yAxis = d3.svg.axis()
+         .scale(y)
+         .orient("left")
+         .ticks([5]);
 
-  svg.append('g')
-      .attr("transform", "translate(0, " + (chartHeight + 5) + ")")
-      .call(xAxis);
+  function line(type) {
+    return d3.svg.line()
+      .y(function(d) { return y(d[type]); })
+      .x(function(d,i) { return x(i); });
+  }
 
-  svg.append('g')
-      .call(yAxis);
+  function colorForType(type) {
+    switch (type) {
+      case 'f1score':
+        return 'green';
+      case 'precision':
+        return 'gold';
+      case 'recall':
+        return 'purple';
+    }
+  }
 
-  svg.append("g")
-      .attr("transform",
-            "translate(" + (chartWidth / 2) + ", " + (HEIGHT - 20) + ")")
-    .append("text")
-      .style("text-anchor", "middle")
-      .text("Last " + RUNS_NUM + " Scores")
+  function _trendlines(selection) {
+    var svg = selection.append('svg')
+          .attr('width', width)
+          .attr('height', height)
+        .append('g')
+          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')'),
+      legend = svg.append('g').attr('transform',
+                                    'translate(' + (width - (margin.left * 5))  + ',0)');
 
-  var legend = svg.selectAll(".legend")
-      .data(colors.domain().slice().reverse())
-    .enter().append("g")
-      .attr("class", "legend")
-      .attr("transform", function(d, i) {
-        return "translate(0," + i * 20 + ")";
-      });
+    _.each(['f1score', 'precision', 'recall'], function(type, idx) {
+      x.domain([0, selection.datum().length]);
+      y.domain(d3.extent(_.pluck(selection.datum(), type)));
 
-  legend.append("rect")
-      .attr("x", chartWidth)
-      .attr("width", 18)
-      .attr("height", 18)
-      .style("fill", colors);
+      svg.append('path')
+          .datum(function(d) { return d; })
+          .attr('class', type)
+          .attr('d', line(type))
+          .attr('stroke', colorForType(type));
 
-  legend.append("text")
-      .attr("x", chartWidth + 23)
-      .attr("y", 9)
-      .attr("dy", ".35em")
-      .text(function(d) {
-        return d;
-      });
+      legend.append('rect')
+          .attr('x', 0)
+          .attr('y', idx * 12)
+          .attr('width', 10)
+          .attr('height', 10)
+          .attr('fill', colorForType(type));
+      legend.append('text')
+          .attr('x', 15)
+          .attr('y', idx * 12 + 8)
+          .text(type);
+    });
+
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
+  }
+  return _trendlines;
+}
+
+
+function main() {
+  var datasetTemplate  = _.template(document.getElementById('dataset-holder').text),
+      body = document.getElementsByTagName('body')[0];
+
+  _.each(datasetRuns, function(runs, datasetName) {
+    var renderedDataset = datasetTemplate({datasetName: datasetName, runs: runs}),
+        div = document.createElement('div'),
+        chart = trendlines();
+    div.innerHTML = renderedDataset;
+
+    d3.select(div)
+      .select('.trendlines')
+        .datum(runs)
+        .call(chart);
+
+    body.appendChild(div);
+  });
+}
+
+
+main();
+
+
+})(this);
