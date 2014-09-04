@@ -20,9 +20,9 @@ import workers.concordance
 import workers.scorer
 
 
-DEMETER_WEBHDFS_URL = 'http://demeter.hpc.mssm.edu:14000/webhdfs/v1/'
-# user.name is required for any WebHDFS operation to work.
-DEMETER_OPEN_OP = '?user.name={}&op=OPEN'.format(app.config['WEBHDFS_USER'])
+WEBHDFS_ENDPOINT = app.config['WEBHDFS_URL'] + '/webhdfs/v1/'
+WEBHDFS_OPEN_OP = '?user.name={}&op=OPEN'.format(app.config['WEBHDFS_USER'])
+
 RUN_ADDL_KVS = {'Tumor BAM': 'tumorPath', 'Normal BAM': 'tumorPath',
                 'Reference': 'referencePath', 'VCF': 'vcfPath',
                 'Notes': 'notes', 'False Positive': 'falsePositive',
@@ -160,6 +160,6 @@ def trends(caller_name):
 @app.route('/vcf/<path:vcf_path>')
 @cache.cached()
 def hdfs_vcf(vcf_path):
-    url = DEMETER_WEBHDFS_URL + vcf_path + DEMETER_OPEN_OP
+    url = WEBHDFS_URL + vcf_path + WEBHDFS_OPEN_OP
     result = requests.get(url)
     return result.text
