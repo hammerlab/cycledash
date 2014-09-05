@@ -6,3 +6,5 @@ config.pyc
 *.pyc
 *.log
 *.db
+node_modules
+cycledash/static/lib/

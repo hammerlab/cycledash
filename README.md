@@ -1,10 +1,7 @@
 ## CycleDash
 
 CycleDash tracks variant caller runs and carries out analyses on them. It
-provides a RESTful interface and exports visualizations for comparing VCFs
-within and across callers.
-
-Very much a WIP and unstable.
+provides a RESTful interface and faciliates the analysis  VCFs.
 
 ### About
 
@@ -13,11 +10,16 @@ For now, see `/` in the running webapp.
 ### Running
 
 (After setting up your virtual environment and sourcing your environment
-variables, below) Start the webserver:
+variables, below), run
 
-`python run.py`
+```bash
+npm install      # to install node packages
+make             # copy node packages to cycledash, init ENV file
+python run.py    # start the web server
+```
 
-Start workers:
+Start a worker (you can start more, as well, by changing the name to
+e.g. worker.2, worker.3, etc.):
 
 ```
 celery -A workers.shared -I workers.concordance,workers.scorer worker -n worker.1 --loglevel=info
@@ -25,13 +27,15 @@ celery -A workers.shared -I workers.concordance,workers.scorer worker -n worker.
 
 ### Config
 
-Environment variables which must be exported:
+Environment variables which must be exported--put them in the ENV file make made for you.
 
 ```
 export PORT=5000
 export DATABASE_URL='sqlite:///test.db'
 export CELERY_BACKEND='db+sqlite:///celery.db'
 export CELERY_BROKER='amqp://localhost'
+export WEBHDFS_USER=username
+export WEBHDFS_URL=http://example.com:5000
 ```
 
 ### Usage

@@ -160,6 +160,6 @@ def trends(caller_name):
 @app.route('/vcf/<path:vcf_path>')
 @cache.cached()
 def hdfs_vcf(vcf_path):
-    url = WEBHDFS_URL + vcf_path + WEBHDFS_OPEN_OP
+    url = WEBHDFS_ENDPOINT + vcf_path + WEBHDFS_OPEN_OP
     result = requests.get(url)
     return result.text

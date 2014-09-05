@@ -16,8 +16,29 @@ form#submit {
 .runs.table {
   margin-top: 23px;
 }
+tr.run {
+  background: white;
+  cursor: pointer;
+}
+tr.run.selected {
+  font-weight: 500;
+}
+tr.run-info {
+  display: none;
+  background: rgb(247, 252, 253);
+  text-align: center;
+}
+tr.run-info li {
+  list-style-type: none;
+  display: inline;
+}
+tr.run-info li:after {
+  content: ", ";
+}
+tr.run-info li:last-child:after {
+  content: " ";
+}
 </style>
-<script src="{{ url_for('static', filename='js/underscore-min.js') }}"></script>
 {% endblock %}
 
 {% block body %}
@@ -106,31 +127,6 @@ form#submit {
     });
 </script>
 
-<style>
-  tr.run {
-    background: white;
-    cursor: pointer;
-  }
-  tr.run.selected {
-    font-weight: 500;
-  }
-  tr.run-info {
-    display: none;
-    background: rgb(247, 252, 253);
-    text-align: center;
-  }
-  tr.run-info li {
-    list-style-type: none;
-    display: inline;
-  }
-  tr.run-info li:after {
-    content: ", ";
-  }
-  tr.run-info li:last-child:after {
-    content: " ";
-  }
-</style>
-
 <table class="runs table">
   <thead>
     <tr>
@@ -190,9 +186,7 @@ form#submit {
               .style('display', 'table-row');
         }
     });
-</script>
 
-<script>
   d3.select('#show-submit')
       .on('click', function() {
         d3.select(this)
