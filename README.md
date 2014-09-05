@@ -13,9 +13,7 @@ For now, see `/` in the running webapp.
 variables, below), run
 
 ```bash
-npm install      # to install node packages
-make             # copy node packages to cycledash, init ENV file
-python run.py    # start the web server
+python run.py
 ```
 
 Start a worker (you can start more, as well, by changing the name to
@@ -23,6 +21,15 @@ e.g. worker.2, worker.3, etc.):
 
 ```
 celery -A workers.shared -I workers.concordance,workers.scorer worker -n worker.1 --loglevel=info
+```
+
+### Development
+
+You can upgrade packages and move them to the right place within cycledash with:
+
+```
+npm install
+make
 ```
 
 ### Config
