@@ -1,7 +1,7 @@
 #!/bin/bash
 
-set -e
+set -o errexit
 
-source ./ENV
+source ./ENV.sh
 
 python ./run.py

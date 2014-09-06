@@ -6,7 +6,7 @@ cpnode:
 initenv:
 	@echo "Creating ENV template..."
 	@if [ ! -e ./ENV ]; then \
-	  cp ENVTEMPLATE ENV; \
+	  cp ENVTEMPLATE.sh ENV.sh; \
 	  echo "ENV created, edit it to configure CycleDash."; \
 	else \
 	  echo "ENV already exists, leaving it alone."; \
