@@ -1,8 +1,9 @@
 venv/
 .DS_STORE
 __pycache__
-env
+ENV.sh
 config.pyc
 *.pyc
 *.log
 *.db
+node_modules

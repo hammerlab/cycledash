@@ -1,0 +1,12 @@
+{
+  "name": "cycledash",
+  "description": "Variant Caller Analysis Dashboard and Data Management System",
+  "dependencies": {
+    "bootstrap": "^3.2.0",
+    "jquery": "^2.1.1",
+    "d3": "^3.4.11",
+    "react": "^0.11.1",
+    "underscore": "^1.7.0"
+  },
+  "devDependencies": {}
+}
