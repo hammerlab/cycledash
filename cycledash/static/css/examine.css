@@ -1,0 +1,73 @@
+.mini {
+  width: 300px;
+}
+.grid tbody td:first-child {
+  font-weight: 700;
+}
+
+#histogram {
+  font: 10px sans-serif;
+}
+
+.legend {
+  display: none;
+}
+
+rect {
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+  stroke: black;
+}
+
+.bar text {
+    font-size: 1.2em;
+    text-anchor: middle;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path, .x.axis line {
+  display: none;
+}
+
+.x.axis .title {
+  font-weight: 700;
+}
+
+.chart > .title {
+    font-weight: 700;
+    font-size: 15px;
+}
+
+#read-depth-chart {
+  margin-left: 23px;
+}
+
+#read-depth-chart line {
+  stroke-width: 1;
+  stroke: black;
+}
+
+#read-depth-chart rect {
+  fill: none;
+  stroke: 1;
+  stroke: black;
+}
+
+#read-depth-chart text {
+  font: 10px sans-serif;
+}
+
+#read-depth-chart .domain {
+  stroke: none;
+  fill: none;
+}
+
+#read-depth-chart {
+  shape-rendering: crispEdges;
+  text-rendering: optimizeLegibility;
+}

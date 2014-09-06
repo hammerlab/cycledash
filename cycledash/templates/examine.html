@@ -6,243 +6,156 @@
 <script src="{{ url_for('static', filename='js/vcf.js') }}"></script>
 <script src="{{ url_for('static', filename='js/vcf.tools.js') }}"></script>
 
-<style>
-.mini {
-  width: 300px;
-}
-.grid tbody td:first-child {
-  font-weight: 700;
-}
+<script src="http://fb.me/react-0.11.1.js"></script>
+<script src="http://fb.me/JSXTransformer-0.11.1.js"></script>
 
-#histogram {
-  font: 10px sans-serif;
-}
-
-.legend {
-  display: none;
-}
-
-rect {
-  stroke-width: 1px;
-  shape-rendering: crispEdges;
-  stroke: black;
-}
-
-.bar text {
-    font-size: 1.2em;
-    text-anchor: middle;
-}
-
-           .axis path, .axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
-
-.x.axis path, .x.axis line {
-  display: none;
-}
-
-.x.axis .title {
-  font-weight: 700;
-}
-
-.chart > .title {
-    font-weight: 700;
-    font-size: 15px;
-}
-
-#read-depth-chart {
-  margin-left: 23px;
-}
-
-#read-depth-chart line {
-  stroke-width: 1;
-  stroke: black;
-}
-
-#read-depth-chart rect {
-  fill: none;
-  stroke: 1;
-  stroke: black;
-}
-
-#read-depth-chart text {
-  font: 10px sans-serif;
-}
-
-#read-depth-chart .domain {
-  stroke: none;
-  fill: none;
-}
-
-#read-depth-chart {
-  shape-rendering: crispEdges;
-  text-rendering: optimizeLegibility;
-}
-</style>
 {% endblock %}
+
 
 {% block body %}
-{{ nav("runs") }}
-<input type="hidden" value="{{ run['vcfPath'] }}" id="vcf-path">
-<input type="hidden" value="{{ run['truthVcfPath'] }}" id="truth-path">
+<div id="content"></div>
+<script type="text/jsx">
+  /** @jsx React.DOM */
 
-<div id="info">
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Run ID</th>
-        <th>Caller Name</th>
-        <th>Submitted On</th>
-        <th>Dataset</th>
-        <th>Hash</th>
-        <th>f1score</th>
-        <th>precision</th>
-        <th>recall</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><a href="/runs/{{ run['id'] }}">{{ run['id'] }}</a></td>
-        <td>{{ run['variantCallerName'] }}</td>
-        <td>{{ run['submittedAt'] }}</td>
-        <td>{{ run['dataset'] }}</td>
-        <td>{{ run['SHA1'] }}</td>
-        <td>{{ run['f1score'] }}</td>
-        <td>{{ run['precision'] }}</td>
-        <td>{{ run['recall'] }}</td>
-      </tr>
-      <tr class="run-info" data-runId="{{ run['id'] }}">
-        <td colspan=9>
-          <ul style="display: inline-block">
-            {% for name, key in run_kvs.iteritems() %}
-            {%- if run.get(key) %}
-            <li><strong>{{ name }}:</strong> {{ run[key] }}</li>
-            {% endif -%}
-            {% endfor %}
-          </ul>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+var data = {
+  charts: ['RD', 'VAF'],
+  filters: {'RD': '>10'},
+  records: [1,2,3,4,5,6,7,8]
+};
 
-<div id="range-selector" class="form">
-  <img id="loader" style="display: none;" src="{{ url_for('static', filename='img/loader.gif') }}">
-  <div class="radio">
-    <label>
-      <input name="range-type" value="all" type="radio" disabled="disabled" checked>
-      The entire genome.
-    </label>
-  </div>
+var ExaminePage = React.createClass({
+  render: function() {
+    return (
+      <div className="examinePage">
+        <AttributeCharts charts={this.props.charts} />
+        <Karyogram />
+        <VCFTable records={this.props.records} />
+      </div>
+    );
+  }
+});
 
-  <div class="radio">
-    <label>
-      <input name="range-type" value="start-end" type="radio" disabled="disabled">
-      A <strong>start</strong> and <strong>end</strong> reference position:
-      <select name="chromosome" disabled="disabled">
-      </select>
-       start: <input type="text" name="start" placeholder="start" value="1" disabled="disabled">
-       end: <input type="text" name="end" placeholder="end" value="200" disabled="disabled">
-    </label>
-  </div>
-</div>
+var AttributeCharts = React.createClass({
+  render: function() {
+    var charts = this.props.charts.map(function(chart) {
+      return <AttributeChart chart={chart} key={chart} />;
+    });
+    return (
+      <div className="attributeCharts">
+        {charts}
+        <AttributeChartAdder />
+      </div>
+    );
+  }
+});
 
-<hr>
+var AttributeChartAdder = React.createClass({
+  render: function() {
+     return <div><button>Add a Chart</button></div>
+  }
+});
 
-<div id="display">
-  <div>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Precision</th>
-          <th>Recall</th>
-          <th>f1 Score</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td id="precision">...</td>
-          <td id="recall">...</td>
-          <td id="f1score">...</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+var AttributeChart = React.createClass({
+   render: function() {
+     return (
+       <div>This will be a bar chart for {this.props.chart}.</div>
+     );
+   }
+});
 
-  <div>
-    <table class="table">
-      <thead>
-        <tr colspan=5>
-          <th><h4>Read Depth</h4></th>
-        </tr>
-        <tr>
-          <th>Min</th>
-          <th>First Quartile</th>
-          <th>Median</th>
-          <th>Third Quartile</th>
-          <th>Max</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td id="dp-min">...</td>
-          <td id="dp-first-q">...</td>
-          <td id="dp-median">...</td>
-          <td id="dp-third-q">...</td>
-          <td id="dp-max">...</td>
-        </tr>
-      </tbody>
-      <thead>
-        <tr>
-          <th>Mean</th>
-          <th>Standard Dev.</th>
-          <th>Sum</th>
-          <th>Records</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td id="dp-mean">...</td>
-          <td id="dp-sd">...</td>
-          <td id="dp-sum">...</td>
-          <td id="dp-len">...</td>
-          <td></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-<div>
-  <table class="table mini grid">
-    <thead>
-      <tr>
-        <th></th>
-        <th>True</th>
-        <th>False</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr id="positive">
-        <td>Postive</td>
-        <td class="true">...</td>
-        <td class="false">...</td>
-      </tr>
-      <tr id="negative">
-        <td>Negative</td>
-        <td class="true">N/A</td>
-        <td class="false">...</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+var Karyogram = React.createClass({
+   render: function() {
+     return (
+       <div>Karyogram.</div>
+     );
+   }
+});
 
-<div id="read-depth-chart">
-  <h5>Read depth box-plots, by chromosome</h5>
-</div>
+var VCFTable = React.createClass({
+   render: function() {
+     return (
+       <table>
+         <VCFTableHeader />
+         <VCFTableFilter />
+         <VCFTableBody records={this.props.records} />
+       </table>
+     );
+   }
+});
 
-<script src="{{ url_for('static', filename='js/examine.js') }}"></script>
+var VCFTableHeader = React.createClass({
+   render: function() {
+     return (
+       <thead>
+         <tr>
+           <th>Chromosome</th>
+           <th>Position</th>
+           <th>Ref</th>
+           <th>Alt</th>
+           <th>RD</th>
+           <th>VAF</th>
+           <th>FA</th>
+           <th>QUAL</th>
+         </tr>
+       </thead>
+     );
+   }
+});
 
-{% endblock %}
+var VCFTableFilter = React.createClass({
+   render: function() {
+     return (
+       <thead>
+         <tr>
+           <th><input type="text"></input></th>
+           <th><input type="text"></input></th>
+           <th><input type="text"></input></th>
+           <th><input type="text"></input></th>
+           <th><input type="text"></input></th>
+           <th><input type="text"></input></th>
+           <th><input type="text"></input></th>
+           <th><input type="text"></input></th>
+         </tr>
+       </thead>
+     );
+   }
+});
+
+var VCFTableBody = React.createClass({
+   render: function() {
+     var rows = this.props.records.map(function(record) {
+       return <VCFRecord record={record} key={record} />;
+     });
+     return (
+       <tbody>
+         {rows}
+       </tbody>
+     );
+   }
+});
+
+var VCFRecord = React.createClass({
+   render: function() {
+     return (
+       <tr>
+         <td>1</td>
+         <td>2</td>
+         <td>3</td>
+         <td>4</td>
+         <td>5</td>
+         <td>6</td>
+         <td>7</td>
+         <td>8</td>
+       </tr>
+     );
+   }
+});
+
+
+React.renderComponent(
+  <ExaminePage charts={data.charts} records={data.records} />,
+  document.getElementById('content')
+);
+
+</script>
+{% endblock%}
