@@ -52,3 +52,14 @@ def prepare_request_data(request):
     simplified_dict = parsimonious_dict(data)
     stringval_dict = remove_empty_strings(simplified_dict)
     return underscorize_keys(stringval_dict)
+
+
+def update_object(obj, update):
+    """Sets attributes for all key, vals in update on obj.
+
+    Used to batch-update values on SQLAlchemy objects.
+
+    Returns obj."""
+    for key, value in update.iteritems():
+        obj.__setattr__(key, value)
+    return obj
