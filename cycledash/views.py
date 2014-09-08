@@ -10,7 +10,7 @@ import requests
 import uuid
 
 from cycledash import app, db, cache
-from cycledash.helpers import prepare_request_data
+from cycledash.helpers import prepare_request_data, update_object
 from cycledash.models import Run, Concordance
 import cycledash.plaintext as plaintext
 from cycledash.validations import (UpdateRunSchema, CreateRunSchema,
@@ -84,7 +84,7 @@ def concordance(run_ids_key):
         except Exception as e:
             return jsonify({'error': 'Concordance update validation',
                             'message': str(e)})
-        concordance.query.update(data)
+        update_object(concordance, data)
         db.session.commit()
     elif request.method == 'GET':
         if not concordance:
@@ -109,7 +109,7 @@ def run(run_id):
         except Exception as e:
             return jsonify({'error': 'Run update validation',
                             'message': str(e)})
-        run.query.update(data)
+        update_object(run, data)
         db.session.commit()
     elif request.method == 'DELETE':
         db.session.delete(run)
