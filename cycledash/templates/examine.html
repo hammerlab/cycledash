@@ -1,33 +1,48 @@
 {% extends "layouts/layout.html" %}
 {%- from 'macros/nav.html' import nav -%}
 
+{% block bootstrap %}
+<!-- Nothing -->
+{% endblock %}
+
 {% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/examine.css') }}">
+
 <script src="{{ url_for('static', filename='js/d3.bar-chart.js') }}"></script>
+<script src="{{ url_for('static', filename='js/idiogrammatik.js') }}"></script>
 <script src="{{ url_for('static', filename='js/vcf.js') }}"></script>
 <script src="{{ url_for('static', filename='js/vcf.tools.js') }}"></script>
 
 <script src="http://fb.me/react-0.11.1.js"></script>
 <script src="http://fb.me/JSXTransformer-0.11.1.js"></script>
 
+<script type="text/javascript" src="//use.typekit.net/vml3kel.js"></script>
+<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
 {% endblock %}
 
 
 {% block body %}
-<div id="content"></div>
+<script>
+ var VCF_PATH = "{{ run['vcfPath'] }}";
+ var TRUTH_VCF_PATH = "{{ run['truthVcfPath'] }}";
+</script>
+{% raw %}
 <script type="text/jsx">
-  /** @jsx React.DOM */
+/** @jsx React.DOM */
 
 var data = {
-  charts: ['RD', 'VAF'],
+  charts: ['QSS_NT', 'QSS'],
   filters: {'RD': '>10'},
-  records: [1,2,3,4,5,6,7,8]
+  records: []
 };
 
 var ExaminePage = React.createClass({
   render: function() {
     return (
       <div className="examinePage">
-        <AttributeCharts charts={this.props.charts} />
+        <h1>Examining: <small>{VCF_PATH}</small></h1>
+        <AttributeCharts records={this.props.records}
+                         charts={this.props.charts} />
         <Karyogram />
         <VCFTable records={this.props.records} />
       </div>
@@ -38,36 +53,136 @@ var ExaminePage = React.createClass({
 var AttributeCharts = React.createClass({
   render: function() {
     var charts = this.props.charts.map(function(chart) {
-      return <AttributeChart chart={chart} key={chart} />;
-    });
+      return <AttributeChart chart={chart} key={chart}
+                             records={this.props.records} />;
+    }.bind(this));
     return (
       <div className="attributeCharts">
         {charts}
-        <AttributeChartAdder />
       </div>
     );
   }
 });
 
-var AttributeChartAdder = React.createClass({
-  render: function() {
-     return <div><button>Add a Chart</button></div>
-  }
-});
-
 var AttributeChart = React.createClass({
+   binPos: function(bins, val) {
+     // Given a sorted array of numbers, bins, of lower bin bounds, returns the
+     // position index in those bins that val should go. Undefined behavior if
+     // the val is outside the bins.
+     //
+     // e.g. bins = [5, 10, 15, 20], val = 7   =>   0
+     // e.g. bins = [0, 10, 20, 30], val = 21  =>   2
+     // e.g. bins = [0, 10, 20, 30], val = 30  =>   2
+     return _.reduce(bins, function(pos, binMin) {
+       if (binMin >= val) return pos;
+       else return pos + 1;
+     }, 0);
+   },
+   processRecordsForHistogram: function(records) {
+     var TOTAL_BINS = 10;
+     var attr = this.props.chart,
+         binRange = d3.extent(records.map(function(record) { return record.INFO[attr]; })),
+         binGap = (binRange[1] - binRange[0]) / TOTAL_BINS,
+         bins = _.range(TOTAL_BINS + 1).map(function(idx) {
+           return Math.ceil(binRange[0] + (binGap * idx));
+         }),
+         binned = bins.map(function(bin){ return {bin: bin, count: 0}; });
+
+     _.each(records, function(record) {
+       var attrVal = record.INFO[attr],
+           pos = this.binPos(bins, attrVal);
+       binned[pos].count += 1;
+     }.bind(this));
+     return binned;
+   },
+   /* componentDidMount: function() {
+
+   window[this.props.chart] = datum;
+   var barChart = d3.chart.bars()
+   .width(200).height(200).margin({top:0, bottom:0, right:0, left: 0})
+   .groupBy('__BIN__')
+   .stackBy(this.props.chart);
+   d3.select(this.refs.chartHolder.getDOMNode())
+   .datum(datum)
+   .call(barChart);
+   }, */
+   componentWillReceiveProps: function(nextprops) {
+     var datum = this.processRecordsForHistogram(nextprops.records);
+
+     var barChart = d3.chart.bars()
+         .width(400).height(400).margin({top:0, bottom:30, right:0, left: 50})
+         .yLabel('Count')
+         .intraGroupPadding(0.033)
+         .groupBy('bin')
+         .barValue('count');
+     d3.select(this.refs.chartHolder.getDOMNode())
+         .datum(datum)
+         .call(barChart);
+   },
    render: function() {
      return (
-       <div>This will be a bar chart for {this.props.chart}.</div>
+       <div className="attrChart">
+         <h3>{this.props.chart}</h3>
+         <div ref="chartHolder">
+         </div>
+       </div>
      );
    }
 });
 
 var Karyogram = React.createClass({
+   componentDidMount: function() {
+     idiogrammatik.__cytoband_url__ = '/static/js/cytoband.tsv'
+     var firstPos = null,
+         selection = {},
+         shifted = false;
+
+     var karyogram = idiogrammatik()
+         .width(1400)
+         .highlightHeight(59)
+         .on('dragstart', function(position, kgram) {
+           if (!position.chromosome || !shifted) return;
+           firstPos = position;
+          })
+         .on('drag', function(position, kgram) {
+           if (!position.chromosome || !shifted) return;
+           if (selection.remove) selection.remove();
+           selection = kgram.highlight(firstPos, position);
+          })
+         .on('dragend', function(position, kgram) {
+           if (!position.chromosome || !shifted) return;
+           if (selection.remove) selection.remove();
+           selection = kgram.highlight(firstPos, position);
+          });
+
+
+     window.onkeydown = function(e) {
+       if (e.shiftKey) {
+         document.getElementsByTagName("body")[0].style.cursor="text";
+         shifted = true;
+         try {
+           karyogram.zoomBehavior().x(null);
+         } catch(err) {}
+       }
+     };
+     window.onkeyup = function(e) {
+       document.getElementsByTagName("body")[0].style.cursor="default";
+       if (shifted && !e.shiftKey) {
+         shifted = false;
+         karyogram.zoomBehavior().x(karyogram.scale());
+       }
+     };
+
+
+     idiogrammatik.load(function(err, data) {
+       if (err) console.log(err);
+       d3.select(this.getDOMNode())
+           .datum(data)
+           .call(karyogram);
+     }.bind(this));
+   },
    render: function() {
-     return (
-       <div>Karyogram.</div>
-     );
+     return <div className="karyogram"></div>;
    }
 });
 
@@ -76,7 +191,7 @@ var VCFTable = React.createClass({
      return (
        <table>
          <VCFTableHeader />
-         <VCFTableFilter />
+         <VCFTableFilter records={this.props.records} />
          <VCFTableBody records={this.props.records} />
        </table>
      );
@@ -104,11 +219,32 @@ var VCFTableHeader = React.createClass({
 
 var VCFTableFilter = React.createClass({
    render: function() {
+     var chromosomes = _.reduce(this.props.records, function(acc, val, key) {
+       var chromosome = val.CHROM;
+       if (acc.mem[chromosome] === undefined) {
+         acc.mem[chromosome] = true;
+         acc.chromosomes.push(chromosome);
+       }
+       return acc;
+     }, {chromosomes: [], mem: {}}).chromosomes,
+         chromosomeOptions = chromosomes.map(function(chromosome) {
+       return (
+         <option name="chromosome" key={chromosome} value={chromosome}>{chromosome}</option>
+       );
+     });
      return (
        <thead>
          <tr>
-           <th><input type="text"></input></th>
-           <th><input type="text"></input></th>
+           <th>
+             <select>
+               <option name="chromosome" key="all" value="all">&lt;all&gt;</option>
+               {chromosomeOptions}
+             </select>
+           </th>
+           <th id="position">
+             <input name="start" type="text" placeholder="start"></input>
+             <input name="end" type="text" placeholder="end"></input>
+           </th>
            <th><input type="text"></input></th>
            <th><input type="text"></input></th>
            <th><input type="text"></input></th>
@@ -124,7 +260,7 @@ var VCFTableFilter = React.createClass({
 var VCFTableBody = React.createClass({
    render: function() {
      var rows = this.props.records.map(function(record) {
-       return <VCFRecord record={record} key={record} />;
+       return <VCFRecord record={record} key={record.__KEY__} />;
      });
      return (
        <tbody>
@@ -138,24 +274,50 @@ var VCFRecord = React.createClass({
    render: function() {
      return (
        <tr>
-         <td>1</td>
-         <td>2</td>
-         <td>3</td>
-         <td>4</td>
-         <td>5</td>
-         <td>6</td>
-         <td>7</td>
-         <td>8</td>
+         <td>{this.props.record.CHROM}</td>
+         <td>{this.props.record.POS}</td>
+         <td>{this.props.record.REF}</td>
+         <td>{this.props.record.ALT}</td>
+         {/*  Now we have attrs */}
+         <td>ATTR1</td>
+         <td>ATTR2</td>
+         <td>ATTR3</td>
+         <td>ATTR4</td>
        </tr>
      );
    }
 });
 
+function main(vcfPath) {
+   var examinePage = React.renderComponent(
+     <ExaminePage charts={data.charts} records={data.records} />,
+     document.getElementsByTagName('body')[0]
+   );
 
-React.renderComponent(
-  <ExaminePage charts={data.charts} records={data.records} />,
-  document.getElementById('content')
-);
+   console.log('LOADING VCF...')
+   d3.xhr('/vcf' + vcfPath, function(err, response) {
+     console.log('LOADED VCF!')
+
+     var records = vcf().data(response.responseText).data();
+     records = records.map(function(record) {
+       for (var field in record.INFO) {
+         record[field] = record.INFO[field];
+       }
+       return record;
+     });
+
+     data.records = records;
+     window.records = data.records;
+
+     var start = new Date();
+     examinePage.setProps(data);
+     console.log("React rendered " + data.records.length + " records in: ", new Date() - start);
+   });
+}
+
+main(VCF_PATH);
+
 
 </script>
+{% endraw %}
 {% endblock%}

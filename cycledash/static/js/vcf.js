@@ -277,6 +277,8 @@ function Record(line, header) {
   if (record.INFO)    record.INFO = parseInfo(record.INFO, header);
   if (record.FORMAT)  record.FORMAT = parseFormat(record.FORMAT, header);
 
+  record.__KEY__ = 'chr' + record.CHROM + ':' + record.POS; // TODO(ihodes): recommit this to VCF.js
+
   _.each(header.sampleNames, function(sampleName) {
     var sample = record[sampleName];
     if (sample) {
