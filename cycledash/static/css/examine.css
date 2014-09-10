@@ -34,7 +34,11 @@
    margin-top: 37px;
  }
  table {
+   border-collapse: collapse;
    margin-top: 37px;
+ }
+ tr.even {
+   background: rgba(248, 249, 250, 0.5);
  }
  th {
    font-size: 21px;
@@ -46,6 +50,7 @@
    padding: 3px 13px;
  }
  td {
+   border: none;
    font-size: 13px;
  }
  thead, tbody, table {

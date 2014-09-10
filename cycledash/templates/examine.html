@@ -205,8 +205,7 @@ var VCFTableHeader = React.createClass({
          <tr>
            <th>Chromosome</th>
            <th>Position</th>
-           <th>Ref</th>
-           <th>Alt</th>
+           <th>REF / ALT</th>
            <th>RD</th>
            <th>VAF</th>
            <th>FA</th>
@@ -250,7 +249,6 @@ var VCFTableFilter = React.createClass({
            <th><input type="text"></input></th>
            <th><input type="text"></input></th>
            <th><input type="text"></input></th>
-           <th><input type="text"></input></th>
          </tr>
        </thead>
      );
@@ -259,8 +257,8 @@ var VCFTableFilter = React.createClass({
 
 var VCFTableBody = React.createClass({
    render: function() {
-     var rows = this.props.records.map(function(record) {
-       return <VCFRecord record={record} key={record.__KEY__} />;
+     var rows = this.props.records.map(function(record, idx) {
+       return <VCFRecord record={record} key={record.__KEY__} even={idx % 2 == 0} />;
      });
      return (
        <tbody>
@@ -273,11 +271,10 @@ var VCFTableBody = React.createClass({
 var VCFRecord = React.createClass({
    render: function() {
      return (
-       <tr>
+       <tr className={this.props.even ? "even" : "odd"}>
          <td>{this.props.record.CHROM}</td>
          <td>{this.props.record.POS}</td>
-         <td>{this.props.record.REF}</td>
-         <td>{this.props.record.ALT}</td>
+         <td>{this.props.record.REF}/{this.props.record.ALT}</td>
          {/*  Now we have attrs */}
          <td>ATTR1</td>
          <td>ATTR2</td>
