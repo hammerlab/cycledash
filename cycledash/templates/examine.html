@@ -30,28 +30,93 @@
 <script type="text/jsx">
 /** @jsx React.DOM */
 
-var data = {
-  charts: ['QSS_NT', 'QSS'],
-  filters: {'RD': '>10'},
-  records: []
-};
-
 var ExaminePage = React.createClass({
-  render: function() {
-    return (
-      <div className="examinePage">
-        <h1>Examining: <small>{VCF_PATH}</small></h1>
-        <AttributeCharts records={this.props.records}
-                         charts={this.props.charts} />
-        <Karyogram />
-        <VCFTable records={this.props.records} />
-      </div>
-    );
-  }
+   getInitialState: function() {
+     return {charts: [],
+             filters: {start: 0,
+                       end: null, // 'null' for end means "the end."
+                       chromosome: "all"}};
+   },
+   getDefaultProps: function() {
+     return {records: [],
+             karyogram: initializeKaryogram(),
+             chromosomes: []};
+   },
+   componentDidMount: function() {
+     d3.xhr('/vcf' + this.props.vcfPath, function(err, response) {
+       var records = vcf().parseChrom(function(chr){ return 'chr' + chr; })
+                          .data(response.responseText).data();
+       window.rec = records;
+       var chromosomes = chromosomesFrom(records);
+       this.setProps({records: records, chromosomes: chromosomes});
+     }.bind(this));
+   },
+   handleRangeChange: function(start, end, chromosome) {
+     this.setState({filters: {start: start, end: end, chromosome: "all"}});
+   },
+   handleRelativeRangeChange: function(start, end) {
+     this.setState({filters: {start: start, end: end,
+                              chromosome: this.state.filters.chromosome}});
+   },
+   handleChromosomeChange: function(chromosome) {
+     var start, end;
+     if (chromosome === 'all') {
+       start = 0;
+       end = null;
+     } else {
+       var chr = chromosome;
+       start = this.props.karyogram.positionFromRelative(chr, 0).absoluteBp;
+       end = this.props.karyogram.positionFromRelative(chr, null).absoluteBp;
+     }
+     console.log("handle chromosome change: ", chromosome);
+     this.setState({filters: {start: start, end: end, chromosome: chromosome}});
+   },
+   render: function() {
+     console.log('Rendering ExaminePage', this.state);
+
+     var filteredRecords = this.props.records.filter(function(record) {
+       var start = this.state.filters['start'],
+           end = this.state.filters['end'];
+
+       try {
+         var pos = this.props.karyogram.positionFromRelative(record.CHROM, record.POS).absoluteBp;
+       } catch (e) {
+         /* console.warn('Ignoring: ', record.__KEY__); */
+         return false;
+       }
+       return pos >= start && (!end || pos <= end);
+     }.bind(this));
+
+     console.log('state: ', this.state);
+
+     return (
+       <div className="examinePage">
+         <h1>Examining: <small>{VCF_PATH}</small></h1>
+         <AttributeCharts records={filteredRecords}
+                          charts={this.state.charts}
+                          filters={this.state.filters} />
+         <Karyogram start={this.state.filters['start']}
+                    end={this.state.filters['end']}
+                    karyogram={this.props.karyogram}
+                    handleRangeChange={this.handleRangeChange} />
+         <VCFTable records={filteredRecords} filters={this.state.filters}
+                   handleChromosomeChange={this.handleChromosomeChange}
+                   handleRelativeRangeChange={this.handleRelativeRangeChange}
+                   chromosomes={this.props.chromosomes}
+                   karyogram={this.props.karyogram} />
+       </div>
+     );
+   }
 });
 
 var AttributeCharts = React.createClass({
   render: function() {
+     var records = this.props.records.map(function(record) {
+       for (var field in record.INFO) {
+         record[field] = record.INFO[field];
+       }
+       return record;
+     });
     var charts = this.props.charts.map(function(chart) {
       return <AttributeChart chart={chart} key={chart}
                              records={this.props.records} />;
@@ -72,15 +137,15 @@ var AttributeChart = React.createClass({
      //
      // e.g. bins = [5, 10, 15, 20], val = 7   =>   0
      // e.g. bins = [0, 10, 20, 30], val = 21  =>   2
-     // e.g. bins = [0, 10, 20, 30], val = 30  =>   2
+     // e.g. bins = [0, 10, 20, 30], val = 31  =>   3
      return _.reduce(bins, function(pos, binMin) {
        if (binMin >= val) return pos;
        else return pos + 1;
      }, 0);
    },
    processRecordsForHistogram: function(records) {
-     var TOTAL_BINS = 10;
-     var attr = this.props.chart,
+     var TOTAL_BINS = 10,
+         attr = this.props.chart,
          binRange = d3.extent(records.map(function(record) { return record.INFO[attr]; })),
          binGap = (binRange[1] - binRange[0]) / TOTAL_BINS,
          bins = _.range(TOTAL_BINS + 1).map(function(idx) {
@@ -93,6 +158,7 @@ var AttributeChart = React.createClass({
            pos = this.binPos(bins, attrVal);
        binned[pos].count += 1;
      }.bind(this));
+
      return binned;
    },
    /* componentDidMount: function() {
@@ -107,14 +173,14 @@ var AttributeChart = React.createClass({
    .call(barChart);
    }, */
    componentWillReceiveProps: function(nextprops) {
-     var datum = this.processRecordsForHistogram(nextprops.records);
+     var datum = this.processRecordsForHistogram(nextprops.records),
+         barChart = d3.chart.bars()
+           .width(400).height(400).margin({top:0, bottom:30, right:0, left: 50})
+           .yLabel('Count')
+           .intraGroupPadding(0.033)
+           .groupBy('bin')
+           .barValue('count');
 
-     var barChart = d3.chart.bars()
-         .width(400).height(400).margin({top:0, bottom:30, right:0, left: 50})
-         .yLabel('Count')
-         .intraGroupPadding(0.033)
-         .groupBy('bin')
-         .barValue('count');
      d3.select(this.refs.chartHolder.getDOMNode())
          .datum(datum)
          .call(barChart);
@@ -132,56 +198,64 @@ var AttributeChart = React.createClass({
 
 var Karyogram = React.createClass({
    componentDidMount: function() {
-     idiogrammatik.__cytoband_url__ = '/static/js/cytoband.tsv'
-     var firstPos = null,
-         selection = {},
-         shifted = false;
-
-     var karyogram = idiogrammatik()
-         .width(1400)
-         .highlightHeight(59)
-         .on('dragstart', function(position, kgram) {
-           if (!position.chromosome || !shifted) return;
-           firstPos = position;
-          })
-         .on('drag', function(position, kgram) {
-           if (!position.chromosome || !shifted) return;
-           if (selection.remove) selection.remove();
-           selection = kgram.highlight(firstPos, position);
-          })
-         .on('dragend', function(position, kgram) {
-           if (!position.chromosome || !shifted) return;
-           if (selection.remove) selection.remove();
-           selection = kgram.highlight(firstPos, position);
-          });
-
-
-     window.onkeydown = function(e) {
-       if (e.shiftKey) {
-         document.getElementsByTagName("body")[0].style.cursor="text";
-         shifted = true;
-         try {
-           karyogram.zoomBehavior().x(null);
-         } catch(err) {}
-       }
-     };
-     window.onkeyup = function(e) {
-       document.getElementsByTagName("body")[0].style.cursor="default";
-       if (shifted && !e.shiftKey) {
-         shifted = false;
-         karyogram.zoomBehavior().x(karyogram.scale());
-       }
-     };
-
-
      idiogrammatik.load(function(err, data) {
        if (err) console.log(err);
+       var firstPos = null,
+           selection = {},
+           shifted = false;
+
+       this.props.karyogram
+        .on('dragstart', function(position, kgram) {
+          if (!position.chromosome || !shifted) return;
+          firstPos = position;
+         })
+        .on('drag', function(position, kgram) {
+          if (!position.chromosome || !shifted) return;
+          kgram.highlights().remove();
+          selection = kgram.highlight(firstPos, position);
+         })
+        .on('dragend', function(position, kgram) {
+          if (!position.chromosome || !shifted) return;
+          kgram.highlights().remove();
+          var start, end;
+          if (firstPos.absoluteBp > position.absoluteBp) {
+            start = position.absoluteBp;
+            end = firstPos.absoluteBp;
+          } else {
+            start = firstPos.absoluteBp;
+            end = position.absoluteBp;
+          }
+          this.props.handleRangeChange(start, end);
+          selection = kgram.highlight(firstPos, position);
+         }.bind(this));
+
+       window.onkeydown = function(e) {
+         if (e.shiftKey) {
+           document.getElementsByTagName("body")[0].style.cursor="text";
+           shifted = true;
+           try {
+             this.props.karyogram.zoomBehavior().x(null);
+           } catch(err) {}
+         }
+       }.bind(this);
+       window.onkeyup = function(e) {
+         document.getElementsByTagName("body")[0].style.cursor="default";
+         if (shifted && !e.shiftKey) {
+           shifted = false;
+           this.props.karyogram.zoomBehavior().x(this.props.karyogram.scale());
+         }
+       }.bind(this);
+
        d3.select(this.getDOMNode())
            .datum(data)
-           .call(karyogram);
+           .call(this.props.karyogram);
+
      }.bind(this));
    },
    render: function() {
+     console.log("PROPS IN KARYO:", this.props);
+     this.props.karyogram.highlights().remove();
+     this.props.karyogram.highlight(this.props.start, this.props.end);
      return <div className="karyogram"></div>;
    }
 });
@@ -191,7 +265,13 @@ var VCFTable = React.createClass({
      return (
        <table>
          <VCFTableHeader />
-         <VCFTableFilter records={this.props.records} />
+         <VCFTableFilter chromosomes={this.props.chromosomes}
+                         records={this.props.records}
+                         handleChromosomeChange={this.props.handleChromosomeChange}
+                         chromosome={this.props.filters.chromosome}
+                         filters={this.props.filters}
+                         handleRelativeRangeChange={this.props.handleRelativeRangeChange}
+                         karyogram={this.props.karyogram}/>
          <VCFTableBody records={this.props.records} />
        </table>
      );
@@ -217,32 +297,67 @@ var VCFTableHeader = React.createClass({
 });
 
 var VCFTableFilter = React.createClass({
-   render: function() {
-     var chromosomes = _.reduce(this.props.records, function(acc, val, key) {
-       var chromosome = val.CHROM;
-       if (acc.mem[chromosome] === undefined) {
-         acc.mem[chromosome] = true;
-         acc.chromosomes.push(chromosome);
+   handleChromosomeChange: function(e) {
+     var chromosome = this.refs.chromosome.getDOMNode().value;
+     this.props.handleChromosomeChange(chromosome);
+   },
+   handleRelativeRangeChange: function(e) {
+     var start = this.refs.startPos.getDOMNode().value,
+         end = this.refs.endPos.getDOMNode().value,
+         chromosome = this.props.filters.chromosome;
+     console.log(this.props);
+     if (start.length === 0 || Number(start) === NaN || Number(end) === NaN) {
+       return;
+     } else {
+       start = Number(start);
+       end.length > 0 && Number(end) != NaN ? end = Number(end) : end = null;
+     }
+
+     if (chromosome != 'all') {
+       console.log(chromosome, start);
+       var position = this.props.karyogram.positionFromRelative(chromosome, start);
+       start = position.absoluteBp;
+       if (end != null) {
+         end = this.props.karyogram.positionFromRelative(chromosome, end).absoluteBp;
+       } else {
+         end = position.chromosome.end;
        }
-       return acc;
-     }, {chromosomes: [], mem: {}}).chromosomes,
-         chromosomeOptions = chromosomes.map(function(chromosome) {
+     }
+     this.props.handleRelativeRangeChange(start, end);
+   },
+   render: function() {
+     var chromosomeOptions = this.props.chromosomes.map(function(chromosome) {
        return (
          <option name="chromosome" key={chromosome} value={chromosome}>{chromosome}</option>
        );
-     });
+     }.bind(this));
+     var start, end,
+         kgram = this.props.karyogram;
+     if (this.props.filters.chromosome != 'all') {
+       start = kgram.positionFromAbsoluteBp(this.props.filters.start).relativeBp;
+       end = kgram.positionFromAbsoluteBp(this.props.filters.end).relativeBp;
+     } else {
+       start = this.props.filters.start;
+       end = this.props.filters.end;
+     }
      return (
        <thead>
          <tr>
            <th>
-             <select>
+             <select onChange={this.handleChromosomeChange}
+                     ref="chromosome" value={this.props.chromosome}>
                <option name="chromosome" key="all" value="all">&lt;all&gt;</option>
                {chromosomeOptions}
              </select>
            </th>
-           <th id="position">
-             <input name="start" type="text" placeholder="start"></input>
-             <input name="end" type="text" placeholder="end"></input>
+           <th id="position" onChange={this.handleRelativeRangeChange}>
+             <input name="start" type="text" placeholder="start"
+                    ref="startPos" value={start}>
+             </input>
+             <input name="end" type="text" placeholder="end"
+                    ref="endPos" value={end}>
+             {this.props.filters.end}
+             </input>
            </th>
            <th><input type="text"></input></th>
            <th><input type="text"></input></th>
@@ -273,7 +388,7 @@ var VCFRecord = React.createClass({
      return (
        <tr className={this.props.even ? "even" : "odd"}>
          <td>{this.props.record.CHROM}</td>
-         <td>{this.props.record.POS}</td>
+         <td className="pos">{this.props.record.POS}</td>
          <td>{this.props.record.REF}/{this.props.record.ALT}</td>
          {/*  Now we have attrs */}
          <td>ATTR1</td>
@@ -285,34 +400,33 @@ var VCFRecord = React.createClass({
    }
 });
 
-function main(vcfPath) {
-   var examinePage = React.renderComponent(
-     <ExaminePage charts={data.charts} records={data.records} />,
-     document.getElementsByTagName('body')[0]
-   );
-
-   console.log('LOADING VCF...')
-   d3.xhr('/vcf' + vcfPath, function(err, response) {
-     console.log('LOADED VCF!')
-
-     var records = vcf().data(response.responseText).data();
-     records = records.map(function(record) {
-       for (var field in record.INFO) {
-         record[field] = record.INFO[field];
-       }
-       return record;
-     });
-
-     data.records = records;
-     window.records = data.records;
-
-     var start = new Date();
-     examinePage.setProps(data);
-     console.log("React rendered " + data.records.length + " records in: ", new Date() - start);
-   });
+function main() {
+   var examinePage = React.renderComponent(<ExaminePage vcfPath={VCF_PATH} />,
+                                           document.getElementsByTagName('body')[0]);
 }
 
-main(VCF_PATH);
+
+function chromosomesFrom(records) {
+  return _.reduce(records, function(acc, val, key) {
+     var chromosome = val.CHROM;
+     if (acc.mem[chromosome] === undefined) {
+       acc.mem[chromosome] = true;
+       acc.chromosomes.push(chromosome);
+     }
+     return acc;
+   }, {chromosomes: [], mem: {}}).chromosomes;
+}
+
+function initializeKaryogram() {
+  idiogrammatik.__cytoband_url__ = '/static/js/cytoband.tsv'
+  var karyogram = idiogrammatik()
+        .width(1400)
+        .highlightHeight(59);
+
+  return karyogram;
+}
+
+main();
 
 
 </script>

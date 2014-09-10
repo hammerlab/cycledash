@@ -1,81 +1,84 @@
- body {
-   background: #ffffff url("/static/img/subtle-dots.png") repeat right top;
-   font-family: "brandon-grotesque";
- }
- .attrChart h3 {
-   font-size: 28px;
-   margin-left: 17px;
- }
- .karyogram {
-   box-shadow: inset 0 0 20px #F0F0F0;
- }
- input {
-   border: none;
-   padding: 11px;
-   background: #dddddd;
-   color: #1f2f1f;
-   width: 45px;
-   margin-left: 3px;
-   font-size: 13px;
- }
- th#position input {
-   width: 77px;
- }
- select {
-   padding: 13px 11px;
-   width: 77px;
-   height: 31px;
-   border: none;
-   box-shadow: none;
-   background: #dddddd;
-   background-image: none;
- }
- .karyogram {
-   margin-top: 37px;
- }
- table {
-   border-collapse: collapse;
-   margin-top: 37px;
- }
- tr.even {
-   background: rgba(248, 249, 250, 0.5);
- }
- th {
-   font-size: 21px;
- }
- td, th, th input {
- }
- td, th {
-   text-align: center;
-   padding: 3px 13px;
- }
- td {
-   border: none;
-   font-size: 13px;
- }
- thead, tbody, table {
-   width: 100%;
- }
- path {
-   fill:none;
-   stroke: black;
-   stroke-width: 1px;
- }
- .bar rect {
-   fill: #384045;
- }
- text {
-   font-size: 11px;
- }
- .attrChart  {
-   display: inline-block;
-   width: 400px;
-   height: 400px;
-   margin: 13px;
- }
+body {
+    background: #ffffff url("/static/img/subtle-dots.png") repeat right top;
+    font-family: "brandon-grotesque", verdana, helvetica, sans-serif;
+}
+.attrChart h3 {
+    font-size: 28px;
+    margin-left: 17px;
+}
+.karyogram {
+    box-shadow: inset 0 0 20px #F0F0F0;
+}
+input {
+    border: none;
+    padding: 11px;
+    background: #dddddd;
+    color: #1f2f1f;
+    width: 45px;
+    margin-left: 3px;
+    font-size: 13px;
+}
+th#position input {
+    width: 100px;
+}
+select {
+    padding: 13px 11px;
+    width: 77px;
+    height: 31px;
+    border: none;
+    box-shadow: none;
+    background: #dddddd;
+    background-image: none;
+}
+.karyogram {
+    margin-top: 37px;
+}
+table {
+    border-collapse: collapse;
+    margin-top: 37px;
+}
+tr.even {
+    background: rgba(248, 249, 250, 0.5);
+}
+th {
+    font-size: 21px;
+}
+td.pos {
+    font-family: "inconsolata", monospace;
+    text-align: right;
+    padding-right: 145px;
+}
+td, th {
+    text-align: center;
+    padding: 3px 13px;
+}
+td {
+    border: none;
+    font-size: 13px;
+}
+thead, tbody, table {
+    width: 100%;
+}
+path {
+    fill:none;
+    stroke: black;
+    stroke-width: 1px;
+}
+.bar rect {
+    fill: #384045;
+}
+text {
+    font-size: 11px;
+}
+.attrChart  {
+    display: inline-block;
+    width: 400px;
+    height: 400px;
+    margin: 13px;
+}
 
- h1 small {
-   font-size: 17px;
-   margin-left: 17px;
-   color: #B0B0B0;
- }
+h1 small {
+    font-size: 17px;
+    margin-left: 17px;
+    color: #B0B0B0;
+}

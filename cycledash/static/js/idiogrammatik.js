@@ -114,7 +114,8 @@ function _idiogrammatik() {
     if (arguments.length !== 2)
       throw "Must pass arguments `name of chromosome` and `relative bp position`.";
     var chr = chromosomeFromName(data, name);
-    bp = chr.start + bp;
+    if (bp === null) bp = chr.end;
+    else bp = chr.start + bp;
     return positionFromAbsoluteBp(data, bp);
   };
 
@@ -479,6 +480,9 @@ function parseHighlight(data, args) {
     // Then we assume args 1 and 2 are the absolute base pairs
     start = args[0];
     end = args[1];
+    if (!end) {
+      end = data.totalBases;
+    }
     chrStart = chromosomeFromAbsoluteBp(data, start);
     chrEnd = chromosomeFromAbsoluteBp(data, end);
     opts = args[2];
