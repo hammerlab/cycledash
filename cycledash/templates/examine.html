@@ -1,9 +1,7 @@
 {% extends "layouts/layout.html" %}
 {%- from 'macros/nav.html' import nav -%}
 
-{% block bootstrap %}
-<!-- Nothing -->
-{% endblock %}
+{% block bootstrap %}{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/examine.css') }}">
@@ -26,6 +24,7 @@
  var VCF_PATH = "{{ run['vcfPath'] }}";
  var TRUTH_VCF_PATH = "{{ run['truthVcfPath'] }}";
 </script>
+
 {% raw %}
 <script type="text/jsx">
 /** @jsx React.DOM */
@@ -33,7 +32,7 @@
 var ExaminePage = React.createClass({
    getInitialState: function() {
      return {charts: [],
-             filters: [],
+             filters: {},
              position: {start: 0,
                        end: null, // 'null' for end means "the end."
                        chromosome: "all"}};
@@ -47,24 +46,30 @@ var ExaminePage = React.createClass({
    },
    componentDidMount: function() {
      d3.xhr('/vcf' + this.props.vcfPath, function(err, response) {
-       var records = vcf().parseChrom(function(chr){ return 'chr' + chr; })
-                          .data(response.responseText).data();
+       var records = vcf()
+                        .parseChrom(function(chr){ return 'chr' + chr; })
+                        .data(response.responseText)
+                        .data();
        var attrs = _.keys(records[0].INFO);
        var chromosomes = chromosomesFrom(records);
 
        d3.xhr('/vcf' + this.props.truthVcfPath, function(err, response) {
-         var truthRecords = vcf().parseChrom(function(chr){ return 'chr' + chr; })
-                          .data(response.responseText).data();
-         this.setProps({records: records, chromosomes: chromosomes, attrs: attrs, truthRecords: truthRecords});
+         var truthRecords = vcf()
+                              .parseChrom(function(chr){ return 'chr' + chr; })
+                              .data(response.responseText)
+                              .data();
+
+         this.setProps({records: records, chromosomes: chromosomes,
+                        attrs: attrs, truthRecords: truthRecords});
        }.bind(this))
      }.bind(this));
    },
-   handleRangeChange: function(start, end, chromosome) {
+   handleRangeChange: function(start, end) {
      this.setState({position: {start: start, end: end, chromosome: "all"}});
    },
    handleRelativeRangeChange: function(start, end) {
      this.setState({position: {start: start, end: end,
-                              chromosome: this.state.position.chromosome}});
+                               chromosome: this.state.position.chromosome}});
    },
    handleFilterUpdate: function(filters) {
      this.setState({filters: filters});
@@ -160,12 +165,6 @@ var ExaminePage = React.createClass({
 
 var AttributeCharts = React.createClass({
   render: function() {
-     var records = this.props.records.map(function(record) {
-       for (var field in record.INFO) {
-         record[field] = record.INFO[field];
-       }
-       return record;
-     });
     var charts = this.props.charts.map(function(chart) {
       return <AttributeChart chart={chart} key={chart}
                              records={this.props.records} />;
@@ -245,8 +244,7 @@ var AttributeChart = React.createClass({
      return (
        <div className="attrChart">
          <h4>{this.props.chart}</h4>
-         <div ref="chartHolder">
-         </div>
+         <div ref="chartHolder"></div>
        </div>
      );
    }
@@ -287,7 +285,7 @@ var Karyogram = React.createClass({
 
        window.onkeydown = function(e) {
          if (e.shiftKey) {
-           document.getElementsByTagName("body")[0].style.cursor="text";
+           document.getElementsByTagName("body")[0].style.cursor = "text";
            shifted = true;
            try {
              this.props.karyogram.zoomBehavior().x(null);
@@ -295,7 +293,7 @@ var Karyogram = React.createClass({
          }
        }.bind(this);
        window.onkeyup = function(e) {
-         document.getElementsByTagName("body")[0].style.cursor="default";
+         document.getElementsByTagName("body")[0].style.cursor = "default";
          if (shifted && !e.shiftKey) {
            shifted = false;
            this.props.karyogram.zoomBehavior().x(this.props.karyogram.scale());
@@ -305,7 +303,6 @@ var Karyogram = React.createClass({
        d3.select(this.getDOMNode())
            .datum(data)
            .call(this.props.karyogram);
-
      }.bind(this));
    },
    render: function() {
@@ -486,6 +483,7 @@ var TrueFalsePosNeg = React.createClass({
      var precision = truePositives / (truePositives + falsePositives),
          recall = truePositives / this.props.truthRecords.length,
          f1score = 2 * (precision * recall) / (precision + recall);
+
      var fmt = d3.format(','),
          dfmt = d3.format('.4f');
      return (
@@ -526,7 +524,8 @@ var TrueFalsePosNeg = React.createClass({
 
 
 function main() {
-   var examinePage = React.renderComponent(<ExaminePage vcfPath={VCF_PATH} truthVcfPath={TRUTH_VCF_PATH} />,
+   var examinePage = React.renderComponent(<ExaminePage vcfPath={VCF_PATH}
+                                                        truthVcfPath={TRUTH_VCF_PATH} />,
                                            document.getElementsByTagName('body')[0]);
 }
 
