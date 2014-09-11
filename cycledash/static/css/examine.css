@@ -7,6 +7,7 @@ body {
     margin-left: 17px;
 }
 .karyogram {
+    margin-top: 100px;
     box-shadow: inset 0 0 20px #F0F0F0;
 }
 input {
@@ -29,9 +30,6 @@ select {
     box-shadow: none;
     background: #dddddd;
     background-image: none;
-}
-.karyogram {
-    margin-top: 37px;
 }
 table {
     border-collapse: collapse;
@@ -79,12 +77,39 @@ text {
 .attrChart  {
     display: inline-block;
     width: 450px;
-    height: 450px;
+    height: 250px;
     margin: 13px;
 }
-
+.attrChart h4 {
+    font-size: 25px;
+    margin: 0 0 11px 11px;
+}
 h1 small {
     font-size: 17px;
     margin-left: 17px;
     color: #B0B0B0;
+}
+.trueFalsePosNeg {
+    box-shadow: inset 0 0 20px #F0F0F0;
+    width: 250px;
+    height: 100px;
+    position: absolute;
+    top: -23px;
+    right: 13px;
+    margin-bottom: 200px;
+}
+.trueFalsePosNeg tr td:first-child, .trueFalsePosNeg th {
+    font-weight: bold;
+    font-size: 15px;
+}
+.trueFalsePosNeg .na {
+    font-style: italic;
+}
+.trueFalsePosNeg tr:nth-child(3) td {
+    font-weight: bold;
+    font-size: 13px;
+}
+.trueFalsePosNeg tr:last-child td {
+    font-weight: 500;
+    font-size: 13px;
 }

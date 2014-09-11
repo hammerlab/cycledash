@@ -40,6 +40,7 @@ var ExaminePage = React.createClass({
    },
    getDefaultProps: function() {
      return {records: [],
+             truthRecords: [],
              karyogram: initializeKaryogram(),
              chromosomes: [],
              attrs: []};
@@ -50,7 +51,12 @@ var ExaminePage = React.createClass({
                           .data(response.responseText).data();
        var attrs = _.keys(records[0].INFO);
        var chromosomes = chromosomesFrom(records);
-       this.setProps({records: records, chromosomes: chromosomes, attrs: attrs});
+
+       d3.xhr('/vcf' + this.props.truthVcfPath, function(err, response) {
+         var truthRecords = vcf().parseChrom(function(chr){ return 'chr' + chr; })
+                          .data(response.responseText).data();
+         this.setProps({records: records, chromosomes: chromosomes, attrs: attrs, truthRecords: truthRecords});
+       }.bind(this))
      }.bind(this));
    },
    handleRangeChange: function(start, end, chromosome) {
@@ -121,16 +127,18 @@ var ExaminePage = React.createClass({
        }
      }, true);
    },
-   filterRecords: function() {
-     return this.props.records.filter(function(record) {
-       return this.recordWithinRange(record) && this.recordPassesInfoFilters(record);
+   filterRecords: function(records, skipFilters) {
+     return records.filter(function(record) {
+       return this.recordWithinRange(record) && (skipFilters || this.recordPassesInfoFilters(record));
      }.bind(this));
    },
    render: function() {
-     var filteredRecords = this.filterRecords();
+     var filteredRecords = this.filterRecords(this.props.records);
+     var filteredTruthRecords = this.filterRecords(this.props.truthRecords, true);
      return (
        <div className="examinePage">
          <h1>Examining: <small>{VCF_PATH}</small></h1>
+         <TrueFalsePosNeg records={filteredRecords} truthRecords={filteredTruthRecords} />
          <AttributeCharts records={filteredRecords}
                           charts={this.state.charts} />
          <Karyogram start={this.state.position['start']}
@@ -206,7 +214,7 @@ var AttributeChart = React.createClass({
      var datum = this.processRecordsForHistogram(this.props.records),
          barChart = d3.chart.bars()
            .xTickFormatter(d3.format('.1f'))
-           .width(450).height(450).margin({top:0, bottom:30, right:0, left: 50})
+           .width(450).height(250).margin({top:0, bottom:30, right:0, left: 50})
            .yLabel('Count')
            .intraGroupPadding(0.033)
            .groupBy('bin')
@@ -223,7 +231,7 @@ var AttributeChart = React.createClass({
      var datum = this.processRecordsForHistogram(nextprops.records),
          barChart = d3.chart.bars()
            .xTickFormatter(d3.format('.1f'))
-           .width(450).height(450).margin({top:0, bottom:30, right:0, left: 50})
+           .width(450).height(250).margin({top:0, bottom:30, right:0, left: 50})
            .yLabel('Count')
            .intraGroupPadding(0.033)
            .groupBy('bin')
@@ -236,7 +244,7 @@ var AttributeChart = React.createClass({
    render: function() {
      return (
        <div className="attrChart">
-         <h3>{this.props.chart}</h3>
+         <h4>{this.props.chart}</h4>
          <div ref="chartHolder">
          </div>
        </div>
@@ -463,16 +471,62 @@ var VCFRecord = React.createClass({
          <td>{this.props.record.CHROM}</td>
          <td className="pos">{this.props.record.POS}</td>
          <td>{this.props.record.REF}/{this.props.record.ALT}</td>
-         {/*  Now we have attrs */}
          {attrs}
        </tr>
      );
    }
 });
 
+var TrueFalsePosNeg = React.createClass({
+   render: function() {
+     var truePositives = vcf.tools.truePositives(this.props.truthRecords, this.props.records).length,
+         falsePositives = vcf.tools.falsePositives(this.props.truthRecords, this.props.records).length,
+         falseNegatives = vcf.tools.falseNegatives(this.props.truthRecords, this.props.records).length;
+
+     var precision = truePositives / (truePositives + falsePositives),
+         recall = truePositives / this.props.truthRecords.length,
+         f1score = 2 * (precision * recall) / (precision + recall);
+     var fmt = d3.format(','),
+         dfmt = d3.format('.4f');
+     return (
+       <table className="trueFalsePosNeg">
+         <thead>
+           <tr>
+             <th></th>
+             <th>True</th>
+             <th>False</th>
+           </tr>
+         </thead>
+         <tbody>
+           <tr id="positive">
+             <td>Postive</td>
+             <td>{fmt(truePositives)}</td>
+             <td>{fmt(falsePositives)}</td>
+           </tr>
+           <tr id="negative">
+             <td>Negative</td>
+             <td className="na">N/A</td>
+             <td>{fmt(falseNegatives)}</td>
+           </tr>
+           <tr>
+             <td>Precision</td>
+             <td>Recall</td>
+             <td>f1score</td>
+           </tr>
+           <tr>
+             <td>{dfmt(precision) || "N/A"}</td>
+             <td>{dfmt(recall) || "N/A"}</td>
+             <td>{dfmt(f1score) || "N/A"}</td>
+           </tr>
+         </tbody>
+       </table>
+     );
+   }
+});
+
 
 function main() {
-   var examinePage = React.renderComponent(<ExaminePage vcfPath={VCF_PATH} />,
+   var examinePage = React.renderComponent(<ExaminePage vcfPath={VCF_PATH} truthVcfPath={TRUTH_VCF_PATH} />,
                                            document.getElementsByTagName('body')[0]);
 }
 
