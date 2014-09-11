@@ -43,6 +43,12 @@ tr.even {
 th {
     font-size: 21px;
 }
+th.attr {
+    cursor: pointer;
+}
+th.attr:hover {
+    font-weight: bold;
+}
 td.pos {
     font-family: "inconsolata", monospace;
     text-align: right;
@@ -72,8 +78,8 @@ text {
 }
 .attrChart  {
     display: inline-block;
-    width: 400px;
-    height: 400px;
+    width: 450px;
+    height: 450px;
     margin: 13px;
 }
 

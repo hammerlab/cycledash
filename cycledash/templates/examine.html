@@ -63,6 +63,9 @@ var ExaminePage = React.createClass({
    handleFilterUpdate: function(filters) {
      this.setState({filters: filters});
    },
+   handleChartChange: function(chart) {
+     this.setState({charts: this.togglePresence(this.state.charts, chart)});
+   },
    handleChromosomeChange: function(chromosome) {
      var start, end;
      if (chromosome === 'all') {
@@ -74,6 +77,15 @@ var ExaminePage = React.createClass({
        end = this.props.karyogram.positionFromRelative(chr, null).absoluteBp;
      }
      this.setState({position: {start: start, end: end, chromosome: chromosome}});
+   },
+   togglePresence: function(list, el) {
+     var idx;
+     if ((idx = list.indexOf(el)) > -1) {
+       list.splice(idx, 1);
+     } else {
+       list.push(el);
+     }
+     return list;
    },
    recordWithinRange: function(record) {
      var start = this.state.position['start'],
@@ -120,14 +132,14 @@ var ExaminePage = React.createClass({
        <div className="examinePage">
          <h1>Examining: <small>{VCF_PATH}</small></h1>
          <AttributeCharts records={filteredRecords}
-                          charts={this.state.charts}
-                          position={this.state.position} />
+                          charts={this.state.charts} />
          <Karyogram start={this.state.position['start']}
                     end={this.state.position['end']}
                     karyogram={this.props.karyogram}
                     handleRangeChange={this.handleRangeChange} />
          <VCFTable records={filteredRecords} position={this.state.position}
                    attrs={this.props.attrs}
+                   handleChartChange={this.handleChartChange}
                    handleFilterUpdate={this.handleFilterUpdate}
                    handleChromosomeChange={this.handleChromosomeChange}
                    handleRelativeRangeChange={this.handleRelativeRangeChange}
@@ -178,7 +190,7 @@ var AttributeChart = React.createClass({
          binRange = d3.extent(records.map(function(record) { return record.INFO[attr]; })),
          binGap = (binRange[1] - binRange[0]) / TOTAL_BINS,
          bins = _.range(TOTAL_BINS + 1).map(function(idx) {
-           return Math.ceil(binRange[0] + (binGap * idx));
+           return binRange[0] + (binGap * idx);
          }),
          binned = bins.map(function(bin){ return {bin: bin, count: 0}; });
 
@@ -190,10 +202,28 @@ var AttributeChart = React.createClass({
 
      return binned;
    },
+   componentDidMount: function() {
+     var datum = this.processRecordsForHistogram(this.props.records),
+         barChart = d3.chart.bars()
+           .xTickFormatter(d3.format('.1f'))
+           .width(450).height(450).margin({top:0, bottom:30, right:0, left: 50})
+           .yLabel('Count')
+           .intraGroupPadding(0.033)
+           .groupBy('bin')
+           .barValue('count');
+
+     d3.select(this.refs.chartHolder.getDOMNode())
+         .datum(datum)
+         .call(barChart);
+   },
    componentWillReceiveProps: function(nextprops) {
+     d3.select(this.refs.chartHolder.getDOMNode()).select('svg')
+       .remove();
+
      var datum = this.processRecordsForHistogram(nextprops.records),
          barChart = d3.chart.bars()
-           .width(400).height(400).margin({top:0, bottom:30, right:0, left: 50})
+           .xTickFormatter(d3.format('.1f'))
+           .width(450).height(450).margin({top:0, bottom:30, right:0, left: 50})
            .yLabel('Count')
            .intraGroupPadding(0.033)
            .groupBy('bin')
@@ -281,7 +311,8 @@ var VCFTable = React.createClass({
    render: function() {
      return (
        <table>
-         <VCFTableHeader attrs={this.props.attrs} />
+         <VCFTableHeader attrs={this.props.attrs}
+                         handleChartChange={this.props.handleChartChange} />
          <VCFTableFilter chromosomes={this.props.chromosomes}
                          records={this.props.records}
                          handleFilterUpdate={this.props.handleFilterUpdate}
@@ -298,9 +329,12 @@ var VCFTable = React.createClass({
 });
 
 var VCFTableHeader = React.createClass({
+   handleChartToggle: function(e) {
+     this.props.handleChartChange(e.target.textContent);
+   },
    render: function() {
      var attrs = this.props.attrs.map(function(attr) {
-       return <th key={attr}>{attr}</th>;
+       return <th className="attr" key={attr} onClick={this.handleChartToggle}>{attr}</th>;
      }.bind(this));
      return (
        <thead>
