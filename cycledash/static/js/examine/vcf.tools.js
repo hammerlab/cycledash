@@ -186,8 +186,7 @@ function difference(a, b) {
   return result;
 }
 
-window.vcf = window.vcf || {};
-window.vcf.tools = {
+var _tools = {
   recordKey: recordKey,
   recordComparitor: recordComparitor,
   recordsIn: recordsIn,
@@ -202,4 +201,18 @@ window.vcf.tools = {
 };
 
 
-})();
+// Export tools for either node-type requires or for browers.
+if (typeof exports !== 'undefined') {
+  if (typeof module !== 'undefined' && module.exports) {
+    exports = module.exports = function(obj) {
+      obj.tools = _tools;
+    };
+  }
+  exports = function(obj) {
+    obj.tools = _tools;
+  };
+} else {
+  this.vcfTools = _tools;
+}
+
+}.call(this));

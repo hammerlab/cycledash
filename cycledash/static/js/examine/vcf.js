@@ -504,12 +504,15 @@ function vcf() {
   return vcf_;
 }
 
-if (typeof define === "function" && define.amd) {
-  define(vcf);
-} else if (typeof module === "object" && module.exports) {
-  module.exports = vcf;
+
+// Export vcf for either node-type requires or for browers.
+if (typeof exports !== 'undefined') {
+  if (typeof module !== 'undefined' && module.exports) {
+    exports = module.exports = vcf;
+  }
+  exports = vcf;
 } else {
-  window.vcf = vcf;
+  this.vcf = vcf;
 }
 
-})();
+}.call(this));

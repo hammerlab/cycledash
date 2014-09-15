@@ -1,5 +1,16 @@
-(function(exports) {
+(function() {
 "use strict";
+
+// Check for the existence (or require) d3.js, which is required for
+// idiogrammatik.
+if (typeof d3 === 'undefined') {
+  if (typeof require === 'function') {
+    d3 = require('d3');
+  } else {
+    throw "d3.js must be included before idiogrammatik.js.";
+  }
+}
+
 
 // Data from GRCh38 [cytobands.tsv]
 // c.f. http://bioviz.org/quickload//H_sapiens_Dec_2013/
@@ -21,6 +32,9 @@ var INCLUDED_CHROMOSOME_NAMES = ["chr1", "chr2", "chr3", "chr4", "chr5", "chr6",
     MARGIN = {top: 50, bottom: 20, left: 20, right: 20};
 
 
+// This is the primary export of this file. Calling this function returns an
+// instance of an idiogram, which can be configured and then called on a d3
+// selection.
 function _idiogrammatik() {
   var width = WIDTH,
       height = HEIGHT,
@@ -391,6 +405,9 @@ function appendChromosomes(svg, data, bandStainer, idiogramHeight) {
 }
 
 
+// This appends, to the chromosomes (a d3 selection) clipping rectangles in
+// order to display the start and and of p and q arms (and, as such, delineate
+// chromosomes from one another as well).
 function appendArmClips(chromosomes, idiogramHeight) {
   chromosomes
     .append('g')
@@ -417,6 +434,7 @@ function appendArmClips(chromosomes, idiogramHeight) {
 }
 
 
+// This appends an invisible rectangle to the svg, which will listen for events.
 function appendListenerBox(svg, width, height, margin) {
   return svg.append('rect')
     .attr('id', 'listener')
@@ -426,6 +444,7 @@ function appendListenerBox(svg, width, height, margin) {
     .attr('y', -margin.top)
     .attr('opacity', 0);
 }
+
 
 function renderHighlights(svg, data, highlights, xscale, idiogramHeight, highlightHeight) {
   var highlight = svg.selectAll('.highlight')
@@ -455,6 +474,7 @@ function renderHighlights(svg, data, highlights, xscale, idiogramHeight, highlig
     return d.chrStart + ':' + d.start + '-' + d.chrEnd + ':' + d.end;
   }
 }
+
 
 function parseHighlight(data, args) {
   // Parses a highlight object from an argument array.
@@ -632,25 +652,22 @@ function parseCytoRow(row) {
 
 
 function _init(callback) {
-  if (exports.idiogrammatik.__data__)
+  if (_idiogrammatik.__data__)
     callback(null, window.idiogrammatik.__data__);
   else
-    d3.tsv(exports.idiogrammatik.__cytoband_url__,
-           parseCytoRow,
-           function(err, data) {
-             if (err) {
-               callback(err);
-             } else {
-               exports.idiogrammatik.__data__ = cytobandsToChromosomes(data);
-               callback(null, window.idiogrammatik.__data__);
-             }
-           });
+    d3.tsv(_idiogrammatik.__cytoband_url__, parseCytoRow, function(err, data) {
+      if (err) {
+        callback(err);
+      } else {
+        _idiogrammatik.__data__ = cytobandsToChromosomes(data);
+        callback(null, _idiogrammatik.__data__);
+      }
+    });
 }
 
 
-exports.idiogrammatik = _idiogrammatik;
-exports.idiogrammatik.__cytoband_url__ = CYTOBAND_TSV_URL;
-exports.idiogrammatik.load = _init;
+_idiogrammatik.__cytoband_url__ = CYTOBAND_TSV_URL;
+_idiogrammatik.load = _init;
 
 
 // Example usage:
@@ -661,7 +678,17 @@ exports.idiogrammatik.load = _init;
 //           .call(idiogramatik());
 //      });
 //
-// See more in `test.html`.
+// See more in `test.html` & the README.md/DOCUMENTATION.md files.
 
 
-})(this);
+// Export idiogrammatik for either node-type requires or for browers.
+if (typeof exports !== 'undefined') {
+  if (typeof module !== 'undefined' && module.exports) {
+    exports = module.exports = _idiogrammatik;
+  }
+  exports = _idiogrammatik;
+} else {
+  this.idiogrammatik = _idiogrammatik;
+}
+
+}.call(this));

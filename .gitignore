@@ -7,3 +7,5 @@ config.pyc
 *.log
 *.db
 node_modules
+bundled.js
+.*
