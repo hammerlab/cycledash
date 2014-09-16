@@ -21,7 +21,7 @@ var ExaminePage = React.createClass({
      return {chartAttributes: [],
              filters: {},
              position: {start: 0,
-                        end: null, // 'null' for end means "the end."
+                        end: null,  // 'null' for end means "the end."
                         chromosome: "all"}};
    },
    getDefaultProps: function() {
@@ -86,8 +86,8 @@ var ExaminePage = React.createClass({
      return list;
    },
    recordWithinRange: function(record) {
-     var start = this.state.position['start'],
-         end = this.state.position['end'];
+     var start = this.state.position.start,
+         end = this.state.position.end;
 
      try {
        var pos = this.props.karyogram.positionFromRelative(record.CHROM, record.POS).absoluteBp;
@@ -99,17 +99,17 @@ var ExaminePage = React.createClass({
    },
    recordPassesInfoFilters: function(record) {
      return _.reduce(this.state.filters, function(passes, filterVal, filterName) {
-       if (!passes) return false; // If one fails, they all fail.
+       if (!passes) return false;  // If one fails, they all fail.
        if (filterVal.length === 0) return true;
 
-       if (_.contains(['<', '>'], filterVal[0])) { // then do a numeric test
+       if (_.contains(['<', '>'], filterVal[0])) {  // then do a numeric test
          var val = Number(record.INFO[filterName]);
          if (filterVal[0] === '>') {
            return val > Number(filterVal.slice(1));
          } else {
            return val < Number(filterVal.slice(1));
          }
-       } else { // treat it like a regexp, then...
+       } else {  // treat it like a regexp, then...
          var re = new RegExp(filterVal);
          if (filterName === 'refAlt') {
            return re.test(record.REF + "/" + record.ALT);
@@ -127,10 +127,9 @@ var ExaminePage = React.createClass({
    render: function() {
      var filteredRecords = this.filterRecords(this.props.records);
      var filteredTruthRecords = this.filterRecords(this.props.truthRecords, true);
-    window.recs = this.props.records;
      return (
        <div className="examinePage">
-         <h1>Examining: <small>{VCF_PATH}</small></h1>
+         <h1>Examining: <small>{this.props.vcfPath}</small></h1>
          <Widgets.PrecisionRecallTable records={filteredRecords} truthRecords={filteredTruthRecords} />
          <AttributeCharts records={filteredRecords}
                           chartAttributes={this.state.chartAttributes} />
@@ -175,9 +174,9 @@ function initializeKaryogram() {
 
 
 function main() {
-   var examinePage = React.renderComponent(<ExaminePage vcfPath={VCF_PATH}
-                                                        truthVcfPath={TRUTH_VCF_PATH} />,
-                                           document.getElementsByTagName('body')[0]);
+   React.renderComponent(<ExaminePage vcfPath={VCF_PATH}
+                         truthVcfPath={TRUTH_VCF_PATH} />,
+                         document.getElementsByTagName('body')[0]);
 }
 
 

@@ -4,6 +4,15 @@ var _ = require('underscore'),
     React = require('react');
 
 
+var PositionType = React.PropTypes.shape({
+  start: React.PropTypes.number.isRequired,
+  end: React.PropTypes.oneOfType([
+    React.PropTypes.number,
+    React.PropTypes.instanceOf(null)
+  ]),
+  chromosome: React.PropTypes.string.isRequired
+}).isRequired;
+
 var VCFTable = React.createClass({
    propTypes: {
      // Array of attribute names from the INFO field of the VCF's records
@@ -219,15 +228,6 @@ var VCFRecord = React.createClass({
      );
    }
 });
-
-var PositionType = React.PropTypes.shape({
-  start: React.PropTypes.number.isRequired,
-  end: React.PropTypes.oneOfType([
-    React.PropTypes.number,
-    React.PropTypes.instanceOf(null)
-  ]),
-  chromosome: React.PropTypes.string.isRequired
-}).isRequired;
 
 
 module.exports = VCFTable;
