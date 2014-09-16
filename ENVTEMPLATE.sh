@@ -4,3 +4,5 @@ export CELERY_BACKEND='db+sqlite:///celery.db'
 export CELERY_BROKER='amqp://localhost'
 export WEBHDFS_USER=username
 export WEBHDFS_URL=http://example.com:5000
+# Optional:
+# export TYPEKIT_URL="//use.typekit.net/SOMETHING.js"

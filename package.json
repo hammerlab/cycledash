@@ -8,5 +8,10 @@
     "react": "^0.11.1",
     "underscore": "^1.7.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "browserify": "^5.11.1",
+    "react-tools": "^0.11.1",
+    "reactify": "^0.14.0",
+    "watchify": "^1.0.2"
+  }
 }
