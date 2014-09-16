@@ -13,10 +13,10 @@ require('./vcf.tools')(vcf);
 var Karyogram = React.createClass({
    componentDidMount: function() {
      idiogrammatik.load(function(err, data) {
-       if (err) console.error(err);
+       if (err) throw err;
        var firstPos = null,
-           selection = {},
-           shifted = false;
+           selection = {}, // the current highlight/selected range
+           shifted = false; // if the shift key is down
 
        this.props.karyogram
         .on('dragstart', function(position, kgram) {
@@ -32,13 +32,8 @@ var Karyogram = React.createClass({
           if (!position.chromosome || !shifted) return;
           kgram.highlights().remove();
           var start, end;
-          if (firstPos.absoluteBp > position.absoluteBp) {
-            start = position.absoluteBp;
-            end = firstPos.absoluteBp;
-          } else {
-            start = firstPos.absoluteBp;
-            end = position.absoluteBp;
-          }
+          start = Math.min(position.absoluteBp, firstPos.absoluteBp);
+          end = Math.max(position.absoluteBp, firstPos.absoluteBp);
           this.props.handleRangeChange(start, end);
           selection = kgram.highlight(firstPos, position);
          }.bind(this));
@@ -48,6 +43,7 @@ var Karyogram = React.createClass({
            document.getElementsByTagName("body")[0].style.cursor = "text";
            shifted = true;
            try {
+             // This disables pan/zoom by unsetting the x domain.
              this.props.karyogram.zoomBehavior().x(null);
            } catch(err) {
             // We catch here, because setting the x attr above throws, though
@@ -76,7 +72,7 @@ var Karyogram = React.createClass({
 });
 
 
-var TrueFalsePosNeg = React.createClass({
+var PrecisionRecallTable = React.createClass({
    render: function() {
      var truePositives = vcf.tools.truePositives(this.props.truthRecords, this.props.records).length,
          falsePositives = vcf.tools.falsePositives(this.props.truthRecords, this.props.records).length,
@@ -89,7 +85,7 @@ var TrueFalsePosNeg = React.createClass({
      var fmt = d3.format(','),
          dfmt = d3.format('.4f');
      return (
-       <table className="trueFalsePosNeg">
+       <table className="precision-recall-table">
          <thead>
            <tr>
              <th></th>
@@ -105,7 +101,7 @@ var TrueFalsePosNeg = React.createClass({
            </tr>
            <tr id="negative">
              <td>Negative</td>
-             <td className="na">N/A</td>
+             <td className="na">-</td>
              <td>{fmt(falseNegatives)}</td>
            </tr>
            <tr>
@@ -114,9 +110,9 @@ var TrueFalsePosNeg = React.createClass({
              <td>f1score</td>
            </tr>
            <tr>
-             <td>{dfmt(precision) || "N/A"}</td>
-             <td>{dfmt(recall) || "N/A"}</td>
-             <td>{dfmt(f1score) || "N/A"}</td>
+             <td>{dfmt(precision) || "-"}</td>
+             <td>{dfmt(recall) || "-"}</td>
+             <td>{dfmt(f1score) || "-"}</td>
            </tr>
          </tbody>
        </table>
@@ -126,4 +122,4 @@ var TrueFalsePosNeg = React.createClass({
 
 
 module.exports.Karyogram = Karyogram;
-module.exports.TrueFalsePosNeg = TrueFalsePosNeg;
+module.exports.PrecisionRecallTable = PrecisionRecallTable;

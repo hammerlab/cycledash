@@ -1,15 +1,21 @@
+/* ExaminePage */
+h1 small {
+    font-size: 17px;
+    margin-left: 17px;
+    color: #B0B0B0;
+}
 body {
     background: #ffffff url("/static/img/subtle-dots.png") repeat right top;
     font-family: "brandon-grotesque", verdana, helvetica, sans-serif;
 }
-.attrChart h3 {
-    font-size: 28px;
-    margin-left: 17px;
-}
+
+/* Karyogram */
 .karyogram {
     margin-top: 100px;
     box-shadow: inset 0 0 20px #F0F0F0;
 }
+
+/* VCFTable */
 input {
     border: none;
     padding: 11px;
@@ -27,15 +33,13 @@ select {
     width: 77px;
     height: 31px;
     border: none;
-    box-shadow: none;
     background: #dddddd;
-    background-image: none;
 }
 table {
     border-collapse: collapse;
     margin-top: 37px;
 }
-tr.even {
+tr:nth-child(odd) {
     background: rgba(248, 249, 250, 0.5);
 }
 th {
@@ -49,8 +53,6 @@ th.attr:hover {
 }
 td.pos {
     font-family: "inconsolata", monospace;
-    text-align: right;
-    padding-right: 145px;
 }
 td, th {
     text-align: center;
@@ -63,6 +65,12 @@ td {
 thead, tbody, table {
     width: 100%;
 }
+
+/* AttributeCharts */
+.attr-chart h3 {
+    font-size: 28px;
+    margin-left: 17px;
+}
 path {
     fill:none;
     stroke: black;
@@ -74,22 +82,19 @@ path {
 text {
     font-size: 11px;
 }
-.attrChart  {
+.attr-chart  {
     display: inline-block;
     width: 450px;
     height: 250px;
     margin: 13px;
 }
-.attrChart h4 {
+.attr-chart h4 {
     font-size: 25px;
     margin: 0 0 11px 11px;
 }
-h1 small {
-    font-size: 17px;
-    margin-left: 17px;
-    color: #B0B0B0;
-}
-.trueFalsePosNeg {
+
+/* PrecisionRecallTable */
+.precision-recall-table {
     box-shadow: inset 0 0 20px #F0F0F0;
     width: 250px;
     height: 100px;
@@ -98,18 +103,18 @@ h1 small {
     right: 13px;
     margin-bottom: 200px;
 }
-.trueFalsePosNeg tr td:first-child, .trueFalsePosNeg th {
+.precision-recall-table tr td:first-child, .trueFalsePosNeg th {
     font-weight: bold;
     font-size: 15px;
 }
-.trueFalsePosNeg .na {
+.precision-recall-table .na {
     font-style: italic;
 }
-.trueFalsePosNeg tr:nth-child(3) td {
+.precision-recall-table tr:nth-child(3) td {
     font-weight: bold;
     font-size: 13px;
 }
-.trueFalsePosNeg tr:last-child td {
+.precision-recall-table tr:last-child td {
     font-weight: 500;
     font-size: 13px;
 }

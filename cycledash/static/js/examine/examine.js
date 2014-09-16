@@ -11,14 +11,18 @@ var _ = require('underscore'),
     Widgets = require('./Widgets');
 
 
-
 var ExaminePage = React.createClass({
+   // Render the root element of the examine page.
+   propTypes: {
+     vcfPath: React.PropTypes.string.isRequired,
+     truthVcfPath: React.PropTypes.string.isRequired
+   },
    getInitialState: function() {
-     return {charts: [],
+     return {chartAttributes: [],
              filters: {},
              position: {start: 0,
-                       end: null, // 'null' for end means "the end."
-                       chromosome: "all"}};
+                        end: null, // 'null' for end means "the end."
+                        chromosome: "all"}};
    },
    getDefaultProps: function() {
      return {records: [],
@@ -57,8 +61,8 @@ var ExaminePage = React.createClass({
    handleFilterUpdate: function(filters) {
      this.setState({filters: filters});
    },
-   handleChartChange: function(chart) {
-     this.setState({charts: this.togglePresence(this.state.charts, chart)});
+   handleChartChange: function(chartAttribute) {
+     this.setState({charts: this.togglePresence(this.state.chartAttributes, chartAttribute)});
    },
    handleChromosomeChange: function(chromosome) {
      var start, end;
@@ -127,9 +131,9 @@ var ExaminePage = React.createClass({
      return (
        <div className="examinePage">
          <h1>Examining: <small>{VCF_PATH}</small></h1>
-         <Widgets.TrueFalsePosNeg records={filteredRecords} truthRecords={filteredTruthRecords} />
+         <Widgets.PrecisionRecallTable records={filteredRecords} truthRecords={filteredTruthRecords} />
          <AttributeCharts records={filteredRecords}
-                          charts={this.state.charts} />
+                          chartAttributes={this.state.chartAttributes} />
          <Widgets.Karyogram start={this.state.position.start}
                     end={this.state.position.end}
                     karyogram={this.props.karyogram}

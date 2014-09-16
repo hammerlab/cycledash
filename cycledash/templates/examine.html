@@ -5,14 +5,17 @@
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/examine.css') }}">
-<script type="text/javascript" src="//use.typekit.net/vml3kel.js"></script>
+{% if typekit_url %}
+<script type="text/javascript" src={{typekit_url}}></script>
 <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+{% endif %}
 {% endblock %}
 
 {% block body %}
 <script>
- var VCF_PATH = "{{ run['vcfPath'] }}";
- var TRUTH_VCF_PATH = "{{ run['truthVcfPath'] }}";
+ var VCF_PATH = {{ run['vcfPath'] | tojson }};
+ var TRUTH_VCF_PATH = {{ run['truthVcfPath'] | tojson }};
+ {{something}}
 </script>
 <script type="text/javascript" src="/static/js/examine/bundled.js"></script>
 {% endblock%}

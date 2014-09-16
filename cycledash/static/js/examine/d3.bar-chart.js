@@ -1,4 +1,3 @@
-(function(){
 "use strict";
 
 // Check for the existence (or require) d3.js, which is required.
@@ -458,21 +457,4 @@ function d3_bars() {
   return chart;
 }
 
-// Export bar-chart for either node-type requires or for typical browers.
-if (typeof exports !== 'undefined') {
-  if (typeof module !== 'undefined' && module.exports) {
-    exports = module.exports = function(d3) {
-      d3.charts ? null : d3.charts = {};
-      d3.charts.bars = d3_bars;
-    };
-  }
-  exports = function(d3) {
-    d3.charts ? null : d3.charts = {};
-    d3.charts.bars = d3_bars;
-  }
-} else {
-  this.d3.chart ? null : this.d3.chart = {};
-  this.d3.chart.bars = d3_bars;
-}
-
-}.call(this));
+module.exports = d3_bars;
