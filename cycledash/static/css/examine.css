@@ -110,7 +110,7 @@ text {
 .precision-recall-table .na {
     font-style: italic;
 }
-.precision-recall-table tr:nth-child(3) td {
+.precision-recall-table tr.prec-rec-f1 td {
     font-weight: bold;
     font-size: 13px;
 }

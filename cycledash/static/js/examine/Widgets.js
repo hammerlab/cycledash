@@ -102,7 +102,7 @@ var PrecisionRecallTable = React.createClass({
              <td className="na">-</td>
              <td>{fmt(falseNegatives)}</td>
            </tr>
-           <tr>
+           <tr className="prec-rec-f1">
              <td>Precision</td>
              <td>Recall</td>
              <td>f1score</td>
