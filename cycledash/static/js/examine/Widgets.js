@@ -9,14 +9,13 @@ var _ = require('underscore'),
 require('./vcf.tools')(vcf);
 
 
-
 var Karyogram = React.createClass({
    componentDidMount: function() {
      idiogrammatik.load(function(err, data) {
        if (err) throw err;
        var firstPos = null,
-           selection = {}, // the current highlight/selected range
-           shifted = false; // if the shift key is down
+           selection = {},  // the current highlight/selected range
+           shifted = false;  // if the shift key is down
 
        this.props.karyogram
         .on('dragstart', function(position, kgram) {
@@ -70,7 +69,6 @@ var Karyogram = React.createClass({
      return <div className="karyogram"></div>;
    }
 });
-
 
 var PrecisionRecallTable = React.createClass({
    render: function() {

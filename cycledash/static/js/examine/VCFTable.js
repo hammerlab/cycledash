@@ -5,7 +5,6 @@ var _ = require('underscore'),
 
 
 var VCFTable = React.createClass({
-   // Render the table and its children elements.
    propTypes: {
      // Array of attribute names from the INFO field of the VCF's records
      attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
@@ -14,14 +13,7 @@ var VCFTable = React.createClass({
      // List of chromosomes found in the VCF
      chromosomes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
      // The position object, from ExaminePage, denoting the current range selected
-     position: React.PropTypes.shape({
-       start: React.PropTypes.number.isRequired,
-       end: React.PropTypes.oneOfType([
-         React.PropTypes.number,
-         React.PropTypes.instanceOf(null)
-       ]),
-       chromosome: React.PropTypes.string.isRequired
-     }).isRequired,
+     position: PositionType,
      // Function which sends the newly-selected chromosome up
      handleChromosomeChange: React.PropTypes.func.isRequired,
      // Function which sends up the new range (from the position fields)
@@ -51,7 +43,6 @@ var VCFTable = React.createClass({
    }
 });
 
-
 var VCFTableHeader = React.createClass({
    propTypes: {
      // Function which sends all the current filters up when a filter is changed
@@ -79,20 +70,12 @@ var VCFTableHeader = React.createClass({
    }
 });
 
-
 var VCFTableFilter = React.createClass({
    propTypes: {
      // List of chromosomes found in the VCF
      chromosomes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
      // The position object, from ExaminePage, denoting the current range selected
-     position: React.PropTypes.shape({
-       start: React.PropTypes.number.isRequired,
-       end: React.PropTypes.oneOfType([
-         React.PropTypes.number,
-         React.PropTypes.instanceOf(null)
-       ]),
-       chromosome: React.PropTypes.string.isRequired
-     }).isRequired,
+     position: PositionType,
      // Function which sends the newly-selected chromosome up
      handleChromosomeChange: React.PropTypes.func.isRequired,
      // Function which sends up the new range (from the position fields)
@@ -194,7 +177,6 @@ var VCFTableFilter = React.createClass({
    }
 });
 
-
 var VCFTableBody = React.createClass({
    propTypes: {
      // List of VCF records
@@ -214,7 +196,6 @@ var VCFTableBody = React.createClass({
      );
    }
 });
-
 
 var VCFRecord = React.createClass({
    propTypes: {
@@ -238,6 +219,15 @@ var VCFRecord = React.createClass({
      );
    }
 });
+
+var PositionType = React.PropTypes.shape({
+  start: React.PropTypes.number.isRequired,
+  end: React.PropTypes.oneOfType([
+    React.PropTypes.number,
+    React.PropTypes.instanceOf(null)
+  ]),
+  chromosome: React.PropTypes.string.isRequired
+}).isRequired;
 
 
 module.exports = VCFTable;

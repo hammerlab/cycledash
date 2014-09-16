@@ -7,11 +7,11 @@ var _ = require('underscore'),
 var d3BarChart = require('./d3.bar-chart');
 
 
+/**
+ * Render all attribute charts (currently histograms) for the given INFO
+ * attributes.
+ */
 var AttributeCharts = React.createClass({
-  /**
-   * Render all attribute charts (currently histograms) for the given INFO
-   * attributes.
-   */
   propTypes: {
     chartAttributes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
@@ -29,40 +29,24 @@ var AttributeCharts = React.createClass({
   }
 });
 
-
+/**
+ * Render a histogram for a given INFO attribute of records.
+ */
 var AttributeChart = React.createClass({
-  /**
-   * Render a histogram for a given INFO attribute of records.
-   */
   propTypes: {
     chartAttribute: React.PropTypes.string.isRequired,
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
   },
-  binPos: _.sortedIndex,
-  processRecordsForHistogram: function(records) {
-    /**
-     * Bins the records into a list of bins, each bin of the form
-     * {bin: binNumber, count: numberOfRecordsInBin}.
-     */
-    var TOTAL_BINS = 10,
-         attr = this.props.chartAttribute,
-         binRange = d3.extent(records.map(function(record) { return record.INFO[attr]; })),
-         binGap = (binRange[1] - binRange[0]) / TOTAL_BINS,
-         bins = _.range(TOTAL_BINS + 1).map(function(idx) {
-           return binRange[0] + (binGap * idx);
-         }),
-         binned = bins.map(function(bin){ return {bin: bin, count: 0}; });
+  TOTAL_BINS: 10,
+  binRecords: function(records) {
+    var attr = this.props.chartAttribute,
+        values = records.map(function(r) { return r.INFO[attr]; }),
+        bins = d3.layout.histogram().bins(this.TOTAL_BINS)(values);
 
-    _.each(records, function(record) {
-      var attrVal = record.INFO[attr],
-          pos = this.binPos(bins, attrVal);
-      binned[pos].count += 1;
-    }.bind(this));
-
-    return binned;
+    return bins.map(function(bin) { return {count: bin.length, bin: bin.x} });
   },
   renderHistogram: function(records) {
-    var datum = this.processRecordsForHistogram(records),
+    var datum = this.binRecords(records),
         barChart = d3BarChart()
            .xTickFormatter(d3.format('.1f'))
            .width(450).height(250).margin({top:0, bottom:30, right:0, left: 50})

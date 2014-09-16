@@ -11,8 +11,8 @@ var _ = require('underscore'),
     Widgets = require('./Widgets');
 
 
+// The Root element of the /examine page
 var ExaminePage = React.createClass({
-   // Render the root element of the examine page.
    propTypes: {
      vcfPath: React.PropTypes.string.isRequired,
      truthVcfPath: React.PropTypes.string.isRequired
