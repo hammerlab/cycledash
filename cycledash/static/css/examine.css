@@ -31,12 +31,15 @@ th#position input {
 th.attr {
     position: relative;
 }
+th.attr > span {
+    border-bottom: 1px dashed #333;
+}
 .tooltip {
     display: none;
     border-radius: 3px;
     position: absolute;
     top: 110%;
-    right: -63px;
+    right: -72px;
     background: white;
     border: 1px solid #343434;
     width: 250px;
@@ -52,7 +55,7 @@ th.attr {
 .tooltip p strong {
     font-weight: bold;
 }
-th.attr:hover .tooltip {
+th.attr span:hover + .tooltip {
     display: block;
 }
 .tooltip:after, .tooltip:before {

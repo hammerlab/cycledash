@@ -65,7 +65,7 @@ var VCFTableHeader = React.createClass({
     attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired
   },
   handleChartToggle: function(e) {
-    var attribute = e.target.attributes.getNamedItem('data-attribute').value;
+    var attribute = e.currentTarget.attributes.getNamedItem('data-attribute').value;
     this.props.handleChartChange(attribute);
   },
   render: function() {
@@ -91,7 +91,7 @@ var InfoColumnTh = React.createClass({
   render: function() {
     return (
       <th className="attr" onClick={this.props.handleChartToggle} data-attribute={this.props.attr}>
-        {this.props.attr}
+        <span>{this.props.attr}</span>
         <InfoColumnTooltip info={this.props.info} attr={this.props.attr} />
       </th>
     );
