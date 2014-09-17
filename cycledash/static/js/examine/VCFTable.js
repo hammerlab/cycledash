@@ -56,46 +56,59 @@ var VCFTable = React.createClass({
 });
 
 var VCFTableHeader = React.createClass({
-   propTypes: {
-     // The VCF header, used to get information about the INFO fields
-     header: React.PropTypes.object.isRequired,
-     // Function which sends all the current filters up when a filter is changed
-     handleChartChange: React.PropTypes.func.isRequired,
-     // Array of attribute names from the INFO field of the VCF's records
-     attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired
-   },
-   handleChartToggle: function(e) {
-     var attribute = e.target.attributes.getNamedItem('data-attribute').value;
-     this.props.handleChartChange(attribute);
-   },
-   render: function() {
-     var attrs = this.props.attrs.map(function(attr) {
-       var info =  _.find(this.props.header.info, function(h) {
-         return h.ID === attr;
-       }),
-           infotext = info['Description'],
-           infoType = info[]
-       return (
-           <th className="attr" key={attr} onClick={this.handleChartToggle}
-               data-attribute={attr}>
-             <div className="tooltip" data-attribute={attr}>
-               <p>{infoText}</p>
-             </div>
-             {attr}
-           </th>
-       );
-     }.bind(this));
-     return (
-       <thead>
-         <tr>
-           <th>Chromosome</th>
-           <th>Position</th>
-           <th>REF / ALT</th>
-           {attrs}
-         </tr>
-       </thead>
-     );
-   }
+  propTypes: {
+    // The VCF header, used to get information about the INFO fields
+    header: React.PropTypes.object.isRequired,
+    // Function which sends all the current filters up when a filter is changed
+    handleChartChange: React.PropTypes.func.isRequired,
+    // Array of attribute names from the INFO field of the VCF's records
+    attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired
+  },
+  handleChartToggle: function(e) {
+    var attribute = e.target.attributes.getNamedItem('data-attribute').value;
+    this.props.handleChartChange(attribute);
+  },
+  render: function() {
+    var attrs = this.props.attrs.map(function(attr) {
+      var info =  _.findWhere(this.props.header.info, {ID: attr});
+      return <InfoColumnTh info={info} attr={attr} key={attr} handleChartToggle={this.handleChartToggle} />;
+    }.bind(this));
+
+    return (
+      <thead>
+        <tr>
+          <th>Chromosome</th>
+          <th>Position</th>
+          <th>REF / ALT</th>
+          {attrs}
+        </tr>
+      </thead>
+    );
+  }
+});
+
+var InfoColumnTh = React.createClass({
+  render: function() {
+    return (
+      <th className="attr" onClick={this.props.handleChartToggle} data-attribute={this.props.attr}>
+        {this.props.attr}
+        <InfoColumnTooltip info={this.props.info} attr={this.props.attr} />
+      </th>
+    );
+  }
+});
+
+var InfoColumnTooltip = React.createClass({
+  render: function() {
+    var infoText = this.props.info['Description'],
+        infoType = this.props.info['Type'];
+    return (
+      <div className="tooltip" data-attribute={this.props.attr}>
+        <p className="description">{infoText}</p>
+        <p className="type">Type: <strong>{infoType}</strong></p>
+      </div>
+    );
+  }
 });
 
 var VCFTableFilter = React.createClass({

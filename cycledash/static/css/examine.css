@@ -45,8 +45,12 @@ th.attr {
     z-index: 1000;
 }
 .tooltip p {
+    font-weight: 500;
     text-align: left;
     padding: 2px 13px;
+}
+.tooltip p strong {
+    font-weight: bold;
 }
 th.attr:hover .tooltip {
     display: block;
