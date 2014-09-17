@@ -26,6 +26,7 @@ var ExaminePage = React.createClass({
    },
    getDefaultProps: function() {
      return {records: [],
+             header: {},
              truthRecords: [],
              karyogram: initializeKaryogram(),
              chromosomes: [],
@@ -33,10 +34,11 @@ var ExaminePage = React.createClass({
    },
    componentDidMount: function() {
      d3.xhr('/vcf' + this.props.vcfPath, function(err, response) {
-       var records = vcf()
+       var parsedVcf  = vcf()
                         .parseChrom(function(chr){ return 'chr' + chr; })
-                        .data(response.responseText)
-                        .data(),
+                        .data(response.responseText),
+           records = parsedVcf.data(),
+           header = parsedVcf.header(),
            attrs = _.keys(records[0].INFO),
            chromosomes = chromosomesFrom(records);
 
@@ -46,7 +48,7 @@ var ExaminePage = React.createClass({
                               .data(response.responseText)
                               .data();
 
-         this.setProps({records: records, chromosomes: chromosomes,
+         this.setProps({records: records, header: header, chromosomes: chromosomes,
                         attrs: attrs, truthRecords: truthRecords});
        }.bind(this))
      }.bind(this));
@@ -138,7 +140,7 @@ var ExaminePage = React.createClass({
                     karyogram={this.props.karyogram}
                     handleRangeChange={this.handleRangeChange} />
          <VCFTable records={filteredRecords} position={this.state.position}
-                   attrs={this.props.attrs}
+                   header={this.props.header} attrs={this.props.attrs}
                    handleChartChange={this.handleChartChange}
                    handleFilterUpdate={this.handleFilterUpdate}
                    handleChromosomeChange={this.handleChromosomeChange}

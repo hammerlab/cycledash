@@ -28,6 +28,52 @@ input {
 th#position input {
     width: 100px;
 }
+th.attr {
+    position: relative;
+}
+.tooltip {
+    display: none;
+    border-radius: 3px;
+    position: absolute;
+    top: 110%;
+    right: -63px;
+    background: white;
+    border: 1px solid #343434;
+    width: 250px;
+    font-size: 12px;
+    font-color: #3d3d3d;
+    z-index: 1000;
+}
+.tooltip p {
+    text-align: left;
+    padding: 2px 13px;
+}
+th.attr:hover .tooltip {
+    display: block;
+}
+.tooltip:after, .tooltip:before {
+    bottom: 100%;
+    left: 50%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+}
+.tooltip:after {
+    border-color: rgba(255, 255, 255, 0);
+    border-bottom-color: #ffffff;
+    border-width: 10px;
+    margin-left: -10px;
+}
+.tooltip:before {
+    border-color: rgba(52, 52, 52, 0);
+    border-bottom-color: #343434;
+    border-width: 11px;
+    margin-left: -11px;
+}
+
 select {
     padding: 13px 11px;
     width: 77px;
