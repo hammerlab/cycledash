@@ -126,7 +126,7 @@ input.selector {
       <td>{{ run['dataset'] }}</td>
     </tr>
     <tr class="run-info" data-runId="{{ run['id'] }}">
-      <td colspan=9>
+      <td colspan=4>
         <ul>
           {% for name, key in run_kvs.iteritems() %}
           {%- if run.get(key) %}
