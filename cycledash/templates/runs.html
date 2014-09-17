@@ -28,15 +28,14 @@ tr.run-info {
   background: rgb(247, 252, 253);
   text-align: center;
 }
+tr.run-info ul {
+  text-align: left;
+}
 tr.run-info li {
-  list-style-type: none;
-  display: inline;
+  list-style: none;
 }
-tr.run-info li:after {
-  content: ", ";
-}
-tr.run-info li:last-child:after {
-  content: " ";
+input.selector {
+  margin-right: 13px;
 }
 </style>
 {% endblock %}
@@ -45,9 +44,6 @@ tr.run-info li:last-child:after {
 {{ nav("runs") }}
 <br/>
 <button id="concordance" class="btn btn-info">Concordance on Selected</button>
-<button id="examine" class="btn btn-info">Examine Selected</button>
-<button id="delete" class="btn btn-danger">Delete Selected</button>
-<h3>Runs <small>Every Variant Call Run</small></h3>
 <button id="show-submit" class="btn btn-default">Submit New Run</button>
 <form method="POST" action="/runs" role="form" id="submit">
   <h2>Add a new run:<button type="button" class="close" aria-hidden="true">&times;</button></h3>
@@ -107,56 +103,31 @@ tr.run-info li:last-child:after {
         window.location.href = "/runs/" + run_ids_key + "/concordance";
       }
     });
-
-  d3.select("#examine")
-    .on("click", function() {
-      var run = document.querySelector("input[type=checkbox]:checked");
-      window.location.href = "/runs/" + run.value + "/examine";
-    });
-
-  d3.select("#delete")
-    .on("click", function() {
-      var runs = document.querySelectorAll("input[type=checkbox]:checked");
-      runs = Array.prototype.slice.call(runs).map(function(v) { return v.value; });
-      runs.map(function(id) {
-        var rows = document.querySelectorAll("tr[data-runId=\"" + id + "\"]");
-        rows = Array.prototype.slice.call(rows);
-        rows.map(function(row) { row.remove(); });
-        d3.xhr("/runs/" + id).send("DELETE");
-      });
-    });
 </script>
 
 <table class="runs table">
   <thead>
     <tr>
       <th></th>
-      <th>Run ID</th>
       <th>Caller Name</th>
       <th>Submitted On</th>
       <th>Dataset</th>
-      <th>Hash</th>
-      <th>f1score</th>
-      <th>precision</th>
-      <th>recall</th>
     </tr>
   </thead>
   <tbody>
-{%- for run in  runs %}
+{%- for run in runs %}
     <tr class="run" data-runId="{{ run['id'] }}">
-      <td><input type="checkbox" value="{{ run['id'] }}"></td>
-      <td><a href="/runs/{{ run['id'] }}">{{ run['id'] }}</a></td>
+      <td>
+        <input type="checkbox" value="{{ run['id'] }}" class="selector">
+        <a class="btn btn-default btn-xs" href="/runs/{{ run['id'] }}/examine">Examine</a>
+      </td>
       <td>{{ run['variantCallerName'] }}</td>
       <td>{{ run['submittedAt'] }}</td>
       <td>{{ run['dataset'] }}</td>
-      <td>{{ run['SHA1'] }}</td>
-      <td>{{ run['f1score'] }}</td>
-      <td>{{ run['precision'] }}</td>
-      <td>{{ run['recall'] }}</td>
     </tr>
     <tr class="run-info" data-runId="{{ run['id'] }}">
       <td colspan=9>
-        <ul style="display: inline-block">
+        <ul>
           {% for name, key in run_kvs.iteritems() %}
           {%- if run.get(key) %}
           <li><strong>{{ name }}:</strong> {{ run[key] }}</li>
