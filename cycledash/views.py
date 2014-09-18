@@ -67,8 +67,7 @@ def runs():
 @app.route('/runs/<run_id>/examine')
 def examine(run_id):
     run = Run.query.get_or_404(run_id).to_camel_dict()
-    return render_template('examine.html', run=run, run_kvs=RUN_ADDL_KVS,
-                           typekit_url=app.config['TYPEKIT_URL'])
+    return render_template('examine.html', run=run, run_kvs=RUN_ADDL_KVS)
 
 
 @app.route('/runs/<run_ids_key>/concordance', methods=['GET', 'PUT'])

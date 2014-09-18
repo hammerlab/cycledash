@@ -6,7 +6,6 @@ h1 small {
 }
 body {
     background: #ffffff url("/static/img/subtle-dots.png") repeat right top;
-    font-family: "brandon-grotesque", verdana, helvetica, sans-serif;
 }
 
 /* Karyogram */
@@ -99,7 +98,7 @@ text {
     width: 250px;
     height: 100px;
     position: absolute;
-    top: -23px;
+    top: 0px;
     right: 13px;
     margin-bottom: 200px;
 }

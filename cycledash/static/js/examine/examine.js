@@ -174,9 +174,12 @@ function initializeKaryogram() {
 
 
 function main() {
-   React.renderComponent(<ExaminePage vcfPath={VCF_PATH}
-                         truthVcfPath={TRUTH_VCF_PATH} />,
-                         document.getElementsByTagName('body')[0]);
+  var examineDiv = document.getElementById('examine');
+  if (examineDiv) {
+    React.renderComponent(<ExaminePage vcfPath={VCF_PATH}
+                          truthVcfPath={TRUTH_VCF_PATH} />,
+                          examineDiv);
+  }
 }
 
 
