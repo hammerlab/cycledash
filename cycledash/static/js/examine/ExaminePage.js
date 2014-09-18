@@ -133,7 +133,9 @@ var ExaminePage = React.createClass({
      return (
        <div className="examinePage">
          <h1>Examining: <small>{this.props.vcfPath}</small></h1>
-         <Widgets.PrecisionRecallTable records={filteredRecords} truthRecords={filteredTruthRecords} />
+         <Widgets.GlobalStatsTable records={filteredRecords}
+                                   unfilteredRecords={this.props.records}
+                                   truthRecords={filteredTruthRecords} />
          <AttributeCharts records={filteredRecords}
                           chartAttributes={this.state.chartAttributes} />
          <Widgets.Karyogram start={this.state.position.start}

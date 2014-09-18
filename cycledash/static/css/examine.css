@@ -10,7 +10,8 @@ body {
 
 /* Karyogram */
 .karyogram {
-    margin-top: 100px;
+    margin-top: 121px;  /* enough space for the global stats table */
+                        /* TODO: deactivate this if AttrCharts are shown. */
     box-shadow: inset 0 0 20px #F0F0F0;
 }
 
@@ -89,15 +90,12 @@ select {
 }
 table {
     border-collapse: collapse;
-    margin-top: 37px;
 }
 tr:nth-child(odd) {
     background: rgba(248, 249, 250, 0.5);
 }
-th {
-    font-size: 21px;
-}
 th.attr {
+    font-size: 21px;
     cursor: pointer;
 }
 th.attr:hover {
@@ -145,28 +143,24 @@ text {
     margin: 0 0 11px 11px;
 }
 
-/* PrecisionRecallTable */
-.precision-recall-table {
+/* GlobalStatsTable */
+.global-stats-table {
     box-shadow: inset 0 0 20px #F0F0F0;
     width: 250px;
     height: 100px;
     position: absolute;
-    top: 0px;
+    top: 37px;
     right: 13px;
-    margin-bottom: 200px;
 }
-.precision-recall-table tr td:first-child, .trueFalsePosNeg th {
+.global-stats-table .label {
     font-weight: bold;
     font-size: 15px;
 }
-.precision-recall-table .na {
-    font-style: italic;
-}
-.precision-recall-table tr.prec-rec-f1 td {
+.global-stats-table tr.prec-rec-f1 td {
     font-weight: bold;
     font-size: 13px;
 }
-.precision-recall-table tr:last-child td {
+.global-stats-table tr.prec-rec-f1-vals td {
     font-weight: 500;
     font-size: 13px;
 }
