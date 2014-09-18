@@ -93,7 +93,7 @@ var GlobalStatsTable = React.createClass({
     var countsText = (numFiltered != numTotal ? fmt(numFiltered) + '/' : '') + fmt(numTotal);
 
     return (
-      <table className="precision-recall-table">
+      <table className="global-stats-table">
         <thead>
           <tr>
             <th></th>
