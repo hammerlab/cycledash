@@ -11,7 +11,7 @@
 {{ nav("examine") }}
 <div id="examine"></div>
 
-<script type="text/javascript" src="/static/js/examine/bundled.js"></script>
+<script type="text/javascript" src="/static/js/dist/bundled.js"></script>
 <script>
 window.renderExaminePage(document.getElementById('examine'),
                          {{ run['vcfPath'] | tojson }},
