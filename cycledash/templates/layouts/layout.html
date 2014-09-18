@@ -14,6 +14,17 @@
     <link rel="stylesheet" href="/static/lib/bootstrap/dist/css/bootstrap.min.css">
     {% endblock %}
 
+    {% if config['DEBUG'] %}
+    <!--
+         This JS is served from a running livereload server, started by our gulp watch task,
+         and is resonsible for reloading the page when the livereload server is notified
+         (usually by grunt tasks, when they've run and generate new CSS or JS).
+
+         This is not included in production mode.
+    -->
+    <script src="http://localhost:35729/livereload.js"></script>
+    {% endif %}
+
     {% if config['TYPEKIT_URL'] %}
     <script type="text/javascript" src={{config['TYPEKIT_URL']}}></script>
     <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
