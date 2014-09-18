@@ -31,26 +31,27 @@ var ExaminePage = React.createClass({
    },
    getDefaultProps: function() {
      return {records: [],
+             header: {},
              truthRecords: [],
              karyogram: initializeKaryogram(),
              chromosomes: [],
              attrs: []};
    },
    componentDidMount: function() {
-     var deferredVCF = function(vcfPath) {
+     function deferredVcf(vcfPath) {
        return $.get('/vcf' + vcfPath).then(function(data) {
          return vcf()
-             .parseChrom(function(chr){ return 'chr' + chr; })
-             .data(data)
-             .data()
+             .parseChrom(function(chr) { return 'chr' + chr; })
+             .data(data);
        });
      };
 
-     $.when(deferredVCF(this.props.vcfPath), deferredVCF(this.props.truthVcfPath))
-         .done(function(records, truthRecords) {
-           this.setProps({records: records, truthRecords: records,
+     $.when(deferredVcf(this.props.vcfPath), deferredVcf(this.props.truthVcfPath))
+         .done(function(vcfData, truthVcfData) {
+           var records = vcfData.data();
+           this.setProps({records: records, truthRecords: truthVcfData.data(),
                           chromosomes: chromosomesFrom(records),
-                          attrs: _.keys(records[0].INFO)});
+                          attrs: _.keys(records[0].INFO), header: vcfData.header()});
          }.bind(this));
    },
    handleRangeChange: function(start, end) {
@@ -140,7 +141,7 @@ var ExaminePage = React.createClass({
                     karyogram={this.props.karyogram}
                     handleRangeChange={this.handleRangeChange} />
          <VCFTable records={filteredRecords} position={this.state.position}
-                   attrs={this.props.attrs}
+                   header={this.props.header} attrs={this.props.attrs}
                    handleChartChange={this.handleChartChange}
                    handleFilterUpdate={this.handleFilterUpdate}
                    handleChromosomeChange={this.handleChromosomeChange}

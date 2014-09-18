@@ -31,12 +31,15 @@ var VCFTable = React.createClass({
      // relative positions -- slated to be removed soon. TODO(ihodes)
      karyogram: React.PropTypes.func.isRequired,
      // List of VCF records
-     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
+     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+     // The VCF header, used to get information about the INFO fields
+     header: React.PropTypes.object.isRequired
    },
    render: function() {
      return (
        <table>
          <VCFTableHeader attrs={this.props.attrs}
+                         header={this.props.header}
                          handleChartChange={this.props.handleChartChange} />
          <VCFTableFilter chromosomes={this.props.chromosomes}
                          handleFilterUpdate={this.props.handleFilterUpdate}
@@ -53,30 +56,72 @@ var VCFTable = React.createClass({
 });
 
 var VCFTableHeader = React.createClass({
-   propTypes: {
-     // Function which sends all the current filters up when a filter is changed
-     handleChartChange: React.PropTypes.func.isRequired,
-     // Array of attribute names from the INFO field of the VCF's records
-     attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
-   },
-   handleChartToggle: function(e) {
-     this.props.handleChartChange(e.target.textContent);
-   },
-   render: function() {
-     var attrs = this.props.attrs.map(function(attr) {
-       return <th className="attr" key={attr} onClick={this.handleChartToggle}>{attr}</th>;
-     }.bind(this));
-     return (
-       <thead>
-         <tr>
-           <th>Chromosome</th>
-           <th>Position</th>
-           <th>REF / ALT</th>
-           {attrs}
-         </tr>
-       </thead>
-     );
-   }
+  propTypes: {
+    // The VCF header, used to get information about the INFO fields
+    header: React.PropTypes.object.isRequired,
+    // Function which sends all the current filters up when a filter is changed
+    handleChartChange: React.PropTypes.func.isRequired,
+    // Array of attribute names from the INFO field of the VCF's records
+    attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired
+  },
+  handleChartToggle: function(e) {
+    var attribute = e.currentTarget.attributes.getNamedItem('data-attribute').value;
+    this.props.handleChartChange(attribute);
+  },
+  render: function() {
+    var attrs = this.props.attrs.map(function(attr) {
+      var info =  _.findWhere(this.props.header.info, {ID: attr});
+      return <InfoColumnTh info={info} attr={attr} key={attr} handleChartToggle={this.handleChartToggle} />;
+    }.bind(this));
+
+    return (
+      <thead>
+        <tr>
+          <th>Chromosome</th>
+          <th>Position</th>
+          <th>REF / ALT</th>
+          {attrs}
+        </tr>
+      </thead>
+    );
+  }
+});
+
+var InfoColumnTh = React.createClass({
+  propTypes: {
+    attr: React.PropTypes.string.isRequired,
+    info: React.PropTypes.object.isRequired,
+    handleChartToggle: React.PropTypes.func.isRequired
+  },
+  render: function() {
+    var tooltip = '';
+    if (this.props.info) {
+      tooltip = <InfoColumnTooltip info={this.props.info} attr={this.props.attr} />;
+    }
+    return (
+      <th className="attr" onClick={this.props.handleChartToggle} data-attribute={this.props.attr}>
+        <span>{this.props.attr}</span>
+        {tooltip}
+      </th>
+    );
+  }
+});
+
+var InfoColumnTooltip = React.createClass({
+  propTypes: {
+    attr: React.PropTypes.string.isRequired,
+    info: React.PropTypes.object.isRequired
+  },
+  render: function() {
+    var infoText = this.props.info['Description'],
+        infoType = this.props.info['Type'];
+    return (
+      <div className="tooltip">
+        <p className="description">{infoText}</p>
+        <p className="type">Type: <strong>{infoType}</strong></p>
+      </div>
+    );
+  }
 });
 
 var VCFTableFilter = React.createClass({
