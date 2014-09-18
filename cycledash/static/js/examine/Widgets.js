@@ -131,8 +131,23 @@ var GlobalStatsTable = React.createClass({
   }
 });
 
+var Loading = React.createClass({
+  propTypes: {
+    files: React.PropTypes.arrayOf(React.PropTypes.string).isRequired
+  },
+  render: function() {
+    var filePs = this.props.files.map(function(file, idx) {
+      return <p key={idx}>{file}</p>;
+    });
+    return <div className="loading-initial-data">
+      <h1>Loading files...</h1>
+      {filePs}
+    </div>;
+  }
+});
 
 module.exports = {
   Karyogram: Karyogram,
-  GlobalStatsTable: GlobalStatsTable
+  GlobalStatsTable: GlobalStatsTable,
+  Loading: Loading
 };

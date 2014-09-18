@@ -20,7 +20,8 @@ window.renderExaminePage = function(el, vcfPath, truthVcfPath) {
 var ExaminePage = React.createClass({
    propTypes: {
      vcfPath: React.PropTypes.string.isRequired,
-     truthVcfPath: React.PropTypes.string.isRequired
+     truthVcfPath: React.PropTypes.string.isRequired,
+     hasLoaded: React.PropTypes.bool.isRequired
    },
    getInitialState: function() {
      return {chartAttributes: [],
@@ -35,7 +36,8 @@ var ExaminePage = React.createClass({
              truthRecords: [],
              karyogram: initializeKaryogram(),
              chromosomes: [],
-             attrs: []};
+             attrs: [],
+             hasLoaded: false};
    },
    componentDidMount: function() {
      function deferredVcf(vcfPath) {
@@ -49,9 +51,14 @@ var ExaminePage = React.createClass({
      $.when(deferredVcf(this.props.vcfPath), deferredVcf(this.props.truthVcfPath))
          .done(function(vcfData, truthVcfData) {
            var records = vcfData.data();
-           this.setProps({records: records, truthRecords: truthVcfData.data(),
-                          chromosomes: chromosomesFrom(records),
-                          attrs: _.keys(records[0].INFO), header: vcfData.header()});
+           this.setProps({
+             hasLoaded: true,
+             records: records,
+             truthRecords: truthVcfData.data(),
+             chromosomes: chromosomesFrom(records),
+             attrs: _.keys(records[0].INFO),
+             header: vcfData.header()
+           });
          }.bind(this));
    },
    handleRangeChange: function(start, end) {
@@ -130,18 +137,13 @@ var ExaminePage = React.createClass({
    render: function() {
      var filteredRecords = this.filterRecords(this.props.records);
      var filteredTruthRecords = this.filterRecords(this.props.truthRecords, true);
-     return (
-       <div className="examinePage">
-         <h1>Examining: <small>{this.props.vcfPath}</small></h1>
+
+     var statsTable = this.props.hasLoaded ?
          <Widgets.GlobalStatsTable records={filteredRecords}
                                    unfilteredRecords={this.props.records}
-                                   truthRecords={filteredTruthRecords} />
-         <AttributeCharts records={filteredRecords}
-                          chartAttributes={this.state.chartAttributes} />
-         <Widgets.Karyogram start={this.state.position.start}
-                    end={this.state.position.end}
-                    karyogram={this.props.karyogram}
-                    handleRangeChange={this.handleRangeChange} />
+                                   truthRecords={filteredTruthRecords} /> : null;
+
+     var vcfTable = this.props.hasLoaded ?
          <VCFTable records={filteredRecords} position={this.state.position}
                    header={this.props.header} attrs={this.props.attrs}
                    handleChartChange={this.handleChartChange}
@@ -149,7 +151,23 @@ var ExaminePage = React.createClass({
                    handleChromosomeChange={this.handleChromosomeChange}
                    handleRelativeRangeChange={this.handleRelativeRangeChange}
                    chromosomes={this.props.chromosomes}
-                   karyogram={this.props.karyogram} />
+                   karyogram={this.props.karyogram} /> : null;
+
+     var loadingIndicator = this.props.hasLoaded ? '' :
+         <Widgets.Loading files={[this.props.vcfPath, this.props.truthVcfPath]} />;
+
+     return (
+       <div className="examinePage">
+         <h1>Examining: <small>{this.props.vcfPath}</small></h1>
+         {loadingIndicator}
+         {statsTable}
+         <AttributeCharts records={filteredRecords}
+                          chartAttributes={this.state.chartAttributes} />
+         <Widgets.Karyogram start={this.state.position.start}
+                    end={this.state.position.end}
+                    karyogram={this.props.karyogram}
+                    handleRangeChange={this.handleRangeChange} />
+         {vcfTable}
        </div>
      );
    }
