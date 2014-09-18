@@ -89,7 +89,6 @@ select {
 }
 table {
     border-collapse: collapse;
-    margin-top: 37px;
 }
 tr:nth-child(odd) {
     background: rgba(248, 249, 250, 0.5);
@@ -151,7 +150,7 @@ text {
     width: 250px;
     height: 100px;
     position: absolute;
-    top: 0px;
+    top: 37px;
     right: 13px;
     margin-bottom: 200px;
 }

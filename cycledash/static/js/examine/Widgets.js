@@ -118,6 +118,24 @@ var PrecisionRecallTable = React.createClass({
    }
 });
 
+var RecordCount = React.createClass({
+  propTypes: {
+    numTotalRecords: React.PropTypes.number.isRequired,
+    numFilteredRecords: React.PropTypes.number.isRequired
+  },
+  render: function() {
+    if (this.props.numTotalRecords == this.props.numFilteredRecords) {
+      return <p>Showing {this.props.numTotalRecords.toLocaleString()} variants.</p>;
+    } else {
+      return <p>Showing {this.props.numFilteredRecords.toLocaleString()}
+          /{this.props.numTotalRecords.toLocaleString()} variants.</p>;
+    }
+  }
+});
 
-module.exports.Karyogram = Karyogram;
-module.exports.PrecisionRecallTable = PrecisionRecallTable;
+
+module.exports = {
+  Karyogram: Karyogram,
+  PrecisionRecallTable: PrecisionRecallTable,
+  RecordCount: RecordCount
+};

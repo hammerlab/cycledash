@@ -140,6 +140,8 @@ var ExaminePage = React.createClass({
                     end={this.state.position.end}
                     karyogram={this.props.karyogram}
                     handleRangeChange={this.handleRangeChange} />
+         <Widgets.RecordCount numTotalRecords={this.props.records.length}
+                              numFilteredRecords={filteredRecords.length} />
          <VCFTable records={filteredRecords} position={this.state.position}
                    header={this.props.header} attrs={this.props.attrs}
                    handleChartChange={this.handleChartChange}
