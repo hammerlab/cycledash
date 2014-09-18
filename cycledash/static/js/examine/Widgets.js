@@ -72,9 +72,9 @@ var Karyogram = React.createClass({
 
 var GlobalStatsTable = React.createClass({
   propTypes: {
-    truthRecords: React.PropTypes.array.isRequired,
-    records: React.PropTypes.array.isRequired,
-    unfilteredRecords: React.PropTypes.array.isRequired
+    truthRecords: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+    records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+    unfilteredRecords: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
   },
   render: function() {
     var truePositives = vcf.tools.truePositives(this.props.truthRecords, this.props.records).length,
@@ -97,8 +97,8 @@ var GlobalStatsTable = React.createClass({
         <thead>
           <tr>
             <th></th>
-            <th class="label">True</th>
-            <th class="label">False</th>
+            <th className="label">True</th>
+            <th className="label">False</th>
           </tr>
         </thead>
         <tbody>
@@ -128,21 +128,6 @@ var GlobalStatsTable = React.createClass({
         </tbody>
       </table>
     );
-  }
-});
-
-var RecordCount = React.createClass({
-  propTypes: {
-    numTotalRecords: React.PropTypes.number.isRequired,
-    numFilteredRecords: React.PropTypes.number.isRequired
-  },
-  render: function() {
-    if (this.props.numTotalRecords == this.props.numFilteredRecords) {
-      return <p>Showing {this.props.numTotalRecords.toLocaleString()} variants.</p>;
-    } else {
-      return <p>Showing {this.props.numFilteredRecords.toLocaleString()}
-          /{this.props.numTotalRecords.toLocaleString()} variants.</p>;
-    }
   }
 });
 
