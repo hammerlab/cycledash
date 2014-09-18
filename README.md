@@ -15,7 +15,11 @@ source venv/bin/activate           # Activate your virtual environment.
 pip install -r requirements.txt    # Install requirements into virtualenv.
 make initenv                       # Initialize environment file.
 $EDITOR ENV.sh                     # Fill in values.
+./create_database.sh               # Create database tables
 ```
+
+For hammerlab folks, you'll want to set `WEBHDFS_URL` to
+`http://demeter.hpc.mssm.edu:14000`.
 
 ### Start CycleDash
 
@@ -41,8 +45,6 @@ You can upgrade packages and move them to the right place within cycledash with:
 
 ```
 npm install             # Installs all packages in package.json.
-                        # (or...)
-npm install <package>   # Installs new package, adds it to package.json.
 make cpnode             # Copies all node deps to cycledash/static/lib where
                         # Flask can serve them.
 ```
@@ -51,7 +53,8 @@ In order to compile and bundle the examine page's JS(X), make sure the node dev
 tools are installed and run the following:
 
 ```
-browserify cycledash/static/js/examine/*.js -o cycledash/static/js/examine/bundled.js --transform reactify --debug
+sudo npm install -g browserify
+./run_browserify.sh
 ```
 
 ### Config

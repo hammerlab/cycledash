@@ -32,24 +32,21 @@ var ExaminePage = React.createClass({
              attrs: []};
    },
    componentDidMount: function() {
-     d3.xhr('/vcf' + this.props.vcfPath, function(err, response) {
-       var records = vcf()
-                        .parseChrom(function(chr){ return 'chr' + chr; })
-                        .data(response.responseText)
-                        .data(),
-           attrs = _.keys(records[0].INFO),
-           chromosomes = chromosomesFrom(records);
+     var deferredVCF = function(vcfPath) {
+       return $.get('/vcf' + vcfPath).then(function(data) {
+         return vcf()
+             .parseChrom(function(chr){ return 'chr' + chr; })
+             .data(data)
+             .data()
+       });
+     };
 
-       d3.xhr('/vcf' + this.props.truthVcfPath, function(err, response) {
-         var truthRecords = vcf()
-                              .parseChrom(function(chr){ return 'chr' + chr; })
-                              .data(response.responseText)
-                              .data();
-
-         this.setProps({records: records, chromosomes: chromosomes,
-                        attrs: attrs, truthRecords: truthRecords});
-       }.bind(this))
-     }.bind(this));
+     $.when(deferredVCF(this.props.vcfPath), deferredVCF(this.props.truthVcfPath))
+         .done(function(records, truthRecords) {
+           this.setProps({records: records, truthRecords: records,
+                          chromosomes: chromosomesFrom(records),
+                          attrs: _.keys(records[0].INFO)});
+         }.bind(this));
    },
    handleRangeChange: function(start, end) {
      this.setState({position: {start: start, end: end, chromosome: "all"}});
