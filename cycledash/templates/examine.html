@@ -10,10 +10,11 @@
 {% block body %}
 {{ nav("examine") }}
 <div id="examine"></div>
-<script>
- var VCF_PATH = {{ run['vcfPath'] | tojson }};
- var TRUTH_VCF_PATH = {{ run['truthVcfPath'] | tojson }};
- {{something}}
-</script>
+
 <script type="text/javascript" src="/static/js/examine/bundled.js"></script>
+<script>
+window.renderExaminePage(document.getElementById('examine'),
+                         {{ run['vcfPath'] | tojson }},
+                         {{ run['truthVcfPath'] | tojson }});
+</script>
 {% endblock%}

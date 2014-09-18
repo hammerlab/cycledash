@@ -11,6 +11,11 @@ var _ = require('underscore'),
     Widgets = require('./Widgets');
 
 
+window.renderExaminePage = function(el, vcfPath, truthVcfPath) {
+  React.renderComponent(<ExaminePage vcfPath={vcfPath} truthVcfPath={truthVcfPath} />, el);
+}
+
+
 // The Root element of the /examine page
 var ExaminePage = React.createClass({
    propTypes: {
@@ -171,16 +176,3 @@ function initializeKaryogram() {
 
   return karyogram;
 }
-
-
-function main() {
-  var examineDiv = document.getElementById('examine');
-  if (examineDiv) {
-    React.renderComponent(<ExaminePage vcfPath={VCF_PATH}
-                          truthVcfPath={TRUTH_VCF_PATH} />,
-                          examineDiv);
-  }
-}
-
-
-main();
