@@ -88,6 +88,11 @@ var VCFTableHeader = React.createClass({
 });
 
 var InfoColumnTh = React.createClass({
+  propTypes: {
+    attr: React.PropTypes.string.isRequired,
+    info: React.PropTypes.object.isRequired,
+    handleChartToggle: React.PropTypes.func.isRequired
+  },
   render: function() {
     return (
       <th className="attr" onClick={this.props.handleChartToggle} data-attribute={this.props.attr}>
@@ -99,11 +104,15 @@ var InfoColumnTh = React.createClass({
 });
 
 var InfoColumnTooltip = React.createClass({
+  propTypes: {
+    attr: React.PropTypes.string.isRequired,
+    info: React.PropTypes.object.isRequired
+  },
   render: function() {
     var infoText = this.props.info['Description'],
         infoType = this.props.info['Type'];
     return (
-      <div className="tooltip" data-attribute={this.props.attr}>
+      <div className="tooltip">
         <p className="description">{infoText}</p>
         <p className="type">Type: <strong>{infoType}</strong></p>
       </div>
