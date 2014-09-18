@@ -26,7 +26,9 @@ WEBHDFS_OPEN_OP = '?user.name={}&op=OPEN'.format(app.config['WEBHDFS_USER'])
 RUN_ADDL_KVS = {'Tumor BAM': 'tumorPath', 'Normal BAM': 'tumorPath',
                 'Reference': 'referencePath', 'VCF': 'vcfPath',
                 'Notes': 'notes', 'False Positive': 'falsePositive',
-                'True Positive': 'truePositive', 'Truth VCF': 'truthVcfPath'}
+                'True Positive': 'truePositive', 'Truth VCF': 'truthVcfPath',
+                'Hash': 'SHA1', 'Precision': 'precision', 'recall': 'recall',
+                'f1score': 'f1score' }
 
 
 @app.route('/')
