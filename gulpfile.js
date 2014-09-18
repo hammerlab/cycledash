@@ -4,7 +4,8 @@ var gulp = require('gulp'),
     watchify = require('watchify'),
     reactify = require('reactify'),
     uglifyify = require('uglifyify'),
-    source = require('vinyl-source-stream');
+    source = require('vinyl-source-stream'),
+    _ = require('underscore');
 
 
 var PATHS = {
@@ -13,6 +14,8 @@ var PATHS = {
   examineJs: ['cycledash/static/js/*.js'], // All of the JS files we want to watch for changes.
   css: ['./cycledash/static/css/*.css'] // The CSS we want to watch for changes.
 };
+
+var REACT_OPTS = {es6: true};
 
 
 // Generates compiled JS bundle, automatically recompiling and reloading the
@@ -26,7 +29,7 @@ gulp.task('js', function() {
 
   function rebundle() {
     return bundler
-      .transform({es6: true, debug: true}, reactify)
+      .transform(_.extend({debug: true}, REACT_OPTS), reactify)
       .on('update', function(msg) { console.log('changes detected in... \n    ' + msg.join('\n    ')); })
       .on('error', function(e) { console.log(e); })
       .bundle()
@@ -60,7 +63,7 @@ gulp.task('default', ['watch', 'js']);
 // Minified, JSX & ES6, and browserified.
 gulp.task('build', function() {
   browserify(PATHS.examineSrc)
-    .transform({es6: true}, reactify)
+    .transform(REACT_OPTS, reactify)
     .transform({global: true}, uglifyify) // Global: true indicates that uglify
                                           // will minify all of the module code.
     .bundle()

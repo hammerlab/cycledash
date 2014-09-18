@@ -1,3 +1,5 @@
+#!/bin/bash
+
 source ENV.sh
 
 python -c '
