@@ -16,6 +16,9 @@ body {
 }
 
 /* VCFTable */
+.vcf-table {
+  padding-top: 20px;
+}
 input {
     border: none;
     padding: 11px;

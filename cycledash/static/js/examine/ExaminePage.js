@@ -19,9 +19,13 @@ window.renderExaminePage = function(el, vcfPath, truthVcfPath) {
 // The Root element of the /examine page
 var ExaminePage = React.createClass({
    propTypes: {
+     hasLoaded: React.PropTypes.bool.isRequired,
      vcfPath: React.PropTypes.string.isRequired,
      truthVcfPath: React.PropTypes.string.isRequired,
-     hasLoaded: React.PropTypes.bool.isRequired
+     chromosomes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
+     attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
+     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+     truthRecords: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
    },
    getInitialState: function() {
      return {chartAttributes: [],
@@ -138,36 +142,32 @@ var ExaminePage = React.createClass({
      var filteredRecords = this.filterRecords(this.props.records);
      var filteredTruthRecords = this.filterRecords(this.props.truthRecords, true);
 
-     var statsTable = this.props.hasLoaded ?
-         <Widgets.GlobalStatsTable records={filteredRecords}
-                                   unfilteredRecords={this.props.records}
-                                   truthRecords={filteredTruthRecords} /> : null;
-
-     var vcfTable = this.props.hasLoaded ?
-         <VCFTable records={filteredRecords} position={this.state.position}
-                   header={this.props.header} attrs={this.props.attrs}
-                   handleChartChange={this.handleChartChange}
-                   handleFilterUpdate={this.handleFilterUpdate}
-                   handleChromosomeChange={this.handleChromosomeChange}
-                   handleRelativeRangeChange={this.handleRelativeRangeChange}
-                   chromosomes={this.props.chromosomes}
-                   karyogram={this.props.karyogram} /> : null;
-
-     var loadingIndicator = this.props.hasLoaded ? '' :
-         <Widgets.Loading files={[this.props.vcfPath, this.props.truthVcfPath]} />;
-
      return (
-       <div className="examinePage">
+       <div className="examine-page">
          <h1>Examining: <small>{this.props.vcfPath}</small></h1>
-         {loadingIndicator}
-         {statsTable}
+         <Widgets.Loading hasLoaded={this.props.hasLoaded}
+                          files={[this.props.vcfPath, this.props.truthVcfPath]} />
+         <Widgets.GlobalStatsTable hasLoaded={this.props.hasLoaded}
+                                   records={filteredRecords}
+                                   unfilteredRecords={this.props.records}
+                                   truthRecords={filteredTruthRecords} />
          <AttributeCharts records={filteredRecords}
                           chartAttributes={this.state.chartAttributes} />
          <Widgets.Karyogram start={this.state.position.start}
                     end={this.state.position.end}
                     karyogram={this.props.karyogram}
                     handleRangeChange={this.handleRangeChange} />
-         {vcfTable}
+         <VCFTable hasLoaded={this.props.hasLoaded}
+                   records={filteredRecords}
+                   position={this.state.position}
+                   header={this.props.header}
+                   attrs={this.props.attrs}
+                   handleChartChange={this.handleChartChange}
+                   handleFilterUpdate={this.handleFilterUpdate}
+                   handleChromosomeChange={this.handleChromosomeChange}
+                   handleRelativeRangeChange={this.handleRelativeRangeChange}
+                   chromosomes={this.props.chromosomes}
+                   karyogram={this.props.karyogram} />
        </div>
      );
    }
