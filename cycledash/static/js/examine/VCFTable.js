@@ -37,7 +37,7 @@ var VCFTable = React.createClass({
    },
    render: function() {
      return (
-       <table>
+       <table className="vcf-table">
          <VCFTableHeader attrs={this.props.attrs}
                          header={this.props.header}
                          handleChartChange={this.props.handleChartChange} />

@@ -72,6 +72,7 @@ var Karyogram = React.createClass({
 
 var GlobalStatsTable = React.createClass({
   propTypes: {
+    hasLoaded: React.PropTypes.bool.isRequired,
     truthRecords: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     unfilteredRecords: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
@@ -91,6 +92,11 @@ var GlobalStatsTable = React.createClass({
     var numFiltered = this.props.records.length,
         numTotal = this.props.unfilteredRecords.length;
     var countsText = (numFiltered != numTotal ? fmt(numFiltered) + '/' : '') + fmt(numTotal);
+
+    if (!this.props.hasLoaded) {
+      fmt = dfmt = function() { return '-'; };
+      countsText = '...';
+    }
 
     return (
       <table className="global-stats-table">
@@ -118,9 +124,9 @@ var GlobalStatsTable = React.createClass({
             <td>f1score</td>
           </tr>
           <tr className="prec-rec-f1-vals">
-            <td>{dfmt(precision) || "-"}</td>
-            <td>{dfmt(recall) || "-"}</td>
-            <td>{dfmt(f1score) || "-"}</td>
+            <td>{dfmt(precision)}</td>
+            <td>{dfmt(recall)}</td>
+            <td>{dfmt(f1score)}</td>
           </tr>
           <tr className="counts">
             <td colSpan="3">Showing {countsText} variants.</td>
@@ -131,8 +137,30 @@ var GlobalStatsTable = React.createClass({
   }
 });
 
+var Loading = React.createClass({
+  propTypes: {
+    hasLoaded: React.PropTypes.bool.isRequired,
+    files: React.PropTypes.arrayOf(React.PropTypes.string).isRequired
+  },
+  render: function() {
+    if (this.props.hasLoaded) {
+      return null;
+    } else {
+      var filePs = this.props.files.map(function(file, idx) {
+        return <p key={idx}>{file}</p>;
+      });
+      return (
+        <div className="loading-initial-data">
+          <h1>Loading files&hellip;</h1>
+          {filePs}
+        </div>
+      );
+    }
+  }
+});
 
 module.exports = {
   Karyogram: Karyogram,
-  GlobalStatsTable: GlobalStatsTable
+  GlobalStatsTable: GlobalStatsTable,
+  Loading: Loading
 };
