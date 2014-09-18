@@ -1,3 +1,10 @@
 body {
     padding: 11px;
+    font-family: "brandon-grotesque", verdana, helvetica, sans-serif;
+}
+pre {
+    font-family: "inconsolata", monospace;
+}
+table td {
+    font-family: helvetica, arial, sans-serif;
 }

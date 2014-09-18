@@ -14,8 +14,13 @@
     <link rel="stylesheet" href="/static/lib/bootstrap/dist/css/bootstrap.min.css">
     {% endblock %}
 
-    <link rel="stylesheet" href="/static/css/style.css">
+    {% if config['TYPEKIT_URL'] %}
+    <script type="text/javascript" src={{config['TYPEKIT_URL']}}></script>
+    <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+    {% endif %}
 
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/header.css">
     {% block head %}{% endblock %}
   </head>
 
