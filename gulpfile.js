@@ -8,10 +8,10 @@ var gulp = require('gulp'),
 
 
 var PATHS = {
-  examineSrc: ['./cycledash/static/js/examine/ExaminePage.js'],
-  examineDest: './cycledash/static/js/dist/',
-  examineJs: ['cycledash/static/js/*.js'],
-  css: ['./cycledash/static/css/*.css']
+  examineSrc: ['./cycledash/static/js/examine/ExaminePage.js'], // the File being compiled.
+  examineDest: './cycledash/static/js/dist/', // Where the compiled JS bundle will go.
+  examineJs: ['cycledash/static/js/*.js'], // All of the JS files we want to watch for changes.
+  css: ['./cycledash/static/css/*.css'] // The CSS we want to watch for changes.
 };
 
 
@@ -32,7 +32,8 @@ gulp.task('js', function() {
       .bundle()
       .pipe(source('bundled.js'))
       .pipe(gulp.dest(PATHS.examineDest))
-      .pipe(livereload({ auto: false }));
+      .pipe(livereload({ auto: false })); // Because the 'watch' task has
+                                          // already started a livereload server.
   }
 
   rebundle();
@@ -44,7 +45,7 @@ gulp.task('css', function() {
   livereload.changed();
 });
 
-// Started the livereload server and runs the 'js' and 'css' taskes, above.
+// Starts the livereload server and runs the 'js' and 'css' tasks, above.
 gulp.task('watch', function() {
   livereload.listen();
   gulp.watch(PATHS.examineJs, ['js']);
@@ -60,7 +61,8 @@ gulp.task('default', ['watch', 'js']);
 gulp.task('build', function() {
   browserify(PATHS.examineSrc)
     .transform({es6: true}, reactify)
-    .transform({global: true}, uglifyify)
+    .transform({global: true}, uglifyify) // Global: true indicates that uglify
+                                          // will minify all of the module code.
     .bundle()
     .pipe(source('bundled.js'))
     .pipe(gulp.dest(PATHS.examineDest))

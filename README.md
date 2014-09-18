@@ -15,7 +15,7 @@ source venv/bin/activate           # Activate your virtual environment.
 pip install -r requirements.txt    # Install requirements into virtualenv.
 make initenv                       # Initialize environment file.
 $EDITOR ENV.sh                     # Fill in values.
-./create_database.sh               # Create database tables
+./initialize_database.sh           # Create database tables
 ```
 
 For hammerlab folks, you'll want to set `WEBHDFS_URL` to
@@ -57,17 +57,6 @@ gulp                    # Compile the JS and start the automatic compiler
 
 If `DEBUG` is True in your ENV.sh, then you'll get automatic code-reloading with
 the Flask server. There's not much else to it.
-
-Be sure to initialize your database before running:
-
-```python
-from cycledash import app,db
-ctx = app.test_request_context()
-ctx.push()
-db.create_all()
-```
-
-And now you should be good to go.
 
 ### Config
 
