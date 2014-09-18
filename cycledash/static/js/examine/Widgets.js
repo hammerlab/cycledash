@@ -94,7 +94,7 @@ var GlobalStatsTable = React.createClass({
     var countsText = (numFiltered != numTotal ? fmt(numFiltered) + '/' : '') + fmt(numTotal);
 
     if (!this.props.hasLoaded) {
-      fmt = dfmt = function() { return '-' };
+      fmt = dfmt = function() { return '-'; };
       countsText = '...';
     }
 
@@ -149,10 +149,12 @@ var Loading = React.createClass({
       var filePs = this.props.files.map(function(file, idx) {
         return <p key={idx}>{file}</p>;
       });
-      return <div className="loading-initial-data">
-        <h1>Loading files&hellip;</h1>
-        {filePs}
-      </div>;
+      return (
+        <div className="loading-initial-data">
+          <h1>Loading files&hellip;</h1>
+          {filePs}
+        </div>
+      );
     }
   }
 });
