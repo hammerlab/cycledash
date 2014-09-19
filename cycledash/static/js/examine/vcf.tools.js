@@ -10,7 +10,7 @@ function recordKey(record) {
   // Returns a string that uniquely identifies a record in a VCF.
   //
   // Used to test for record equality.
-  return String(record.CHROM) + '-' + String(record.POS) + ':' + String(record.REF) + ':' + String(record.ALT);
+  return record.__KEY__;
 }
 
 function recordComparitor(a,b) {
@@ -153,15 +153,16 @@ function intersection(a, b) {
   var ai = 0, bi = 0,
       result = [];
   while (ai < a.length && bi < b.length) {
-    if (recordKey(a[ai]) < recordKey(b[bi])) ai++;
-    else if (recordKey(a[ai]) > recordKey(b[bi])) bi++;
-    else { // they're equal
+    if (recordKey(a[ai]) < recordKey(b[bi])) {
+      ai++;
+    } else if (recordKey(a[ai]) > recordKey(b[bi])) {
+      bi++;
+    } else { // they're equal
       result.push(a[ai]);
       ai++;
       bi++;
     }
   }
-
   return result;
 }
 
@@ -170,19 +171,26 @@ function difference(a, b) {
   // time: O(n)
   var ai = 0, bi = 0,
       result = [];
-
-  while (ai < a.length && bi < b.length) {
-    if (recordKey(a[ai]) < recordKey(b[bi])) {
+  while (ai < a.length) {
+    if (bi >= b.length) {
+      // Then we're done, as there are no more elements in b to remove from a.
+      return result.concat(a.slice(ai));
+    } else if (recordKey(a[ai]) < recordKey(b[bi])) {
+      // then a[ai] will never be found
+      // later in b, so it doesn't
+      // exist in b, and we can add it
+      // to results (and move to the next element)
       result.push(a[ai]);
       ai++;
     } else if (recordKey(a[ai]) > recordKey(b[bi])) {
+      // then we need to move forward in b to see if later items in b may be
+      // equal to those in a.
       bi++;
     } else { // they're equal
       ai++;
       bi++;
     }
   }
-
   return result;
 }
 
@@ -197,7 +205,9 @@ var _tools = {
   recall: recall,
   f1score: f1score,
   summaryStats: summary,
-  fiveNumberSummary: fiveNumber
+  fiveNumberSummary: fiveNumber,
+  difference: difference,
+  intersection: intersection
 };
 
 
