@@ -19,7 +19,10 @@ nav.navigation a {
     text-decoration: none;
 }
 nav.navigation a:hover {
-    font-weight: bold;
+    text-decoration: underline;
+}
+nav.navigation .active a:hover {
+    text-decoration: none;
 }
 nav.navigation .active {
     font-weight: bold;
