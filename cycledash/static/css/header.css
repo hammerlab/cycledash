@@ -13,13 +13,17 @@ nav.navigation ul {
 nav.navigation li {
     display: inline-block;
     padding: 2px 11px;
+    min-width: 60px;
 }
 nav.navigation a {
     color: black;
     text-decoration: none;
 }
 nav.navigation a:hover {
-    font-weight: bold;
+    text-shadow:0px 0px 1px black;
+}
+nav.navigation .active a:hover {
+    text-shadow: none;
 }
 nav.navigation .active {
     font-weight: bold;
