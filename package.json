@@ -3,10 +3,12 @@
   "description": "Variant Caller Analysis Dashboard and Data Management System",
   "dependencies": {
     "bootstrap": "^3.2.0",
-    "jquery": "^2.1.1",
     "d3": "^3.4.11",
+    "idiogrammatik.js": "^0.1.2",
+    "jquery": "^2.1.1",
     "react": "^0.11.2",
-    "underscore": "^1.7.0"
+    "underscore": "^1.7.0",
+    "vcf.js": "^0.2.2"
   },
   "devDependencies": {
     "browserify": "^5.11.1",
