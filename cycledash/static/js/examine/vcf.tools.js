@@ -13,7 +13,7 @@ function recordKey(record) {
   return record.__KEY__;
 }
 
-function recordComparitor(a,b) {
+function recordComparator(a,b) {
   var aKey = recordKey(a),
       bKey = recordKey(b);
   if (aKey < bKey) {
@@ -147,12 +147,25 @@ function fiveNumber(records, attr, range) {
           thirdQuartile: thirdQuartile, max: max, total: length};
 }
 
+function assertSorted(lst, idx) {
+  if (idx + 1 < lst.length) {
+    if (recordKey(lst[idx]) > recordKey(lst[idx + 1])) {
+      throw TypeError("List of records must be sorted.")
+    }
+  }
+}
+
 function intersection(a, b) {
+  // Returns records which are in both a and b.
+  //
   // NB: Expects a and b be sorted on recordKey, and unique on recordKey.
   // time: O(n)
   var ai = 0, bi = 0,
       result = [];
   while (ai < a.length && bi < b.length) {
+    assertSorted(a, ai);
+    assertSorted(b, bi);
+
     if (recordKey(a[ai]) < recordKey(b[bi])) {
       ai++;
     } else if (recordKey(a[ai]) > recordKey(b[bi])) {
@@ -167,11 +180,16 @@ function intersection(a, b) {
 }
 
 function difference(a, b) {
+  // Returns records which are in a and not in b.
+  //
   // NB: Expects a and b be sorted on recordKey, and unique on recordKey.
   // time: O(n)
   var ai = 0, bi = 0,
       result = [];
   while (ai < a.length) {
+    assertSorted(a, ai);
+    assertSorted(b, bi);
+
     if (bi >= b.length) {
       // Then we're done, as there are no more elements in b to remove from a.
       return result.concat(a.slice(ai));
@@ -196,7 +214,7 @@ function difference(a, b) {
 
 var _tools = {
   recordKey: recordKey,
-  recordComparitor: recordComparitor,
+  recordComparator: recordComparator,
   recordsIn: recordsIn,
   truePositives: truePositives,
   falsePositives: falsePositives,

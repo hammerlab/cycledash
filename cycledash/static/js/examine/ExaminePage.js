@@ -145,8 +145,8 @@ var ExaminePage = React.createClass({
 
      // We need to sort the records on their keys so that VCF tools'
      // {true,false}Positives works properly.
-     filteredRecords.sort(vcf.tools.recordComparitor);
-     filteredTruthRecords.sort(vcf.tools.recordComparitor);
+     filteredRecords.sort(vcf.tools.recordComparator);
+     filteredTruthRecords.sort(vcf.tools.recordComparator);
 
      return (
        <div className="examine-page">
