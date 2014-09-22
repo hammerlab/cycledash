@@ -155,12 +155,15 @@ function assertSortedAtIndex(lst, idx) {
   }
 }
 
+/**
+ * Returns records which are in both a and b.
+ *
+ * NB: Expects a and b be sorted on recordKey, and unique on recordKey.
+ *     Throws if unsorted (unless the unsorted portion of b is not reached).
+ *
+ * time: O(n)
+ */
 function intersection(a, b) {
-  // Returns records which are in both a and b.
-  //
-  // NB: Expects a and b be sorted on recordKey, and unique on recordKey.
-  //     Throws if unsorted (unless the unsorted portion of b is not reached)
-  // time: O(n)
   var ai = 0, bi = 0,
       result = [];
   while (ai < a.length && bi < b.length) {
@@ -180,12 +183,15 @@ function intersection(a, b) {
   return result;
 }
 
+/**
+ * Returns records which are in a and not in b.
+ *
+ * NB: Expects a and b be sorted on recordKey, and unique on recordKey.
+ *     Throws if unsorted (unless the unsorted portion of b is not reached).
+ *
+ * time: O(n)
+ */
 function difference(a, b) {
-  // Returns records which are in a and not in b.
-  //
-  // NB: Expects a and b be sorted on recordKey, and unique on recordKey.
-  //     Throws if unsorted (unless the unsorted portion of b is not reached)
-  // time: O(n)
   var ai = 0, bi = 0,
       result = [];
   while (ai < a.length) {
