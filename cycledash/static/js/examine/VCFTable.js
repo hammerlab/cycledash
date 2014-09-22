@@ -256,7 +256,7 @@ var VCFTableBody = React.createClass({
     $(window).on('scroll.vcftable', () => {
       // Show more rows if the browser viewport is close to the bottom and
       // there are more rows to be shown.
-      if (this.state.numRowsToShow >= this.records.length) return;
+      if (this.state.numRowsToShow >= this.props.records.length) return;
 
       var $table = $(this.refs.lazyload.getDOMNode()),
           tableBottom = $table.position().top + $table.height(),
