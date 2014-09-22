@@ -4,7 +4,7 @@ var vcf = require("vcf.js");
 require("../cycledash/static/js/examine/vcf.tools.js")(vcf);
 
 
-var A = [{__KEY__: '2'}, {__KEY__: '4'},{__KEY__: '5'}],
+var A = [{__KEY__: '2'}, {__KEY__: '4'}, {__KEY__: '5'}],
     B = [{__KEY__: '1'}, {__KEY__: '2'}, {__KEY__: '3'}],
     C = [{__KEY__: '5'}, {__KEY__: '3'}, {__KEY__: '4'}];
 
@@ -27,7 +27,7 @@ describe('VCF.tools', function() {
   })
 
   describe('intersection()', function() {
-    it('should return 1 records', function() {
+    it('should return 1 record', function() {
       var intersection = vcf.tools.intersection(A, B);
       assert.equal(1, intersection.length);
     })

@@ -147,7 +147,7 @@ function fiveNumber(records, attr, range) {
           thirdQuartile: thirdQuartile, max: max, total: length};
 }
 
-function assertSorted(lst, idx) {
+function assertSortedAtIndex(lst, idx) {
   if (idx + 1 < lst.length) {
     if (recordKey(lst[idx]) > recordKey(lst[idx + 1])) {
       throw TypeError("List of records must be sorted.")
@@ -159,12 +159,13 @@ function intersection(a, b) {
   // Returns records which are in both a and b.
   //
   // NB: Expects a and b be sorted on recordKey, and unique on recordKey.
+  //     Throws if unsorted (unless the unsorted portion of b is not reached)
   // time: O(n)
   var ai = 0, bi = 0,
       result = [];
   while (ai < a.length && bi < b.length) {
-    assertSorted(a, ai);
-    assertSorted(b, bi);
+    assertSortedAtIndex(a, ai);
+    assertSortedAtIndex(b, bi);
 
     if (recordKey(a[ai]) < recordKey(b[bi])) {
       ai++;
@@ -183,12 +184,13 @@ function difference(a, b) {
   // Returns records which are in a and not in b.
   //
   // NB: Expects a and b be sorted on recordKey, and unique on recordKey.
+  //     Throws if unsorted (unless the unsorted portion of b is not reached)
   // time: O(n)
   var ai = 0, bi = 0,
       result = [];
   while (ai < a.length) {
-    assertSorted(a, ai);
-    assertSorted(b, bi);
+    assertSortedAtIndex(a, ai);
+    assertSortedAtIndex(b, bi);
 
     if (bi >= b.length) {
       // Then we're done, as there are no more elements in b to remove from a.
