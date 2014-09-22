@@ -1,16 +1,23 @@
 /** @jsx React.DOM */
 var _ = require('underscore'),
     d3 = require('d3'),
-    React = require('react');
+    React = require('react'),
+    idiogrammatik = require('idiogrammatik.js');
 
 
 var PositionType = React.PropTypes.shape({
-  start: React.PropTypes.number.isRequired,
+  start: React.PropTypes.oneOfType([
+    React.PropTypes.number,
+    React.PropTypes.instanceOf(null)
+  ]),
   end: React.PropTypes.oneOfType([
     React.PropTypes.number,
     React.PropTypes.instanceOf(null)
   ]),
-  chromosome: React.PropTypes.string.isRequired
+  chromosome: React.PropTypes.oneOfType([
+    React.PropTypes.string,
+    React.PropTypes.instanceOf(idiogrammatik.ALL_CHROMOSOMES)
+  ])
 }).isRequired;
 
 var VCFTable = React.createClass({
@@ -26,7 +33,7 @@ var VCFTable = React.createClass({
      // Function which sends the newly-selected chromosome up
      handleChromosomeChange: React.PropTypes.func.isRequired,
      // Function which sends up the new range (from the position fields)
-     handleRelativeRangeChange: React.PropTypes.func.isRequired,
+     handleRangeChange: React.PropTypes.func.isRequired,
      // The idiogrammtik object used to translate base pairs from absolute to
      // relative positions -- slated to be removed soon. TODO(ihodes)
      karyogram: React.PropTypes.func.isRequired,
@@ -45,7 +52,7 @@ var VCFTable = React.createClass({
                          handleFilterUpdate={this.props.handleFilterUpdate}
                          handleChromosomeChange={this.props.handleChromosomeChange}
                          position={this.props.position}
-                         handleRelativeRangeChange={this.props.handleRelativeRangeChange}
+                         handleRangeChange={this.props.handleRangeChange}
                          attrs={this.props.attrs}
                          karyogram={this.props.karyogram}/>
          <VCFTableBody records={this.props.records}
@@ -70,7 +77,7 @@ var VCFTableHeader = React.createClass({
   },
   render: function() {
     var attrs = this.props.attrs.map(function(attr) {
-      var info =  _.findWhere(this.props.header.info, {ID: attr});
+      var info =  _.findWhere(this.props.header.INFO, {ID: attr});
       return <InfoColumnTh info={info} attr={attr} key={attr} handleChartToggle={this.handleChartToggle} />;
     }.bind(this));
 
@@ -133,7 +140,7 @@ var VCFTableFilter = React.createClass({
      // Function which sends the newly-selected chromosome up
      handleChromosomeChange: React.PropTypes.func.isRequired,
      // Function which sends up the new range (from the position fields)
-     handleRelativeRangeChange: React.PropTypes.func.isRequired,
+     handleRangeChange: React.PropTypes.func.isRequired,
      // The idiogrammtik object used to translate base pairs from absolute to
      // relative positions -- slated to be removed soon. TODO(ihodes)
      karyogram: React.PropTypes.func.isRequired,
@@ -144,27 +151,11 @@ var VCFTableFilter = React.createClass({
      var chromosome = this.refs.chromosome.getDOMNode().value;
      this.props.handleChromosomeChange(chromosome);
    },
-   handleRelativeRangeChange: function(e) {
+   handleRangeChange: function(e) {
      var start = this.refs.startPos.getDOMNode().value,
          end = this.refs.endPos.getDOMNode().value,
          chromosome = this.props.position.chromosome;
-     if (start.length === 0 || Number(start) === NaN || Number(end) === NaN) {
-       return;
-     } else {
-       start = Number(start);
-       end.length > 0 && Number(end) != NaN ? end = Number(end) : end = null;
-     }
-
-     if (chromosome != 'all') {
-       var position = this.props.karyogram.positionFromRelative(chromosome, start);
-       start = position.absoluteBp;
-       if (end != null) {
-         end = this.props.karyogram.positionFromRelative(chromosome, end).absoluteBp;
-       } else {
-         end = position.chromosome.end;
-       }
-     }
-     this.props.handleRelativeRangeChange(start, end);
+     this.props.handleRangeChange(chromosome, Number(start) || null, Number(end) || null);
    },
    handleFilterUpdate: function(e) {
      // Array.slice converts the returned node list into an array so that we can
@@ -178,15 +169,8 @@ var VCFTableFilter = React.createClass({
      this.props.handleFilterUpdate(filters);
    },
    render: function() {
-     var start, end,
-         kgram = this.props.karyogram;
-     if (this.props.position.chromosome != 'all') {
-       start = kgram.positionFromAbsoluteBp(this.props.position.start).relativeBp;
-       end = kgram.positionFromAbsoluteBp(this.props.position.end).relativeBp;
-     } else {
-       start = this.props.position.start;
-       end = this.props.position.end;
-     }
+     var {position, kgram} = this.props,
+         {start, end} = position;
 
      var chromosomeOptions = this.props.chromosomes.map(function(chromosome) {
        return (
@@ -197,8 +181,7 @@ var VCFTableFilter = React.createClass({
        return (
          <th key={attr}>
            <input name={attr} className="infoFilter" type="text"
-                  onChange={this.handleFilterUpdate}>
-           </input>
+                  onChange={this.handleFilterUpdate} />
          </th>
        );
      }.bind(this));
@@ -207,22 +190,22 @@ var VCFTableFilter = React.createClass({
          <tr>
            <th>
              <select onChange={this.handleChromosomeChange}
-                     ref="chromosome" value={this.props.position.chromosome}>
+                     ref="chromosome" value={this.props.position.chromosome || 'all'}>
                <option name="chromosome" key="all" value="all">&lt;all&gt;</option>
                {chromosomeOptions}
              </select>
            </th>
            <th id="position">
              <input name="start" type="text" placeholder="start"
-                    ref="startPos" value={start} onChange={this.handleRelativeRangeChange}>
-             </input>
+                    disabled={!this.props.position.chromosome}
+                    ref="startPos" value={start || ''} onChange={this.handleRangeChange} />
              <input name="end" type="text" placeholder="end"
-                    ref="endPos" value={end} onChange={this.handleRelativeRangeChange}>
-             </input>
+                    disabled={!this.props.position.chromosome}
+                    ref="endPos" value={end || ''} onChange={this.handleRangeChange} />
            </th>
            <th>
              <input name="refAlt" className="infoFilter" type="text"
-                    onChange={this.handleFilterUpdate}></input>
+                    onChange={this.handleFilterUpdate} />
            </th>
            {attrThs}
          </tr>

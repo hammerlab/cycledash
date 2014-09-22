@@ -15,7 +15,8 @@ var PATHS = {
   css: ['./cycledash/static/css/*.css'] // The CSS we want to watch for changes.
 };
 
-var REACT_OPTS = {es6: true};
+var REACT_OPTS = {es6: true},
+    BROWSERIFY_OPTS =  _.extend({entries: PATHS.examineSrc, debug: true}, watchify.args)
 
 
 // Generates compiled JS bundle, automatically recompiling and reloading the
@@ -25,12 +26,11 @@ var REACT_OPTS = {es6: true};
 // Runs JSX, ES6 transforms, browserify, adds sourcemaps, and notifies the
 // livereload server that JS has changed.
 gulp.task('js', function() {
-  var bundler = watchify(browserify(PATHS.examineSrc, watchify.args));
+  var bundler = watchify(browserify(BROWSERIFY_OPTS));
 
   function rebundle() {
     return bundler
       .transform(_.extend({debug: true}, REACT_OPTS), reactify)
-      .on('update', function(msg) { console.log('changes detected in... \n    ' + msg.join('\n    ')); })
       .on('error', function(e) { console.log(e); })
       .bundle()
       .pipe(source('bundled.js'))
