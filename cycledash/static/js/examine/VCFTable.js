@@ -229,24 +229,46 @@ var VCFTableFilter = React.createClass({
    }
 });
 
+// As an optimization, this component only displays rows as they get close to
+// the screen. The number of rows shown only increases over time.
 var VCFTableBody = React.createClass({
-   propTypes: {
-     // List of VCF records
-     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-     // Array of attribute names from the INFO field of the VCF's records
-     attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired
-   },
-   render: function() {
-     var rows = this.props.records.map(function(record, idx) {
-       return <VCFRecord record={record} key={record.__KEY__}
-                         attrs={this.props.attrs}/>;
-     }.bind(this));
-     return (
-       <tbody>
-         {rows}
-       </tbody>
-     );
-   }
+  BOTTOM_BUFFER: 500,  // show more data when user is within 500px of bottom.
+  propTypes: {
+    // List of VCF records
+    records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+    // Array of attribute names from the INFO field of the VCF's records
+    attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired
+  },
+  getInitialState: function() {
+    return {numRowsToShow: 100};
+  },
+  render: function() {
+    var rows = _.first(this.props.records, this.state.numRowsToShow)
+        .map((record, idx) =>
+             <VCFRecord record={record} key={record.__KEY__} attrs={this.props.attrs}/>);
+    return (
+      <tbody ref="lazyload">
+        {rows}
+      </tbody>
+    );
+  },
+  componentDidMount: function() {
+    $(window).on('scroll.vcftable', () => {
+      // Show more rows if the browser viewport is close to the bottom and
+      // there are more rows to be shown.
+      if (this.state.numRowsToShow >= this.records.length) return;
+
+      var $table = $(this.refs.lazyload.getDOMNode()),
+          tableBottom = $table.position().top + $table.height(),
+          windowBottom = $(window).scrollTop() + $(window).height();
+      if (tableBottom < windowBottom + this.BOTTOM_BUFFER) {
+        this.setState({numRowsToShow: this.state.numRowsToShow + 100});
+      }
+    });
+  },
+  componentWillUnmount: function() {
+    $(window).off('scroll.vcftable');
+  }
 });
 
 var VCFRecord = React.createClass({
