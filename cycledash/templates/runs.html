@@ -142,6 +142,10 @@ input.selector {
 <script>
   d3.selectAll('tr.run')
     .on('click', function(d, i) {
+      // Ignore clicks on links in the row.
+      var tag = d3.event.target.tagName;
+      if (tag == 'A' || tag == 'INPUT') return;
+
       var selected = d3.select(this).attr('data-selected');
       var $this = d3.select(this);
       if (selected == 'true') {
