@@ -1,7 +1,7 @@
 /** @jsx React.DOM */
 var _ = require('underscore'),
     d3 = require('d3'),
-    React = require('react'),
+    React = require('react/addons'),
     idiogrammatik = require('idiogrammatik.js');
 
 
