@@ -92,7 +92,7 @@ var ExaminePage = React.createClass({
      }
      return list;
    },
-   recordWithinRange: function(record) {
+   isRecordWithinRange: function(record) {
      var {start, end, chromosome} = this.state.position;
 
      if (chromosome === idiogrammatik.ALL_CHROMOSOMES) {
@@ -133,7 +133,7 @@ var ExaminePage = React.createClass({
    },
    filterRecords: function(records, skipFilters) {
      return records.filter(function(record) {
-       return this.recordWithinRange(record) &&
+       return this.isRecordWithinRange(record) &&
          (skipFilters || this.recordPassesInfoFilters(record));
      }.bind(this));
    },

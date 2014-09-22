@@ -1,7 +1,8 @@
 /** @jsx React.DOM */
 var _ = require('underscore'),
     d3 = require('d3'),
-    React = require('react');
+    React = require('react'),
+    idiogrammatik = require('idiogrammatik.js');
 
 
 var PositionType = React.PropTypes.shape({
@@ -15,7 +16,7 @@ var PositionType = React.PropTypes.shape({
   ]),
   chromosome: React.PropTypes.oneOfType([
     React.PropTypes.string,
-    React.PropTypes.instanceOf(null)
+    React.PropTypes.instanceOf(idiogrammatik.ALL_CHROMOSOMES)
   ])
 }).isRequired;
 
@@ -180,8 +181,7 @@ var VCFTableFilter = React.createClass({
        return (
          <th key={attr}>
            <input name={attr} className="infoFilter" type="text"
-                  onChange={this.handleFilterUpdate}>
-           </input>
+                  onChange={this.handleFilterUpdate} />
          </th>
        );
      }.bind(this));
@@ -190,7 +190,7 @@ var VCFTableFilter = React.createClass({
          <tr>
            <th>
              <select onChange={this.handleChromosomeChange}
-                     ref="chromosome" value={this.props.position.chromosome ||  'all'}>
+                     ref="chromosome" value={this.props.position.chromosome || 'all'}>
                <option name="chromosome" key="all" value="all">&lt;all&gt;</option>
                {chromosomeOptions}
              </select>
@@ -198,16 +198,14 @@ var VCFTableFilter = React.createClass({
            <th id="position">
              <input name="start" type="text" placeholder="start"
                     disabled={!this.props.position.chromosome}
-                    ref="startPos" value={start || ''} onChange={this.handleRangeChange}>
-             </input>
+                    ref="startPos" value={start || ''} onChange={this.handleRangeChange} />
              <input name="end" type="text" placeholder="end"
                     disabled={!this.props.position.chromosome}
-                    ref="endPos" value={end || ''} onChange={this.handleRangeChange}>
-             </input>
+                    ref="endPos" value={end || ''} onChange={this.handleRangeChange} />
            </th>
            <th>
              <input name="refAlt" className="infoFilter" type="text"
-                    onChange={this.handleFilterUpdate}></input>
+                    onChange={this.handleFilterUpdate} />
            </th>
            {attrThs}
          </tr>
