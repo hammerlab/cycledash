@@ -167,6 +167,7 @@ var ExaminePage = React.createClass({
                    position={this.state.position}
                    header={this.props.header}
                    attrs={this.props.attrs}
+                   selectedAttrs={this.state.chartAttributes}
                    handleChartChange={this.handleChartChange}
                    handleFilterUpdate={this.handleFilterUpdate}
                    handleChromosomeChange={this.handleChromosomeChange}

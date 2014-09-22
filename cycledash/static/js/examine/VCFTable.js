@@ -21,45 +21,48 @@ var PositionType = React.PropTypes.shape({
 }).isRequired;
 
 var VCFTable = React.createClass({
-   propTypes: {
-     // Array of attribute names from the INFO field of the VCF's records
-     attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
-     // Function which takes a chart attribute name and propagates the change up
-     handleChartChange: React.PropTypes.func.isRequired,
-     // List of chromosomes found in the VCF
-     chromosomes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
-     // The position object, from ExaminePage, denoting the current range selected
-     position: PositionType,
-     // Function which sends the newly-selected chromosome up
-     handleChromosomeChange: React.PropTypes.func.isRequired,
-     // Function which sends up the new range (from the position fields)
-     handleRangeChange: React.PropTypes.func.isRequired,
-     // The idiogrammtik object used to translate base pairs from absolute to
-     // relative positions -- slated to be removed soon. TODO(ihodes)
-     karyogram: React.PropTypes.func.isRequired,
-     // List of VCF records
-     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-     // The VCF header, used to get information about the INFO fields
-     header: React.PropTypes.object.isRequired
-   },
-   render: function() {
-     return (
-       <table className="vcf-table">
-         <VCFTableHeader attrs={this.props.attrs}
-                         header={this.props.header}
-                         handleChartChange={this.props.handleChartChange} />
-         <VCFTableFilter chromosomes={this.props.chromosomes}
-                         handleFilterUpdate={this.props.handleFilterUpdate}
-                         handleChromosomeChange={this.props.handleChromosomeChange}
-                         position={this.props.position}
-                         handleRangeChange={this.props.handleRangeChange}
-                         attrs={this.props.attrs}
-                         karyogram={this.props.karyogram}/>
-         <VCFTableBody records={this.props.records}
-                       attrs={this.props.attrs} />
-       </table>
-     );
-   }
+  propTypes: {
+    // Array of attribute names from the INFO field of the VCF's records
+    attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
+    // Subset of attrs which are currently selected.
+    selectedAttrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
+    // Function which takes a chart attribute name and propagates the change up
+    handleChartChange: React.PropTypes.func.isRequired,
+    // List of chromosomes found in the VCF
+    chromosomes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
+    // The position object, from ExaminePage, denoting the current range selected
+    position: PositionType,
+    // Function which sends the newly-selected chromosome up
+    handleChromosomeChange: React.PropTypes.func.isRequired,
+    // Function which sends up the new range (from the position fields)
+    handleRangeChange: React.PropTypes.func.isRequired,
+    // The idiogrammtik object used to translate base pairs from absolute to
+    // relative positions -- slated to be removed soon. TODO(ihodes)
+    karyogram: React.PropTypes.func.isRequired,
+    // List of VCF records
+    records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+    // The VCF header, used to get information about the INFO fields
+    header: React.PropTypes.object.isRequired
+  },
+  render: function() {
+    return (
+      <table className="vcf-table">
+        <VCFTableHeader attrs={this.props.attrs}
+                        selectedAttrs={this.props.selectedAttrs}
+                        header={this.props.header}
+                        handleChartChange={this.props.handleChartChange} />
+        <VCFTableFilter chromosomes={this.props.chromosomes}
+                        handleFilterUpdate={this.props.handleFilterUpdate}
+                        handleChromosomeChange={this.props.handleChromosomeChange}
+                        position={this.props.position}
+                        handleRangeChange={this.props.handleRangeChange}
+                        attrs={this.props.attrs}
+                        karyogram={this.props.karyogram}/>
+        <VCFTableBody records={this.props.records}
+                      attrs={this.props.attrs} />
+      </table>
+    );
+  }
 });
 
 var VCFTableHeader = React.createClass({
@@ -69,7 +72,9 @@ var VCFTableHeader = React.createClass({
     // Function which sends all the current filters up when a filter is changed
     handleChartChange: React.PropTypes.func.isRequired,
     // Array of attribute names from the INFO field of the VCF's records
-    attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired
+    attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
+    // Subset of attrs which are currently selected.
+    selectedAttrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
   },
   handleChartToggle: function(e) {
     var attribute = e.currentTarget.attributes.getNamedItem('data-attribute').value;
@@ -78,7 +83,12 @@ var VCFTableHeader = React.createClass({
   render: function() {
     var attrs = this.props.attrs.map(function(attr) {
       var info =  _.findWhere(this.props.header.INFO, {ID: attr});
-      return <InfoColumnTh info={info} attr={attr} key={attr} handleChartToggle={this.handleChartToggle} />;
+      var isSelected = (this.props.selectedAttrs.indexOf(attr) != -1);
+      return <InfoColumnTh info={info}
+                           attr={attr}
+                           isSelected={isSelected}
+                           key={attr}
+                           handleChartToggle={this.handleChartToggle} />;
     }.bind(this));
 
     return (
@@ -98,15 +108,17 @@ var InfoColumnTh = React.createClass({
   propTypes: {
     attr: React.PropTypes.string.isRequired,
     info: React.PropTypes.object.isRequired,
-    handleChartToggle: React.PropTypes.func.isRequired
+    handleChartToggle: React.PropTypes.func.isRequired,
+    isSelected: React.PropTypes.bool.isRequired
   },
   render: function() {
     var tooltip = '';
     if (this.props.info) {
       tooltip = <InfoColumnTooltip info={this.props.info} attr={this.props.attr} />;
     }
+    var className = 'attr' + (this.props.isSelected ? ' selected' : '');
     return (
-      <th className="attr" onClick={this.props.handleChartToggle} data-attribute={this.props.attr}>
+      <th className={className} onClick={this.props.handleChartToggle} data-attribute={this.props.attr}>
         <span>{this.props.attr}</span>
         {tooltip}
       </th>

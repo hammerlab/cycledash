@@ -37,6 +37,9 @@ th.attr {
 th.attr > span {
     border-bottom: 1px dashed #333;
 }
+th.attr.selected {
+    background: #ddd;
+}
 .tooltip {
     display: none;
     border-radius: 3px;
