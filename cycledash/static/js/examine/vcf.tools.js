@@ -10,10 +10,10 @@ function recordKey(record) {
   // Returns a string that uniquely identifies a record in a VCF.
   //
   // Used to test for record equality.
-  return String(record.CHROM) + '-' + String(record.POS) + ':' + String(record.REF) + ':' + String(record.ALT);
+  return record.__KEY__;
 }
 
-function recordComparitor(a,b) {
+function recordComparator(a,b) {
   var aKey = recordKey(a),
       bKey = recordKey(b);
   if (aKey < bKey) {
@@ -147,48 +147,82 @@ function fiveNumber(records, attr, range) {
           thirdQuartile: thirdQuartile, max: max, total: length};
 }
 
+function assertSortedAtIndex(lst, idx) {
+  if (idx + 1 < lst.length) {
+    if (recordKey(lst[idx]) > recordKey(lst[idx + 1])) {
+      throw TypeError("List of records must be sorted.")
+    }
+  }
+}
+
+/**
+ * Returns records which are in both a and b.
+ *
+ * NB: Expects a and b be sorted on recordKey, and unique on recordKey.
+ *     Throws if unsorted (unless the unsorted portion of b is not reached).
+ *
+ * time: O(n)
+ */
 function intersection(a, b) {
-  // NB: Expects a and b be sorted on recordKey, and unique on recordKey.
-  // time: O(n)
   var ai = 0, bi = 0,
       result = [];
   while (ai < a.length && bi < b.length) {
-    if (recordKey(a[ai]) < recordKey(b[bi])) ai++;
-    else if (recordKey(a[ai]) > recordKey(b[bi])) bi++;
-    else { // they're equal
+    assertSortedAtIndex(a, ai);
+    assertSortedAtIndex(b, bi);
+
+    if (recordKey(a[ai]) < recordKey(b[bi])) {
+      ai++;
+    } else if (recordKey(a[ai]) > recordKey(b[bi])) {
+      bi++;
+    } else { // they're equal
       result.push(a[ai]);
       ai++;
       bi++;
     }
   }
-
   return result;
 }
 
+/**
+ * Returns records which are in a and not in b.
+ *
+ * NB: Expects a and b be sorted on recordKey, and unique on recordKey.
+ *     Throws if unsorted (unless the unsorted portion of b is not reached).
+ *
+ * time: O(n)
+ */
 function difference(a, b) {
-  // NB: Expects a and b be sorted on recordKey, and unique on recordKey.
-  // time: O(n)
   var ai = 0, bi = 0,
       result = [];
+  while (ai < a.length) {
+    assertSortedAtIndex(a, ai);
+    assertSortedAtIndex(b, bi);
 
-  while (ai < a.length && bi < b.length) {
-    if (recordKey(a[ai]) < recordKey(b[bi])) {
+    if (bi >= b.length) {
+      // Then we're done, as there are no more elements in b to remove from a.
+      return result.concat(a.slice(ai));
+    } else if (recordKey(a[ai]) < recordKey(b[bi])) {
+      // then a[ai] will never be found
+      // later in b, so it doesn't
+      // exist in b, and we can add it
+      // to results (and move to the next element)
       result.push(a[ai]);
       ai++;
     } else if (recordKey(a[ai]) > recordKey(b[bi])) {
+      // then we need to move forward in b to see if later items in b may be
+      // equal to those in a.
       bi++;
     } else { // they're equal
       ai++;
       bi++;
     }
   }
-
   return result;
 }
 
 var _tools = {
   recordKey: recordKey,
-  recordComparitor: recordComparitor,
+  recordComparator: recordComparator,
   recordsIn: recordsIn,
   truePositives: truePositives,
   falsePositives: falsePositives,
@@ -197,7 +231,9 @@ var _tools = {
   recall: recall,
   f1score: f1score,
   summaryStats: summary,
-  fiveNumberSummary: fiveNumber
+  fiveNumberSummary: fiveNumber,
+  difference: difference,
+  intersection: intersection
 };
 
 

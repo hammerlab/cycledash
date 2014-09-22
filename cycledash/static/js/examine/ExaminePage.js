@@ -9,6 +9,7 @@ var _ = require('underscore'),
     AttributeCharts = require('./AttributeCharts'),
     VCFTable = require('./VCFTable'),
     Widgets = require('./Widgets');
+require('./vcf.tools')(vcf);
 
 
 window.renderExaminePage = function(el, vcfPath, truthVcfPath) {
@@ -141,6 +142,11 @@ var ExaminePage = React.createClass({
    render: function() {
      var filteredRecords = this.filterRecords(this.props.records);
      var filteredTruthRecords = this.filterRecords(this.props.truthRecords, true);
+
+     // We need to sort the records on their keys so that VCF tools'
+     // {true,false}Positives works properly.
+     filteredRecords.sort(vcf.tools.recordComparator);
+     filteredTruthRecords.sort(vcf.tools.recordComparator);
 
      return (
        <div className="examine-page">

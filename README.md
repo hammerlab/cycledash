@@ -95,3 +95,15 @@ JSON should be posted to this URL with following fields:
 `tumorPath` -- The path on HDFS of the tumor BAM on which the caller was run.<br />
 `normalPath` -- The path on HDFS of the normalBAM on which the caller was run.<br />
 `params` -- Params that the caller was run with, or other notes relevant to the run.<br />
+
+
+### Testing
+
+CycleDash uses [nosetests](https://nose.readthedocs.org/en/latest/) for Python tests, and [Mocha.js](http://visionmedia.github.io/mocha/) for JavaScript testing.
+
+To run tests:
+
+```
+nosetests   # Run Python tests
+mocha       # Run JS tests
+```
