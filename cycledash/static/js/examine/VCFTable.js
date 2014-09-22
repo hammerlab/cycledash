@@ -83,7 +83,7 @@ var VCFTableHeader = React.createClass({
   render: function() {
     var attrs = this.props.attrs.map(function(attr) {
       var info =  _.findWhere(this.props.header.INFO, {ID: attr});
-      var isSelected = (this.props.selectedAttrs.indexOf(attr) != -1);
+      var isSelected = _.contains(this.props.selectedAttrs, attr);
       return <InfoColumnTh info={info}
                            attr={attr}
                            isSelected={isSelected}
@@ -116,9 +116,12 @@ var InfoColumnTh = React.createClass({
     if (this.props.info) {
       tooltip = <InfoColumnTooltip info={this.props.info} attr={this.props.attr} />;
     }
-    var className = 'attr' + (this.props.isSelected ? ' selected' : '');
+    var classes = React.addons.classSet({
+      'attr': true,
+      'selected': this.props.isSelected
+    });
     return (
-      <th className={className} onClick={this.props.handleChartToggle} data-attribute={this.props.attr}>
+      <th className={classes} onClick={this.props.handleChartToggle} data-attribute={this.props.attr}>
         <span>{this.props.attr}</span>
         {tooltip}
       </th>
