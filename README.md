@@ -53,6 +53,14 @@ gulp                    # Compile the JS and start the automatic compiler
                         # and live-reloader.
 ```
 
+To regenerate the `bundled.js` file without using the live reloader, run:
+
+```
+gulp build
+```
+
+This will also minify the JS and not create a source map.
+
 #### Python
 
 If `DEBUG` is True in your ENV.sh, then you'll get automatic code-reloading with
