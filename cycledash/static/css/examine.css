@@ -153,15 +153,15 @@ text {
     margin: 0 0 11px 11px;
 }
 
-/* RegionalStatsSummary */
-#regional-stats-container {
+/* StatsSummary */
+#stats-container {
     width: 350px;
     height: 190px;
     position: absolute;
     top: 37px;
     right: 13px;
 }
-#regional-stats-container .variant-type-tabs li {
+#stats-container .variant-type-tabs li {
     border-radius: 3px 3px 0 0;
     display: inline-block;
     margin-left: 20px;
@@ -171,26 +171,26 @@ text {
     background-color: none;
     cursor: pointer;
 }
-#regional-stats-container .variant-type-tabs li:first-child {
+#stats-container .variant-type-tabs li:first-child {
     margin-left: 0;
 }
-#regional-stats-container .variant-type-tabs li.active {
+#stats-container .variant-type-tabs li.active {
     background-color: white;
     margin-bottom: -2px;
     cursor: auto;
     border-bottom: none;
 }
-#regional-stats-container .precision-recall {
+#stats-container .precision-recall {
     border-radius: 3px 3px 0 0;
     border: 1px solid black;
     margin-top: -17px;
     padding: 13px 0px;
 }
-#regional-stats-container .precision-recall .label {
+#stats-container .precision-recall .label {
     font-weight: bold;
     font-size: 14px;
 }
-#regional-stats-container .total-records {
+#stats-container .total-records {
     text-align: center;
     border: 1px solid black;
     border-top: none;

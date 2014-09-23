@@ -7,9 +7,7 @@ var _ = require('underscore'),
     vcfTools = require('./vcf.tools');
 
 
-var cx = React.addons.classSet;
-
-var RegionalStatsSummary = React.createClass({
+var StatsSummary = React.createClass({
   propTypes: {
     hasLoaded: React.PropTypes.bool.isRequired,
     truthRecords: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
@@ -20,7 +18,7 @@ var RegionalStatsSummary = React.createClass({
   },
   render: function() {
     return (
-      <div id="regional-stats-container">
+      <div id="stats-container">
         <VariantTypeTabs variantType={this.props.variantType}
                          handleVariantTypeChange={this.props.handleVariantTypeChange} />
         <VariantStats variantType={this.props.variantType}
@@ -45,7 +43,7 @@ var VariantTypeTabs = React.createClass({
   },
   render: function() {
     var tabs = _.map(['All', 'SNV', 'INDEL', 'SV'], (vType) => {
-      var cls = cx({'active' : this.props.variantType == vType});
+      var cls = React.addons.classSet({'active' : this.props.variantType == vType});
       return (
         <li onClick={this.handleVariantTypeChange} className={cls} key={vType}>
           {vType}
@@ -139,4 +137,4 @@ var RecordsShown = React.createClass({
 });
 
 
-module.exports = RegionalStatsSummary;
+module.exports = StatsSummary;

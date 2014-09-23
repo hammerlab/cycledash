@@ -9,7 +9,7 @@ var _ = require('underscore'),
     GSTAINED_CHROMOSOMES = require('../../data/gstained-chromosomes'),
     AttributeCharts = require('./AttributeCharts'),
     VCFTable = require('./VCFTable'),
-    RegionalStatsSummary = require('./RegionalStatsSummary'),
+    StatsSummary = require('./StatsSummary'),
     Widgets = require('./Widgets'),
     vcfTools = require('./vcf.tools');
 
@@ -171,12 +171,12 @@ var ExaminePage = React.createClass({
           <h1>Examining: <small>{this.props.vcfPath}</small></h1>
           <Widgets.Loading hasLoaded={this.props.hasLoaded}
                            files={[this.props.vcfPath, this.props.truthVcfPath]} />
-          <RegionalStatsSummary hasLoaded={this.props.hasLoaded}
-                                variantType={this.state.variantType}
-                                handleVariantTypeChange={this.handleVariantTypeChange}
-                                records={filteredRecords}
-                                unfilteredRecords={this.props.records}
-                                truthRecords={filteredTruthRecords} />
+          <StatsSummary hasLoaded={this.props.hasLoaded}
+                        variantType={this.state.variantType}
+                        handleVariantTypeChange={this.handleVariantTypeChange}
+                        records={filteredRecords}
+                        unfilteredRecords={this.props.records}
+                        truthRecords={filteredTruthRecords} />
           <AttributeCharts records={filteredRecords}
                            chartAttributes={this.state.chartAttributes} />
           <Widgets.Karyogram data={this.props.karyogramData}
