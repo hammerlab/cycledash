@@ -1,24 +1,12 @@
 /** @jsx React.DOM */
+"use strict";
+
 var _ = require('underscore'),
     d3 = require('d3'),
     React = require('react/addons'),
-    idiogrammatik = require('idiogrammatik.js');
+    idiogrammatik = require('idiogrammatik.js'),
+    types = require('./types.js');
 
-
-var PositionType = React.PropTypes.shape({
-  start: React.PropTypes.oneOfType([
-    React.PropTypes.number,
-    React.PropTypes.instanceOf(null)
-  ]),
-  end: React.PropTypes.oneOfType([
-    React.PropTypes.number,
-    React.PropTypes.instanceOf(null)
-  ]),
-  chromosome: React.PropTypes.oneOfType([
-    React.PropTypes.string,
-    React.PropTypes.instanceOf(idiogrammatik.ALL_CHROMOSOMES)
-  ])
-}).isRequired;
 
 var VCFTable = React.createClass({
   propTypes: {
@@ -31,7 +19,7 @@ var VCFTable = React.createClass({
     // List of chromosomes found in the VCF
     chromosomes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     // The position object, from ExaminePage, denoting the current range selected
-    position: PositionType,
+    position: types.PositionType,
     // Function which sends the newly-selected chromosome up
     handleChromosomeChange: React.PropTypes.func.isRequired,
     // Function which sends up the new range (from the position fields)
@@ -107,12 +95,12 @@ var VCFTableHeader = React.createClass({
 var InfoColumnTh = React.createClass({
   propTypes: {
     attr: React.PropTypes.string.isRequired,
-    info: React.PropTypes.object.isRequired,
+    info: React.PropTypes.object,
     handleChartToggle: React.PropTypes.func.isRequired,
     isSelected: React.PropTypes.bool.isRequired
   },
   render: function() {
-    var tooltip = '';
+    var tooltip;
     if (this.props.info) {
       tooltip = <InfoColumnTooltip info={this.props.info} attr={this.props.attr} />;
     }
@@ -151,7 +139,7 @@ var VCFTableFilter = React.createClass({
      // List of chromosomes found in the VCF
      chromosomes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
      // The position object, from ExaminePage, denoting the current range selected
-     position: PositionType,
+     position: types.PositionType,
      // Function which sends the newly-selected chromosome up
      handleChromosomeChange: React.PropTypes.func.isRequired,
      // Function which sends up the new range (from the position fields)

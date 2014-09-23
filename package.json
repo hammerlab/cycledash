@@ -8,7 +8,7 @@
     "jquery": "^2.1.1",
     "react": "^0.11.2",
     "underscore": "^1.7.0",
-    "vcf.js": "^0.2.2"
+    "vcf.js": "^0.2.3"
   },
   "devDependencies": {
     "browserify": "^5.11.1",
