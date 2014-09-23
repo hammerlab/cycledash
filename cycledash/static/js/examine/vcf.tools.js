@@ -23,9 +23,9 @@ function trueFalsePositiveNegative(records, truthRecords) {
       falsePositives = 0,
       falseNegatives = 0;
 
-  for (let i in records) {
+  for (var i = 0; i < records.length; i++) {
     // NB: we don't ignore filtered out records
-    let record = records[i];
+    var record = records[i];
     if (match(record, truthRecords)) {
       truePositives += 1;
     } else {
