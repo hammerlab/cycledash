@@ -4,9 +4,7 @@
 var _ = require('underscore'),
     d3 = require('d3'),
     React = require('react'),
-    idiogrammatik = require('idiogrammatik.js'),
-    vcf = require('vcf.js');
-require('./vcf.tools')(vcf);
+    idiogrammatik = require('idiogrammatik.js');
 
 
 var Karyogram = React.createClass({
@@ -98,73 +96,6 @@ var Karyogram = React.createClass({
   }
 });
 
-var GlobalStatsTable = React.createClass({
-  propTypes: {
-    hasLoaded: React.PropTypes.bool.isRequired,
-    truthRecords: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-    records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-    unfilteredRecords: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
-  },
-  render: function() {
-    var truePositives = vcf.tools.truePositives(this.props.truthRecords, this.props.records).length,
-        falsePositives = vcf.tools.falsePositives(this.props.truthRecords, this.props.records).length,
-        falseNegatives = vcf.tools.falseNegatives(this.props.truthRecords, this.props.records).length;
-
-    var precision = truePositives / (truePositives + falsePositives),
-        recall = truePositives / this.props.truthRecords.length,
-        f1score = 2 * (precision * recall) / (precision + recall);
-
-    var fmt = d3.format(','),
-        dfmt = d3.format('.4f');
-
-    var numFiltered = this.props.records.length,
-        numTotal = this.props.unfilteredRecords.length;
-    var countsText = (numFiltered != numTotal ? fmt(numFiltered) + '/' : '') + fmt(numTotal);
-
-    if (!this.props.hasLoaded) {
-      fmt = dfmt = function() { return '-'; };
-      countsText = '...';
-    }
-
-    return (
-      <table className="global-stats-table">
-        <thead>
-          <tr>
-            <th></th>
-            <th className="label">True</th>
-            <th className="label">False</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr id="positive">
-            <td className="label">Postive</td>
-            <td>{fmt(truePositives)}</td>
-            <td>{fmt(falsePositives)}</td>
-          </tr>
-          <tr id="negative">
-            <td className="label">Negative</td>
-            <td className="na">-</td>
-            <td>{fmt(falseNegatives)}</td>
-          </tr>
-          <tr className="prec-rec-f1">
-            <td>Precision</td>
-            <td>Recall</td>
-            <td>f1score</td>
-          </tr>
-          <tr className="prec-rec-f1-vals">
-            <td>{dfmt(precision)}</td>
-            <td>{dfmt(recall)}</td>
-            <td>{dfmt(f1score)}</td>
-          </tr>
-          <tr className="counts">
-            <td colSpan="3">Showing {countsText} variants.</td>
-          </tr>
-        </tbody>
-      </table>
-    );
-  }
-});
-
 var Loading = React.createClass({
   propTypes: {
     hasLoaded: React.PropTypes.bool.isRequired,
@@ -189,6 +120,5 @@ var Loading = React.createClass({
 
 module.exports = {
   Karyogram: Karyogram,
-  GlobalStatsTable: GlobalStatsTable,
   Loading: Loading
 };

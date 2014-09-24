@@ -10,7 +10,7 @@ body {
 
 /* Karyogram */
 .karyogram {
-    margin-top: 121px;  /* enough space for the global stats table */
+    margin-top: 171px;  /* enough space for the global stats table */
                         /* TODO: deactivate this if AttrCharts are shown. */
     box-shadow: inset 0 0 20px #F0F0F0;
 }
@@ -153,24 +153,47 @@ text {
     margin: 0 0 11px 11px;
 }
 
-/* GlobalStatsTable */
-.global-stats-table {
-    box-shadow: inset 0 0 20px #F0F0F0;
-    width: 250px;
-    height: 100px;
+/* StatsSummary */
+#stats-container {
+    width: 350px;
+    height: 190px;
     position: absolute;
     top: 37px;
     right: 13px;
 }
-.global-stats-table .label {
-    font-weight: bold;
-    font-size: 15px;
+#stats-container .variant-type-tabs li {
+    border-radius: 3px 3px 0 0;
+    display: inline-block;
+    margin-left: 20px;
+    padding: 3px 13px;
+    border: 1px solid black;
+    border-bottom: none;
+    background-color: none;
+    cursor: pointer;
 }
-.global-stats-table tr.prec-rec-f1 td {
-    font-weight: bold;
-    font-size: 13px;
+#stats-container .variant-type-tabs li:first-child {
+    margin-left: 0;
 }
-.global-stats-table tr.prec-rec-f1-vals td {
-    font-weight: 500;
-    font-size: 13px;
+#stats-container .variant-type-tabs li.active {
+    background-color: white;
+    margin-bottom: -2px;
+    cursor: auto;
+    border-bottom: none;
+}
+#stats-container .precision-recall {
+    border-radius: 3px 3px 0 0;
+    border: 1px solid black;
+    margin-top: -17px;
+    padding: 13px 0px;
+}
+#stats-container .precision-recall .label {
+    font-weight: bold;
+    font-size: 14px;
+}
+#stats-container .total-records {
+    text-align: center;
+    border: 1px solid black;
+    border-top: none;
+    padding: 3px 0;
+    border-radius: 0 0 3px 3px;
 }

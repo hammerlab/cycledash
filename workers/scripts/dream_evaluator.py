@@ -13,7 +13,6 @@ Requires PyVCF (https://github.com/jamescasbon/PyVCF)
 # (Edited slightly for inclusion in this repository.)
 
 
-
 def match(subrec, trurec, vtype='SNV'):
     assert vtype in ('SNV', 'SV', 'INDEL')
 

@@ -113,5 +113,5 @@ To run tests:
 
 ```
 nosetests   # Run Python tests
-mocha       # Run JS tests
+gulp test   # Run JS tests
 ```

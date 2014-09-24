@@ -13,3 +13,4 @@ cycledash/static/lib/browserify/
 cycledash/static/lib/react-tools/
 cycledash/static/lib/reactify/
 cycledash/static/lib/watchify/
+test/tests.bundled.js
