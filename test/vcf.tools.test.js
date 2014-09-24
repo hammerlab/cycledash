@@ -1,44 +1,41 @@
-var assert = require("assert");
+/** @jsx */
+var assert = require("assert"),
+    vcfTools = require("../cycledash/static/js/examine/vcf.tools.js");
 
-var vcf = require("vcf.js");
-require("../cycledash/static/js/examine/vcf.tools.js")(vcf);
 
-
-var A = [{__KEY__: '2'}, {__KEY__: '4'}, {__KEY__: '5'}],
-    B = [{__KEY__: '1'}, {__KEY__: '2'}, {__KEY__: '3'}],
-    C = [{__KEY__: '5'}, {__KEY__: '3'}, {__KEY__: '4'}];
+var svs = [{__KEY__: '1', POS: 0, INFO: { END: 100}},
+           {__KEY__: '2', POS: 100, INFO: { END: 200}},
+           {__KEY__: '3', POS: 800, INFO: { END: 900}},],
+    svsTruth = [{__KEY__: '3', POS: 850,
+                 INFO: { END: 1020,
+                         CIPOS: [-100],
+                         CIEND: [100]}},
+                {__KEY__: '4', POS: 2000,
+                 INFO: { END: 2050}}],
+    snvs = [{__KEY__: 'good1'}, {__KEY__: 'bad2'},
+            {__KEY__: 'bad3'}, {__KEY__: 'good2'}, {__KEY__: 'bad1'}],
+    snvsTruth = [{__KEY__: 'good1'}, {__KEY__: 'forgot me!'}, {__KEY__: 'good2'}];
 
 describe('VCF.tools', function() {
-  describe('difference()', function() {
-    it('should return 2 records', function() {
-      var diff = vcf.tools.difference(A, B);
-      assert.equal(2, diff.length);
-    })
-    it('should contain the common records', function() {
-      var diff = vcf.tools.difference(A, B);
-      assert.equal('4', diff[0].__KEY__);
-      assert.equal('5', diff[1].__KEY__);
-    })
-    it('should throw if unsorted', function() {
-      assert.throws(function() {
-        vcf.tools.difference(B, C);
-      });
+  describe('trueFalsePositiveNegativeForSVs()', function() {
+    var trueFalsePositiveNegativeForSVs = vcfTools.trueFalsePositiveNegativeForSVs;
+    it('should return correct stats', function() {
+      var {svTruePositives, svFalsePositives, svFalseNegatives} = trueFalsePositiveNegativeForSVs(svs, svsTruth);
+
+      assert.equal(svTruePositives, 1);
+      assert.equal(svFalsePositives, 2);
+      assert.equal(svFalseNegatives, 1);
     })
   })
 
-  describe('intersection()', function() {
-    it('should return 1 record', function() {
-      var intersection = vcf.tools.intersection(A, B);
-      assert.equal(1, intersection.length);
-    })
-    it('should return the right record', function() {
-      var intersection = vcf.tools.intersection(A, B);
-      assert.equal('2', intersection[0].__KEY__);
-    })
-    it('should throw if unsorted', function() {
-      assert.throws(function() {
-        vcf.tools.intersection(C, A);
-      });
+  describe('trueFalsePositiveNegativeForSNVandINDELs()', function() {
+    var trueFalsePositiveNegativeForSNVandINDELs = vcfTools.trueFalsePositiveNegativeForSNVandINDELs;
+    it('should return correct stats', function() {
+      var {truePositives, falsePositives, falseNegatives} = trueFalsePositiveNegativeForSNVandINDELs(snvs, snvsTruth);
+
+      assert.equal(truePositives, 2);
+      assert.equal(falsePositives, 3);
+      assert.equal(falseNegatives, 1);
     })
   })
 })

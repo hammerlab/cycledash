@@ -25,25 +25,9 @@ function trueFalsePositiveNegative(records, truthRecords) {
   var [svRecords, records] = _.partition(records, (record) => record.isSv()),
       [svTruths, truths] = _.partition(truthRecords, (record) => record.isSv());
 
-  // In order to quickly find t/f/p/n we need to sort our records somehow.
-  records = _.sortBy(records, '__KEY__');
-  truths = _.sortBy(truths, '__KEY__');
-
   var {truePositives, falsePositives, falseNegatives} = trueFalsePositiveNegativeForSNVandINDELs(records, truths);
 
-  // Now we add the stats for SVs to those from SNVs and INDELs, found above.
-  var svTruePositives = 0,
-      svFalsePositives = 0,
-      svFalseNegatives = 0;
-  for (var i = 0; i < svRecords.length; i++) {
-    var record = svRecords[i];
-    if (svMatch(record, svTruths)) {
-      svTruePositives += 1;
-    } else {
-      svFalsePositives += 1;
-    }
-  }
-  svFalseNegatives = svTruths.length - svTruePositives;
+  var {svTruePositive3s, svFalsePositives, svFalseNegatives} = trueFalsePositiveNegativeForSVs(svRecords, svTruths);
 
   truePositives += svTruePositives;
   falsePositives += svFalsePositives;
@@ -53,12 +37,16 @@ function trueFalsePositiveNegative(records, truthRecords) {
 }
 
 /**
- * Fast (O(n)) way to find true/false/pos/neg for SNVs and INDELs, relies on
- * them being sorted in some consistent order. This is largely a performance
- * optimization.
+ * Fast (O(n)) way to find true/false/pos/neg for SNVs and INDELs.  This is
+ * largely a performance optimization. First sorts both arrays, so we get some
+ * slowdown there, but this is negligable compared to the alternative;
  */
-function trueFalsePositiveNegativeForSNVandINDELs(sortedRecords, sortedTruthRecords) {
+function trueFalsePositiveNegativeForSNVandINDELs(records, truthRecords) {
   var recordKey = (record) => record.__KEY__; // We sort on this lexicographic key.
+
+  // In order to quickly find t/f/p/n we need to sort our records.
+  var records = _.sortBy(records, '__KEY__'),
+      truths = _.sortBy(truthRecords, '__KEY__');
 
   // Indexes into records, truth (respectively).
   var ri = 0,
@@ -67,10 +55,6 @@ function trueFalsePositiveNegativeForSNVandINDELs(sortedRecords, sortedTruthReco
   var truePositives = 0,
       falsePositives = 0,
       falseNegatives = 0;
-
-  // aliases
-  var records = sortedRecords,
-      truths = sortedTruthRecords;
 
   while (ri < records.length) {
     if (ti >= truths.length) {
@@ -94,9 +78,33 @@ function trueFalsePositiveNegativeForSNVandINDELs(sortedRecords, sortedTruthReco
   }
 
   // The records in truth that we didn't call correctly are false negatives.
-  falseNegatives = sortedTruthRecords.length - truePositives;
+  falseNegatives = truths.length - truePositives;
 
   return {truePositives, falsePositives, falseNegatives};
+}
+
+/**
+ * Return the true/false/pos/neg for SVs.
+ *
+ * NB: O(n*m), but generally the number of SVs is low, so this should be okay
+ * for most cases.
+ */
+function trueFalsePositiveNegativeForSVs(svRecords, svTruthRecords) {
+  var svTruePositives = 0,
+      svFalsePositives = 0,
+      svFalseNegatives = 0;
+
+  for (var i = 0; i < svRecords.length; i++) {
+    var record = svRecords[i];
+    if (svMatch(record, svTruthRecords)) {
+      svTruePositives += 1;
+    } else {
+      svFalsePositives += 1;
+    }
+  }
+  svFalseNegatives = svTruthRecords.length - svTruePositives;
+
+  return {svTruePositives, svFalsePositives, svFalseNegatives};
 }
 
 /**
@@ -105,14 +113,9 @@ function trueFalsePositiveNegativeForSNVandINDELs(sortedRecords, sortedTruthReco
  * Matching means "overlapping/within the confidence interval" for SVs.
  */
 function svMatch(record, truthRecords) {
-  if (record.isSv()) {
-    var truthRecords = vcf.fetch(truthRecords, record.CHROM, record.POS, record.INFO.END),
-        truthRecords = _.filter(truthRecords, (record) => record.isSv()),
-        overlappingRecords = _.map(truthRecords, _.partial(doRecordsOverlap, record));
-    return !!_.first(overlappingRecords);
-  } else { // Then this is a SNV or INDEL, and we look for identity
-    return !!_.findWhere(truthRecords, {__KEY__: record.__KEY__});
-  }
+  var truthRecords = vcf.fetch(truthRecords, record.CHROM, record.POS, record.INFO.END),
+      overlappingRecords = _.map(truthRecords, _.partial(doRecordsOverlap, record));
+  return !!_.first(overlappingRecords);
 }
 
 /**
@@ -151,5 +154,7 @@ function doRecordsOverlap(aRecord, bRecord) {
 
 
 module.exports = {
-  trueFalsePositiveNegative: trueFalsePositiveNegative
+  trueFalsePositiveNegative: trueFalsePositiveNegative,
+  trueFalsePositiveNegativeForSVs: trueFalsePositiveNegativeForSVs,
+  trueFalsePositiveNegativeForSNVandINDELs: trueFalsePositiveNegativeForSNVandINDELs
 };
