@@ -18,20 +18,18 @@ var svs = [{__KEY__: '1', POS: 0, INFO: { END: 100}},
 
 describe('VCF.tools', function() {
   describe('trueFalsePositiveNegativeForSVs()', function() {
-    var trueFalsePositiveNegativeForSVs = vcfTools.trueFalsePositiveNegativeForSVs;
     it('should return correct stats', function() {
-      var {svTruePositives, svFalsePositives, svFalseNegatives} = trueFalsePositiveNegativeForSVs(svs, svsTruth);
+      var {truePositives, falsePositives, falseNegatives} = vcfTools.trueFalsePositiveNegativeForSvs(svs, svsTruth);
 
-      assert.equal(svTruePositives, 1);
-      assert.equal(svFalsePositives, 2);
-      assert.equal(svFalseNegatives, 1);
+      assert.equal(truePositives, 1);
+      assert.equal(falsePositives, 2);
+      assert.equal(falseNegatives, 1);
     })
   })
 
   describe('trueFalsePositiveNegativeForSNVandINDELs()', function() {
-    var trueFalsePositiveNegativeForSNVandINDELs = vcfTools.trueFalsePositiveNegativeForSNVandINDELs;
     it('should return correct stats', function() {
-      var {truePositives, falsePositives, falseNegatives} = trueFalsePositiveNegativeForSNVandINDELs(snvs, snvsTruth);
+      var {truePositives, falsePositives, falseNegatives} = vcfTools.trueFalsePositiveNegativeForSnvAndIndels(snvs, snvsTruth);
 
       assert.equal(truePositives, 2);
       assert.equal(falsePositives, 3);

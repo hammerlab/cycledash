@@ -23,15 +23,13 @@ function recordKey(record) {
 function trueFalsePositiveNegative(records, truthRecords) {
   // We can quickly get t/f/p/n for SNVs and INDELs, so pull them out:
   var [svRecords, records] = _.partition(records, (record) => record.isSv()),
-      [svTruths, truths] = _.partition(truthRecords, (record) => record.isSv());
+      [svTruths, truths] = _.partition(truthRecords, (record) => record.isSv()),
+      {truePositives, falsePositives, falseNegatives} = trueFalsePositiveNegativeForSnvAndIndels(records, truths),
+      svTFPN = trueFalsePositiveNegativeForSvs(svRecords, svTruths);
 
-  var {truePositives, falsePositives, falseNegatives} = trueFalsePositiveNegativeForSNVandINDELs(records, truths);
-
-  var {svTruePositive3s, svFalsePositives, svFalseNegatives} = trueFalsePositiveNegativeForSVs(svRecords, svTruths);
-
-  truePositives += svTruePositives;
-  falsePositives += svFalsePositives;
-  falseNegatives += svFalseNegatives;
+  truePositives += svTFPN.truePositives;
+  falsePositives += svTFPN.falsePositives;
+  falseNegatives += svTFPN.falseNegatives;
 
   return {truePositives, falsePositives, falseNegatives};
 }
@@ -41,7 +39,7 @@ function trueFalsePositiveNegative(records, truthRecords) {
  * largely a performance optimization. First sorts both arrays, so we get some
  * slowdown there, but this is negligable compared to the alternative;
  */
-function trueFalsePositiveNegativeForSNVandINDELs(records, truthRecords) {
+function trueFalsePositiveNegativeForSnvAndIndels(records, truthRecords) {
   var recordKey = (record) => record.__KEY__; // We sort on this lexicographic key.
 
   // In order to quickly find t/f/p/n we need to sort our records.
@@ -89,22 +87,22 @@ function trueFalsePositiveNegativeForSNVandINDELs(records, truthRecords) {
  * NB: O(n*m), but generally the number of SVs is low, so this should be okay
  * for most cases.
  */
-function trueFalsePositiveNegativeForSVs(svRecords, svTruthRecords) {
-  var svTruePositives = 0,
-      svFalsePositives = 0,
-      svFalseNegatives = 0;
+function trueFalsePositiveNegativeForSvs(records, truthRecords) {
+  var truePositives = 0,
+      falsePositives = 0,
+      falseNegatives = 0;
 
-  for (var i = 0; i < svRecords.length; i++) {
-    var record = svRecords[i];
-    if (svMatch(record, svTruthRecords)) {
-      svTruePositives += 1;
+  for (var i = 0; i < records.length; i++) {
+    var record = records[i];
+    if (svMatch(record, truthRecords)) {
+      truePositives += 1;
     } else {
-      svFalsePositives += 1;
+      falsePositives += 1;
     }
   }
-  svFalseNegatives = svTruthRecords.length - svTruePositives;
+  falseNegatives = truthRecords.length - truePositives;
 
-  return {svTruePositives, svFalsePositives, svFalseNegatives};
+  return {truePositives, falsePositives, falseNegatives};
 }
 
 /**
@@ -155,6 +153,6 @@ function doRecordsOverlap(aRecord, bRecord) {
 
 module.exports = {
   trueFalsePositiveNegative: trueFalsePositiveNegative,
-  trueFalsePositiveNegativeForSVs: trueFalsePositiveNegativeForSVs,
-  trueFalsePositiveNegativeForSNVandINDELs: trueFalsePositiveNegativeForSNVandINDELs
+  trueFalsePositiveNegativeForSvs: trueFalsePositiveNegativeForSvs,
+  trueFalsePositiveNegativeForSnvAndIndels: trueFalsePositiveNegativeForSnvAndIndels
 };
