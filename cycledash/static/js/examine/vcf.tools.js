@@ -17,33 +17,94 @@ function recordKey(record) {
 /**
  * Returns {truePositives, falsePositives, falseNegatives} for the given records
  * and truthRecords.
+ *
+ * NB: We don't ignore filtered out records in this calculation.
  */
 function trueFalsePositiveNegative(records, truthRecords) {
-  var truePositives = 0,
-      falsePositives = 0,
-      falseNegatives = 0;
+  // We can quickly get t/f/p/n for SNVs and INDELs, so pull them out:
+  var [svRecords, records] = _.partition(records, (record) => record.isSv()),
+      [svTruths, truths] = _.partition(truthRecords, (record) => record.isSv());
 
-  for (var i = 0; i < records.length; i++) {
-    // NB: we don't ignore filtered out records
-    var record = records[i];
-    if (match(record, truthRecords)) {
-      truePositives += 1;
+  // In order to quickly find t/f/p/n we need to sort our records somehow.
+  records = _.sortBy(records, '__KEY__');
+  truths = _.sortBy(truths, '__KEY__');
+
+  var {truePositives, falsePositives, falseNegatives} = trueFalsePositiveNegativeForSNVandINDELs(records, truths);
+
+  // Now we add the stats for SVs to those from SNVs and INDELs, found above.
+  var svTruePositives = 0,
+      svFalsePositives = 0,
+      svFalseNegatives = 0;
+  for (var i = 0; i < svRecords.length; i++) {
+    var record = svRecords[i];
+    if (svMatch(record, svTruths)) {
+      svTruePositives += 1;
     } else {
-      falsePositives += 1;
+      svFalsePositives += 1;
     }
   }
-  falseNegatives = truthRecords.length - truePositives;
+  svFalseNegatives = svTruths.length - svTruePositives;
+
+  truePositives += svTruePositives;
+  falsePositives += svFalsePositives;
+  falseNegatives += svFalseNegatives;
 
   return {truePositives, falsePositives, falseNegatives};
 }
 
 /**
- * Returns true if the record "matches" with a truth record.
- *
- * Matching means being equal to (in terms of the records' __KEY__) when looking
- * at SNV or INDEL, or overlapping when looking at SVs.
+ * Fast (O(n)) way to find true/false/pos/neg for SNVs and INDELs, relies on
+ * them being sorted in some consistent order. This is largely a performance
+ * optimization.
  */
-function match(record, truthRecords) {
+function trueFalsePositiveNegativeForSNVandINDELs(sortedRecords, sortedTruthRecords) {
+  var recordKey = (record) => record.__KEY__; // We sort on this lexicographic key.
+
+  // Indexes into records, truth (respectively).
+  var ri = 0,
+      ti = 0;
+
+  var truePositives = 0,
+      falsePositives = 0,
+      falseNegatives = 0;
+
+  // aliases
+  var records = sortedRecords,
+      truths = sortedTruthRecords;
+
+  while (ri < records.length) {
+    if (ti >= truths.length) {
+      // Then we're done going through truths, so the remaining elements in
+      // records are false.
+      falsePositives += records.slice(ri).length;
+      ri = records.length; // terminate loop
+    } else if (recordKey(records[ri]) < recordKey(truths[ti])) {
+      // Then the record at ri doesn't appear in truth, so it's false.
+      falsePositives += 1;
+      ri++;
+    } else if (recordKey(records[ri]) > recordKey(truths[ti])) {
+      // Then we need to move forward through truths to see if the record at ri
+      // is there, later.
+      ti++;
+    } else {
+      // Then they're equal, so it's a true positive.
+      truePositives += 1;
+      ri++; ti++;
+    }
+  }
+
+  // The records in truth that we didn't call correctly are false negatives.
+  falseNegatives = sortedTruthRecords.length - truePositives;
+
+  return {truePositives, falsePositives, falseNegatives};
+}
+
+/**
+ * Returns true if the SV record "matches" with a truth record.
+ *
+ * Matching means "overlapping/within the confidence interval" for SVs.
+ */
+function svMatch(record, truthRecords) {
   if (record.isSv()) {
     var truthRecords = vcf.fetch(truthRecords, record.CHROM, record.POS, record.INFO.END),
         truthRecords = _.filter(truthRecords, (record) => record.isSv()),
