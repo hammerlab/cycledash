@@ -30,16 +30,7 @@ function chromosomeComparator(a, b) {
 }
 
 function recordComparator(a, b) {
-  if (a.CHROM != b.CHROM) {
-    return chromosomeComparator(a.CHROM, b.CHROM);
-  } else {
-    if (a.POS > b.POS)
-      return 1;
-    else if (a.POS < b.POS)
-      return -1;
-    else
-      return 0;
-  }
+  return chromosomeComparator(a.CHROM, b.CHROM) || (a.POS - b.POS);
 }
 
 /**
