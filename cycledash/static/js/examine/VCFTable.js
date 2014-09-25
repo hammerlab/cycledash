@@ -5,7 +5,8 @@ var _ = require('underscore'),
     d3 = require('d3'),
     React = require('react/addons'),
     idiogrammatik = require('idiogrammatik.js'),
-    types = require('./types.js');
+    types = require('./types.js'),
+    $ = require('jquery');
 
 
 var VCFTable = React.createClass({

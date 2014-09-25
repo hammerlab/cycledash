@@ -1,7 +1,10 @@
 /** @jsx React.DOM */
 "use strict";
 
-var React = require('react');
+var React = require('react'),
+    $ = require('jquery');
+
+require('jquery-mousewheel')($);
 
 
 var BioDalliance = React.createClass({
@@ -25,7 +28,7 @@ var BioDalliance = React.createClass({
     }
 
     return (
-      <div className="variant-inspector" style={style}>
+      <div className="variant-inspector" ref="inspector" style={style}>
         <a href='#' className="close-button" onClick={this.handleClose}>✕</a>
         <div id="svgHolder" />
       </div>
@@ -123,9 +126,30 @@ var BioDalliance = React.createClass({
   },
   componentDidMount: function() {
     this.update();
+
+    $(this.refs.inspector.getDOMNode()).on('mousewheel.biodalliance', (e) => {
+      var $target = $(e.target);
+      var $tiers = $target.parents('.tier.pileup');
+      if ($tiers.length == 0) {
+        e.preventDefault();
+      }
+    }).on('mousewheel.biodalliance', '.tier.pileup', (e, d) => {
+      // See http://stackoverflow.com/q/5802467/388951
+      var t = $(e.currentTarget);
+      if (d > 0 && t.scrollTop() === 0) {
+        e.preventDefault();
+      } else {
+        if (d < 0 && (t.scrollTop() == t.get(0).scrollHeight - t.innerHeight())) {
+          e.preventDefault();
+        }
+      }
+    });
   },
   componentDidUpdate: function() {
     this.update();
+  },
+  componentWillUnmount: function() {
+    $(this.props.inspector.getDOMNode()).off('mousewheel.biodalliance');
   },
   shouldComponentUpdate: function(nextProps, nextState) {
     return (nextProps.selectedRecord != this.props.selectedRecord);

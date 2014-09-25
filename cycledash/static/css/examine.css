@@ -207,7 +207,7 @@ text {
   position: fixed;
   left: 0;
   right: 0;
-  top: 200px;
+  height: 850px;
   bottom: 0;
   background-color: white;
 }
