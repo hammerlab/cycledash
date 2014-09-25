@@ -18,6 +18,8 @@ var BioDalliance = React.createClass({
     tumorBamPath:  React.PropTypes.string,
     // Event handlers
     handleClose: React.PropTypes.func.isRequired,
+    handlePreviousRecord: React.PropTypes.func.isRequired,
+    handleNextRecord: React.PropTypes.func.isRequired,
     // Configuration
     igvHttpfsUrl: React.PropTypes.string.isRequired
   },
@@ -30,6 +32,8 @@ var BioDalliance = React.createClass({
     return (
       <div className="variant-inspector" ref="inspector" style={style}>
         <a href='#' className="close-button" onClick={this.handleClose}>✕</a>
+        <a href='#' className="left-button" onClick={this.handleLeft}>←</a>
+        <a href='#' className="right-button" onClick={this.handleRight}>→</a>
         <div id="svgHolder" />
       </div>
     );
@@ -41,6 +45,14 @@ var BioDalliance = React.createClass({
   handleClose: function(e) {
     e.preventDefault();
     this.props.handleClose();
+  },
+  handleLeft: function(e) {
+    e.preventDefault();
+    this.props.handlePreviousRecord();
+  },
+  handleRight: function(e) {
+    e.preventDefault();
+    this.props.handleNextRecord();
   },
   browser: null,
   lazilyCreateDalliance: function() {
@@ -142,6 +154,17 @@ var BioDalliance = React.createClass({
         if (d < 0 && (t.scrollTop() == t.get(0).scrollHeight - t.innerHeight())) {
           e.preventDefault();
         }
+      }
+    });
+
+    $(window).on('keydown', (e) => {
+      if (e.which == 27 /* esc */ && this.props.selectedRecord) {
+        e.preventDefault();
+        this.props.handleClose();
+      } else if (e.which == 37 /* left arrow */) {
+        this.handleLeft(e);
+      } else if (e.which == 39 /* right arrow */) {
+        this.handleRight(e);
       }
     });
   },
