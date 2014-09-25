@@ -8,7 +8,7 @@ var _ = require('underscore'),
     vcf = require('vcf.js'),
     GSTAINED_CHROMOSOMES = require('../../data/gstained-chromosomes'),
     AttributeCharts = require('./AttributeCharts'),
-    BioDalliance = require('./BioDalliance').BioDalliance,
+    BioDalliance = require('./BioDalliance'),
     VCFTable = require('./VCFTable'),
     StatsSummary = require('./StatsSummary'),
     Widgets = require('./Widgets'),
@@ -99,10 +99,6 @@ var ExaminePage = React.createClass({
   handleSelectRecord: function(record) {
     this.setState({selectedRecord: record});
     this.refs.vcfTable.scrollRecordToTop(record);
-  },
-  handleNextVariant: function() {
-  },
-  handlePreviousVariant: function() {
   },
   togglePresence: function(list, el) {
     // Adds el to list if it's not in list, else removed it from list.
@@ -222,8 +218,6 @@ var ExaminePage = React.createClass({
                         normalBamPath={this.props.normalBamPath}
                         tumorBamPath={this.props.tumorBamPath}
                         selectedRecord={this.state.selectedRecord}
-                        handleNextVariant={this.handleNextVariant}
-                        handlePreviousVariant={this.handlePreviousVariant}
                         handleClose={() => this.handleSelectRecord(null)} />
         </div>
      );

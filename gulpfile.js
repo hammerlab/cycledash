@@ -69,7 +69,10 @@ gulp.task('watch', function() {
 
 // Default task which compiles the JS and then watches the JS and CSS for
 // changes.
-gulp.task('default', ['watch', 'js', 'copydalliance']);
+gulp.task('default', ['watch', 'js']);
+
+// Build production resources and copy them into the serving directory.
+gulp.task('prod', ['buildjs', 'dalliance'])
 
 // Task which builds the production-ready JS.
 // Minified, JSX & ES6, and browserified.
@@ -84,7 +87,7 @@ gulp.task('build', function() {
 });
 
 // Copy over prebuilt Biodalliance files from node_modules.
-gulp.task('copydalliance', function() {
+gulp.task('dalliance', function() {
   gulp.src('./node_modules/dalliance/{css,fonts,img}/*.*',
            {base: './node_modules/dalliance'})
     .pipe(gulp.dest('./cycledash/static/dalliance'));
@@ -95,10 +98,13 @@ gulp.task('copydalliance', function() {
 });
 
 gulp.task('help', function() {
-  console.log();
-  console.log("The following tasks may be run:");
-  console.log("  default  -- generates development JS and listens, refreshing the");
-  console.log("              browser upon CSS or JS source changes.");
-  console.log("  build    -- compiles production-ready JS");
-  console.log();
+  console.log([
+      '',
+      'The following tasks may be run:',
+      '  default    -- generates development JS and listens, refreshing',
+      '                the browser upon CSS or JS source changes.',
+      '  prod       -- all resources needed for production deployment.',
+      '  build      -- compile production-ready JS',
+      '  dalliance  -- Move biodalliance JS/CSS into place',
+      ''].join('\n'));
 });

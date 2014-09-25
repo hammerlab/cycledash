@@ -1,11 +1,10 @@
 /** @jsx React.DOM */
 "use strict";
 
-var _ = require('underscore'),
-    d3 = require('d3'),
-    React = require('react');
+var React = require('react');
 
 // Convert an HDFS path to a browser-accessible URL via igv-httpfs.
+// TODO: make this configurable, see issues #81
 function hdfsUrl(path) {
   return 'http://hammerlab-dev3.hpc.mssm.edu:9876' + path;
 }
@@ -20,10 +19,7 @@ var BioDalliance = React.createClass({
     truthVcfPath: React.PropTypes.string.isRequired,
     normalBamPath:  React.PropTypes.string,
     tumorBamPath:  React.PropTypes.string,
-
     // Event handlers
-    handleNextVariant: React.PropTypes.func.isRequired,
-    handlePreviousVariant: React.PropTypes.func.isRequired,
     handleClose: React.PropTypes.func.isRequired
   },
   render: function() {
@@ -51,7 +47,6 @@ var BioDalliance = React.createClass({
           {
             name: 'Genome',
             twoBitURI: 'http://www.biodalliance.org/datasets/hg19.2bit',
-            // twoBitURI: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit',
             tier_type: 'sequence'
           },
           {
@@ -69,13 +64,6 @@ var BioDalliance = React.createClass({
     ];
     if (this.props.normalBamPath) {
       sources = sources.concat(
-          // (coverage bar charts would be nice, but create duplicate XHRs)
-          // {
-          //   name: 'Normal',
-          //   bamURI: hdfsUrl(this.props.normalBamPath),
-          //   tier_type: 'base-coverage',
-          //   style: coverageStyle
-          // },
           {
             name: 'Normal',
             bamURI: hdfsUrl(this.props.normalBamPath),
@@ -86,12 +74,6 @@ var BioDalliance = React.createClass({
     }
     if (this.props.tumorBamPath) {
       sources = sources.concat(
-          // {
-          //   name: 'Tumor',
-          //   bamURI: hdfsUrl(this.props.tumorBamPath),
-          //   tier_type: 'base-coverage',
-          //   style: coverageStyle
-          // },
           {
             name: 'Tumor',
             bamURI: hdfsUrl(this.props.tumorBamPath),
@@ -243,6 +225,4 @@ var coverageStyle = [
 ];
 
 
-module.exports = {
-  BioDalliance
-};
+module.exports = BioDalliance;

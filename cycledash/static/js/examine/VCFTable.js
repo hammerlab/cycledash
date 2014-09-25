@@ -33,6 +33,16 @@ var VCFTable = React.createClass({
     // The VCF header, used to get information about the INFO fields
     header: React.PropTypes.object.isRequired
   },
+  // Call this to scroll a record to somewhere close to the top of the page.
+  scrollRecordToTop: function(record) {
+    var idx = this.props.records.indexOf(record);
+    if (idx >= 0) {
+      var row = $(this.refs.vcfTable.getDOMNode()).find('tr').get(idx);
+      $('html,body').animate({
+        scrollTop: $(row).offset().top - 70
+      }, 250 /* ms */);
+    }
+  },
   render: function() {
     return (
       <table className="vcf-table" ref="vcfTable">
@@ -52,16 +62,6 @@ var VCFTable = React.createClass({
                       handleSelectRecord={this.props.handleSelectRecord} />
       </table>
     );
-  },
-  // Call this to scroll a record to somewhere close to the top of the page.
-  scrollRecordToTop: function(record) {
-    var idx = this.props.records.indexOf(record);
-    if (idx >= 0) {
-      var row = $(this.refs.vcfTable.getDOMNode()).find('tr').get(idx);
-      $('html,body').animate({
-        scrollTop: $(row).offset().top - 70
-      }, 250 /* ms */);
-    }
   }
 });
 
@@ -243,20 +243,6 @@ var VCFTableBody = React.createClass({
   getInitialState: function() {
     return {numRowsToShow: 100};
   },
-  render: function() {
-    var selectedRecord = this.props.selectedRecord;
-    var selKey = selectedRecord ? selectedRecord.__KEY__ : null;
-    var rows = _.first(this.props.records, this.state.numRowsToShow)
-        .map((record, idx) => <VCFRecord record={record}
-                                         key={record.__KEY__}
-                                         attrs={this.props.attrs}
-                                         isSelected={record.__KEY__ == selKey} />);
-    return (
-      <tbody ref="lazyload">
-        {rows}
-      </tbody>
-    );
-  },
   componentDidMount: function() {
     $(window).on('scroll.vcftable', () => {
       // Show more rows if the browser viewport is close to the bottom and
@@ -271,15 +257,28 @@ var VCFTableBody = React.createClass({
       }
     });
 
-    var component = this;
-    $(this.refs.lazyload.getDOMNode()).on('click', 'tr', function(e) {
-      component.props.handleSelectRecord(
-          component.props.records[$(this).index()]);
+    $(this.refs.lazyload.getDOMNode()).on('click', 'tr', (e) => {
+      this.props.handleSelectRecord(
+          this.props.records[$(e.currentTarget).index()]);
     });
   },
   componentWillUnmount: function() {
     $(window).off('scroll.vcftable');
     $(this.refs.lazyload.getDOMNode()).off('click');
+  },
+  render: function() {
+    var selectedRecord = this.props.selectedRecord;
+    var selKey = selectedRecord ? selectedRecord.__KEY__ : null;
+    var rows = _.first(this.props.records, this.state.numRowsToShow)
+        .map((record, idx) => <VCFRecord record={record}
+                                         key={record.__KEY__}
+                                         attrs={this.props.attrs}
+                                         isSelected={record.__KEY__ == selKey} />);
+    return (
+      <tbody ref="lazyload">
+        {rows}
+      </tbody>
+    );
   }
 });
 

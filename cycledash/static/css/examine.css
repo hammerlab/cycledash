@@ -228,10 +228,10 @@ text {
 .dalliance-root {
   max-height: 80000px !important;
 }
-*.dalliance .tier-holder {
+.dalliance .tier-holder {
   overflow-y: hidden;
 }
-*.dalliance .tier.pileup {
+.dalliance .tier.pileup {
   border-top: 1px solid black;
   overflow-y: auto;
   max-height: 300px;

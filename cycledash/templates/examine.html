@@ -18,7 +18,6 @@
 
 <script type="text/javascript" src="/static/js/dist/bundled.js"></script>
 <script>
-run = {{run|tojson}};
 window.renderExaminePage(document.getElementById('examine'),
                          {{ run['vcfPath'] | tojson }},
                          {{ run['truthVcfPath'] | tojson }},
