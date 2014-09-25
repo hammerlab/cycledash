@@ -72,7 +72,7 @@ gulp.task('watch', function() {
 gulp.task('default', ['watch', 'js']);
 
 // Build production resources and copy them into the serving directory.
-gulp.task('prod', ['buildjs', 'dalliance'])
+gulp.task('prod', ['build', 'dalliance'])
 
 // Task which builds the production-ready JS.
 // Minified, JSX & ES6, and browserified.
