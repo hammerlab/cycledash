@@ -60,12 +60,14 @@ var ExaminePage = React.createClass({
 
     $.when(deferredVcf(this.props.vcfPath), deferredVcf(this.props.truthVcfPath))
       .done((vcfData, truthVcfData) => {
-        var records = vcfData.records;
+        var records = vcfData.records,
+            chromosomes = _.uniq(records.map((r) => r.CHROM));
+        chromosomes.sort(vcfTools.chromosomeComparator);
         this.setProps({
           hasLoaded: true,
           records: records,
           truthRecords: truthVcfData.records,
-          chromosomes: chromosomesFrom(records),
+          chromosomes: chromosomes,
           attrs: _.keys(records[0].INFO),
           header: vcfData.header
         });
@@ -166,6 +168,9 @@ var ExaminePage = React.createClass({
                                                   this.isRecordWithinRange,
                                                   this.isRecordCorrectVariantType);
 
+    filteredRecords.sort(vcfTools.recordComparator);
+    filteredTruthRecords.sort(vcfTools.recordComparator);
+
     return (
         <div className="examine-page">
           <h1>Examining: <small>{this.props.vcfPath}</small></h1>
@@ -199,17 +204,6 @@ var ExaminePage = React.createClass({
      );
    }
 });
-
-function chromosomesFrom(records) {
-  return _.reduce(records, function(acc, val, key) {
-     var chromosome = val.CHROM;
-     if (acc.mem[chromosome] === undefined) {
-       acc.mem[chromosome] = true;
-       acc.chromosomes.push(chromosome);
-     }
-     return acc;
-   }, {chromosomes: [], mem: {}}).chromosomes;
-}
 
 function initializeKaryogram() {
   return idiogrammatik()

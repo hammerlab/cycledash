@@ -14,6 +14,25 @@ function recordKey(record) {
   return record.__KEY__;
 }
 
+function chromosomeComparator(a, b) {
+  var aChr = Number(a) || a,
+      bChr = Number(b) || b;
+  if (aChr == bChr)
+    return 0;
+  else if (_.isString(aChr) && _.isString(bChr))
+    return aChr < bChr ? -1 : 1; // we want alphabetical ordering
+  else if (_.isNumber(aChr) && _.isNumber(bChr))
+    return aChr > bChr ? 1 : -1;
+  else if (_.isString(aChr))
+    return 1
+  else
+    return -1;
+}
+
+function recordComparator(a, b) {
+  return chromosomeComparator(a.CHROM, b.CHROM) || (a.POS - b.POS);
+}
+
 /**
  * Returns {truePositives, falsePositives, falseNegatives} for the given records
  * and truthRecords.
@@ -154,5 +173,7 @@ function doRecordsOverlap(aRecord, bRecord) {
 module.exports = {
   trueFalsePositiveNegative: trueFalsePositiveNegative,
   trueFalsePositiveNegativeForSvs: trueFalsePositiveNegativeForSvs,
-  trueFalsePositiveNegativeForSnvAndIndels: trueFalsePositiveNegativeForSnvAndIndels
+  trueFalsePositiveNegativeForSnvAndIndels: trueFalsePositiveNegativeForSnvAndIndels,
+  chromosomeComparator: chromosomeComparator,
+  recordComparator: recordComparator
 };
