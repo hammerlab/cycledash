@@ -11,10 +11,18 @@
 {{ nav("examine") }}
 <div id="examine"></div>
 
+<link rel="stylesheet" href="/static/dalliance/css/bootstrap-scoped.css" />
+<link rel="stylesheet" href="/static/dalliance/css/dalliance-scoped.css" />
+<link rel="stylesheet" href="/static/dalliance/css/font-awesome.min.css" />
+<script type="text/javascript" src="/static/dalliance/dalliance-all.js"></script>
+
 <script type="text/javascript" src="/static/js/dist/bundled.js"></script>
 <script>
 window.renderExaminePage(document.getElementById('examine'),
                          {{ run['vcfPath'] | tojson }},
-                         {{ run['truthVcfPath'] | tojson }});
+                         {{ run['truthVcfPath'] | tojson }},
+                         {{ run['normalPath'] | tojson }},
+                         {{ run['tumorPath'] | tojson }},
+                         {{ config['IGV_HTTPFS_URL'] | tojson }});
 </script>
 {% endblock%}

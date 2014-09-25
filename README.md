@@ -26,6 +26,7 @@ For hammerlab folks, you'll want to set `WEBHDFS_URL` to
 To start the application server:
 
 ```bash
+gulp prod
 ./run.sh
 ```
 
@@ -60,6 +61,13 @@ gulp build
 ```
 
 This will also minify the JS and not create a source map.
+
+To update BioDalliance, run:
+
+```
+npm install
+gulp dalliance
+```
 
 #### Python
 

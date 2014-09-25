@@ -8,15 +8,20 @@ var _ = require('underscore'),
     vcf = require('vcf.js'),
     GSTAINED_CHROMOSOMES = require('../../data/gstained-chromosomes'),
     AttributeCharts = require('./AttributeCharts'),
+    BioDalliance = require('./BioDalliance'),
     VCFTable = require('./VCFTable'),
     StatsSummary = require('./StatsSummary'),
     Widgets = require('./Widgets'),
     vcfTools = require('./vcf.tools');
 
 
-window.renderExaminePage = function(el, vcfPath, truthVcfPath) {
+window.renderExaminePage = function(el, vcfPath, truthVcfPath,
+                                    normalBamPath, tumorBamPath, igvHttpfsUrl) {
   React.renderComponent(<ExaminePage vcfPath={vcfPath}
                                      truthVcfPath={truthVcfPath}
+                                     normalBamPath={normalBamPath}
+                                     tumorBamPath={tumorBamPath}
+                                     igvHttpfsUrl={igvHttpfsUrl}
                                      karyogramData={GSTAINED_CHROMOSOMES} />, el);
 }
 
@@ -28,15 +33,19 @@ var ExaminePage = React.createClass({
     karyogramData: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     vcfPath: React.PropTypes.string.isRequired,
     truthVcfPath: React.PropTypes.string.isRequired,
+    normalBamPath:  React.PropTypes.string,
+    tumorBamPath:  React.PropTypes.string,
     chromosomes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-    truthRecords: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
+    truthRecords: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+    igvHttpfsUrl: React.PropTypes.string.isRequired
   },
   getInitialState: function() {
     return {chartAttributes: [],
             variantType: 'All',
             filters: {},
+            selectedRecord: null,
             position: {start: null,
                        end: null,
                        chromosome: idiogrammatik.ALL_CHROMOSOMES}};
@@ -88,6 +97,10 @@ var ExaminePage = React.createClass({
   },
   handleVariantTypeChange: function(variantType) {
     this.setState({variantType: variantType});
+  },
+  handleSelectRecord: function(record) {
+    this.setState({selectedRecord: record});
+    this.refs.vcfTable.scrollRecordToTop(record);
   },
   togglePresence: function(list, el) {
     // Adds el to list if it's not in list, else removed it from list.
@@ -188,18 +201,28 @@ var ExaminePage = React.createClass({
                              karyogram={this.props.karyogram}
                              position={this.state.position}
                              handleRangeChange={this.handleRangeChange} />
-          <VCFTable hasLoaded={this.props.hasLoaded}
+          <VCFTable ref="vcfTable"
+                    hasLoaded={this.props.hasLoaded}
                     records={filteredRecords}
                     position={this.state.position}
                     header={this.props.header}
                     attrs={this.props.attrs}
                     selectedAttrs={this.state.chartAttributes}
+                    selectedRecord={this.state.selectedRecord}
+                    chromosomes={this.props.chromosomes}
+                    karyogram={this.props.karyogram}
                     handleChartChange={this.handleChartChange}
                     handleFilterUpdate={this.handleFilterUpdate}
                     handleChromosomeChange={this.handleChromosomeChange}
                     handleRangeChange={this.handleRangeChange}
-                    chromosomes={this.props.chromosomes}
-                    karyogram={this.props.karyogram} />
+                    handleSelectRecord={this.handleSelectRecord} />
+          <BioDalliance vcfPath={this.props.vcfPath}
+                        truthVcfPath={this.props.truthVcfPath}
+                        normalBamPath={this.props.normalBamPath}
+                        tumorBamPath={this.props.tumorBamPath}
+                        igvHttpfsUrl={this.props.igvHttpfsUrl}
+                        selectedRecord={this.state.selectedRecord}
+                        handleClose={() => this.handleSelectRecord(null)} />
         </div>
      );
    }

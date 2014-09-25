@@ -126,6 +126,10 @@ thead, tbody, table {
     width: 100%;
 }
 
+tr.selected {
+  background-color: lightblue;
+}
+
 /* AttributeCharts */
 .attr-chart h3 {
     font-size: 28px;
@@ -196,4 +200,40 @@ text {
     border-top: none;
     padding: 3px 0;
     border-radius: 0 0 3px 3px;
+}
+
+/* BioDalliance */
+.variant-inspector {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 200px;
+  bottom: 0;
+  background-color: white;
+}
+.variant-inspector .close-button {
+  float: right;
+  text-decoration: none;
+  margin-right: 5px;
+}
+
+#svgHolder {
+  position: relative;
+  bottom: 0;
+  border: 1px solid #ccc;
+  overflow-y: auto;
+  margin: 0 5%;
+  padding: 10px;
+}
+.dalliance-root {
+  max-height: 80000px !important;
+}
+.dalliance .tier-holder {
+  overflow-y: hidden;
+}
+.dalliance .tier.pileup {
+  border-top: 1px solid black;
+  overflow-y: auto;
+  max-height: 300px;
+  min-height: 300px;
 }

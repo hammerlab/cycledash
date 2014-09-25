@@ -14,6 +14,8 @@ var VCFTable = React.createClass({
     attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     // Subset of attrs which are currently selected.
     selectedAttrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
+    // Currently selected VCF record.
+    selectedRecord: React.PropTypes.object,
     // Function which takes a chart attribute name and propagates the change up
     handleChartChange: React.PropTypes.func.isRequired,
     // List of chromosomes found in the VCF
@@ -24,17 +26,26 @@ var VCFTable = React.createClass({
     handleChromosomeChange: React.PropTypes.func.isRequired,
     // Function which sends up the new range (from the position fields)
     handleRangeChange: React.PropTypes.func.isRequired,
-    // The idiogrammtik object used to translate base pairs from absolute to
-    // relative positions -- slated to be removed soon. TODO(ihodes)
-    karyogram: React.PropTypes.func.isRequired,
+    // Function which sends up the a newly selected record.
+    handleSelectRecord: React.PropTypes.func.isRequired,
     // List of VCF records
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     // The VCF header, used to get information about the INFO fields
     header: React.PropTypes.object.isRequired
   },
+  // Call this to scroll a record to somewhere close to the top of the page.
+  scrollRecordToTop: function(record) {
+    var idx = this.props.records.indexOf(record);
+    if (idx >= 0) {
+      var row = $(this.refs.vcfTable.getDOMNode()).find('tr').get(idx);
+      $('html,body').animate({
+        scrollTop: $(row).offset().top - 70
+      }, 250 /* ms */);
+    }
+  },
   render: function() {
     return (
-      <table className="vcf-table">
+      <table className="vcf-table" ref="vcfTable">
         <VCFTableHeader attrs={this.props.attrs}
                         selectedAttrs={this.props.selectedAttrs}
                         header={this.props.header}
@@ -44,10 +55,11 @@ var VCFTable = React.createClass({
                         handleChromosomeChange={this.props.handleChromosomeChange}
                         position={this.props.position}
                         handleRangeChange={this.props.handleRangeChange}
-                        attrs={this.props.attrs}
-                        karyogram={this.props.karyogram}/>
+                        attrs={this.props.attrs} />
         <VCFTableBody records={this.props.records}
-                      attrs={this.props.attrs} />
+                      attrs={this.props.attrs}
+                      selectedRecord={this.props.selectedRecord}
+                      handleSelectRecord={this.props.handleSelectRecord} />
       </table>
     );
   }
@@ -144,9 +156,6 @@ var VCFTableFilter = React.createClass({
      handleChromosomeChange: React.PropTypes.func.isRequired,
      // Function which sends up the new range (from the position fields)
      handleRangeChange: React.PropTypes.func.isRequired,
-     // The idiogrammtik object used to translate base pairs from absolute to
-     // relative positions -- slated to be removed soon. TODO(ihodes)
-     karyogram: React.PropTypes.func.isRequired,
      // Array of attribute names from the INFO field of the VCF's records
      attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired
    },
@@ -225,20 +234,14 @@ var VCFTableBody = React.createClass({
     // List of VCF records
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     // Array of attribute names from the INFO field of the VCF's records
-    attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired
+    attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
+    // Currently selected VCF record (null = no selection)
+    selectedRecord: React.PropTypes.object,
+    // Function which sends up the a newly selected record.
+    handleSelectRecord: React.PropTypes.func.isRequired
   },
   getInitialState: function() {
     return {numRowsToShow: 100};
-  },
-  render: function() {
-    var rows = _.first(this.props.records, this.state.numRowsToShow)
-        .map((record, idx) =>
-             <VCFRecord record={record} key={record.__KEY__} attrs={this.props.attrs}/>);
-    return (
-      <tbody ref="lazyload">
-        {rows}
-      </tbody>
-    );
   },
   componentDidMount: function() {
     $(window).on('scroll.vcftable', () => {
@@ -253,9 +256,29 @@ var VCFTableBody = React.createClass({
         this.setState({numRowsToShow: this.state.numRowsToShow + 100});
       }
     });
+
+    $(this.refs.lazyload.getDOMNode()).on('click', 'tr', (e) => {
+      this.props.handleSelectRecord(
+          this.props.records[$(e.currentTarget).index()]);
+    });
   },
   componentWillUnmount: function() {
     $(window).off('scroll.vcftable');
+    $(this.refs.lazyload.getDOMNode()).off('click');
+  },
+  render: function() {
+    var selectedRecord = this.props.selectedRecord;
+    var selKey = selectedRecord ? selectedRecord.__KEY__ : null;
+    var rows = _.first(this.props.records, this.state.numRowsToShow)
+        .map((record, idx) => <VCFRecord record={record}
+                                         key={record.__KEY__}
+                                         attrs={this.props.attrs}
+                                         isSelected={record.__KEY__ == selKey} />);
+    return (
+      <tbody ref="lazyload">
+        {rows}
+      </tbody>
+    );
   }
 });
 
@@ -264,15 +287,18 @@ var VCFRecord = React.createClass({
      // A VCF record
      record: React.PropTypes.object.isRequired,
      // Array of attribute names from the INFO field of the VCF's records
-     attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired
+     attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
+     // Whether this variant is currently selected.
+     isSelected: React.PropTypes.bool.isRequired
    },
    render: function() {
      var attrs = this.props.attrs.map(function(attr) {
        var val = this.props.record.INFO[attr];
        return <td key={attr}>{String(val)}</td>;
      }.bind(this));
+     var classes = React.addons.classSet({selected: this.props.isSelected});
      return (
-       <tr>
+       <tr className={classes}>
          <td>{this.props.record.CHROM}</td>
          <td className="pos">{this.props.record.POS}</td>
          <td>{this.props.record.REF}/{this.props.record.ALT}</td>
