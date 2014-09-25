@@ -69,7 +69,7 @@ gulp.task('watch', function() {
 
 // Default task which compiles the JS and then watches the JS and CSS for
 // changes.
-gulp.task('default', ['watch', 'js']);
+gulp.task('default', ['watch', 'js', 'copydalliance']);
 
 // Task which builds the production-ready JS.
 // Minified, JSX & ES6, and browserified.
@@ -81,6 +81,17 @@ gulp.task('build', function() {
     .bundle()
     .pipe(source('bundled.js'))
     .pipe(gulp.dest(PATHS.examineDest))
+});
+
+// Copy over prebuilt Biodalliance files from node_modules.
+gulp.task('copydalliance', function() {
+  gulp.src('./node_modules/dalliance/{css,fonts,img}/*.*',
+           {base: './node_modules/dalliance'})
+    .pipe(gulp.dest('./cycledash/static/dalliance'));
+
+  gulp.src('./node_modules/dalliance/build/*.js',
+           {base: './node_modules/dalliance/build'})
+    .pipe(gulp.dest('./cycledash/static/dalliance'));
 });
 
 gulp.task('help', function() {
