@@ -3,12 +3,6 @@
 
 var React = require('react');
 
-// Convert an HDFS path to a browser-accessible URL via igv-httpfs.
-// TODO: make this configurable, see issues #81
-function hdfsUrl(path) {
-  return 'http://hammerlab-dev3.hpc.mssm.edu:9876' + path;
-}
-
 
 var BioDalliance = React.createClass({
   propTypes: {
@@ -20,7 +14,9 @@ var BioDalliance = React.createClass({
     normalBamPath:  React.PropTypes.string,
     tumorBamPath:  React.PropTypes.string,
     // Event handlers
-    handleClose: React.PropTypes.func.isRequired
+    handleClose: React.PropTypes.func.isRequired,
+    // Configuration
+    igvHttpfsUrl: React.PropTypes.string.isRequired
   },
   render: function() {
     var style = {};
@@ -34,6 +30,10 @@ var BioDalliance = React.createClass({
         <div id="svgHolder" />
       </div>
     );
+  },
+  // Convert an HDFS path to a browser-accessible URL via igv-httpfs.
+  hdfsUrl: function(path) {
+    return this.props.igvHttpfsUrl + path;
   },
   handleClose: function(e) {
     e.preventDefault();
@@ -51,13 +51,13 @@ var BioDalliance = React.createClass({
           },
           {
             name: 'Truth VCF',
-            uri: hdfsUrl(this.props.truthVcfPath),
+            uri: this.hdfsUrl(this.props.truthVcfPath),
             tier_type: 'memstore',
             payload: 'vcf'
           },
           {
             name: 'Run VCF',
-            uri: hdfsUrl(this.props.vcfPath),
+            uri: this.hdfsUrl(this.props.vcfPath),
             tier_type: 'memstore',
             payload: 'vcf'
           }
@@ -66,7 +66,7 @@ var BioDalliance = React.createClass({
       sources = sources.concat(
           {
             name: 'Normal',
-            bamURI: hdfsUrl(this.props.normalBamPath),
+            bamURI: this.hdfsUrl(this.props.normalBamPath),
             tier_type: 'bam',
             style: bamStyle,
             className: 'pileup'
@@ -76,7 +76,7 @@ var BioDalliance = React.createClass({
       sources = sources.concat(
           {
             name: 'Tumor',
-            bamURI: hdfsUrl(this.props.tumorBamPath),
+            bamURI: this.hdfsUrl(this.props.tumorBamPath),
             tier_type: 'bam',
             style: bamStyle,
             className: 'pileup'

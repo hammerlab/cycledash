@@ -16,11 +16,12 @@ var _ = require('underscore'),
 
 
 window.renderExaminePage = function(el, vcfPath, truthVcfPath,
-                                    normalBamPath, tumorBamPath) {
+                                    normalBamPath, tumorBamPath, igvHttpfsUrl) {
   React.renderComponent(<ExaminePage vcfPath={vcfPath}
                                      truthVcfPath={truthVcfPath}
                                      normalBamPath={normalBamPath}
                                      tumorBamPath={tumorBamPath}
+                                     igvHttpfsUrl={igvHttpfsUrl}
                                      karyogramData={GSTAINED_CHROMOSOMES} />, el);
 }
 
@@ -37,7 +38,8 @@ var ExaminePage = React.createClass({
     chromosomes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-    truthRecords: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
+    truthRecords: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+    igvHttpfsUrl: React.PropTypes.string.isRequired
   },
   getInitialState: function() {
     return {chartAttributes: [],
@@ -218,6 +220,7 @@ var ExaminePage = React.createClass({
                         truthVcfPath={this.props.truthVcfPath}
                         normalBamPath={this.props.normalBamPath}
                         tumorBamPath={this.props.tumorBamPath}
+                        igvHttpfsUrl={this.props.igvHttpfsUrl}
                         selectedRecord={this.state.selectedRecord}
                         handleClose={() => this.handleSelectRecord(null)} />
         </div>

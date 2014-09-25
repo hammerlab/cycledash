@@ -22,6 +22,7 @@ window.renderExaminePage(document.getElementById('examine'),
                          {{ run['vcfPath'] | tojson }},
                          {{ run['truthVcfPath'] | tojson }},
                          {{ run['normalPath'] | tojson }},
-                         {{ run['tumorPath'] | tojson }});
+                         {{ run['tumorPath'] | tojson }},
+                         {{ config['IGV_HTTPFS_URL'] | tojson }});
 </script>
 {% endblock%}
