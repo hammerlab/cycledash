@@ -12,7 +12,8 @@ var _ = require('underscore'),
     VCFTable = require('./VCFTable'),
     StatsSummary = require('./StatsSummary'),
     Widgets = require('./Widgets'),
-    vcfTools = require('./vcf.tools');
+    vcfTools = require('./vcf.tools'),
+    $ = require('jquery');
 
 
 window.renderExaminePage = function(el, vcfPath, truthVcfPath,
