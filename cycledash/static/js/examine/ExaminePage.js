@@ -38,12 +38,13 @@ var ExaminePage = React.createClass({
     tumorBamPath:  React.PropTypes.string,
     chromosomes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
-    records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     truthRecords: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     igvHttpfsUrl: React.PropTypes.string.isRequired
   },
   getInitialState: function() {
     return {chartAttributes: [],
+            records: [],
+            sortBy: [null, 'desc'], // null sorts by default = CHR/POS
             variantType: 'All',
             filters: {},
             selectedRecord: null,
@@ -52,8 +53,7 @@ var ExaminePage = React.createClass({
                        chromosome: idiogrammatik.ALL_CHROMOSOMES}};
   },
   getDefaultProps: function() {
-    return {records: [],
-            header: {},
+    return {header: {},
             truthRecords: [],
             karyogram: initializeKaryogram(),
             chromosomes: [],
@@ -73,9 +73,9 @@ var ExaminePage = React.createClass({
         var records = vcfData.records,
             chromosomes = _.uniq(records.map((r) => r.CHROM));
         chromosomes.sort(vcfTools.chromosomeComparator);
+        this.setState({records: records});
         this.setProps({
           hasLoaded: true,
-          records: records,
           truthRecords: truthVcfData.records,
           chromosomes: chromosomes,
           attrs: _.keys(records[0].INFO),
@@ -91,6 +91,9 @@ var ExaminePage = React.createClass({
   },
   handleChartChange: function(chartAttribute) {
     this.setState({charts: this.togglePresence(this.state.chartAttributes, chartAttribute)});
+  },
+  handleSortByChange: function(sortByAttribute, direction) {
+    this.setState({sortBy: [sortByAttribute, direction]});
   },
   handleChromosomeChange: function(chromosome) {
     if (chromosome === 'all') chromosome = this.props.karyogram.ALL_CHROMOSOMES;
@@ -111,7 +114,7 @@ var ExaminePage = React.createClass({
   },
   moveSelectionInDirection: function(delta) {
     if (!this.state.selectedRecord) return;
-    var filteredRecords = this.getFilteredRecords();
+    var filteredRecords = this.getFilteredSortedRecords();
     var idx = filteredRecords.indexOf(this.state.selectedRecord);
     if (idx == -1) return;
     var newIdx = idx + delta;
@@ -189,21 +192,29 @@ var ExaminePage = React.createClass({
       return _.every(_.map(predicates, (pred) => pred(record)));
     });
   },
-  getFilteredRecords: function() {
-    var filteredRecords = this.filterRecords(this.props.records,
+  getFilteredSortedRecords: function() {
+    var filteredRecords = this.filterRecords(this.state.records,
                                              this.isRecordWithinRange,
                                              this.doesRecordPassFilters,
                                              this.isRecordCorrectVariantType);
-    filteredRecords.sort(vcfTools.recordComparator);
+    var [sortByAttr, direction] = this.state.sortBy;
+    if (sortByAttr === null) {
+      filteredRecords.sort(vcfTools.recordComparator(direction));
+    } else {
+      filteredRecords.sort((a, b) => {
+        if (direction === 'desc')
+          return a.INFO[sortByAttr] - b.INFO[sortByAttr];
+        else
+          return b.INFO[sortByAttr] - a.INFO[sortByAttr];
+      });
+    }
     return filteredRecords;
   },
   render: function() {
-    var filteredRecords = this.getFilteredRecords(),
+    var filteredRecords = this.getFilteredSortedRecords(),
         filteredTruthRecords = this.filterRecords(this.props.truthRecords,
                                                   this.isRecordWithinRange,
                                                   this.isRecordCorrectVariantType);
-
-    filteredTruthRecords.sort(vcfTools.recordComparator);
 
     return (
         <div className="examine-page">
@@ -214,7 +225,7 @@ var ExaminePage = React.createClass({
                         variantType={this.state.variantType}
                         handleVariantTypeChange={this.handleVariantTypeChange}
                         records={filteredRecords}
-                        unfilteredRecords={this.props.records}
+                        unfilteredRecords={this.state.records}
                         truthRecords={filteredTruthRecords} />
           <AttributeCharts records={filteredRecords}
                            chartAttributes={this.state.chartAttributes} />
@@ -232,6 +243,8 @@ var ExaminePage = React.createClass({
                     selectedRecord={this.state.selectedRecord}
                     chromosomes={this.props.chromosomes}
                     karyogram={this.props.karyogram}
+                    sortBy={this.state.sortBy}
+                    handleSortByChange={this.handleSortByChange}
                     handleChartChange={this.handleChartChange}
                     handleFilterUpdate={this.handleFilterUpdate}
                     handleChromosomeChange={this.handleChromosomeChange}

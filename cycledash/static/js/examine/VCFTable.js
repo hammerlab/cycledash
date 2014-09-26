@@ -23,16 +23,16 @@ var VCFTable = React.createClass({
     chromosomes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     // The position object, from ExaminePage, denoting the current range selected
     position: types.PositionType,
-    // Function which sends the newly-selected chromosome up
-    handleChromosomeChange: React.PropTypes.func.isRequired,
-    // Function which sends up the new range (from the position fields)
-    handleRangeChange: React.PropTypes.func.isRequired,
-    // Function which sends up the a newly selected record.
-    handleSelectRecord: React.PropTypes.func.isRequired,
     // List of VCF records
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     // The VCF header, used to get information about the INFO fields
-    header: React.PropTypes.object.isRequired
+    header: React.PropTypes.object.isRequired,
+    // Attribute being sorted by
+    sortBy: React.PropTypes.array,
+    handleSortByChange: React.PropTypes.func.isRequired,
+    handleChromosomeChange: React.PropTypes.func.isRequired,
+    handleRangeChange: React.PropTypes.func.isRequired,
+    handleSelectRecord: React.PropTypes.func.isRequired
   },
   // Call this to scroll a record to somewhere close to the top of the page.
   scrollRecordToTop: function(record) {
@@ -49,7 +49,9 @@ var VCFTable = React.createClass({
       <table className="vcf-table" ref="vcfTable">
         <VCFTableHeader attrs={this.props.attrs}
                         selectedAttrs={this.props.selectedAttrs}
+                        sortBy={this.props.sortBy}
                         header={this.props.header}
+                        handleSortByChange={this.props.handleSortByChange}
                         handleChartChange={this.props.handleChartChange} />
         <VCFTableFilter chromosomes={this.props.chromosomes}
                         handleFilterUpdate={this.props.handleFilterUpdate}
@@ -70,16 +72,31 @@ var VCFTableHeader = React.createClass({
   propTypes: {
     // The VCF header, used to get information about the INFO fields
     header: React.PropTypes.object.isRequired,
-    // Function which sends all the current filters up when a filter is changed
     handleChartChange: React.PropTypes.func.isRequired,
+    handleSortByChange: React.PropTypes.func.isRequired,
     // Array of attribute names from the INFO field of the VCF's records
     attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     // Subset of attrs which are currently selected.
     selectedAttrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
+    // Attribute being sorted by
+    sortBy: React.PropTypes.array
   },
   handleChartToggle: function(e) {
-    var attribute = e.currentTarget.attributes.getNamedItem('data-attribute').value;
+    var attribute = e.currentTarget.parentElement
+      .attributes.getNamedItem('data-attribute').value;
     this.props.handleChartChange(attribute);
+  },
+  handleSortByChange: function(e) {
+    var attribute = e.currentTarget.parentElement
+      .attributes.getNamedItem('data-attribute').value;
+    if (attribute === 'position')
+      attribute = null;
+    var [sortAttr, direction] = this.props.sortBy;
+    if (attribute === sortAttr)
+      direction = direction == 'asc' ? 'desc' : 'asc';
+    else
+      direction = 'desc'
+    this.props.handleSortByChange(attribute, direction);
   },
   render: function() {
     var attrs = this.props.attrs.map(function(attr) {
@@ -87,16 +104,28 @@ var VCFTableHeader = React.createClass({
       var isSelected = _.contains(this.props.selectedAttrs, attr);
       return <InfoColumnTh info={info}
                            attr={attr}
+                           sortBy={this.props.sortBy}
+                           handleSortByChange={this.handleSortByChange}
                            isSelected={isSelected}
                            key={attr}
                            handleChartToggle={this.handleChartToggle} />;
     }.bind(this));
 
+    var propClasses = React.addons.classSet({
+      'sort': true,
+      'desc': this.props.sortBy[1] === 'desc',
+      'asc': this.props.sortBy[1] === 'asc',
+      'sorting-by': this.props.sortBy[0] === null
+    });
+
     return (
       <thead>
         <tr>
           <th>Chromosome</th>
-          <th>Position</th>
+          <th data-attribute="position">
+            Position
+            <a className={propClasses} onClick={this.handleSortByChange}></a>
+          </th>
           <th>REF / ALT</th>
           {attrs}
         </tr>
@@ -110,21 +139,46 @@ var InfoColumnTh = React.createClass({
     attr: React.PropTypes.string.isRequired,
     info: React.PropTypes.object,
     handleChartToggle: React.PropTypes.func.isRequired,
-    isSelected: React.PropTypes.bool.isRequired
+    isSelected: React.PropTypes.bool.isRequired,
+    handleSortByChange: React.PropTypes.func.isRequired,
+    sortBy: React.PropTypes.array
   },
   render: function() {
     var tooltip;
     if (this.props.info) {
       tooltip = <InfoColumnTooltip info={this.props.info} attr={this.props.attr} />;
     }
-    var classes = React.addons.classSet({
+    var thClasses = React.addons.classSet({
       'attr': true,
-      'selected': this.props.isSelected
+      'selected': this.props.isSelected,
     });
+    var aClasses = React.addons.classSet({
+      'sorting-by': this.props.sortBy[0] === this.props.attr,
+      'desc': this.props.sortBy[1] === 'desc',
+      'asc': this.props.sortBy[1] === 'asc',
+      'sort': true
+    });
+
+    if (_.contains(['Integer', 'Float'], this.props.info['Type'])) {
+      var sorter = <a className={aClasses}
+                      onClick={this.props.handleSortByChange}></a>;
+    }
+
+
+    if (_.contains(['Integer', 'Float'], this.props.info['Type'])) {
+      var chartToggle = (<span className="chartable"
+                               onClick={this.props.handleChartToggle}>
+                           {this.props.attr}
+                         </span>);
+    } else {
+      var chartToggle = <span>{this.props.attr}</span>;
+    }
+
     return (
-      <th className={classes} onClick={this.props.handleChartToggle} data-attribute={this.props.attr}>
-        <span>{this.props.attr}</span>
+      <th className={thClasses} data-attribute={this.props.attr}>
+        {chartToggle}
         {tooltip}
+        {sorter}
       </th>
     );
   }

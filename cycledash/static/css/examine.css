@@ -31,10 +31,12 @@ input {
 th#position input {
     width: 100px;
 }
-th.attr {
+th {
+    font-size: 19px;
     position: relative;
 }
-th.attr > span {
+th.attr > span.chartable {
+    cursor: pointer;
     border-bottom: 1px dashed #333;
 }
 th.attr.selected > span {
@@ -104,9 +106,17 @@ table {
 tr:nth-child(odd) {
     background: rgba(248, 249, 250, 0.5);
 }
-th.attr {
-    font-size: 21px;
+th .sort {
     cursor: pointer;
+}
+th .sort:before {
+    content: ' ↕';
+}
+th .sorting-by.asc:before {
+    content: ' ↑';
+}
+th .sorting-by.desc:before {
+    content: ' ↓';
 }
 th.attr:hover {
     font-weight: bold;
