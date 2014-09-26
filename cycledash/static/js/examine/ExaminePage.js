@@ -44,6 +44,7 @@ var ExaminePage = React.createClass({
   },
   getInitialState: function() {
     return {chartAttributes: [],
+            sortBy: [null, 'desc'], // null sorts by default = CHR/POS
             variantType: 'All',
             filters: {},
             selectedRecord: null,
@@ -52,8 +53,8 @@ var ExaminePage = React.createClass({
                        chromosome: idiogrammatik.ALL_CHROMOSOMES}};
   },
   getDefaultProps: function() {
-    return {records: [],
-            header: {},
+    return {header: {},
+            records: [],
             truthRecords: [],
             karyogram: initializeKaryogram(),
             chromosomes: [],
@@ -92,6 +93,9 @@ var ExaminePage = React.createClass({
   handleChartChange: function(chartAttribute) {
     this.setState({charts: this.togglePresence(this.state.chartAttributes, chartAttribute)});
   },
+  handleSortByChange: function(sortByAttribute, direction) {
+    this.setState({sortBy: [sortByAttribute, direction]});
+  },
   handleChromosomeChange: function(chromosome) {
     if (chromosome === 'all') chromosome = this.props.karyogram.ALL_CHROMOSOMES;
     this.setState({position: {start: null, end: null, chromosome: chromosome}});
@@ -111,7 +115,7 @@ var ExaminePage = React.createClass({
   },
   moveSelectionInDirection: function(delta) {
     if (!this.state.selectedRecord) return;
-    var filteredRecords = this.getFilteredRecords();
+    var filteredRecords = this.getFilteredSortedRecords();
     var idx = filteredRecords.indexOf(this.state.selectedRecord);
     if (idx == -1) return;
     var newIdx = idx + delta;
@@ -189,21 +193,30 @@ var ExaminePage = React.createClass({
       return _.every(_.map(predicates, (pred) => pred(record)));
     });
   },
-  getFilteredRecords: function() {
+  getFilteredSortedRecords: function() {
     var filteredRecords = this.filterRecords(this.props.records,
                                              this.isRecordWithinRange,
                                              this.doesRecordPassFilters,
                                              this.isRecordCorrectVariantType);
-    filteredRecords.sort(vcfTools.recordComparator);
+    var [sortByAttr, direction] = this.state.sortBy;
+    if (sortByAttr === null) {
+      filteredRecords.sort(vcfTools.recordComparator(direction));
+    } else {
+      filteredRecords.sort((a, b) => {
+        if (direction === 'desc') {
+          return a.INFO[sortByAttr] - b.INFO[sortByAttr];
+        } else {
+          return b.INFO[sortByAttr] - a.INFO[sortByAttr];
+        }
+      });
+    }
     return filteredRecords;
   },
   render: function() {
-    var filteredRecords = this.getFilteredRecords(),
+    var filteredRecords = this.getFilteredSortedRecords(),
         filteredTruthRecords = this.filterRecords(this.props.truthRecords,
                                                   this.isRecordWithinRange,
                                                   this.isRecordCorrectVariantType);
-
-    filteredTruthRecords.sort(vcfTools.recordComparator);
 
     return (
         <div className="examine-page">
@@ -232,6 +245,8 @@ var ExaminePage = React.createClass({
                     selectedRecord={this.state.selectedRecord}
                     chromosomes={this.props.chromosomes}
                     karyogram={this.props.karyogram}
+                    sortBy={this.state.sortBy}
+                    handleSortByChange={this.handleSortByChange}
                     handleChartChange={this.handleChartChange}
                     handleFilterUpdate={this.handleFilterUpdate}
                     handleChromosomeChange={this.handleChromosomeChange}

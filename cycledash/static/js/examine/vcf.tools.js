@@ -29,8 +29,14 @@ function chromosomeComparator(a, b) {
     return -1;
 }
 
-function recordComparator(a, b) {
-  return chromosomeComparator(a.CHROM, b.CHROM) || (a.POS - b.POS);
+function recordComparator(direction) {
+  return function(a, b) {
+    if (direction === 'desc' || !direction) {
+      return chromosomeComparator(a.CHROM, b.CHROM) || (a.POS - b.POS);
+    } else if (direction === 'asc') {
+      return chromosomeComparator(b.CHROM, a.CHROM) || (b.POS - a.POS);
+    }
+  }
 }
 
 /**
