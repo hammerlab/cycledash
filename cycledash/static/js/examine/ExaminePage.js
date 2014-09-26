@@ -38,6 +38,7 @@ var ExaminePage = React.createClass({
     tumorBamPath:  React.PropTypes.string,
     chromosomes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
+    records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     truthRecords: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     igvHttpfsUrl: React.PropTypes.string.isRequired
   },
@@ -73,9 +74,9 @@ var ExaminePage = React.createClass({
         var records = vcfData.records,
             chromosomes = _.uniq(records.map((r) => r.CHROM));
         chromosomes.sort(vcfTools.chromosomeComparator);
-        this.setState({records: records});
         this.setProps({
           hasLoaded: true,
+          records: records,
           truthRecords: truthVcfData.records,
           chromosomes: chromosomes,
           attrs: _.keys(records[0].INFO),
@@ -193,7 +194,7 @@ var ExaminePage = React.createClass({
     });
   },
   getFilteredSortedRecords: function() {
-    var filteredRecords = this.filterRecords(this.state.records,
+    var filteredRecords = this.filterRecords(this.props.records,
                                              this.isRecordWithinRange,
                                              this.doesRecordPassFilters,
                                              this.isRecordCorrectVariantType);
@@ -202,10 +203,11 @@ var ExaminePage = React.createClass({
       filteredRecords.sort(vcfTools.recordComparator(direction));
     } else {
       filteredRecords.sort((a, b) => {
-        if (direction === 'desc')
+        if (direction === 'desc') {
           return a.INFO[sortByAttr] - b.INFO[sortByAttr];
-        else
+        } else {
           return b.INFO[sortByAttr] - a.INFO[sortByAttr];
+        }
       });
     }
     return filteredRecords;
@@ -225,7 +227,7 @@ var ExaminePage = React.createClass({
                         variantType={this.state.variantType}
                         handleVariantTypeChange={this.handleVariantTypeChange}
                         records={filteredRecords}
-                        unfilteredRecords={this.state.records}
+                        unfilteredRecords={this.props.records}
                         truthRecords={filteredTruthRecords} />
           <AttributeCharts records={filteredRecords}
                            chartAttributes={this.state.chartAttributes} />

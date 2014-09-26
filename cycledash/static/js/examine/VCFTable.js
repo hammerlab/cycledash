@@ -27,7 +27,7 @@ var VCFTable = React.createClass({
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     // The VCF header, used to get information about the INFO fields
     header: React.PropTypes.object.isRequired,
-    // Attribute being sorted by
+    // Attribute by which we are sorting
     sortBy: React.PropTypes.array,
     handleSortByChange: React.PropTypes.func.isRequired,
     handleChromosomeChange: React.PropTypes.func.isRequired,
@@ -78,17 +78,17 @@ var VCFTableHeader = React.createClass({
     attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     // Subset of attrs which are currently selected.
     selectedAttrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
-    // Attribute being sorted by
+    // Attribute by which we are sorting
     sortBy: React.PropTypes.array
   },
   handleChartToggle: function(e) {
     var attribute = e.currentTarget.parentElement
-      .attributes.getNamedItem('data-attribute').value;
+        .attributes.getNamedItem('data-attribute').value;
     this.props.handleChartChange(attribute);
   },
   handleSortByChange: function(e) {
     var attribute = e.currentTarget.parentElement
-      .attributes.getNamedItem('data-attribute').value;
+        .attributes.getNamedItem('data-attribute').value;
     if (attribute === 'position')
       attribute = null;
     var [sortAttr, direction] = this.props.sortBy;
@@ -111,7 +111,7 @@ var VCFTableHeader = React.createClass({
                            handleChartToggle={this.handleChartToggle} />;
     }.bind(this));
 
-    var propClasses = React.addons.classSet({
+    var sorterClasses = React.addons.classSet({
       'sort': true,
       'desc': this.props.sortBy[1] === 'desc',
       'asc': this.props.sortBy[1] === 'asc',
@@ -124,7 +124,7 @@ var VCFTableHeader = React.createClass({
           <th>Chromosome</th>
           <th data-attribute="position">
             Position
-            <a className={propClasses} onClick={this.handleSortByChange}></a>
+            <a className={sorterClasses} onClick={this.handleSortByChange}></a>
           </th>
           <th>REF / ALT</th>
           {attrs}
