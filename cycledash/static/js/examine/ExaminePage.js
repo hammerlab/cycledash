@@ -44,7 +44,6 @@ var ExaminePage = React.createClass({
   },
   getInitialState: function() {
     return {chartAttributes: [],
-            records: [],
             sortBy: [null, 'desc'], // null sorts by default = CHR/POS
             variantType: 'All',
             filters: {},
@@ -55,6 +54,7 @@ var ExaminePage = React.createClass({
   },
   getDefaultProps: function() {
     return {header: {},
+            records: [],
             truthRecords: [],
             karyogram: initializeKaryogram(),
             chromosomes: [],
