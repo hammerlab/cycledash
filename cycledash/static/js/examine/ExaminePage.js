@@ -103,6 +103,22 @@ var ExaminePage = React.createClass({
     this.setState({selectedRecord: record});
     this.refs.vcfTable.scrollRecordToTop(record);
   },
+  handleNextRecord: function() {
+    this.moveSelectionInDirection(+1);
+  },
+  handlePreviousRecord: function() {
+    this.moveSelectionInDirection(-1);
+  },
+  moveSelectionInDirection: function(delta) {
+    if (!this.state.selectedRecord) return;
+    var filteredRecords = this.getFilteredRecords();
+    var idx = filteredRecords.indexOf(this.state.selectedRecord);
+    if (idx == -1) return;
+    var newIdx = idx + delta;
+    if (newIdx >= 0 && newIdx <= filteredRecords.length) {
+      this.setState({selectedRecord: filteredRecords[newIdx]});
+    }
+  },
   togglePresence: function(list, el) {
     // Adds el to list if it's not in list, else removed it from list.
     var idx;
@@ -173,16 +189,20 @@ var ExaminePage = React.createClass({
       return _.every(_.map(predicates, (pred) => pred(record)));
     });
   },
-  render: function() {
+  getFilteredRecords: function() {
     var filteredRecords = this.filterRecords(this.props.records,
                                              this.isRecordWithinRange,
                                              this.doesRecordPassFilters,
-                                             this.isRecordCorrectVariantType),
+                                             this.isRecordCorrectVariantType);
+    filteredRecords.sort(vcfTools.recordComparator);
+    return filteredRecords;
+  },
+  render: function() {
+    var filteredRecords = this.getFilteredRecords(),
         filteredTruthRecords = this.filterRecords(this.props.truthRecords,
                                                   this.isRecordWithinRange,
                                                   this.isRecordCorrectVariantType);
 
-    filteredRecords.sort(vcfTools.recordComparator);
     filteredTruthRecords.sort(vcfTools.recordComparator);
 
     return (
@@ -223,6 +243,8 @@ var ExaminePage = React.createClass({
                         tumorBamPath={this.props.tumorBamPath}
                         igvHttpfsUrl={this.props.igvHttpfsUrl}
                         selectedRecord={this.state.selectedRecord}
+                        handlePreviousRecord={this.handlePreviousRecord}
+                        handleNextRecord={this.handleNextRecord}
                         handleClose={() => this.handleSelectRecord(null)} />
         </div>
      );

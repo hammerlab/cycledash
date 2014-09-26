@@ -211,10 +211,15 @@ text {
   bottom: 0;
   background-color: white;
 }
-.variant-inspector .close-button {
+.variant-inspector .close-button, .variant-inspector .right-button {
   float: right;
   text-decoration: none;
   margin-right: 5px;
+}
+.variant-inspector .left-button {
+  float: left;
+  text-decoration: none;
+  margin-left: 5px;
 }
 
 #svgHolder {
