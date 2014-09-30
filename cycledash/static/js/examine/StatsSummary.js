@@ -17,7 +17,7 @@ var StatsSummary = React.createClass({
     variantType: React.PropTypes.string.isRequired
   },
   render: function() {
-    if (this.props.truthRecords.length === 0) return null;
+    if (this.props.truthRecords === null) return null;
     return (
       <div id="stats-container">
         <VariantTypeTabs variantType={this.props.variantType}
