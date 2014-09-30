@@ -7,6 +7,8 @@ def initialize_application():
     app = Flask(__name__)
 
     _configure_application(app)
+    if not app.config.get('DEBUG'):
+        _configure_prod_logging(app)
 
     return app
 
@@ -29,8 +31,6 @@ def _configure_prod_logging(app):
 
 def _configure_application(app):
     app.config.from_object('config')
-    if not app.config.get('DEBUG'):
-        _configure_prod_logging(app)
 
 
 app = initialize_application()
