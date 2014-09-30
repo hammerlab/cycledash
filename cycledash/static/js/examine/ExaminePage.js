@@ -14,7 +14,8 @@ var _ = require('underscore'),
     Widgets = require('./Widgets'),
     vcfTools = require('./vcf.tools'),
     $ = require('jquery'),
-    getIn = require('./utils').getIn;
+    utils = require('./utils'),
+    types = require('./types');
 
 
 window.renderExaminePage = function(el, vcfPath, truthVcfPath,
@@ -38,7 +39,7 @@ var ExaminePage = React.createClass({
     normalBamPath:  React.PropTypes.string,
     tumorBamPath:  React.PropTypes.string,
     chromosomes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
-    columns: React.PropTypes.object.isRequired,
+    columns: React.PropTypes.object.isRequired, // c.f. method deriveColumns
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     truthRecords: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     igvHttpfsUrl: React.PropTypes.string.isRequired
@@ -47,7 +48,7 @@ var ExaminePage = React.createClass({
     return {selectedColumns: [],
             sortBy: [null, 'desc'], // null sorts by default = CHR/POS
             variantType: 'All',
-            filters: {},
+            filters: [], // list of objects of shape: {path: ['INFO', 'DP'], filter: '>20'}
             selectedRecord: null,
             position: {start: null,
                        end: null,
@@ -78,9 +79,6 @@ var ExaminePage = React.createClass({
             chromosomes = _.uniq(records.map((r) => r.CHROM));
         chromosomes.sort(vcfTools.chromosomeComparator);
 
-        window.h = header;
-        window.c = columns;
-
         this.setProps({
           hasLoaded: true,
           records: records,
@@ -94,26 +92,25 @@ var ExaminePage = React.createClass({
   handleRangeChange: function(chromosome, start, end) {
     this.setState({position: {start: start, end: end, chromosome: chromosome}});
   },
-  handleFilterUpdate: function(filters) {
+  handleFilterUpdate: function(filter) {
+    var filters = this.state.filters,
+        found = false;
+    for (var i = 0; i < filters.length; i++) {
+      var listedFilter = filters[i],
+          isSameItem = utils.everyOver(listedFilter.path, filter.path, utils.equals);
+      if (isSameItem) {
+        listedFilter.filter = filter.filter;
+        found = true;
+      }
+    }
+    if(!found) filters.push(filter);
     this.setState({filters: filters});
   },
   handleChartChange: function(column) {
-    var selected = this.state.selectedColumns,
-        colIdx = null;
-    for (var i = 0; i < selected.length; i++) {
-      var selectedColumn = selected[i],
-          pairedPath = _.zip(selectedColumn.path, column.path),
-          isSameColumn = _.every(pairedPath, function(pair) {
-            return pair[0] == pair[1];
-          });
-      if (isSameColumn) colIdx = i;
-    }
-    if (colIdx !== null) {
-      selected.splice(colIdx, 1);
-    } else {
-      selected.push(column);
-    }
-    this.setState({selectedColumns: selected});
+    var selectedCharts = this.togglePresence(this.state.selectedColumns, column, function(a, b) {
+      return utils.everyOver(a.path, b.path, utils.equals);
+    });
+    this.setState({selectedColumns: selectedCharts});
   },
   handleSortByChange: function(sortByAttribute, direction) {
     this.setState({sortBy: [sortByAttribute, direction]});
@@ -160,38 +157,32 @@ var ExaminePage = React.createClass({
       return columns;
     }, {'INFO': []});
     _.each(records, function(record) {
-      _.each(_.keys(columns), function(topLvlAttr) {
-        var subCols = record[topLvlAttr];
+      _.each(_.keys(columns), function(topLevelAttr) {
+        var subCols = record[topLevelAttr];
         for (var attr in subCols) {
-          var info = topLvlAttr == 'INFO' ? _.findWhere(header.INFO, {ID: attr})
-                                          : _.findWhere(header.FORMAT, {ID: attr});
-          columns[topLvlAttr][attr] = {path: [topLvlAttr, attr], info: info, name: attr};
+          var info = topLevelAttr == 'INFO' ? _.findWhere(header.INFO, {ID: attr})
+                                            : _.findWhere(header.FORMAT, {ID: attr});
+          columns[topLevelAttr][attr] = {path: [topLevelAttr, attr], info: info, name: attr};
         }
       });
     });
     return columns;
   },
-  toggleChartPresence: function(selectedColumns, column) {
-    // Adds col to selectedColumns if it's not in list, else remove it.
-    function samePath(selected, newCol) {
-      var selPath = selected.path,
-      newPath = newCol.path,
-      same = true;
-      for (var i = 0; i < selPath.length; i++) {
-        if (selPath[i] != newPath[i]) same = false;
-      }
-      return same;
+  togglePresence: function(list, item, pred) {
+    // Adds item to list if pred doesn't return true for any item in list, else
+    // remove the item in list that pred is true for. Returns the modified list.
+    var colIdx = null;
+    for (var i = 0; i < list.length; i++) {
+      var listItem = list[i],
+          isSameItem = pred(listItem, item);
+      if (isSameItem) colIdx = i;
     }
-
-    var found = false;
-    for (var i = 0; i < selectedColumns.length; i++) {
-      if (samePath(selected, column)) {
-        selectedColumns.splice(i, 1);
-        found = true;
-      }
+    if (colIdx !== null) {
+      list.splice(colIdx, 1);
+    } else {
+      list.push(item);
     }
-    if (!found) selectedColumns.push(column);
-    return selectedColumns;
+    return list;
   },
   isRecordCorrectVariantType: function(record) {
     switch (this.state.variantType) {
@@ -226,12 +217,15 @@ var ExaminePage = React.createClass({
     }
   },
   doesRecordPassFilters: function(record) {
-    return _.reduce(this.state.filters, function(passes, filterVal, filterName) {
+    return _.reduce(this.state.filters, function(passes, filter) {
+      var filterVal = filter.filter,
+          valPath = filter.path,
+          val = valPath ? utils.getIn(record, valPath) : null;
       if (!passes) return false;  // If one fails, they all fail.
       if (filterVal.length === 0) return true;
 
       if (_.contains(['<', '>'], filterVal[0])) {  // then do a numeric test
-        var val = Number(record.INFO[filterName]);
+        val = Number(val);
         if (filterVal[0] === '>') {
           return val > Number(filterVal.slice(1));
         } else {
@@ -239,10 +233,10 @@ var ExaminePage = React.createClass({
         }
       } else {  // treat it like a regexp, then...
         var re = new RegExp(filterVal);
-        if (filterName === 'refAlt') {
+        if (valPath[0] === types.REF_ALT_PATH[0]) {
           return re.test(record.REF + "/" + record.ALT);
-        } else {
-          return re.test(record.INFO[filterName]);
+        } else { // this is a regular non-numeric column
+          return re.test(String(val));
         }
       }
     }, true);
@@ -263,8 +257,8 @@ var ExaminePage = React.createClass({
       filteredRecords.sort(vcfTools.recordComparator(direction));
     } else {
       filteredRecords.sort((a, b) => {
-        var aVal = getIn(a, sortByPath),
-            bVal = getIn(b, sortByPath);
+        var aVal = utils.getIn(a, sortByPath),
+            bVal = utils.getIn(b, sortByPath);
         if (direction === 'desc') {
           return aVal - bVal
         } else {

@@ -7,11 +7,12 @@ var _ = require('underscore'),
     idiogrammatik = require('idiogrammatik.js'),
     types = require('./types.js'),
     $ = require('jquery'),
-    getIn = require('./utils').getIn;
+    utils = require('./utils');
 
 
 var VCFTable = React.createClass({
   propTypes: {
+    // c.f. ExaminePage.deriveColumns for structure of object
     columns: React.PropTypes.object.isRequired,
     // Subset of columns which are currently selected to be graphed.
     selectedColumns: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
@@ -104,14 +105,14 @@ var VCFTableHeader = React.createClass({
         columnHeaders = [];
 
     window.cols = [];
-    _.each(this.props.columns, (columns, topLvlColName) => {
+    _.each(this.props.columns, (columns, topLevelColumnName) => {
       uberColumns.push(
-        <th colSpan={_.keys(columns).length} className="uber-column" key={topLvlColName}>
-          {topLvlColName}
+        <th colSpan={_.keys(columns).length} className="uber-column" key={topLevelColumnName}>
+          {topLevelColumnName}
         </th>
       );
-      for (var colName in columns) {
-        var column = columns[colName];
+      for (var columnName in columns) {
+        var column = columns[columnName];
         columnHeaders.push(<ColumnHeader info={column.info}
                                          key={column.path.join('::')}
                                          column={column}
@@ -168,11 +169,7 @@ var ColumnHeader = React.createClass({
 
     var [sortByPath, direction] = this.props.sortBy;
     var sortingBy = false;
-    if (sortByPath) {
-      sortingBy = _.every(_.zip(sortByPath, this.props.column.path), function(pair) {
-        return pair[0] == pair[1];
-      });
-    }
+    if (sortByPath) sortingBy = utils.everyOver(sortByPath, this.props.column.path, utils.equals);
     var aClasses = React.addons.classSet({
       'sorting-by': sortingBy,
       'desc': this.props.sortBy[1] === 'desc',
@@ -241,16 +238,10 @@ var VCFTableFilter = React.createClass({
     chromosome = this.props.position.chromosome;
     this.props.handleRangeChange(chromosome, Number(start) || null, Number(end) || null);
   },
-  handleFilterUpdate: function(e) {
-    // Array.slice converts the returned node list into an array so that we can
-    // map over it.
-    var filters = Array.prototype.slice.call(document.querySelectorAll('input.infoFilter'));
-    // Return an object mapping filter names to filter values to be processed
-    // when filtering records.
-    filters = _.object(filters.map(function(f) {
-      return [f.name, f.value];
-    }));
-    this.props.handleFilterUpdate(filters);
+  handleFilterUpdate: function(path) {
+    return e => {
+      this.props.handleFilterUpdate({filter: e.currentTarget.value, path: path});
+    };
   },
   render: function() {
     var {position, kgram} = this.props,
@@ -262,13 +253,13 @@ var VCFTableFilter = React.createClass({
       );
     }.bind(this));
     var columnFilterFields = [];
-    _.each(this.props.columns, (columns, topLvlColumnName) => {
-      for (var colName in columns) {
-        var column = columns[colName];
+    _.each(this.props.columns, (columns, topLevelColumnName) => {
+      for (var columnName in columns) {
+        var column = columns[columnName];
         columnFilterFields.push(
-          <th key={topLvlColumnName + column.name}>
+          <th key={topLevelColumnName + column.name}>
             <input name={column.name} className="infoFilter" type="text"
-                   onChange={this.handleFilterUpdate} />
+                   onChange={this.handleFilterUpdate(column.path)} />
           </th>
         );
       }
@@ -291,7 +282,7 @@ var VCFTableFilter = React.createClass({
           </th>
           <th>
             <input name="refAlt" className="infoFilter" type="text"
-                   onChange={this.handleFilterUpdate} />
+                   onChange={this.handleFilterUpdate(types.REF_ALT_PATH)} />
           </th>
           {columnFilterFields}
         </tr>
@@ -360,12 +351,12 @@ var VCFRecord = React.createClass({
   },
   render: function() {
     var tds = [];
-    _.each(this.props.columns, (columns, topLvlColumnName) => {
-      for (var colName in columns) {
-        var column = columns[colName];
+    _.each(this.props.columns, (columns, topLevelColumnName) => {
+      for (var columnName in columns) {
+        var column = columns[columnName];
         tds.push(
           <td key={column.path.join('::')} title={column.path.join('→')}>
-            {String(getIn(this.props.record, column.path))}
+            {String(utils.getIn(this.props.record, column.path))}
           </td>
         );
       }

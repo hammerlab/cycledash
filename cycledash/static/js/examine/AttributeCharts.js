@@ -4,7 +4,7 @@
 var _ = require('underscore'),
     d3 = require('d3'),
     React = require('react'),
-    getIn = require('./utils').getIn;
+    utils = require('./utils');
 var d3BarChart = require('./d3.bar-chart');
 
 
@@ -40,8 +40,8 @@ var AttributeChart = React.createClass({
   TOTAL_BINS: 10,
   binRecords: function(records) {
     var path = this.props.column.path,
-        values = records.map(function(record) { return getIn(record, path); }),
-         bins = d3.layout.histogram().bins(this.TOTAL_BINS)(values);
+        values = records.map(function(record) { return utils.getIn(record, path); }),
+        bins = d3.layout.histogram().bins(this.TOTAL_BINS)(values);
     return bins.map(bin => ({count: bin.length, bin: bin.x}));
   },
   renderHistogram: function(records) {
