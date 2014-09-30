@@ -13,7 +13,7 @@ var BioDalliance = React.createClass({
     selectedRecord: React.PropTypes.object,
     vcfPath: React.PropTypes.string.isRequired,
     // Truth VCF should become optional once /examine no longer requires it.
-    truthVcfPath: React.PropTypes.string.isRequired,
+    truthVcfPath: React.PropTypes.string,
     normalBamPath:  React.PropTypes.string,
     tumorBamPath:  React.PropTypes.string,
     // Event handlers
@@ -65,12 +65,6 @@ var BioDalliance = React.createClass({
             tier_type: 'sequence'
           },
           {
-            name: 'Truth VCF',
-            uri: this.hdfsUrl(this.props.truthVcfPath),
-            tier_type: 'memstore',
-            payload: 'vcf'
-          },
-          {
             name: 'Run VCF',
             uri: this.hdfsUrl(this.props.vcfPath),
             tier_type: 'memstore',
@@ -78,25 +72,30 @@ var BioDalliance = React.createClass({
           }
     ];
     if (this.props.normalBamPath) {
-      sources = sources.concat(
-          {
-            name: 'Normal',
-            bamURI: this.hdfsUrl(this.props.normalBamPath),
-            tier_type: 'bam',
-            style: bamStyle,
-            className: 'pileup'
-          });
+      sources.push({
+          name: 'Normal',
+          bamURI: this.hdfsUrl(this.props.normalBamPath),
+          tier_type: 'bam',
+          style: bamStyle,
+          className: 'pileup'
+      });
     }
     if (this.props.tumorBamPath) {
-      sources = sources.concat(
-          {
+      sources.push({
             name: 'Tumor',
             bamURI: this.hdfsUrl(this.props.tumorBamPath),
             tier_type: 'bam',
             style: bamStyle,
             className: 'pileup'
-          }
-      );
+      });
+    }
+    if (this.props.truthVcfPath) {
+      sources.push({
+          name: 'Truth VCF',
+          uri: this.hdfsUrl(this.props.truthVcfPath),
+          tier_type: 'memstore',
+          payload: 'vcf'
+      });
     }
 
     // BioDalliance steals these events. We just want default browser behavior.

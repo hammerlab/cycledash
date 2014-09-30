@@ -10,13 +10,14 @@ var _ = require('underscore'),
 var StatsSummary = React.createClass({
   propTypes: {
     hasLoaded: React.PropTypes.bool.isRequired,
-    truthRecords: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+    truthRecords: React.PropTypes.arrayOf(React.PropTypes.object),
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     unfilteredRecords: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     handleVariantTypeChange: React.PropTypes.func.isRequired,
     variantType: React.PropTypes.string.isRequired
   },
   render: function() {
+    if (this.props.truthRecords.length === 0) return null;
     return (
       <div id="stats-container">
         <VariantTypeTabs variantType={this.props.variantType}
