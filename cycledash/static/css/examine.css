@@ -45,7 +45,12 @@ th.attr.selected > span {
     border: none;
     color: #969696;
 }
-
+th.uber-column {
+    border-right: 1px solid black;
+}
+th.uber-column:last-child {
+    border: none;
+}
 .tooltip {
     display: none;
     border-radius: 3px;

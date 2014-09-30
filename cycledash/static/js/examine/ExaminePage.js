@@ -13,7 +13,8 @@ var _ = require('underscore'),
     StatsSummary = require('./StatsSummary'),
     Widgets = require('./Widgets'),
     vcfTools = require('./vcf.tools'),
-    $ = require('jquery');
+    $ = require('jquery'),
+    getIn = require('./utils').getIn;
 
 
 window.renderExaminePage = function(el, vcfPath, truthVcfPath,
@@ -24,7 +25,7 @@ window.renderExaminePage = function(el, vcfPath, truthVcfPath,
                                      tumorBamPath={tumorBamPath}
                                      igvHttpfsUrl={igvHttpfsUrl}
                                      karyogramData={GSTAINED_CHROMOSOMES} />, el);
-}
+};
 
 
 // The Root element of the /examine page
@@ -37,13 +38,13 @@ var ExaminePage = React.createClass({
     normalBamPath:  React.PropTypes.string,
     tumorBamPath:  React.PropTypes.string,
     chromosomes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
-    attrs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
+    columns: React.PropTypes.object.isRequired,
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     truthRecords: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     igvHttpfsUrl: React.PropTypes.string.isRequired
   },
   getInitialState: function() {
-    return {chartAttributes: [],
+    return {selectedColumns: [],
             sortBy: [null, 'desc'], // null sorts by default = CHR/POS
             variantType: 'All',
             filters: {},
@@ -58,7 +59,7 @@ var ExaminePage = React.createClass({
             truthRecords: [],
             karyogram: initializeKaryogram(),
             chromosomes: [],
-            attrs: [],
+            columns: {},
             hasLoaded: false};
   },
   componentDidMount: function() {
@@ -72,14 +73,20 @@ var ExaminePage = React.createClass({
     $.when(deferredVcf(this.props.vcfPath), deferredVcf(this.props.truthVcfPath))
       .done((vcfData, truthVcfData) => {
         var records = vcfData.records,
+            header = vcfData.header,
+            columns = this.deriveColumns(header, records),
             chromosomes = _.uniq(records.map((r) => r.CHROM));
         chromosomes.sort(vcfTools.chromosomeComparator);
+
+        window.h = header;
+        window.c = columns;
+
         this.setProps({
           hasLoaded: true,
           records: records,
           truthRecords: truthVcfData.records,
           chromosomes: chromosomes,
-          attrs: _.keys(records[0].INFO),
+          columns: columns,
           header: vcfData.header
         });
       });
@@ -90,8 +97,23 @@ var ExaminePage = React.createClass({
   handleFilterUpdate: function(filters) {
     this.setState({filters: filters});
   },
-  handleChartChange: function(chartAttribute) {
-    this.setState({charts: this.togglePresence(this.state.chartAttributes, chartAttribute)});
+  handleChartChange: function(column) {
+    var selected = this.state.selectedColumns,
+        colIdx = null;
+    for (var i = 0; i < selected.length; i++) {
+      var selectedColumn = selected[i],
+          pairedPath = _.zip(selectedColumn.path, column.path),
+          isSameColumn = _.every(pairedPath, function(pair) {
+            return pair[0] == pair[1];
+          });
+      if (isSameColumn) colIdx = i;
+    }
+    if (colIdx !== null) {
+      selected.splice(colIdx, 1);
+    } else {
+      selected.push(column);
+    }
+    this.setState({selectedColumns: selected});
   },
   handleSortByChange: function(sortByAttribute, direction) {
     this.setState({sortBy: [sortByAttribute, direction]});
@@ -123,15 +145,53 @@ var ExaminePage = React.createClass({
       this.setState({selectedRecord: filteredRecords[newIdx]});
     }
   },
-  togglePresence: function(list, el) {
-    // Adds el to list if it's not in list, else removed it from list.
-    var idx;
-    if ((idx = list.indexOf(el)) > -1) {
-      list.splice(idx, 1);
-    } else {
-      list.push(el);
+  deriveColumns: function(header, records) {
+    // Columns to be displayed: {INFO: {attr1: {path: ['INFO', 'attr1'],
+    //                                          name: 'attr1',
+    //                                          info: <attr spec from header>} },
+    //                           sampleName1: {attrA:  ..}, ..}
+    //
+    // NB: rather than pulling this from the header's INFO and FORMAT fields,
+    //     we pull the columns from the records themselves, as sometimes the
+    //     header contains many more FORMAT and INFO fields than are actually
+    //     used. This would waste a ton of horizontal space in the VCF table.
+    var columns = _.reduce(header.sampleNames, (columns, name) => {
+      columns[name] = [];
+      return columns;
+    }, {'INFO': []});
+    _.each(records, function(record) {
+      _.each(_.keys(columns), function(topLvlAttr) {
+        var subCols = record[topLvlAttr];
+        for (var attr in subCols) {
+          var info = topLvlAttr == 'INFO' ? _.findWhere(header.INFO, {ID: attr})
+                                          : _.findWhere(header.FORMAT, {ID: attr});
+          columns[topLvlAttr][attr] = {path: [topLvlAttr, attr], info: info, name: attr};
+        }
+      });
+    });
+    return columns;
+  },
+  toggleChartPresence: function(selectedColumns, column) {
+    // Adds col to selectedColumns if it's not in list, else remove it.
+    function samePath(selected, newCol) {
+      var selPath = selected.path,
+      newPath = newCol.path,
+      same = true;
+      for (var i = 0; i < selPath.length; i++) {
+        if (selPath[i] != newPath[i]) same = false;
+      }
+      return same;
     }
-    return list;
+
+    var found = false;
+    for (var i = 0; i < selectedColumns.length; i++) {
+      if (samePath(selected, column)) {
+        selectedColumns.splice(i, 1);
+        found = true;
+      }
+    }
+    if (!found) selectedColumns.push(column);
+    return selectedColumns;
   },
   isRecordCorrectVariantType: function(record) {
     switch (this.state.variantType) {
@@ -198,15 +258,17 @@ var ExaminePage = React.createClass({
                                              this.isRecordWithinRange,
                                              this.doesRecordPassFilters,
                                              this.isRecordCorrectVariantType);
-    var [sortByAttr, direction] = this.state.sortBy;
-    if (sortByAttr === null) {
+    var [sortByPath, direction] = this.state.sortBy;
+    if (sortByPath === null) {
       filteredRecords.sort(vcfTools.recordComparator(direction));
     } else {
       filteredRecords.sort((a, b) => {
+        var aVal = getIn(a, sortByPath),
+            bVal = getIn(b, sortByPath);
         if (direction === 'desc') {
-          return a.INFO[sortByAttr] - b.INFO[sortByAttr];
+          return aVal - bVal
         } else {
-          return b.INFO[sortByAttr] - a.INFO[sortByAttr];
+          return bVal - aVal
         }
       });
     }
@@ -230,7 +292,7 @@ var ExaminePage = React.createClass({
                         unfilteredRecords={this.props.records}
                         truthRecords={filteredTruthRecords} />
           <AttributeCharts records={filteredRecords}
-                           chartAttributes={this.state.chartAttributes} />
+                           selectedColumns={this.state.selectedColumns} />
           <Widgets.Karyogram data={this.props.karyogramData}
                              karyogram={this.props.karyogram}
                              position={this.state.position}
@@ -240,8 +302,8 @@ var ExaminePage = React.createClass({
                     records={filteredRecords}
                     position={this.state.position}
                     header={this.props.header}
-                    attrs={this.props.attrs}
-                    selectedAttrs={this.state.chartAttributes}
+                    columns={this.props.columns}
+                    selectedColumns={this.state.selectedColumns}
                     selectedRecord={this.state.selectedRecord}
                     chromosomes={this.props.chromosomes}
                     karyogram={this.props.karyogram}

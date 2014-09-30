@@ -3,22 +3,22 @@
 
 var _ = require('underscore'),
     d3 = require('d3'),
-    React = require('react');
+    React = require('react'),
+    getIn = require('./utils').getIn;
 var d3BarChart = require('./d3.bar-chart');
 
 
 /**
- * Render all attribute charts (currently histograms) for the given INFO
- * attributes.
+ * Render all attribute charts (currently histograms) for the given columns.
  */
 var AttributeCharts = React.createClass({
   propTypes: {
-    chartAttributes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
+    selectedColumns: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
   },
   render: function() {
-    var charts = this.props.chartAttributes.map(function(chartAttribute) {
-      return <AttributeChart chartAttribute={chartAttribute} key={chartAttribute}
+    var charts = this.props.selectedColumns.map(function(column) {
+      return <AttributeChart column={column} key={column.path.join('>')}
                              records={this.props.records} />;
     }.bind(this));
     return (
@@ -30,20 +30,19 @@ var AttributeCharts = React.createClass({
 });
 
 /**
- * Render a histogram for a given INFO attribute of records.
+ * Render a histogram for a given column of records.
  */
 var AttributeChart = React.createClass({
   propTypes: {
-    chartAttribute: React.PropTypes.string.isRequired,
+    column: React.PropTypes.object.isRequired,
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
   },
   TOTAL_BINS: 10,
   binRecords: function(records) {
-    var attr = this.props.chartAttribute,
-        values = records.map(function(r) { return r.INFO[attr]; }),
-        bins = d3.layout.histogram().bins(this.TOTAL_BINS)(values);
-
-    return bins.map(function(bin) { return {count: bin.length, bin: bin.x} });
+    var path = this.props.column.path,
+        values = records.map(function(record) { return getIn(record, path); }),
+         bins = d3.layout.histogram().bins(this.TOTAL_BINS)(values);
+    return bins.map(bin => ({count: bin.length, bin: bin.x}));
   },
   renderHistogram: function(records) {
     var datum = this.binRecords(records),
@@ -69,7 +68,7 @@ var AttributeChart = React.createClass({
   render: function() {
     return (
         <div className="attr-chart">
-          <h4>{this.props.chartAttribute}</h4>
+          <h4>{this.props.column.name}</h4>
           <div ref="chartHolder"></div>
         </div>
     );
