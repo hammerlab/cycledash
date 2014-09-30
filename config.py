@@ -14,9 +14,5 @@ IGV_HTTPFS_URL = os.environ['IGV_HTTPFS_URL']
 
 TYPEKIT_URL = os.environ.get('TYPEKIT_URL', None)
 
-LOG_FILE = os.environ.get('LOG_FILE', None)
-LOG_FILE_MAXSIZE_BYTES = int(
-        os.environ.get('LOG_FILE_MAXSIZE_BYTES', 100 * 2**20))
-
 
 del os

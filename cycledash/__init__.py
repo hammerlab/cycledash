@@ -18,18 +18,18 @@ def _configure_prod_logging(app):
         return 'Internal Server Error', 500
 
     import logging
-    from logging.handlers import RotatingFileHandler
-    file_handler = RotatingFileHandler(app.config['LOG_FILE'],
-            maxBytes=app.config['LOG_FILE_MAXSIZE_BYTES'], backupCount=20)
-    file_handler.setLevel(logging.WARNING)
+    import sys
+
+    stdout_handler = logging.StreamHandler(sys.stdout)
+    stdout_handler.setLevel(logging.WARNING)
     formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-    file_handler.setFormatter(formatter)
-    app.logger.addHandler(file_handler)
+    stdout_handler.setFormatter(formatter)
+    app.logger.addHandler(stdout_handler)
 
 
 def _configure_application(app):
     app.config.from_object('config')
-    if app.config['LOG_FILE']:
+    if not app.config.get('DEBUG'):
         _configure_prod_logging(app)
 
 
