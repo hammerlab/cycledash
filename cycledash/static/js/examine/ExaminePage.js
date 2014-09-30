@@ -148,10 +148,15 @@ var ExaminePage = React.createClass({
     //                                          info: <attr spec from header>} },
     //                           sampleName1: {attrA:  ..}, ..}
     //
-    // NB: rather than pulling this from the header's INFO and FORMAT fields,
+    // NB: Rather than pulling this from the header's INFO and FORMAT fields,
     //     we pull the columns from the records themselves, as sometimes the
     //     header contains many more FORMAT and INFO fields than are actually
     //     used. This would waste a ton of horizontal space in the VCF table.
+    //
+    //     It's worth noting, too, that in current JS implementations object
+    //     key/vals stay ordered as inserted, unless a key is a number type.
+    //     This is nice, becauce it keeps the columns displayed in the table in
+    //     order.
     var columns = _.reduce(header.sampleNames, (columns, name) => {
       columns[name] = [];
       return columns;

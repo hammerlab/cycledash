@@ -1,7 +1,10 @@
+"use strict";
+
 var _ = require('underscore');
 
 
-/** Returns the value in object found at path.
+/**
+ * Returns the value in object found at path.
  *
  * e.g. obj = {a: [0, {b: 'Whoa'}, 2]}, path = ['a', 1, 'b'] => 'Whoa'.
  */
@@ -21,15 +24,15 @@ function getIn(obj, path) {
  */
 function everyOver(/* list* pred */) {
   var args = _.toArray(arguments),
-      lists = _.take(args, args.length - 1),
-      pred = args[args.length - 1];
-  var tuples = _.zip.apply(this, lists);
+      pred = args.pop(),
+      lists = args;
+  var tuples = _.zip.apply(null, lists);
   return _.every(tuples, function(tuple) {
-    return pred.apply(this, tuple);
+    return pred.apply(null, tuple);
   });
 }
 
-/** Return true is all arguments are equal. */
+/** Return true if all arguments are equal. */
 function equals(/* els */) {
   return _.uniq(arguments).length == 1;
 }
