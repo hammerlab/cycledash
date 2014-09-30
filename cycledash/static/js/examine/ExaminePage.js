@@ -173,7 +173,10 @@ var ExaminePage = React.createClass({
       });
     });
     // If there are no minor columns in a major, remove the major.
-    var emptyMajors = _.filter(columns, function(minors, majorName) { return _.keys(minors).length === 0; });
+    var emptyMajors = [];
+    _.each(columns,  function(minors, majorName) {
+      if (_.keys(minors).length === 0) emptyMajors.push(majorName);
+    });
     _.each(emptyMajors, function(majorName) {
       delete columns[majorName];
     });
