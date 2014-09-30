@@ -71,6 +71,14 @@ var BioDalliance = React.createClass({
             payload: 'vcf'
           }
     ];
+    if (this.props.truthVcfPath) {
+      sources.push({
+          name: 'Truth VCF',
+          uri: this.hdfsUrl(this.props.truthVcfPath),
+          tier_type: 'memstore',
+          payload: 'vcf'
+      });
+    }
     if (this.props.normalBamPath) {
       sources.push({
           name: 'Normal',
@@ -87,14 +95,6 @@ var BioDalliance = React.createClass({
             tier_type: 'bam',
             style: bamStyle,
             className: 'pileup'
-      });
-    }
-    if (this.props.truthVcfPath) {
-      sources.push({
-          name: 'Truth VCF',
-          uri: this.hdfsUrl(this.props.truthVcfPath),
-          tier_type: 'memstore',
-          payload: 'vcf'
       });
     }
 
