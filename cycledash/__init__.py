@@ -7,13 +7,12 @@ def initialize_application():
     app = Flask(__name__)
 
     _configure_application(app)
-    if not app.config.get('DEBUG'):
-        _configure_prod_logging(app)
+    _configure_logging(app)
 
     return app
 
 
-def _configure_prod_logging(app):
+def _configure_logging(app):
     @app.errorhandler(500)
     def internal_error(exception):
         app.logger.exception(exception)
@@ -23,7 +22,7 @@ def _configure_prod_logging(app):
     import sys
 
     stdout_handler = logging.StreamHandler(sys.stdout)
-    stdout_handler.setLevel(logging.WARNING)
+    stdout_handler.setLevel(logging.INFO)
     formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     stdout_handler.setFormatter(formatter)
     app.logger.addHandler(stdout_handler)
