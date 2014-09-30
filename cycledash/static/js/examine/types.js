@@ -16,7 +16,10 @@ var PositionType = React.PropTypes.shape({
   ])
 }).isRequired;
 
+// Sentinel value for filtering on ref/alt
+var REF_ALT_PATH = [null];
 
 module.exports = {
-  PositionType: PositionType
+  PositionType: PositionType,
+  REF_ALT_PATH: REF_ALT_PATH
 };
