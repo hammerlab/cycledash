@@ -35,13 +35,13 @@ var ExaminePage = React.createClass({
     hasLoaded: React.PropTypes.bool.isRequired,
     karyogramData: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     vcfPath: React.PropTypes.string.isRequired,
-    truthVcfPath: React.PropTypes.string.isRequired,
+    truthVcfPath: React.PropTypes.string,
     normalBamPath:  React.PropTypes.string,
     tumorBamPath:  React.PropTypes.string,
     chromosomes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     columns: React.PropTypes.object.isRequired, // c.f. method deriveColumns
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-    truthRecords: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+    truthRecords: React.PropTypes.arrayOf(React.PropTypes.object),
     igvHttpfsUrl: React.PropTypes.string.isRequired
   },
   getInitialState: function() {
@@ -70,8 +70,9 @@ var ExaminePage = React.createClass({
         return vcfParser(data);
       });
     };
-
-    $.when(deferredVcf(this.props.vcfPath), deferredVcf(this.props.truthVcfPath))
+    var deferreds = [deferredVcf(this.props.vcfPath)];
+    if (this.props.truthVcfPath) deferreds.push(deferredVcf(this.props.truthVcfPath));
+    $.when.apply(this, deferreds)
       .done((vcfData, truthVcfData) => {
         var records = vcfData.records,
             header = vcfData.header,
@@ -82,7 +83,7 @@ var ExaminePage = React.createClass({
         this.setProps({
           hasLoaded: true,
           records: records,
-          truthRecords: truthVcfData.records,
+          truthRecords: truthVcfData ? truthVcfData.records : null,
           chromosomes: chromosomes,
           columns: columns,
           header: vcfData.header
@@ -288,8 +289,8 @@ var ExaminePage = React.createClass({
                         variantType={this.state.variantType}
                         handleVariantTypeChange={this.handleVariantTypeChange}
                         records={filteredRecords}
-                        unfilteredRecords={this.props.records}
-                        truthRecords={filteredTruthRecords} />
+                        truthRecords={filteredTruthRecords}
+                        unfilteredRecords={this.props.records} />
           <AttributeCharts records={filteredRecords}
                            selectedColumns={this.state.selectedColumns} />
           <Widgets.Karyogram data={this.props.karyogramData}
