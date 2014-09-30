@@ -1,13 +1,13 @@
 import os
 
 # ensure that false in config isn't interpreted as True
-debug = os.environ.get('DEBUG', False)
-if debug and debug.lower() == 'false':
-    debug = False
+use_reloader = os.environ.get('USE_RELOADER', False)
+if use_reloader and use_reloader.lower() == 'false':
+    use_reloader = False
+USE_RELOADER = use_reloader
 
 SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
 PORT = int(os.environ.get('PORT', 5000))
-DEBUG = debug
 WEBHDFS_USER = os.environ['WEBHDFS_USER']
 WEBHDFS_URL = os.environ['WEBHDFS_URL']
 IGV_HTTPFS_URL = os.environ['IGV_HTTPFS_URL']

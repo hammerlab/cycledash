@@ -71,8 +71,8 @@ gulp dalliance
 
 #### Python
 
-If `DEBUG` is True in your ENV.sh, then you'll get automatic code-reloading with
-the Flask server. There's not much else to it.
+If `USE_RELOADER` is True in your ENV.sh, then you'll get automatic
+code-reloading with the Flask server (and JS/CSS via Gulp).
 
 ### Config
 

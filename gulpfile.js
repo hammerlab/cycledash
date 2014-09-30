@@ -33,7 +33,7 @@ gulp.task('test', function() {
 
 // Generates compiled JS bundle, automatically recompiling and reloading the
 // browser (by notifying the livereload server, listened to by the js included
-// in the layout.html template in DEBUG mode).
+// in the layout.html template in USE_RELOADER mode).
 //
 // Runs JSX, ES6 transforms, browserify, adds sourcemaps, and notifies the
 // livereload server that JS has changed.
