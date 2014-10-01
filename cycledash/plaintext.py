@@ -39,12 +39,13 @@ POST to /runs a JSON object of the format below:
       "variantCallerName": "name of the variant caller",
       "sha1": "hash of git commit for this run",
       "dataset": "name of the dataset used for this run, e.g. dream.training.chr20",
-      "f1score": 0.xxx,
-      "precision": 0.xxx,
-      "recall": 0.xxx,
-      "notes": "params and config the caller was invoked with"
+      "notes": "params and config the caller was invoked with",
+      "vcfPath": "HDFS path of VCF",
+      "truthVcfPath": "HDFS path of truth VCF",
+      "normalPath": "HDFS path of normal BAMF",
+      "tumorPath": "HDFS path of tumor BAM",
+      "referencePath": "HDFS path of reference genome"
     }
 
-NOTE: Be careful that 'name' is constant between submissions for the same
-caller, otherwise data will not be aggregated correctly.
-"""
+NOTE: Be careful that 'variantCallerName' is constant between submissions for
+the same caller, otherwise data will not be aggregated correctly."""
