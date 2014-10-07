@@ -333,3 +333,5 @@ function initializeKaryogram() {
            .width(1400)
            .highlightHeight(59);
 }
+
+module.exports = ExaminePage;
