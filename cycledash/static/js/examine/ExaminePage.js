@@ -2,7 +2,7 @@
 "use strict";
 
 var _ = require('underscore'),
-    d3 = require('d3'),
+    d3 = require('d3/d3'),
     React = require('react'),
     idiogrammatik = require('idiogrammatik.js'),
     vcf = require('vcf.js'),
