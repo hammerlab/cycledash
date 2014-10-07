@@ -65,6 +65,8 @@ describe('ExaminePage', function() {
                    normalBamPath="" tumorBamPath=""
                    igvHttpfsUrl="" karyogramData="" />);
 
+    expect(this.examine.state.selectedColumns.length).toBe(0);
+
     var VCFTable = require('../cycledash/static/js/examine/VCFTable');
     var vcfTable = TestUtils.findRenderedComponentWithType(this.examine, VCFTable);
     var chartableAttrs =
@@ -72,12 +74,12 @@ describe('ExaminePage', function() {
                  .filter(function(el) { return el.getDOMNode().textContent == 'DP' });
 
     expect(chartableAttrs.length).toBe(3);  // {INFO, NORMAL, TUMOR}.DP
-    TestUtils.Simulate.click(chartableAttrs);  // chart all three
+    // chart all three
+    chartableAttrs.forEach(function(el) { TestUtils.Simulate.click(el); });
+    expect(this.examine.state.selectedColumns.length).toBe(3);
 
-    // The enclosing <th> elements for all charted columns should have a 'selected' class.
-    var $ths = $(chartableAttrs).map(function(_, el) { return $(el.getDOMNode()).parents('th').get(0); });
-    expect($ths.length).toBe(3);
-    var selecteds = $ths.map(function(_, el) { return $(el).is('.selected'); }).toArray();
-    expect(selecteds).toBe([true, true, true]);
+    var selectedAttrs =
+        TestUtils.scryRenderedDOMComponentsWithClass(vcfTable, 'selected');
+    expect(selectedAttrs.length).toBe(3);
   });
 });

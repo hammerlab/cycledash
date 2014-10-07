@@ -159,9 +159,9 @@ var ExaminePage = React.createClass({
     //     This is nice, becauce it keeps the columns displayed in the table in
     //     order.
     var columns = _.reduce(header.sampleNames, (columns, name) => {
-      columns[name] = [];
+      columns[name] = {};
       return columns;
-    }, {'INFO': []});
+    }, {'INFO': {}});
     _.each(records, function(record) {
       _.each(_.keys(columns), function(topLevelAttr) {
         var subCols = record[topLevelAttr];
