@@ -11,13 +11,8 @@ jest
     ;
 
 
-function log(msg) {
-  require('fs').appendFileSync('/tmp/jest.log.txt', msg + '\n', {'encoding': 'utf8'});
-}
-
-
 describe('ExaminePage', function() {
-  // Fake for jQuery's $.get()
+  // Fake for jQuery's $.get() which returns a test VCF.
   function fakeGet(path) {
     if (!path.match(/^\/vcf/)) {
       throw "Surprising AJAX request! " + path;
@@ -39,19 +34,19 @@ describe('ExaminePage', function() {
     spyOn($, 'get').andCallFake(fakeGet);
 
     var vcfPath = '/vcf/snv.vcf';
-    this.examine = TestUtils.renderIntoDocument(
+    var examine = TestUtils.renderIntoDocument(
       <ExaminePage vcfPath={vcfPath} truthVcfPath={vcfPath}
                    normalBamPath="" tumorBamPath=""
                    igvHttpfsUrl="" karyogramData="" />);
 
     var VCFTable = require('../cycledash/static/js/examine/VCFTable');
-    var vcfTable = TestUtils.findRenderedComponentWithType(this.examine, VCFTable);
+    var vcfTable = TestUtils.findRenderedComponentWithType(examine, VCFTable);
     var tbody = TestUtils.findRenderedDOMComponentWithTag(vcfTable, 'tbody');
     var trs = TestUtils.scryRenderedDOMComponentsWithTag(tbody, 'tr');
     expect(trs.length).toBe(10);
   });
 
-  it('indicates when a column has been clicked', function() {
+  it('Indicates when a column has been clicked', function() {
     var React = require('react/addons');
     var ExaminePage = require('../cycledash/static/js/examine/ExaminePage.js');
     var TestUtils = React.addons.TestUtils;
@@ -60,23 +55,22 @@ describe('ExaminePage', function() {
     spyOn($, 'get').andCallFake(fakeGet);
 
     var vcfPath = '/vcf/snv.vcf';
-    this.examine = TestUtils.renderIntoDocument(
+    var examine = TestUtils.renderIntoDocument(
       <ExaminePage vcfPath={vcfPath} truthVcfPath={vcfPath}
                    normalBamPath="" tumorBamPath=""
                    igvHttpfsUrl="" karyogramData="" />);
 
-    expect(this.examine.state.selectedColumns.length).toBe(0);
+    expect(examine.state.selectedColumns.length).toBe(0);
 
     var VCFTable = require('../cycledash/static/js/examine/VCFTable');
-    var vcfTable = TestUtils.findRenderedComponentWithType(this.examine, VCFTable);
+    var vcfTable = TestUtils.findRenderedComponentWithType(examine, VCFTable);
     var chartableAttrs =
         TestUtils.scryRenderedDOMComponentsWithClass(vcfTable, 'chartable')
-                 .filter(function(el) { return el.getDOMNode().textContent == 'DP' });
+                 .filter(el => (el.getDOMNode().textContent == 'DP') );
 
     expect(chartableAttrs.length).toBe(3);  // {INFO, NORMAL, TUMOR}.DP
-    // chart all three
-    chartableAttrs.forEach(function(el) { TestUtils.Simulate.click(el); });
-    expect(this.examine.state.selectedColumns.length).toBe(3);
+    chartableAttrs.forEach(el => TestUtils.Simulate.click(el));  // chart all 3
+    expect(examine.state.selectedColumns.length).toBe(3);
 
     var selectedAttrs =
         TestUtils.scryRenderedDOMComponentsWithClass(vcfTable, 'selected');
