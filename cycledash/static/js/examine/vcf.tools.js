@@ -62,7 +62,7 @@ function trueFalsePositiveNegative(records, truthRecords) {
 /**
  * Fast (O(n)) way to find true/false/pos/neg for SNVs and INDELs.  This is
  * largely a performance optimization. First sorts both arrays, so we get some
- * slowdown there, but this is negligable compared to the alternative;
+ * slowdown there, but this is negligible compared to the alternative.
  */
 function trueFalsePositiveNegativeForSnvAndIndels(records, truthRecords) {
   var recordKey = (record) => record.__KEY__; // We sort on this lexicographic key.

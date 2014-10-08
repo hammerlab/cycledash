@@ -1,7 +1,11 @@
 /** @jsx */
-var assert = require("assert"),
-    vcfTools = require("../cycledash/static/js/examine/vcf.tools.js");
+jest
+    .dontMock('vcf.js')
+    .dontMock('../cycledash/static/js/examine/vcf.tools.js')
+    .dontMock('underscore')
 
+var assert = require('assert'),
+    vcfTools = require('../cycledash/static/js/examine/vcf.tools.js');
 
 var svs = [{__KEY__: '1', POS: 0, INFO: { END: 100}},
            {__KEY__: '2', POS: 100, INFO: { END: 200}},
@@ -16,10 +20,12 @@ var svs = [{__KEY__: '1', POS: 0, INFO: { END: 100}},
             {__KEY__: 'bad3'}, {__KEY__: 'good2'}, {__KEY__: 'bad1'}],
     snvsTruth = [{__KEY__: 'good1'}, {__KEY__: 'forgot me!'}, {__KEY__: 'good2'}];
 
+
 describe('VCF.tools', function() {
   describe('trueFalsePositiveNegativeForSVs()', function() {
     it('should return correct stats', function() {
-      var {truePositives, falsePositives, falseNegatives} = vcfTools.trueFalsePositiveNegativeForSvs(svs, svsTruth);
+      var {truePositives, falsePositives, falseNegatives} =
+          vcfTools.trueFalsePositiveNegativeForSvs(svs, svsTruth);
 
       assert.equal(truePositives, 1);
       assert.equal(falsePositives, 2);
@@ -29,7 +35,8 @@ describe('VCF.tools', function() {
 
   describe('trueFalsePositiveNegativeForSNVandINDELs()', function() {
     it('should return correct stats', function() {
-      var {truePositives, falsePositives, falseNegatives} = vcfTools.trueFalsePositiveNegativeForSnvAndIndels(snvs, snvsTruth);
+      var {truePositives, falsePositives, falseNegatives} =
+          vcfTools.trueFalsePositiveNegativeForSnvAndIndels(snvs, snvsTruth);
 
       assert.equal(truePositives, 2);
       assert.equal(falsePositives, 3);

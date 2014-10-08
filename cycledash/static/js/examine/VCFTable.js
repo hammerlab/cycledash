@@ -2,7 +2,7 @@
 "use strict";
 
 var _ = require('underscore'),
-    d3 = require('d3'),
+    d3 = require('d3/d3'),
     React = require('react/addons'),
     idiogrammatik = require('idiogrammatik.js'),
     types = require('./types.js'),
@@ -117,7 +117,7 @@ var VCFTableHeader = React.createClass({
                                          key={column.path.join('::')}
                                          column={column}
                                          sortBy={this.props.sortBy}
-                                         isSelected={false}
+                                         isSelected={_.contains(this.props.selectedColumns, column)}
                                          handleSortByChange={this.handleSortByChange}
                                          handleChartToggle={this.handleChartToggle(column)} />);
       };

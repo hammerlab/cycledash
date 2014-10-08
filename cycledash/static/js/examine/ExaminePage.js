@@ -2,7 +2,7 @@
 "use strict";
 
 var _ = require('underscore'),
-    d3 = require('d3'),
+    d3 = require('d3/d3'),
     React = require('react'),
     idiogrammatik = require('idiogrammatik.js'),
     vcf = require('vcf.js'),
@@ -159,9 +159,9 @@ var ExaminePage = React.createClass({
     //     This is nice, becauce it keeps the columns displayed in the table in
     //     order.
     var columns = _.reduce(header.sampleNames, (columns, name) => {
-      columns[name] = [];
+      columns[name] = {};
       return columns;
-    }, {'INFO': []});
+    }, {'INFO': {}});
     _.each(records, function(record) {
       _.each(_.keys(columns), function(topLevelAttr) {
         var subCols = record[topLevelAttr];
@@ -341,3 +341,5 @@ function initializeKaryogram() {
            .width(1400)
            .highlightHeight(59);
 }
+
+module.exports = ExaminePage;
