@@ -52,12 +52,6 @@ describe('ExaminePage', function() {
     return TestUtils.findRenderedComponentWithType(tree, VCFTable);
   }
 
-  // saner names for these functions
-  function componentsWithClass(t, c) {
-    return TestUtils.scryRenderedDOMComponentsWithClass(t, c);
-  }
-
-
   it('Shows the expected number of rows', function() {
     var examine = makeTestExaminePage();
 
@@ -73,8 +67,8 @@ describe('ExaminePage', function() {
     var vcfTable = findVCFTable(examine);
     expect(Utils.findInComponent('.selected', vcfTable).length).toEqual(0);
 
-    var chartableAttrs = componentsWithClass(vcfTable, 'chartable')
-         .filter(el => (el.getDOMNode().textContent == 'DP') );
+    var chartableAttrs = Utils.findInComponent('.chartable', vcfTable)
+         .filter(el => (el.textContent == 'DP') );
 
     expect(chartableAttrs.length).toBe(3);  // {INFO, NORMAL, TUMOR}.DP
     chartableAttrs.forEach(el => TestUtils.Simulate.click(el));  // click all 3
