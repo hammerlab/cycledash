@@ -26,12 +26,6 @@ describe('VCFTable', function() {
     TestUtils = React.addons.TestUtils;
   });
 
-  function loadVcfData(path) {
-    var vcfParser = require('vcf.js').parser();
-    var data = require('fs').readFileSync(path, {encoding: 'utf8'});
-    return vcfParser(data);
-  }
-
   function makeTestVCFTable(vcfData) {
     var columns = vcfTools.deriveColumns(vcfData);
 
@@ -55,7 +49,7 @@ describe('VCFTable', function() {
   }
 
   it('should display all the VCF data it is given', function() {
-    var vcfData = loadVcfData('__tests__/data/snv.vcf');
+    var vcfData = Utils.loadVcfData('__tests__/data/snv.vcf');
     var table = makeTestVCFTable(vcfData);
 
     var ths = Utils.findInComponent('th.attr', table);
@@ -88,7 +82,7 @@ describe('VCFTable', function() {
   });
 
   it('should render selected rows', function() {
-    var vcfData = loadVcfData('__tests__/data/snv.vcf');
+    var vcfData = Utils.loadVcfData('__tests__/data/snv.vcf');
     var table = makeTestVCFTable(vcfData);
     expect(Utils.findInComponent('tr.selected', table)).toEqual([]);
 
@@ -109,7 +103,7 @@ describe('VCFTable', function() {
   });
 
   it('should render selected columns', function() {
-    var vcfData = loadVcfData('__tests__/data/snv.vcf');
+    var vcfData = Utils.loadVcfData('__tests__/data/snv.vcf');
     var table = makeTestVCFTable(vcfData),
         columns = vcfTools.deriveColumns(vcfData);
 

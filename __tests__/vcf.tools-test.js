@@ -4,10 +4,14 @@ jest
     .dontMock('vcf.js')
     .dontMock('../cycledash/static/js/examine/vcf.tools.js')
     .dontMock('underscore')
+    .dontMock('./Utils.js')
+    ;
 
 var assert = require('assert'),
     vcfTools = require('../cycledash/static/js/examine/vcf.tools.js'),
-    _ = require('underscore');
+    _ = require('underscore'),
+    Utils = require('./Utils.js')
+    ;
 
 var svs = [{__KEY__: '1', POS: 0, INFO: { END: 100}},
            {__KEY__: '2', POS: 100, INFO: { END: 200}},
@@ -24,12 +28,6 @@ var svs = [{__KEY__: '1', POS: 0, INFO: { END: 100}},
 
 
 describe('VCF.tools', function() {
-  function loadVcfData(path) {
-    var vcfParser = require('vcf.js').parser();
-    var data = require('fs').readFileSync(path, {encoding: 'utf8'});
-    return vcfParser(data);
-  }
-
   describe('trueFalsePositiveNegativeForSVs()', function() {
     it('should return correct stats', function() {
       var {truePositives, falsePositives, falseNegatives} =
@@ -54,7 +52,7 @@ describe('VCF.tools', function() {
 
   describe('deriveColumns', function() {
     it('should produce correct columns for a test VCF file', function() {
-      var vcfData = loadVcfData('__tests__/data/snv.vcf');
+      var vcfData = Utils.loadVcfData('__tests__/data/snv.vcf');
       var columns = vcfTools.deriveColumns(vcfData);
 
       // The full object is quite large. We assert specific aspects for brevity.
