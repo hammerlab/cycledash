@@ -12,7 +12,7 @@ var _ = require('underscore'),
 
 var VCFTable = React.createClass({
   propTypes: {
-    // c.f. ExaminePage.deriveColumns for structure of object
+    // c.f. vcfTools.deriveColumns for structure of object
     columns: React.PropTypes.object.isRequired,
     // Subset of columns which are currently selected to be graphed.
     selectedColumns: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
