@@ -12,6 +12,17 @@ jest
 
 
 describe('ExaminePage', function() {
+  // modules -- must be require'd in beforeEach() or it().
+  var React, TestUtils, VCFTable, ExaminePage, $;
+
+  beforeEach(function() {
+    React = require('react/addons');
+    ExaminePage = require('../cycledash/static/js/examine/ExaminePage.js');
+    VCFTable = require('../cycledash/static/js/examine/VCFTable');
+    TestUtils = React.addons.TestUtils;
+    $ = require('jquery');
+  });
+
   // Fake for jQuery's $.get() which returns a test VCF.
   function fakeGet(path) {
     if (!path.match(/^\/vcf/)) {
@@ -21,51 +32,44 @@ describe('ExaminePage', function() {
     // Return an already-resolved deferred with the data.
     var data = require('fs').readFileSync('__tests__/data/snv.vcf', 'utf8');
 
-    var $ = require('jquery');
     return $.when(data);
   }
 
-  it('Shows the expected number of rows', function() {
-    var React = require('react/addons');
-    var ExaminePage = require('../cycledash/static/js/examine/ExaminePage.js');
-    var TestUtils = React.addons.TestUtils;
-    var $ = require('jquery');
-
+  // Returns a rendered ExaminePage with fake data.
+  function makeTestExaminePage() {
     spyOn($, 'get').andCallFake(fakeGet);
-
     var vcfPath = '/vcf/snv.vcf';
-    var examine = TestUtils.renderIntoDocument(
+    return TestUtils.renderIntoDocument(
       <ExaminePage vcfPath={vcfPath} truthVcfPath={vcfPath}
                    normalBamPath="" tumorBamPath=""
                    igvHttpfsUrl="" karyogramData="" />);
+  }
 
-    var VCFTable = require('../cycledash/static/js/examine/VCFTable');
-    var vcfTable = TestUtils.findRenderedComponentWithType(examine, VCFTable);
+  function findVCFTable(tree) {
+    return TestUtils.findRenderedComponentWithType(tree, VCFTable);
+  }
+
+  // saner names for these functions
+  function componentsWithClass(t, c) {
+    return TestUtils.scryRenderedDOMComponentsWithClass(t, c);
+  }
+
+
+  it('Shows the expected number of rows', function() {
+    var examine = makeTestExaminePage();
+
+    var vcfTable = findVCFTable(examine);
     var tbody = TestUtils.findRenderedDOMComponentWithTag(vcfTable, 'tbody');
     var trs = TestUtils.scryRenderedDOMComponentsWithTag(tbody, 'tr');
     expect(trs.length).toBe(10);
   });
 
   it('Indicates when a column has been clicked', function() {
-    var React = require('react/addons');
-    var ExaminePage = require('../cycledash/static/js/examine/ExaminePage.js');
-    var TestUtils = React.addons.TestUtils;
-    var $ = require('jquery');
-
-    spyOn($, 'get').andCallFake(fakeGet);
-
-    var vcfPath = '/vcf/snv.vcf';
-    var examine = TestUtils.renderIntoDocument(
-      <ExaminePage vcfPath={vcfPath} truthVcfPath={vcfPath}
-                   normalBamPath="" tumorBamPath=""
-                   igvHttpfsUrl="" karyogramData="" />);
+    var examine = makeTestExaminePage();
 
     expect(examine.state.selectedColumns.length).toBe(0);
 
-    var componentsWithClass = TestUtils.scryRenderedDOMComponentsWithClass;
-
-    var VCFTable = require('../cycledash/static/js/examine/VCFTable');
-    var vcfTable = TestUtils.findRenderedComponentWithType(examine, VCFTable);
+    var vcfTable = findVCFTable(examine);
     var chartableAttrs = componentsWithClass(vcfTable, 'chartable')
          .filter(el => (el.getDOMNode().textContent == 'DP') );
 
@@ -73,7 +77,6 @@ describe('ExaminePage', function() {
     chartableAttrs.forEach(el => TestUtils.Simulate.click(el));  // click all 3
     expect(examine.state.selectedColumns.length).toBe(3);
 
-    var selectedAttrs = componentsWithClass(vcfTable, 'selected');
-    expect(selectedAttrs.length).toBe(3);
+    expect(componentsWithClass(vcfTable, 'selected').length).toBe(3);
   });
 });
