@@ -18,8 +18,6 @@ var VCFTable = React.createClass({
     selectedColumns: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     // Currently selected VCF record.
     selectedRecord: React.PropTypes.object,
-    // Function which takes a chart attribute name and propagates the change up
-    handleChartChange: React.PropTypes.func.isRequired,
     // List of chromosomes found in the VCF
     chromosomes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     // The position object, from ExaminePage, denoting the current range selected
@@ -30,7 +28,10 @@ var VCFTable = React.createClass({
     header: React.PropTypes.object.isRequired,
     // Attribute by which we are sorting
     sortBy: React.PropTypes.array,
+    // Function which takes a chart attribute name and propagates the change up
+    handleChartChange: React.PropTypes.func.isRequired,
     handleSortByChange: React.PropTypes.func.isRequired,
+    handleFilterUpdate: React.PropTypes.func.isRequired,
     handleChromosomeChange: React.PropTypes.func.isRequired,
     handleRangeChange: React.PropTypes.func.isRequired,
     handleSelectRecord: React.PropTypes.func.isRequired
