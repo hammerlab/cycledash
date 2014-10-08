@@ -20,17 +20,6 @@ var REACT_OPTS = {es6: true},
     BROWSERIFY_OPTS =  _.extend({entries: PATHS.examineSrc, debug: true}, watchify.args)
 
 
-// Runs our React.js transpiler on our tests and the code it'll be testing, then
-// runs our mocha tests.
-gulp.task('test', function() {
-  return browserify(['./test/vcf.tools.test.js'])
-    .transform(REACT_OPTS, reactify)
-    .bundle()
-    .pipe(source('tests.bundled.js'))
-    .pipe(gulp.dest('./test'))
-    .pipe(mocha());
-});
-
 // Generates compiled JS bundle, automatically recompiling and reloading the
 // browser (by notifying the livereload server, listened to by the js included
 // in the layout.html template in USE_RELOADER mode).

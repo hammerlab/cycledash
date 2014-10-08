@@ -115,11 +115,11 @@ JSON should be posted to this URL with following fields:
 
 ### Testing
 
-CycleDash uses [nosetests](https://nose.readthedocs.org/en/latest/) for Python tests, and [Mocha.js](http://visionmedia.github.io/mocha/) for JavaScript testing.
+CycleDash uses [nosetests](https://nose.readthedocs.org/en/latest/) for Python tests, and [Jest](http://facebook.github.io/jest/) for JavaScript testing.
 
 To run tests:
 
 ```
 nosetests   # Run Python tests
-gulp test   # Run JS tests
+npm test   # Run JS tests
 ```
