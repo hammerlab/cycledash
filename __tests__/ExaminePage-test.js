@@ -62,18 +62,18 @@ describe('ExaminePage', function() {
 
     expect(examine.state.selectedColumns.length).toBe(0);
 
+    var componentsWithClass = TestUtils.scryRenderedDOMComponentsWithClass;
+
     var VCFTable = require('../cycledash/static/js/examine/VCFTable');
     var vcfTable = TestUtils.findRenderedComponentWithType(examine, VCFTable);
-    var chartableAttrs =
-        TestUtils.scryRenderedDOMComponentsWithClass(vcfTable, 'chartable')
-                 .filter(el => (el.getDOMNode().textContent == 'DP') );
+    var chartableAttrs = componentsWithClass(vcfTable, 'chartable')
+         .filter(el => (el.getDOMNode().textContent == 'DP') );
 
     expect(chartableAttrs.length).toBe(3);  // {INFO, NORMAL, TUMOR}.DP
-    chartableAttrs.forEach(el => TestUtils.Simulate.click(el));  // chart all 3
+    chartableAttrs.forEach(el => TestUtils.Simulate.click(el));  // click all 3
     expect(examine.state.selectedColumns.length).toBe(3);
 
-    var selectedAttrs =
-        TestUtils.scryRenderedDOMComponentsWithClass(vcfTable, 'selected');
+    var selectedAttrs = componentsWithClass(vcfTable, 'selected');
     expect(selectedAttrs.length).toBe(3);
   });
 });
