@@ -39,7 +39,7 @@ var ExaminePage = React.createClass({
     normalBamPath:  React.PropTypes.string,
     tumorBamPath:  React.PropTypes.string,
     chromosomes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
-    columns: React.PropTypes.object.isRequired, // c.f. method deriveColumns
+    columns: React.PropTypes.object.isRequired, // c.f. vcfTools.deriveColumns
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     truthRecords: React.PropTypes.arrayOf(React.PropTypes.object),
     igvHttpfsUrl: React.PropTypes.string.isRequired
@@ -75,8 +75,7 @@ var ExaminePage = React.createClass({
     $.when.apply(this, deferreds)
       .done((vcfData, truthVcfData) => {
         var records = vcfData.records,
-            header = vcfData.header,
-            columns = this.deriveColumns(header, records),
+            columns = vcfTools.deriveColumns(vcfData),
             chromosomes = _.uniq(records.map((r) => r.CHROM));
         chromosomes.sort(vcfTools.chromosomeComparator);
 
@@ -142,45 +141,6 @@ var ExaminePage = React.createClass({
     if (newIdx >= 0 && newIdx <= filteredRecords.length) {
       this.setState({selectedRecord: filteredRecords[newIdx]});
     }
-  },
-  deriveColumns: function(header, records) {
-    // Columns to be displayed: {INFO: {attr1: {path: ['INFO', 'attr1'],
-    //                                          name: 'attr1',
-    //                                          info: <attr spec from header>} },
-    //                           sampleName1: {attrA:  ..}, ..}
-    //
-    // NB: Rather than pulling this from the header's INFO and FORMAT fields,
-    //     we pull the columns from the records themselves, as sometimes the
-    //     header contains many more FORMAT and INFO fields than are actually
-    //     used. This would waste a ton of horizontal space in the VCF table.
-    //
-    //     It's worth noting, too, that in current JS implementations object
-    //     key/vals stay ordered as inserted, unless a key is a number type.
-    //     This is nice, becauce it keeps the columns displayed in the table in
-    //     order.
-    var columns = _.reduce(header.sampleNames, (columns, name) => {
-      columns[name] = {};
-      return columns;
-    }, {'INFO': {}});
-    _.each(records, function(record) {
-      _.each(_.keys(columns), function(topLevelAttr) {
-        var subCols = record[topLevelAttr];
-        for (var attr in subCols) {
-          var info = topLevelAttr == 'INFO' ? _.findWhere(header.INFO, {ID: attr})
-                                            : _.findWhere(header.FORMAT, {ID: attr});
-          columns[topLevelAttr][attr] = {path: [topLevelAttr, attr], info: info, name: attr};
-        }
-      });
-    });
-    // If there are no minor columns in a major, remove the major.
-    var emptyMajors = [];
-    _.each(columns,  function(minors, majorName) {
-      if (_.keys(minors).length === 0) emptyMajors.push(majorName);
-    });
-    _.each(emptyMajors, function(majorName) {
-      delete columns[majorName];
-    });
-    return columns;
   },
   togglePresence: function(list, item, pred) {
     // Adds item to list if pred doesn't return true for any item in list, else
@@ -314,7 +274,6 @@ var ExaminePage = React.createClass({
                     selectedColumns={this.state.selectedColumns}
                     selectedRecord={this.state.selectedRecord}
                     chromosomes={this.props.chromosomes}
-                    karyogram={this.props.karyogram}
                     sortBy={this.state.sortBy}
                     handleSortByChange={this.handleSortByChange}
                     handleChartChange={this.handleChartChange}
