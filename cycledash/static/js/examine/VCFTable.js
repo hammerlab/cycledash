@@ -114,11 +114,13 @@ var VCFTableHeader = React.createClass({
       );
       for (var columnName in columns) {
         var column = columns[columnName];
+        var isSelected =
+            _.any(this.props.selectedColumns, el => _.isEqual(el, column));
         columnHeaders.push(<ColumnHeader info={column.info}
                                          key={column.path.join('::')}
                                          column={column}
                                          sortBy={this.props.sortBy}
-                                         isSelected={_.contains(this.props.selectedColumns, column)}
+                                         isSelected={isSelected}
                                          handleSortByChange={this.handleSortByChange}
                                          handleChartToggle={this.handleChartToggle(column)} />);
       };
