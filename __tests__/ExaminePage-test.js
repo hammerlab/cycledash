@@ -3,12 +3,15 @@ jest
     .dontMock('../cycledash/static/js/examine/ExaminePage.js')
     .dontMock('../cycledash/static/js/examine/VCFTable.js')
     .dontMock('../cycledash/static/js/examine/vcf.tools.js')
+    .dontMock('./Utils.js')
     .dontMock('idiogrammatik.js')
     .dontMock('jquery')
     .dontMock('fs')
     .dontMock('vcf.js')
     .dontMock('underscore')
     ;
+
+var Utils = require('./Utils');
 
 
 describe('ExaminePage', function() {
@@ -49,19 +52,11 @@ describe('ExaminePage', function() {
     return TestUtils.findRenderedComponentWithType(tree, VCFTable);
   }
 
-  // saner names for these functions
-  function componentsWithClass(t, c) {
-    return TestUtils.scryRenderedDOMComponentsWithClass(t, c);
-  }
-
-
   it('Shows the expected number of rows', function() {
     var examine = makeTestExaminePage();
 
-    var vcfTable = findVCFTable(examine);
-    var tbody = TestUtils.findRenderedDOMComponentWithTag(vcfTable, 'tbody');
-    var trs = TestUtils.scryRenderedDOMComponentsWithTag(tbody, 'tr');
-    expect(trs.length).toBe(10);
+    var rows = Utils.findInComponent('.vcf-table tbody tr', examine);
+    expect(rows.length).toEqual(10);
   });
 
   it('Indicates when a column has been clicked', function() {
@@ -70,13 +65,15 @@ describe('ExaminePage', function() {
     expect(examine.state.selectedColumns.length).toBe(0);
 
     var vcfTable = findVCFTable(examine);
-    var chartableAttrs = componentsWithClass(vcfTable, 'chartable')
-         .filter(el => (el.getDOMNode().textContent == 'DP') );
+    expect(Utils.findInComponent('.selected', vcfTable).length).toEqual(0);
+
+    var chartableAttrs = Utils.findInComponent('.chartable', vcfTable)
+         .filter(el => (el.textContent == 'DP') );
 
     expect(chartableAttrs.length).toBe(3);  // {INFO, NORMAL, TUMOR}.DP
     chartableAttrs.forEach(el => TestUtils.Simulate.click(el));  // click all 3
     expect(examine.state.selectedColumns.length).toBe(3);
 
-    expect(componentsWithClass(vcfTable, 'selected').length).toBe(3);
+    expect(Utils.findInComponent('.selected', vcfTable).length).toEqual(3);
   });
 });

@@ -175,11 +175,57 @@ function doRecordsOverlap(aRecord, bRecord) {
   return startsBetween || endsBetween || encompasses;
 }
 
+/**
+ * Derives groups of columns from the VCF data:
+ *     {INFO: {attr1: {path: ['INFO', 'attr1'],
+ *                     name: 'attr1',
+ *                     info: <attr spec from header>} },
+ *      sampleName1: {attrA:  ..}, ..}
+ *
+ * NB: Rather than pulling this from the header's INFO and FORMAT fields,
+ *     we pull the columns from the records themselves, as sometimes the
+ *     header contains many more FORMAT and INFO fields than are actually
+ *     used.
+ *
+ *     It's worth noting, too, that in current JS implementations object
+ *     key/vals stay ordered as inserted, unless a key is a number type.
+ *     This is nice, becauce it keeps the columns ordered as they are in the
+ *     vcfData.
+ */
+function deriveColumns(vcfData) {
+  var header = vcfData.header,
+      records = vcfData.records;
+  var columns = _.reduce(header.sampleNames, (columns, name) => {
+    columns[name] = {};
+    return columns;
+  }, {'INFO': {}});
+  _.each(records, function(record) {
+    _.each(_.keys(columns), function(topLevelAttr) {
+      var subCols = record[topLevelAttr];
+      for (var attr in subCols) {
+        var info = topLevelAttr == 'INFO' ? _.findWhere(header.INFO, {ID: attr})
+                                          : _.findWhere(header.FORMAT, {ID: attr});
+        columns[topLevelAttr][attr] = {path: [topLevelAttr, attr], info: info, name: attr};
+      }
+    });
+  });
+  // If there are no minor columns in a major, remove the major.
+  var emptyMajors = [];
+  _.each(columns, function(minors, majorName) {
+    if (_.keys(minors).length === 0) emptyMajors.push(majorName);
+  });
+  _.each(emptyMajors, function(majorName) {
+    delete columns[majorName];
+  });
+  return columns;
+}
+
 
 module.exports = {
   trueFalsePositiveNegative: trueFalsePositiveNegative,
   trueFalsePositiveNegativeForSvs: trueFalsePositiveNegativeForSvs,
   trueFalsePositiveNegativeForSnvAndIndels: trueFalsePositiveNegativeForSnvAndIndels,
   chromosomeComparator: chromosomeComparator,
-  recordComparator: recordComparator
+  recordComparator: recordComparator,
+  deriveColumns: deriveColumns
 };

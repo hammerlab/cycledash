@@ -1,11 +1,17 @@
 /** @jsx */
 jest
+    .dontMock('fs')
     .dontMock('vcf.js')
     .dontMock('../cycledash/static/js/examine/vcf.tools.js')
     .dontMock('underscore')
+    .dontMock('./Utils.js')
+    ;
 
 var assert = require('assert'),
-    vcfTools = require('../cycledash/static/js/examine/vcf.tools.js');
+    vcfTools = require('../cycledash/static/js/examine/vcf.tools.js'),
+    _ = require('underscore'),
+    Utils = require('./Utils.js')
+    ;
 
 var svs = [{__KEY__: '1', POS: 0, INFO: { END: 100}},
            {__KEY__: '2', POS: 100, INFO: { END: 200}},
@@ -43,4 +49,40 @@ describe('VCF.tools', function() {
       assert.equal(falseNegatives, 1);
     })
   })
+
+  describe('deriveColumns', function() {
+    it('should produce correct columns for a test VCF file', function() {
+      var vcfData = Utils.loadVcfData('__tests__/data/snv.vcf');
+      var columns = vcfTools.deriveColumns(vcfData);
+
+      // The full object is quite large. We assert specific aspects for brevity.
+      expect(_.keys(columns)).toEqual(['INFO', 'NORMAL', 'TUMOR']);
+      expect(_.keys(columns.INFO)).toEqual(['DP', 'SS', 'SSC', 'GPV', 'SPV']);
+      expect(_.keys(columns.NORMAL)).toEqual(
+          ['GT', 'GQ', 'DP', 'RD', 'AD', 'FREQ', 'DP4']);
+      expect(_.keys(columns.NORMAL)).toEqual(_.keys(columns.TUMOR));
+
+      expect(columns.INFO.DP).toEqual({
+          name: 'DP',
+          path: [ 'INFO', 'DP' ],
+          info: {
+            'ID': 'DP',
+            'Number': 1,
+            'Type': 'Integer',
+            'Description': 'Total depth of quality bases'
+          }
+        });
+
+      expect(columns.NORMAL.AD).toEqual({
+          name: 'AD',
+          path: [ 'NORMAL', 'AD' ],
+          info: {
+            'ID': 'AD',
+            'Number': 1,
+            'Type': 'Integer',
+            'Description': 'Depth of variant-supporting bases (reads2)'
+          },
+        });
+    });
+  });
 })

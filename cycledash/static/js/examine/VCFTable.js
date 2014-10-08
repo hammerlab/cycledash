@@ -12,14 +12,12 @@ var _ = require('underscore'),
 
 var VCFTable = React.createClass({
   propTypes: {
-    // c.f. ExaminePage.deriveColumns for structure of object
+    // c.f. vcfTools.deriveColumns for structure of object
     columns: React.PropTypes.object.isRequired,
     // Subset of columns which are currently selected to be graphed.
     selectedColumns: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     // Currently selected VCF record.
     selectedRecord: React.PropTypes.object,
-    // Function which takes a chart attribute name and propagates the change up
-    handleChartChange: React.PropTypes.func.isRequired,
     // List of chromosomes found in the VCF
     chromosomes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     // The position object, from ExaminePage, denoting the current range selected
@@ -30,7 +28,10 @@ var VCFTable = React.createClass({
     header: React.PropTypes.object.isRequired,
     // Attribute by which we are sorting
     sortBy: React.PropTypes.array,
+    // Function which takes a chart attribute name and propagates the change up
+    handleChartChange: React.PropTypes.func.isRequired,
     handleSortByChange: React.PropTypes.func.isRequired,
+    handleFilterUpdate: React.PropTypes.func.isRequired,
     handleChromosomeChange: React.PropTypes.func.isRequired,
     handleRangeChange: React.PropTypes.func.isRequired,
     handleSelectRecord: React.PropTypes.func.isRequired
@@ -113,11 +114,13 @@ var VCFTableHeader = React.createClass({
       );
       for (var columnName in columns) {
         var column = columns[columnName];
+        var isSelected =
+            _.any(this.props.selectedColumns, el => _.isEqual(el, column));
         columnHeaders.push(<ColumnHeader info={column.info}
                                          key={column.path.join('::')}
                                          column={column}
                                          sortBy={this.props.sortBy}
-                                         isSelected={_.contains(this.props.selectedColumns, column)}
+                                         isSelected={isSelected}
                                          handleSortByChange={this.handleSortByChange}
                                          handleChartToggle={this.handleChartToggle(column)} />);
       };
