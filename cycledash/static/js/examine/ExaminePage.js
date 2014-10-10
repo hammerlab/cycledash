@@ -9,8 +9,9 @@ var _ = require('underscore'),
     GSTAINED_CHROMOSOMES = require('../../data/gstained-chromosomes'),
     AttributeCharts = require('./AttributeCharts'),
     BioDalliance = require('./BioDalliance'),
-    VCFTable = require('./VCFTable'),
+    DataStore = require('./DataStore'),
     StatsSummary = require('./StatsSummary'),
+    VCFTable = require('./VCFTable'),
     Widgets = require('./Widgets'),
     vcfTools = require('./vcf.tools'),
     $ = require('jquery'),
@@ -78,10 +79,11 @@ var ExaminePage = React.createClass({
             chromosomes = _.uniq(records.map((r) => r.CHROM));
         chromosomes.sort(vcfTools.chromosomeComparator);
 
+        var model = new DataModel(vcfData, truthVcfData);
+
         this.setProps({
           hasLoaded: true,
-          records: records,
-          truthRecords: truthVcfData ? truthVcfData.records : null,
+          model: model,
           chromosomes: chromosomes,
           columns: columns,
           header: vcfData.header
@@ -157,95 +159,15 @@ var ExaminePage = React.createClass({
     }
     return list;
   },
-  isRecordCorrectVariantType: function(record) {
-    switch (this.state.variantType) {
-      case 'All':
-        return true;
-      case 'SNV':
-        return record.isSnv();
-      case 'INDEL':
-        return record.isIndel();
-      case 'SV':
-        return record.isSv();
-      default:
-        throw "this.state.variantType must be one of All, SNV, SV, INDEL, is '" +
-          this.props.variantType + "'";
-    }
-  },
-  isRecordWithinRange: function(record) {
-    var {start, end, chromosome} = this.state.position;
-
-    if (chromosome === idiogrammatik.ALL_CHROMOSOMES) {
-      return true;
-    } else if (record.CHROM !== chromosome) {
-      return false;
-    } else if (_.isNull(start) && _.isNull(end)) {
-      return true;
-    } else if (_.isNull(end)) {
-      return record.POS >= start;
-    } else if (_.isNull(start)) {
-      return record.POS <= end;
-    } else {
-      return record.POS >= start && record.POS <= end;
-    }
-  },
-  doesRecordPassFilters: function(record) {
-    return _.reduce(this.state.filters, function(passes, filter) {
-      var filterVal = filter.filter,
-          valPath = filter.path,
-          val = valPath ? utils.getIn(record, valPath) : null;
-      if (!passes) return false;  // If one fails, they all fail.
-      if (filterVal.length === 0) return true;
-
-      if (_.contains(['<', '>'], filterVal[0])) {  // then do a numeric test
-        val = Number(val);
-        if (filterVal[0] === '>') {
-          return val > Number(filterVal.slice(1));
-        } else {
-          return val < Number(filterVal.slice(1));
-        }
-      } else {  // treat it like a regexp, then...
-        var re = new RegExp(filterVal);
-        if (valPath[0] === types.REF_ALT_PATH[0]) {
-          return re.test(record.REF + "/" + record.ALT);
-        } else { // this is a regular non-numeric column
-          return re.test(String(val));
-        }
-      }
-    }, true);
-  },
-  filterRecords: function(records /*, predicates */) {
-    var predicates = _.rest(_.toArray(arguments), 1)
-    return _.filter(records, (record) => {
-      return _.every(_.map(predicates, (pred) => pred(record)));
-    });
-  },
-  getFilteredSortedRecords: function() {
-    var filteredRecords = this.filterRecords(this.props.records,
-                                             this.isRecordWithinRange,
-                                             this.doesRecordPassFilters,
-                                             this.isRecordCorrectVariantType);
-    var [sortByPath, direction] = this.state.sortBy;
-    if (sortByPath === null) {
-      filteredRecords.sort(vcfTools.recordComparator(direction));
-    } else {
-      filteredRecords.sort((a, b) => {
-        var aVal = utils.getIn(a, sortByPath),
-            bVal = utils.getIn(b, sortByPath);
-        if (direction === 'desc') {
-          return aVal - bVal
-        } else {
-          return bVal - aVal
-        }
-      });
-    }
-    return filteredRecords;
-  },
   render: function() {
-    var filteredRecords = this.getFilteredSortedRecords(),
-        filteredTruthRecords = this.filterRecords(this.props.truthRecords,
-                                                  this.isRecordWithinRange,
-                                                  this.isRecordCorrectVariantType);
+    var modelState = {
+      variantType: this.state.variantType,
+      filters: this.state.filter,
+      position: this.state.position,
+      sortBy: this.state.sortBy
+    };
+    var filteredRecords = this.props.model.getFilteredSortedRecords(state),
+        filteredTruthRecords = this.props.model.getFilteredTruthRecords(state);
 
     return (
         <div className="examine-page">
