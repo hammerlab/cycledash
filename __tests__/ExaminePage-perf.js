@@ -1,4 +1,15 @@
 /** @jsx React.DOM */
+/**
+ * Performance test for ExaminePage.
+ *
+ * You probably want to run this via the scripts/perf-test.sh script.
+ *
+ * This loads two VCF files (specified in environment variables), renders an
+ * ExaminePage and then selects two records, one after the other.
+ *
+ * TODO: do some sorting and filtering.
+ */
+
 jest
     .dontMock('../cycledash/static/js/examine/DataStore.js')
     .dontMock('../cycledash/static/js/examine/ExaminePage.js')
