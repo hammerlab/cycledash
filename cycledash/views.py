@@ -162,6 +162,8 @@ def trends(caller_name):
 @app.route('/vcf/<path:vcf_path>')
 @cache.cached()
 def hdfs_vcf(vcf_path):
+    if app.config['USE_RELOADER'] and vcf_path.startswith('__tests__'):
+        return open(vcf_path).read()
     url = WEBHDFS_ENDPOINT + vcf_path + WEBHDFS_OPEN_OP
     result = requests.get(url)
     return result.text
