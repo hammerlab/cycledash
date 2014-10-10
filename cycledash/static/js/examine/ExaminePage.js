@@ -84,6 +84,7 @@ var ExaminePage = React.createClass({
         this.setProps({
           hasLoaded: true,
           model: model,
+          records: records,
           chromosomes: chromosomes,
           columns: columns,
           header: vcfData.header

@@ -2,9 +2,10 @@
 jest
     .dontMock('../cycledash/static/js/examine/DataStore.js')
     .dontMock('../cycledash/static/js/examine/ExaminePage.js')
+    .dontMock('../cycledash/static/js/examine/StatsSummary.js')
+    .dontMock('../cycledash/static/js/examine/utils.js')
     .dontMock('../cycledash/static/js/examine/VCFTable.js')
     .dontMock('../cycledash/static/js/examine/vcf.tools.js')
-    .dontMock('../cycledash/static/js/examine/utils.js')
     .dontMock('./Utils.js')
     .dontMock('idiogrammatik.js')
     .dontMock('jquery')
@@ -155,6 +156,12 @@ describe('ExaminePage', function() {
       '20::63799',  // DP=72,SSC=7
       '20::75254'   // DP=74,SSC=9
     ]);
+  });
+
+  it('Should show summary statistics', function() {
+    var examine = makeTestExaminePage();
+    expect(Utils.findInComponent('.total-records', examine)[0].textContent)
+        .toEqual('Showing all 10 variants.');
   });
 
   // TODO: filter by regex
