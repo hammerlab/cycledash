@@ -1,3 +1,4 @@
+/** @jsx */
 var React = require('react/addons')
     idiogrammatik = require('idiogrammatik.js');
 
@@ -19,7 +20,11 @@ var PositionType = React.PropTypes.shape({
 // Sentinel value for filtering on ref/alt
 var REF_ALT_PATH = [null];
 
+// Sentinel value to indicate no chromosome restriction
+ALL_CHROMOSOMES = null;
+
 module.exports = {
-  PositionType: PositionType,
-  REF_ALT_PATH: REF_ALT_PATH
+  PositionType,
+  REF_ALT_PATH,
+  ALL_CHROMOSOMES
 };

@@ -28,7 +28,6 @@ window.renderExaminePage = function(el, vcfPath, truthVcfPath,
                                      karyogramData={GSTAINED_CHROMOSOMES} />, el);
 };
 
-
 // The Root element of the /examine page
 var ExaminePage = React.createClass({
   propTypes: {
@@ -97,13 +96,13 @@ var ExaminePage = React.createClass({
         found = false;
     for (var i = 0; i < filters.length; i++) {
       var listedFilter = filters[i],
-          isSameItem = utils.everyOver(listedFilter.path, filter.path, utils.equals);
+          isSameItem = _.isEqual(listedFilter.path, filter.path);
       if (isSameItem) {
         listedFilter.filter = filter.filter;
         found = true;
       }
     }
-    if(!found) filters.push(filter);
+    if (!found) filters.push(filter);
     this.setState({filters: filters});
   },
   handleChartChange: function(column) {
