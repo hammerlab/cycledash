@@ -134,7 +134,8 @@ var ExaminePage = React.createClass({
   },
   moveSelectionInDirection: function(delta) {
     if (!this.state.selectedRecord) return;
-    var filteredRecords = this.getFilteredSortedRecords();
+    var storeState = this.getStoreState();
+    var filteredRecords = this.props.store.getFilteredSortedRecords(storeState);
     var idx = filteredRecords.indexOf(this.state.selectedRecord);
     if (idx == -1) return;
     var newIdx = idx + delta;
@@ -158,13 +159,16 @@ var ExaminePage = React.createClass({
     }
     return list;
   },
-  render: function() {
-    var storeState = {
+  getStoreState: function() {
+    return {
       variantType: this.state.variantType,
       filters: this.state.filters,
       position: this.state.position,
       sortBy: this.state.sortBy
     };
+  },
+  render: function() {
+    var storeState = this.getStoreState();
     var store = this.props.store;
     var filteredRecords = store ? store.getFilteredSortedRecords(storeState) : [],
         filteredTruthRecords = store ? store.getFilteredTruthRecords(storeState) : [];

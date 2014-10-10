@@ -162,6 +162,22 @@ describe('ExaminePage', function() {
         .toEqual('Showing all 10 variants.');
   });
 
+  it('Should allow movement in either direction', function() {
+    var examine = makeTestExaminePage();
+    function selectedRows() {
+      return Utils.findInComponent('tr.selected td.pos', examine)
+                  .map(td => td.textContent);
+    }
+
+    expect(selectedRows()).toEqual([]);
+    examine.setState({selectedRecord: examine.props.records[4]});
+    expect(selectedRows()).toEqual(['20::65900']);
+    examine.moveSelectionInDirection(+1);
+    expect(selectedRows()).toEqual(['20::66370']);
+    examine.moveSelectionInDirection(-1);
+    expect(selectedRows()).toEqual(['20::65900']);
+  });
+
   // TODO: filter by regex
 
   // TODO: filter by type
