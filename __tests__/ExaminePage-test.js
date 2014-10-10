@@ -11,12 +11,10 @@ jest
     .dontMock('jquery')
     .dontMock('fs')
     .dontMock('vcf.js')
-    .dontMock('underscore')
-    ;
+    .dontMock('underscore');
 
 var Utils = require('./Utils')
-    _ = require('underscore')
-    ;
+    _ = require('underscore');
 
 
 describe('ExaminePage', function() {

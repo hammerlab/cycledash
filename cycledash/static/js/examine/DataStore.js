@@ -30,7 +30,7 @@ function isRecordCorrectVariantType(record, variantType) {
 function isRecordWithinRange(record, position) {
   var {start, end, chromosome} = position;
 
-  if (chromosome === idiogrammatik.ALL_CHROMOSOMES) {
+  if (chromosome === types.ALL_CHROMOSOMES) {
     return true;
   } else if (record.CHROM !== chromosome) {
     return false;
@@ -91,7 +91,7 @@ class DataModel {
     this.vcfData = runVcfData;
     this.truthVcfData = truthVcfData;
 
-    // Last state for which filtered [truth] records were computed.
+    // Last state for which filtered & filtered truth records were computed.
     // {variantType,filters,position,sortBy}
     this.lastState = null;
 
@@ -124,9 +124,9 @@ class DataModel {
         var aVal = utils.getIn(a, sortByPath),
             bVal = utils.getIn(b, sortByPath);
         if (direction === 'desc') {
-          return aVal - bVal
+          return aVal - bVal;
         } else {
-          return bVal - aVal
+          return bVal - aVal;
         }
       });
     }

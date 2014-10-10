@@ -4,8 +4,7 @@
  */
 
 var $ = require('jquery'),
-    vcf = require('vcf.js')
-    ;
+    vcf = require('vcf.js');
 
 /**
  * Apply a CSS selector to a React tree. Returns an array of DOM nodes.

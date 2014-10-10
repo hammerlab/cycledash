@@ -1,4 +1,5 @@
 /** @jsx */
+'use strict';
 var React = require('react/addons')
     idiogrammatik = require('idiogrammatik.js');
 
@@ -21,7 +22,7 @@ var PositionType = React.PropTypes.shape({
 var REF_ALT_PATH = [null];
 
 // Sentinel value to indicate no chromosome restriction
-ALL_CHROMOSOMES = null;
+var ALL_CHROMOSOMES = null;
 
 module.exports = {
   PositionType,

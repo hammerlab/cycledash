@@ -79,11 +79,11 @@ var ExaminePage = React.createClass({
             chromosomes = _.uniq(records.map((r) => r.CHROM));
         chromosomes.sort(vcfTools.chromosomeComparator);
 
-        var model = new DataStore(vcfData, truthVcfData);
+        var store = new DataStore(vcfData, truthVcfData);
 
         this.setProps({
           hasLoaded: true,
-          model: model,
+          store: store,
           records: records,
           chromosomes: chromosomes,
           columns: columns,
@@ -159,15 +159,15 @@ var ExaminePage = React.createClass({
     return list;
   },
   render: function() {
-    var modelState = {
+    var storeState = {
       variantType: this.state.variantType,
       filters: this.state.filters,
       position: this.state.position,
       sortBy: this.state.sortBy
     };
-    var model = this.props.model;
-    var filteredRecords = model ? model.getFilteredSortedRecords(modelState) : [],
-        filteredTruthRecords = model ? this.props.model.getFilteredTruthRecords(modelState) : [];
+    var store = this.props.store;
+    var filteredRecords = store ? store.getFilteredSortedRecords(storeState) : [],
+        filteredTruthRecords = store ? store.getFilteredTruthRecords(storeState) : [];
 
     return (
         <div className="examine-page">
