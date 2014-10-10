@@ -172,7 +172,7 @@ var ColumnHeader = React.createClass({
 
     var [sortByPath, direction] = this.props.sortBy;
     var sortingBy = false;
-    if (sortByPath) sortingBy = utils.everyOver(sortByPath, this.props.column.path, utils.equals);
+    if (sortByPath) sortingBy = _.isEqual(sortByPath, this.props.column.path);
     var aClasses = React.addons.classSet({
       'sorting-by': sortingBy,
       'desc': this.props.sortBy[1] === 'desc',

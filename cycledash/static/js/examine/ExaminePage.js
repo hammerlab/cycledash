@@ -9,8 +9,9 @@ var _ = require('underscore'),
     GSTAINED_CHROMOSOMES = require('../../data/gstained-chromosomes'),
     AttributeCharts = require('./AttributeCharts'),
     BioDalliance = require('./BioDalliance'),
-    VCFTable = require('./VCFTable'),
+    DataStore = require('./DataStore'),
     StatsSummary = require('./StatsSummary'),
+    VCFTable = require('./VCFTable'),
     Widgets = require('./Widgets'),
     vcfTools = require('./vcf.tools'),
     $ = require('jquery'),
@@ -27,7 +28,6 @@ window.renderExaminePage = function(el, vcfPath, truthVcfPath,
                                      igvHttpfsUrl={igvHttpfsUrl}
                                      karyogramData={GSTAINED_CHROMOSOMES} />, el);
 };
-
 
 // The Root element of the /examine page
 var ExaminePage = React.createClass({
@@ -79,10 +79,12 @@ var ExaminePage = React.createClass({
             chromosomes = _.uniq(records.map((r) => r.CHROM));
         chromosomes.sort(vcfTools.chromosomeComparator);
 
+        var store = new DataStore(vcfData, truthVcfData);
+
         this.setProps({
           hasLoaded: true,
+          store: store,
           records: records,
-          truthRecords: truthVcfData ? truthVcfData.records : null,
           chromosomes: chromosomes,
           columns: columns,
           header: vcfData.header
@@ -97,19 +99,17 @@ var ExaminePage = React.createClass({
         found = false;
     for (var i = 0; i < filters.length; i++) {
       var listedFilter = filters[i],
-          isSameItem = utils.everyOver(listedFilter.path, filter.path, utils.equals);
+          isSameItem = _.isEqual(listedFilter.path, filter.path);
       if (isSameItem) {
         listedFilter.filter = filter.filter;
         found = true;
       }
     }
-    if(!found) filters.push(filter);
+    if (!found) filters.push(filter);
     this.setState({filters: filters});
   },
   handleChartChange: function(column) {
-    var selectedCharts = this.togglePresence(this.state.selectedColumns, column, function(a, b) {
-      return utils.everyOver(a.path, b.path, utils.equals);
-    });
+    var selectedCharts = this.togglePresence(this.state.selectedColumns, column, _.isEqual);
     this.setState({selectedColumns: selectedCharts});
   },
   handleSortByChange: function(sortByAttribute, direction) {
@@ -158,95 +158,16 @@ var ExaminePage = React.createClass({
     }
     return list;
   },
-  isRecordCorrectVariantType: function(record) {
-    switch (this.state.variantType) {
-      case 'All':
-        return true;
-      case 'SNV':
-        return record.isSnv();
-      case 'INDEL':
-        return record.isIndel();
-      case 'SV':
-        return record.isSv();
-      default:
-        throw "this.state.variantType must be one of All, SNV, SV, INDEL, is '" +
-          this.props.variantType + "'";
-    }
-  },
-  isRecordWithinRange: function(record) {
-    var {start, end, chromosome} = this.state.position;
-
-    if (chromosome === idiogrammatik.ALL_CHROMOSOMES) {
-      return true;
-    } else if (record.CHROM !== chromosome) {
-      return false;
-    } else if (_.isNull(start) && _.isNull(end)) {
-      return true;
-    } else if (_.isNull(end)) {
-      return record.POS >= start;
-    } else if (_.isNull(start)) {
-      return record.POS <= end;
-    } else {
-      return record.POS >= start && record.POS <= end;
-    }
-  },
-  doesRecordPassFilters: function(record) {
-    return _.reduce(this.state.filters, function(passes, filter) {
-      var filterVal = filter.filter,
-          valPath = filter.path,
-          val = valPath ? utils.getIn(record, valPath) : null;
-      if (!passes) return false;  // If one fails, they all fail.
-      if (filterVal.length === 0) return true;
-
-      if (_.contains(['<', '>'], filterVal[0])) {  // then do a numeric test
-        val = Number(val);
-        if (filterVal[0] === '>') {
-          return val > Number(filterVal.slice(1));
-        } else {
-          return val < Number(filterVal.slice(1));
-        }
-      } else {  // treat it like a regexp, then...
-        var re = new RegExp(filterVal);
-        if (valPath[0] === types.REF_ALT_PATH[0]) {
-          return re.test(record.REF + "/" + record.ALT);
-        } else { // this is a regular non-numeric column
-          return re.test(String(val));
-        }
-      }
-    }, true);
-  },
-  filterRecords: function(records /*, predicates */) {
-    var predicates = _.rest(_.toArray(arguments), 1)
-    return _.filter(records, (record) => {
-      return _.every(_.map(predicates, (pred) => pred(record)));
-    });
-  },
-  getFilteredSortedRecords: function() {
-    var filteredRecords = this.filterRecords(this.props.records,
-                                             this.isRecordWithinRange,
-                                             this.doesRecordPassFilters,
-                                             this.isRecordCorrectVariantType);
-    var [sortByPath, direction] = this.state.sortBy;
-    if (sortByPath === null) {
-      filteredRecords.sort(vcfTools.recordComparator(direction));
-    } else {
-      filteredRecords.sort((a, b) => {
-        var aVal = utils.getIn(a, sortByPath),
-            bVal = utils.getIn(b, sortByPath);
-        if (direction === 'desc') {
-          return aVal - bVal
-        } else {
-          return bVal - aVal
-        }
-      });
-    }
-    return filteredRecords;
-  },
   render: function() {
-    var filteredRecords = this.getFilteredSortedRecords(),
-        filteredTruthRecords = this.filterRecords(this.props.truthRecords,
-                                                  this.isRecordWithinRange,
-                                                  this.isRecordCorrectVariantType);
+    var storeState = {
+      variantType: this.state.variantType,
+      filters: this.state.filters,
+      position: this.state.position,
+      sortBy: this.state.sortBy
+    };
+    var store = this.props.store;
+    var filteredRecords = store ? store.getFilteredSortedRecords(storeState) : [],
+        filteredTruthRecords = store ? store.getFilteredTruthRecords(storeState) : [];
 
     return (
         <div className="examine-page">
