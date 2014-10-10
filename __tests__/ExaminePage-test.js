@@ -1,5 +1,6 @@
 /** @jsx React.DOM */
 jest
+    .dontMock('../cycledash/static/js/examine/DataStore.js')
     .dontMock('../cycledash/static/js/examine/ExaminePage.js')
     .dontMock('../cycledash/static/js/examine/VCFTable.js')
     .dontMock('../cycledash/static/js/examine/vcf.tools.js')
