@@ -1,6 +1,6 @@
 /** @jsx */
 'use strict';
-var React = require('react/addons')
+var React = require('react/addons'),
     idiogrammatik = require('idiogrammatik.js');
 
 var PositionType = React.PropTypes.shape({
