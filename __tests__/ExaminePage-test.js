@@ -17,10 +17,6 @@ var Utils = require('./Utils')
     _ = require('underscore')
     ;
 
-    function log(msg) {
-      require('fs').appendFileSync('/tmp/jest.log.txt', msg + '\n', {'encoding': 'utf8'});
-    }
-
 
 describe('ExaminePage', function() {
   // modules -- must be require'd in beforeEach() or it().

@@ -108,9 +108,7 @@ var ExaminePage = React.createClass({
     this.setState({filters: filters});
   },
   handleChartChange: function(column) {
-    var selectedCharts = this.togglePresence(this.state.selectedColumns, column, function(a, b) {
-      return utils.everyOver(a.path, b.path, utils.equals);
-    });
+    var selectedCharts = this.togglePresence(this.state.selectedColumns, column, _.isEqual);
     this.setState({selectedColumns: selectedCharts});
   },
   handleSortByChange: function(sortByAttribute, direction) {
