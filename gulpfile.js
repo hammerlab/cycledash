@@ -66,6 +66,7 @@ gulp.task('prod', ['build', 'dalliance'])
 // Task which builds the production-ready JS.
 // Minified, JSX & ES6, and browserified.
 gulp.task('build', function() {
+  process.env.NODE_ENV = 'production';
   return browserify(PATHS.examineSrc)
     .transform(REACT_OPTS, reactify)
     .transform({global: true}, uglifyify) // Global: true indicates that uglify
