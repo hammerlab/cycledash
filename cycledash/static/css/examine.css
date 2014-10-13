@@ -257,3 +257,13 @@ text {
   max-height: 300px;
   min-height: 300px;
 }
+
+@media(max-height:1000px) {
+  .variant-inspector {
+    height: 550px;
+  }
+  .dalliance .tier.pileup {
+    max-height: 200px;
+    min-height: 200px;
+  }
+}
