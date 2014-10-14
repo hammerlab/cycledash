@@ -1,14 +1,16 @@
 setup: |
+    gulp prod
     export PORT=5001
     export DATABASE_URL='sqlite:///../pdifftests/test.db'
     export WEBHDFS_USER=testing
     export WEBHDFS_URL='http://example.com'
     export IGV_HTTPFS_URL='http://example.com'
+    export ALLOW_LOCAL_VCFS=true
     python ./run.py
 
 waitFor:
     url: http://localhost:5001/
-    timeout_secs: 5
+    timeout_secs: 15
 
 aliases:
   - &std-config
@@ -22,7 +24,27 @@ aliases:
 
 tests:
   - name: examine
-    description:
-      Basic view of a fully-loaded Examine page.
+    description: Initial view of a fully-loaded Examine page.
     url: http://localhost:5001/runs/4/examine
-    config: *std-config
+    config:
+      <<: *std-config
+
+  - name: examine-sorted
+    description: Examine page sorted by decreasing Normal Read Depth
+    url: http://localhost:5001/runs/4/examine
+    config:
+      <<: *std-config
+      injectJs: |
+        c = document.createEvent('MouseEvent');
+        c.initMouseEvent('click', true, true, window);
+        $('[data-attribute="NORMAL::RD"] a').get(0).dispatchEvent(c);
+
+  - name: examine-charted
+    description: Examine page showing a chart of Normal Read Depth
+    url: http://localhost:5001/runs/4/examine
+    config:
+      <<: *std-config
+      injectJs: |
+        c = document.createEvent('MouseEvent');
+        c.initMouseEvent('click', true, true, window);
+        $('[data-attribute="NORMAL::RD"] .chartable').get(0).dispatchEvent(c);

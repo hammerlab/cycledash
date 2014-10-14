@@ -10,10 +10,14 @@ var gulp = require('gulp'),
 
 
 var PATHS = {
-  examineSrc: ['./cycledash/static/js/examine/ExaminePage.js'], // the File being compiled.
-  examineDest: './cycledash/static/js/dist/', // Where the compiled JS bundle will go.
-  examineJs: ['cycledash/static/js/*.js'], // All of the JS files we want to watch for changes.
-  css: ['./cycledash/static/css/*.css'] // The CSS we want to watch for changes.
+  examineSrc: ['./cycledash/static/js/examine/ExaminePage.js'],  // the File being compiled.
+  examineDest: './cycledash/static/js/dist/',  // Where the compiled JS bundle will go.
+  examineJs: ['cycledash/static/js/*.js'],  // All of the JS files we want to watch for changes.
+  css: ['./cycledash/static/css/*.css'],  // The CSS we want to watch for changes.
+  polyfills: [
+    './node_modules/es5-shim/es5-shim.min.js',
+    './node_modules/es5-shim/es5-sham.min.js'
+  ]  // polyfills
 };
 
 var REACT_OPTS = {es6: true},
@@ -64,10 +68,11 @@ gulp.task('default', ['watch', 'js']);
 gulp.task('prod', ['build', 'dalliance'])
 
 // Task which builds the production-ready JS.
-// Minified, JSX & ES6, and browserified.
+// Minified, polyfilled, JSX & ES6, and browserified.
 gulp.task('build', function() {
   process.env.NODE_ENV = 'production';
-  return browserify(PATHS.examineSrc)
+  var srcs = PATHS.polyfills.concat(PATHS.examineSrc);
+  return browserify(srcs)
     .transform(REACT_OPTS, reactify)
     .transform({global: true}, uglifyify) // Global: true indicates that uglify
                                           // will minify all of the module code.
