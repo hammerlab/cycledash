@@ -123,3 +123,11 @@ To run tests:
 nosetests   # Run Python tests
 npm test   # Run JS tests
 ```
+
+CycleDash uses dpxdt for perceptual diff testing. To update the reference screenshots:
+
+```
+dpxdt update pdifftests
+```
+
+Running `git status` after this should indicate whether the screenshots have changed.
