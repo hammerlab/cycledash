@@ -4,6 +4,6 @@ set -o errexit
 
 pip install -r requirements.txt
 npm install
-make
+make initenv
 
 gulp prod
