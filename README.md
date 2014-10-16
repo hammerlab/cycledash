@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/hammerlab/cycledash.svg?branch=master)](https://travis-ci.org/hammerlab/cycledash)
+
 ## CycleDash
 
 CycleDash tracks variant caller runs and facilitates analyses on them. It
