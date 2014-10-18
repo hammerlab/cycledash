@@ -4,6 +4,7 @@
 var _ = require('underscore'),
     d3 = require('d3/d3'),
     React = require('react'),
+    types = require('./types'),
     idiogrammatik = require('idiogrammatik.js');
 
 
@@ -19,9 +20,10 @@ var Karyogram = React.createClass({
     kgram.highlights().remove();
 
     if (chromosome !== this.props.position.chromosome) {
-      kgram.zoom(chromosome);
+      if (chromosome === null) kgram.zoom(kgram.ALL_CHROMOSOMES);
+      else kgram.zoom(chromosome);
     }
-    if (this.props.position.chromosome !== kgram.ALL_CHROMOSOMES) {
+    if (this.props.position.chromosome !== types.ALL_CHROMOSOMES) {
       if (!start && !end) {
         // We don't want to highlight the whole chromosome, that's cluttering.
       } else if (start && !end) {

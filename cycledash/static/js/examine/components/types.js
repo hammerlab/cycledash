@@ -1,7 +1,7 @@
 /** @jsx */
 'use strict';
-var React = require('react/addons'),
-    idiogrammatik = require('idiogrammatik.js');
+var React = require('react/addons');
+
 
 var PositionType = React.PropTypes.shape({
   start: React.PropTypes.oneOfType([
@@ -14,7 +14,7 @@ var PositionType = React.PropTypes.shape({
   ]),
   chromosome: React.PropTypes.oneOfType([
     React.PropTypes.string,
-    React.PropTypes.instanceOf(idiogrammatik.ALL_CHROMOSOMES)
+    React.PropTypes.instanceOf(ALL_CHROMOSOMES)
   ])
 }).isRequired;
 

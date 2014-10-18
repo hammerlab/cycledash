@@ -2,12 +2,10 @@
 "use strict";
 
 var _ = require('underscore'),
-    d3 = require('d3/d3'),
     React = require('react/addons'),
-    idiogrammatik = require('idiogrammatik.js'),
-    types = require('./types.js'),
+    types = require('./types'),
     $ = require('jquery'),
-    utils = require('./utils');
+    utils = require('../utils');
 
 
 var VCFTable = React.createClass({
@@ -27,7 +25,7 @@ var VCFTable = React.createClass({
     // The VCF header, used to get information about the INFO fields
     header: React.PropTypes.object.isRequired,
     // Attribute by which we are sorting
-    sortBy: React.PropTypes.array,
+    sortBy: React.PropTypes.object.isRequired,
     // Function which takes a chart attribute name and propagates the change up
     handleChartChange: React.PropTypes.func.isRequired,
     handleSortByChange: React.PropTypes.func.isRequired,
@@ -75,7 +73,7 @@ var VCFTableHeader = React.createClass({
     header: React.PropTypes.object.isRequired,
     selectedColumns: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     columns: React.PropTypes.object.isRequired,
-    sortBy: React.PropTypes.array,
+    sortBy: React.PropTypes.object.isRequired,
     handleChartChange: React.PropTypes.func.isRequired,
     handleSortByChange: React.PropTypes.func.isRequired
   },
@@ -85,21 +83,21 @@ var VCFTableHeader = React.createClass({
     };
   },
   handleSortByChange: function(e) {
-    var path = e.currentTarget.parentElement
-        .attributes.getNamedItem('data-attribute').value;
-    var [sortPath, direction] = this.props.sortBy;
-    if (!sortPath || path === sortPath.join('::')) {
-      direction = direction == 'asc' ? 'desc' : 'asc';
+    var currentPath = e.currentTarget.parentElement
+        .attributes.getNamedItem('data-attribute')
+        .value.split('::');
+    var {path, order} = this.props.sortBy;
+    if (!path || _.isEqual(path, currentPath)) {
+      order = order == 'asc' ? 'desc' : 'asc';
     } else {
-      direction = 'desc';
+      order = 'asc';
     }
-    if (path === 'position') {
+    if (currentPath[0] === 'position') {
       path = null;
     } else {
-      path = path.split('::');
+      path = currentPath;
     }
-
-    this.props.handleSortByChange(path, direction);
+    this.props.handleSortByChange({path, order});
   },
   render: function() {
     var uberColumns = [],
@@ -114,8 +112,7 @@ var VCFTableHeader = React.createClass({
       );
       for (var columnName in columns) {
         var column = columns[columnName];
-        var isSelected =
-            _.any(this.props.selectedColumns, el => _.isEqual(el, column));
+        var isSelected = _.any(this.props.selectedColumns, el => _.isEqual(el, column));
         columnHeaders.push(<ColumnHeader info={column.info}
                                          key={column.path.join('::')}
                                          column={column}
@@ -127,9 +124,9 @@ var VCFTableHeader = React.createClass({
     });
     var sorterClasses = React.addons.classSet({
       'sort': true,
-      'desc': this.props.sortBy[1] === 'desc',
-      'asc': this.props.sortBy[1] === 'asc',
-      'sorting-by': this.props.sortBy[0] === null
+      'desc': this.props.sortBy.order === 'desc',
+      'asc': this.props.sortBy.order === 'asc',
+      'sorting-by': this.props.sortBy.path === null
     });
 
     return (
@@ -158,7 +155,7 @@ var ColumnHeader = React.createClass({
     handleChartToggle: React.PropTypes.func.isRequired,
     isSelected: React.PropTypes.bool.isRequired,
     handleSortByChange: React.PropTypes.func.isRequired,
-    sortBy: React.PropTypes.array
+    sortBy: React.PropTypes.object.isRequired
   },
   render: function() {
     var tooltip;
@@ -170,22 +167,18 @@ var ColumnHeader = React.createClass({
       'selected': this.props.isSelected,
     });
 
-    var [sortByPath, direction] = this.props.sortBy;
-    var sortingBy = false;
-    if (sortByPath) sortingBy = _.isEqual(sortByPath, this.props.column.path);
+    var sortByPath = this.props.sortBy.path,
+        order = this.props.sortBy.order;
+    if (sortByPath) var sortingBy = _.isEqual(sortByPath, this.props.column.path);
     var aClasses = React.addons.classSet({
       'sorting-by': sortingBy,
-      'desc': this.props.sortBy[1] === 'desc',
-      'asc': this.props.sortBy[1] === 'asc',
+      'desc': order === 'desc',
+      'asc': order === 'asc',
       'sort': true
     });
 
     if (_.contains(['Integer', 'Float'], this.props.info['Type'])) {
       var sorter = <a className={aClasses} onClick={this.props.handleSortByChange}></a>;
-    }
-
-
-    if (_.contains(['Integer', 'Float'], this.props.info['Type'])) {
       var chartToggle = (<span className="chartable"
                                onClick={this.props.handleChartToggle}>
                            {this.props.column.name}
@@ -233,17 +226,20 @@ var VCFTableFilter = React.createClass({
   },
   handleChromosomeChange: function(e) {
     var chromosome = this.refs.chromosome.getDOMNode().value;
+    if (chromosome === 'all') chromosome = null;
     this.props.handleChromosomeChange(chromosome);
   },
   handleRangeChange: function(e) {
     var start = this.refs.startPos.getDOMNode().value,
     end = this.refs.endPos.getDOMNode().value,
     chromosome = this.props.position.chromosome;
-    this.props.handleRangeChange(chromosome, Number(start) || null, Number(end) || null);
+    this.props.handleRangeChange({chromosome,
+                                  start: Number(start) || null,
+                                  end: Number(end) || null});
   },
   handleFilterUpdate: function(path) {
     return e => {
-      this.props.handleFilterUpdate({filter: e.currentTarget.value, path: path});
+      this.props.handleFilterUpdate({filterValue: e.currentTarget.value, path: path});
     };
   },
   render: function() {
