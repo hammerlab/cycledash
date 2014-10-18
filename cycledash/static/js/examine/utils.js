@@ -1,3 +1,4 @@
+/** @jsx */
 "use strict";
 
 var _ = require('underscore');
@@ -15,7 +16,8 @@ function getIn(obj, path) {
   return obj;
 }
 
+function juxt(fns) {
+  return o => _.map(fns, fn => fn(o));
+}
 
-module.exports = {
-  getIn: getIn
-};
+module.exports = { getIn, juxt };
