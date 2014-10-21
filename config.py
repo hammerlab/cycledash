@@ -21,6 +21,9 @@ COMPRESS_MIMETYPES=['text/html', 'text/plain', 'text/css', 'text/xml',
                     'application/json', 'application/javascript']
 
 import subprocess
-DEPLOYED_GIT_HASH = subprocess.check_output(['git', 'rev-parse', 'HEAD'])[:-1]
+try:
+    DEPLOYED_GIT_HASH = subprocess.check_output(['git', 'rev-parse', 'HEAD'])[:-1]
+except subprocess.CalledProcessError:
+    DEPLOYED_GIT_HASH = '<No hash: not in git repository>'
 
 del os
