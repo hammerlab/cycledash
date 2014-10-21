@@ -3,7 +3,7 @@ jest.autoMockOff();
 
 var _ = require('underscore'),
     Utils = require('./Utils.js'),
-    ACTION_TYPES = require('../cycledash/static/js/examine/RecordActions.js').ACTION_TYPES,
+    ACTION_TYPES = require('../../cycledash/static/js/examine/RecordActions.js').ACTION_TYPES,
     $ = require('jquery');
 
 
@@ -11,19 +11,19 @@ describe('RecordStore', function() {
   var RecordStore, RecordActions, Dispatcher;
 
   beforeEach(function() {
-    RecordStore = require('../cycledash/static/js/examine/RecordStore.js');
+    RecordStore = require('../../cycledash/static/js/examine/RecordStore.js');
     $ = require('jquery');
   });
 
   it('should load VCF records', function() {
-    spyOn($, 'get').andCallFake(Utils.fakeGet('__tests__/data/snv.vcf'));
+    spyOn($, 'get').andCallFake(Utils.fakeGet('__tests__/js/data/snv.vcf'));
     var rs = RecordStore('/vcf/snv.vcf', '/vcf/snv.vcf');
     expect(rs.hasLoadedVcfs()).toEqual(true);
     expect(rs.getRecords().length).toEqual(10);
   });
 
   it('should sort records by INFO:DP', function() {
-    spyOn($, 'get').andCallFake(Utils.fakeGet('__tests__/data/snv.vcf'));
+    spyOn($, 'get').andCallFake(Utils.fakeGet('__tests__/js/data/snv.vcf'));
     var rs = RecordStore('/vcf/snv.vcf', '/vcf/snv.vcf');
 
     var originalDps = _.pluck(_.pluck(rs.getRecords(), 'INFO'), 'DP'),
@@ -40,7 +40,7 @@ describe('RecordStore', function() {
   });
 
   it('should filter to DP > 55 and then NORMAL:GT = 1/1', function() {
-    spyOn($, 'get').andCallFake(Utils.fakeGet('__tests__/data/snv.vcf'));
+    spyOn($, 'get').andCallFake(Utils.fakeGet('__tests__/js/data/snv.vcf'));
     var rs = RecordStore('/vcf/snv.vcf', '/vcf/snv.vcf');
 
     var filteredDps = _.filter(_.pluck(_.pluck(
@@ -66,7 +66,7 @@ describe('RecordStore', function() {
   });
 
   it('should select a range within chromosome 20', function() {
-    spyOn($, 'get').andCallFake(Utils.fakeGet('__tests__/data/snv.vcf'));
+    spyOn($, 'get').andCallFake(Utils.fakeGet('__tests__/js/data/snv.vcf'));
     var rs = RecordStore('/vcf/snv.vcf', '/vcf/snv.vcf');
 
     var withinRangeRecords = _.filter(rs.getRecords(), record => {
@@ -82,7 +82,7 @@ describe('RecordStore', function() {
   });
 
   it('should select a range, filter by NORMAL:AD > 25, and sort by desc position', function() {
-    spyOn($, 'get').andCallFake(Utils.fakeGet('__tests__/data/snv.vcf'));
+    spyOn($, 'get').andCallFake(Utils.fakeGet('__tests__/js/data/snv.vcf'));
     var rs = RecordStore('/vcf/snv.vcf', '/vcf/snv.vcf');
 
     var validatedRecords = _.filter(rs.getRecords(), record => {

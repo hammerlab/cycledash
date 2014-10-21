@@ -16,8 +16,8 @@ function RecordActions (dispatcher) {
     updateSorter: function({path, order}) {
       dispatcher.dispatch({
         actionType: ACTION_TYPES.SORT_BY,
-        path: path,
-        order: order
+        path,
+        order
       });
     },
     updateFilters: function({path, filterValue}) {
@@ -59,7 +59,4 @@ function RecordActions (dispatcher) {
 }
 
 
-module.exports = {
-  ACTION_TYPES: ACTION_TYPES,
-  RecordActions: RecordActions
-};
+module.exports = {ACTION_TYPES, RecordActions};

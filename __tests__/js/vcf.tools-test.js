@@ -2,13 +2,12 @@
 jest
     .dontMock('fs')
     .dontMock('vcf.js')
-    .dontMock('../cycledash/static/js/examine/vcf.tools.js')
+    .dontMock('../../cycledash/static/js/examine/vcf.tools.js')
     .dontMock('underscore')
-    .dontMock('./Utils.js')
-    ;
+    .dontMock('./Utils.js');
 
 var assert = require('assert'),
-    vcfTools = require('../cycledash/static/js/examine/vcf.tools.js'),
+    vcfTools = require('../../cycledash/static/js/examine/vcf.tools.js'),
     _ = require('underscore'),
     Utils = require('./Utils.js')
     ;
@@ -52,7 +51,7 @@ describe('VCF.tools', function() {
 
   describe('deriveColumns', function() {
     it('should produce correct columns for a test VCF file', function() {
-      var vcfData = Utils.loadVcfData('__tests__/data/snv.vcf');
+      var vcfData = Utils.loadVcfData('__tests__/js/data/snv.vcf');
       var columns = vcfTools.deriveColumns(vcfData);
 
       // The full object is quite large. We assert specific aspects for brevity.

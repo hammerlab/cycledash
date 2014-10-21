@@ -90,8 +90,9 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
   if (dispatcher) dispatcherToken = dispatcher.register(receiver);
 
   /**
-  * Updates the selected records (and, if updateTruth, truthRecords) by
-  * applying filters, selected range, and variantType.
+  * Updates the selected records (and, if updateTruth, truthRecords) by applying
+  * filters, selected range, and variantType. Also updates true/false pos/neg
+  * values.
   *
   * NB: mutates store state!
   */

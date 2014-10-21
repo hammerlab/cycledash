@@ -5,7 +5,6 @@ var gulp = require('gulp'),
     reactify = require('reactify'),
     uglifyify = require('uglifyify'),
     source = require('vinyl-source-stream'),
-    mocha = require('gulp-mocha'),
     _ = require('underscore');
 
 

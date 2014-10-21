@@ -34,6 +34,6 @@
     ]
   },
   "scripts": {
-    "test": "jest __tests__/*test.js"
+    "test": "jest __tests__/js/*-test.js"
   }
 }
