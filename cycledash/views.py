@@ -161,7 +161,8 @@ def trends(caller_name):
 @cache.cached()
 def hdfs_vcf(vcf_path):
     if app.config['ALLOW_LOCAL_VCFS']:
-        return open(vcf_path).read()
-    url = WEBHDFS_ENDPOINT + vcf_path + WEBHDFS_OPEN_OP
-    result = requests.get(url)
-    return result.text
+        vcf_text = open(vcf_path).read()
+    else:
+        url = WEBHDFS_ENDPOINT + vcf_path + WEBHDFS_OPEN_OP
+        vcf_text = requests.get(url).text
+    return Response(vcf_text, mimetype='text/plain')
