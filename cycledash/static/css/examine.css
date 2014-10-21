@@ -117,10 +117,10 @@ th .sort {
 th .sort:before {
     content: ' ↕';
 }
-th .sorting-by.desc:before {
+th .sorting-by.asc:before {
     content: ' ↑';
 }
-th .sorting-by.asc:before {
+th .sorting-by.desc:before {
     content: ' ↓';
 }
 th.attr:hover {

@@ -3,6 +3,12 @@
 var React = require('react/addons');
 
 
+// Sentinel value for filtering on ref/alt
+var REF_ALT_PATH = [null];
+
+// Sentinel value to indicate no chromosome restriction
+var ALL_CHROMOSOMES = null;
+
 var PositionType = React.PropTypes.shape({
   start: React.PropTypes.oneOfType([
     React.PropTypes.number,
@@ -17,12 +23,6 @@ var PositionType = React.PropTypes.shape({
     React.PropTypes.instanceOf(ALL_CHROMOSOMES)
   ])
 }).isRequired;
-
-// Sentinel value for filtering on ref/alt
-var REF_ALT_PATH = [null];
-
-// Sentinel value to indicate no chromosome restriction
-var ALL_CHROMOSOMES = null;
 
 module.exports = {
   PositionType,

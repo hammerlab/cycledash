@@ -90,12 +90,12 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
   if (dispatcher) dispatcherToken = dispatcher.register(receiver);
 
   /**
-  * Updates the selected records (and, if updateTruth, truthRecords) by applying
-  * filters, selected range, and variantType. Also updates true/false pos/neg
-  * values.
-  *
-  * NB: mutates store state!
-  */
+   * Updates the selected records (and, if updateTruth, truthRecords) by applying
+   * filters, selected range, and variantType. Also updates true/false pos/neg
+   * values.
+   *
+   * NB: mutates store state!
+   */
   function updateRecords({updateTruth}) {
     records = displayableRecords(fullRecords, range, variantType, filters);
     if (updateTruth) {
@@ -106,14 +106,14 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
   }
 
   /**
-  * Updates the sort order of fullRecords.
-  *
-  * Takes the new path and order instead of first setting the new SortBy path
-  * and order so that we can run #reverse() on records if only order is being
-  * changed. [Perf opt hack].
-  *
-  * NB: mutates store state!
-  */
+   * Updates the sort order of fullRecords.
+   *
+   * Takes the new path and order instead of first setting the new SortBy path
+   * and order so that we can run #reverse() on records if only order is being
+   * changed. [Perf opt hack].
+   *
+   * NB: mutates store state!
+   */
   function sortRecords(path, order) {
     // We only sort fullRecords, because they have to be filtered afterwards
     // anyway. We don't sort fullTruthRecords because it has to be sorted by
@@ -126,6 +126,11 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
     }
   }
 
+  /**
+   * Updates the filters by path and filterValue.
+   *
+   * NB: mutates store state!
+   */
   function updateFilters(path, filterValue) {
     var filter = _.findWhere(filters, {path: path});
     if (filter && filterValue.length === 0) {
@@ -171,47 +176,7 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
   }
 
   return {
-    hasLoadedVcfs: function() {
-      return hasLoadedVcfs;
-    },
-    getRecords: function() {
-      return records;
-    },
-    getTruthRecords: function() {
-      return truthRecords;
-    },
-    getTrueFalsePositiveNegative: function() {
-      return trueFalsePositiveNegative;
-    },
-    getTotalRecords: function() {
-      return fullRecords.length;
-    },
-    getSelectedRecord: function() {
-      return selectedRecord;
-    },
-    getFilters: function() {
-      return filters;
-    },
-    getSelectedColumns: function() {
-      return selectedColumns;
-    },
-    getSortBy: function() {
-      return sortBy;
-    },
-    getRange: function() {
-      return range;
-    },
-    getVariantType: function() {
-      return variantType;
-    },
-    getChromosomes: function() {
-      return chromosomes;
-    },
-    getColumns: function() {
-      return columns;
-    },
     getState: function() {
-      // Returns all the above state in an object.
       return {
         hasLoadedVcfs,
         header,
