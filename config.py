@@ -17,7 +17,7 @@ TYPEKIT_URL = os.environ.get('TYPEKIT_URL', None)
 
 # These are the same as Compress's defaults, but with 'text/plain' added.
 # This is important to us because VCF file are transmitted as 'text/plain'.
-COMPRESS_DEBUG=True
+COMPRESS_DEBUG=True  # use gzip, even in DEBUG mode.
 COMPRESS_MIMETYPES=['text/html', 'text/plain', 'text/css', 'text/xml',
                     'text/javascript',
                     'application/json', 'application/javascript']
