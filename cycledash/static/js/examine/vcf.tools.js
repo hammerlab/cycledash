@@ -6,44 +6,8 @@ var _ = require('underscore'),
 
 
 /**
-* Returns a string which uniquely identifies a record in a VCF.
-*
-* Used to test for record equality.
-*/
-function recordKey(record) {
-  return record.__KEY__;
-}
-
-function chromosomeComparator(a, b) {
-  var aChr = Number(a) || a,
-      bChr = Number(b) || b;
-  if (aChr == bChr)
-    return 0;
-  else if (_.isString(aChr) && _.isString(bChr))
-    return aChr < bChr ? -1 : 1; // we want alphabetical ordering
-  else if (_.isNumber(aChr) && _.isNumber(bChr))
-    return aChr > bChr ? 1 : -1;
-  else if (_.isString(aChr))
-    return 1
-  else
-    return -1;
-}
-
-function recordComparator(direction) {
-  return function(a, b) {
-    if (direction === 'desc' || !direction) {
-      return chromosomeComparator(a.CHROM, b.CHROM) || (a.POS - b.POS);
-    } else if (direction === 'asc') {
-      return chromosomeComparator(b.CHROM, a.CHROM) || (b.POS - a.POS);
-    }
-  }
-}
-
-/**
- * Returns {truePositives, falsePositives, falseNegatives} for the given records
+ * Return {truePositives, falsePositives, falseNegatives} for the given records
  * and truthRecords.
- *
- * NB: We don't ignore filtered out records in this calculation.
  */
 function trueFalsePositiveNegative(records, truthRecords) {
   // We can quickly get t/f/p/n for SNVs and INDELs, so pull them out:
@@ -61,17 +25,13 @@ function trueFalsePositiveNegative(records, truthRecords) {
 
 /**
  * Fast (O(n)) way to find true/false/pos/neg for SNVs and INDELs.  This is
- * largely a performance optimization. First sorts both arrays, so we get some
- * slowdown there, but this is negligible compared to the alternative.
+ * largely a performance optimization.
+ *
+ * Unfortunately, we have to sort by __KEY__ first to get this speed. This is
+ * still faster than the alternative, using unsorted records.
  */
-function trueFalsePositiveNegativeForSnvAndIndels(records, truthRecords) {
-  var recordKey = (record) => record.__KEY__; // We sort on this lexicographic key.
-
-  // In order to quickly find t/f/p/n we need to sort our records.
-  var records = _.sortBy(records, '__KEY__'),
-      truths = _.sortBy(truthRecords, '__KEY__');
-
-  // Indexes into records, truth (respectively).
+function trueFalsePositiveNegativeForSnvAndIndels(records, truths) {
+  // Indexes into records and truthRecords.
   var ri = 0,
       ti = 0;
 
@@ -79,17 +39,20 @@ function trueFalsePositiveNegativeForSnvAndIndels(records, truthRecords) {
       falsePositives = 0,
       falseNegatives = 0;
 
+  records = _.sortBy(records, '__KEY__');
+  truths = _.sortBy(truths, '__KEY__');
+
   while (ri < records.length) {
     if (ti >= truths.length) {
       // Then we're done going through truths, so the remaining elements in
       // records are false.
       falsePositives += records.slice(ri).length;
       ri = records.length; // terminate loop
-    } else if (recordKey(records[ri]) < recordKey(truths[ti])) {
+    } else if (records[ri].__KEY__ < truths[ti].__KEY__) {
       // Then the record at ri doesn't appear in truth, so it's false.
       falsePositives += 1;
       ri++;
-    } else if (recordKey(records[ri]) > recordKey(truths[ti])) {
+    } else if (records[ri].__KEY__ > truths[ti].__KEY__) {
       // Then we need to move forward through truths to see if the record at ri
       // is there, later.
       ti++;
@@ -218,6 +181,33 @@ function deriveColumns(vcfData) {
     delete columns[majorName];
   });
   return columns;
+}
+
+// Comparator for chromosomes, first by number, then by lexicographic order.
+function chromosomeComparator(a, b) {
+  var aChr = Number(a) || a,
+      bChr = Number(b) || b;
+  if (aChr == bChr)
+    return 0;
+  else if (_.isString(aChr) && _.isString(bChr))
+    return aChr < bChr ? -1 : 1; // we want alphabetical ordering
+  else if (_.isNumber(aChr) && _.isNumber(bChr))
+    return aChr > bChr ? 1 : -1;
+  else if (_.isString(aChr))
+    return 1;
+  else
+    return -1;
+}
+
+// Return comparator for VCF records, by position in given direction.
+function recordComparator(direction) {
+  return function(a, b) {
+    if (direction === 'asc') {
+      return chromosomeComparator(a.CHROM, b.CHROM) || (a.POS - b.POS);
+    } else if (direction === 'desc') {
+      return chromosomeComparator(b.CHROM, a.CHROM) || (b.POS - a.POS);
+    }
+  };
 }
 
 

@@ -4,7 +4,7 @@
 var _ = require('underscore'),
     React = require('react/addons'),
     vcf = require('vcf.js'),
-    vcfTools = require('./vcf.tools');
+    vcfTools = require('../vcf.tools');
 
 
 var StatsSummary = React.createClass({
@@ -12,7 +12,7 @@ var StatsSummary = React.createClass({
     hasLoaded: React.PropTypes.bool.isRequired,
     truthRecords: React.PropTypes.arrayOf(React.PropTypes.object),
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-    unfilteredRecords: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+    totalRecords: React.PropTypes.number.isRequired,
     handleVariantTypeChange: React.PropTypes.func.isRequired,
     variantType: React.PropTypes.string.isRequired
   },
@@ -28,7 +28,7 @@ var StatsSummary = React.createClass({
                       records={this.props.records} />
         <RecordsShown hasLoaded={this.props.hasLoaded}
                       numberOfFilteredRecords={this.props.records.length}
-                      totalNumberOfRecords={this.props.unfilteredRecords.length} />
+                      totalNumberOfRecords={this.props.totalRecords} />
       </div>
     );
   }
@@ -43,7 +43,7 @@ var VariantTypeTabs = React.createClass({
     this.props.handleVariantTypeChange(e.target.textContent);
   },
   render: function() {
-    var tabs = _.map(['All', 'SNV', 'INDEL', 'SV'], (vType) => {
+    var tabs = _.map(['ALL', 'SNV', 'INDEL', 'SV'], (vType) => {
       var cls = React.addons.classSet({'active' : this.props.variantType == vType});
       return (
         <li onClick={this.handleVariantTypeChange} className={cls} key={vType}>

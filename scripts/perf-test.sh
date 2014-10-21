@@ -9,4 +9,4 @@ fi
 export RUN_VCF=$1
 export TRUTH_VCF=$2
 
-jest __tests__/ExaminePage-perf.js
+jest __tests__/js/ExaminePage-perf.js

@@ -5,12 +5,13 @@
     "bootstrap": "^3.2.0",
     "d3": "^3.4.11",
     "dalliance": "danvk/dalliance#dist",
+    "flux": "^2.0.1",
     "idiogrammatik.js": "^0.1.2",
     "jquery": "^2.1.1",
     "jquery-mousewheel": "^3.1.12",
     "react": "^0.11.2",
     "underscore": "^1.7.0",
-    "vcf.js": "^0.2.3"
+    "vcf.js": "^0.2.5"
   },
   "devDependencies": {
     "browserify": "^5.11.1",
@@ -33,6 +34,6 @@
     ]
   },
   "scripts": {
-    "test": "jest __tests__/*test.js"
+    "test": "jest __tests__/js/*-test.js"
   }
 }

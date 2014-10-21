@@ -9,7 +9,7 @@ var gulp = require('gulp'),
 
 
 var PATHS = {
-  examineSrc: ['./cycledash/static/js/examine/ExaminePage.js'],  // the File being compiled.
+  examineSrc: ['./cycledash/static/js/examine/examine.js'],  // the File being compiled.
   examineDest: './cycledash/static/js/dist/',  // Where the compiled JS bundle will go.
   examineJs: ['cycledash/static/js/*.js'],  // All of the JS files we want to watch for changes.
   css: ['./cycledash/static/css/*.css'],  // The CSS we want to watch for changes.

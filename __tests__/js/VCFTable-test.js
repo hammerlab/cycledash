@@ -1,7 +1,7 @@
 /** @jsx React.DOM */
 jest
-    .dontMock('../cycledash/static/js/examine/VCFTable.js')
-    .dontMock('../cycledash/static/js/examine/vcf.tools.js')
+    .dontMock('../../cycledash/static/js/examine/components/VCFTable.js')
+    .dontMock('../../cycledash/static/js/examine/vcf.tools.js')
     .dontMock('./Utils.js')
     .dontMock('jquery')
     .dontMock('fs')
@@ -9,7 +9,7 @@ jest
     .dontMock('underscore')
     ;
 
-var vcfTools = require('../cycledash/static/js/examine/vcf.tools.js'),
+var vcfTools = require('../../cycledash/static/js/examine/vcf.tools.js'),
     _ = require('underscore'),
     $ = require('jquery'),
     assert = require('assert'),
@@ -22,7 +22,7 @@ describe('VCFTable', function() {
 
   beforeEach(function() {
     React = require('react/addons');
-    VCFTable = require('../cycledash/static/js/examine/VCFTable.js');
+    VCFTable = require('../../cycledash/static/js/examine/components/VCFTable.js');
     TestUtils = React.addons.TestUtils;
   });
 
@@ -49,7 +49,7 @@ describe('VCFTable', function() {
   }
 
   it('should display all the VCF data it is given', function() {
-    var vcfData = Utils.loadVcfData('__tests__/data/snv.vcf');
+    var vcfData = Utils.loadVcfData('__tests__/js/data/snv.vcf');
     var table = makeTestVCFTable(vcfData);
 
     var ths = Utils.findInComponent('th.attr', table);
@@ -82,7 +82,7 @@ describe('VCFTable', function() {
   });
 
   it('should render selected rows', function() {
-    var vcfData = Utils.loadVcfData('__tests__/data/snv.vcf');
+    var vcfData = Utils.loadVcfData('__tests__/js/data/snv.vcf');
     var table = makeTestVCFTable(vcfData);
     expect(Utils.findInComponent('tr.selected', table)).toEqual([]);
 
@@ -103,7 +103,7 @@ describe('VCFTable', function() {
   });
 
   it('should render selected columns', function() {
-    var vcfData = Utils.loadVcfData('__tests__/data/snv.vcf');
+    var vcfData = Utils.loadVcfData('__tests__/js/data/snv.vcf');
     var table = makeTestVCFTable(vcfData),
         columns = vcfTools.deriveColumns(vcfData);
 

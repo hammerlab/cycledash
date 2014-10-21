@@ -7,7 +7,6 @@ import os
 from flask import (request, redirect, Response, render_template, jsonify,
                    url_for, abort)
 import requests
-import uuid
 
 from cycledash import app, db, cache
 from cycledash.helpers import prepare_request_data, update_object
@@ -28,7 +27,7 @@ RUN_ADDL_KVS = {'Tumor BAM': 'tumorPath', 'Normal BAM': 'tumorPath',
                 'Notes': 'notes', 'False Positive': 'falsePositive',
                 'True Positive': 'truePositive', 'Truth VCF': 'truthVcfPath',
                 'Hash': 'SHA1', 'Precision': 'precision', 'recall': 'recall',
-                'f1score': 'f1score' }
+                'f1score': 'f1score'}
 
 
 @app.route('/')
@@ -153,8 +152,7 @@ def trends(caller_name):
                                dataset_runs=datasets,
                                caller_name=caller_name)
     else:
-        return jsonify({'runs': runs_json})
-
+        return jsonify({'runs': runs})
 
 # Path must not start with a '/'.
 # Flask seems to have some trouble dealing with forward-slashes in URLs.
@@ -162,7 +160,7 @@ def trends(caller_name):
 @app.route('/vcf/<path:vcf_path>')
 @cache.cached()
 def hdfs_vcf(vcf_path):
-    if app.config['ALLOW_LOCAL_VCFS'] and vcf_path.startswith('__tests__'):
+    if app.config['ALLOW_LOCAL_VCFS']:
         return open(vcf_path).read()
     url = WEBHDFS_ENDPOINT + vcf_path + WEBHDFS_OPEN_OP
     result = requests.get(url)
