@@ -1,4 +1,14 @@
-/** @jsx React.DOM */
+/**
+ * RecordStore contains all the state for the Examine Page.
+ *
+ * All actions are processed via the "receiver" closure, dispatched on the
+ * ACTION_TYPE of the action by the switch statement therein. Most other code is
+ * simply supporting functinality.
+ *
+ * Beware the mutable function-local state defined at the beginning of
+ * RecordStore. This is what we want to hide from the outside world
+ *
+ * @jsx React.DOM */
 "use strict";
 
 var _ = require('underscore'),
@@ -11,88 +21,104 @@ var _ = require('underscore'),
 
 
 function RecordStore(vcfPath, truthVcfPath, dispatcher) {
-  var listenerCallbacks = [],
-      dispatcherToken = null;
-
+  // Initial state of the store. This is mutable. There be monsters.
   var hasLoadedVcfs = false,
       header = {},
       records = [],
       truthRecords = [],
-      trueFalsePositiveNegative = {truePositives:  0,
-                                   falsePositives: 0,
-                                   falseNegatives: 0},
+      fullRecords = [],
+      fullTruthRecords = [],
+      trueFalsePositiveNegative = {},
       totalRecords = 0,
       selectedRecord = null,
       filters = [],
       selectedColumns = [],
       sortBy = {path: null, order: 'asc'},
-      range = {start: null,
-               end: null,
-               chromosome: types.ALL_CHROMOSOMES},
+      range = {start: null, end: null, chromosome: types.ALL_CHROMOSOMES},
       variantType = 'ALL',
       chromosomes = [],
       columns = {};
 
-  var fullRecords = [],
-      fullTruthRecords = [];
+  // Callbacks registered by listening components, registered with #onChange().
+  var listenerCallbacks = [];
 
-  // Cached comparison function.
-  var comparator = vcfTools.recordComparator(sortBy.order);
+  // Token identifying this store within the dispatcher.
+  var dispatcherToken = null;
 
-  // Callback function to be registered with the Dispatcher to recieve (and act
-  // on) actions.
-  function reciever(action) {
+  // Record comparison function.
+  var comparator = recordComparatorFor(sortBy.path, sortBy.order);
+
+  function receiver(action) {
     switch(action.actionType) {
       case ACTION_TYPES.SORT_BY:
         comparator = recordComparatorFor(action.path, action.order);
         sortRecords(action.path, action.order);
         sortBy = _.pick(action, 'path', 'order');
-        records = displayableRecords(fullRecords, range, variantType, filters);
-        truthRecords = recordsOfType(recordsInRange(fullTruthRecords, range), variantType);
-        trueFalsePositiveNegative = vcfTools.trueFalsePositiveNegative(records, truthRecords);
+        updateRecords({updateTruth: true});
         break;
       case ACTION_TYPES.UPDATE_FILTER:
-        // We don't apply filters to truth records
         updateFilters(action.path, action.filterValue);
-        records = displayableRecords(fullRecords, range, variantType, filters);
-        trueFalsePositiveNegative = vcfTools.trueFalsePositiveNegative(records, truthRecords);
+        updateRecords({updateTruth: false});
         break;
       case ACTION_TYPES.SELECT_RECORD_RANGE:
         range = _.pick(action, 'start', 'end', 'chromosome');
-        records = displayableRecords(fullRecords, range, variantType, filters);
-        truthRecords = recordsOfType(recordsInRange(fullTruthRecords, range), variantType);
-        trueFalsePositiveNegative = vcfTools.trueFalsePositiveNegative(records, truthRecords);
+        updateRecords({updateTruth: true});
         break;
       case ACTION_TYPES.UPDATE_VARIANT_TYPE:
         variantType = action.variantType;
-        records = displayableRecords(fullRecords, range, variantType, filters);
-        truthRecords = recordsOfType(recordsInRange(fullTruthRecords, range), variantType);
-        trueFalsePositiveNegative = vcfTools.trueFalsePositiveNegative(records, truthRecords);
+        updateRecords({updateTruth: true});
         break;
       case ACTION_TYPES.SELECT_COLUMN:
         var col = _.find(selectedColumns, c => _.isEqual(c.path, action.path));
-        if (!col) selectedColumns.push({path: action.path,
-                                        info: action.info,
-                                        name: action.name});
-        else selectedColumns = _.without(selectedColumns, col);
+        if (!col) {
+          selectedColumns.push({path: action.path, info: action.info, name: action.name});
+        } else {
+          selectedColumns = _.without(selectedColumns, col);
+        }
         break;
       case ACTION_TYPES.SELECT_RECORD:
         selectedRecord = action.record;
         break;
     }
+    // Now that the state is updated, we notify listening components that it's
+    // time to query the Store for new state.
     notifyChange();
+
+    // Required: lets the dispatcher to know that the Store is done processing.
     return true;
   }
-  if (dispatcher) dispatcherToken = dispatcher.register(reciever);
+  if (dispatcher) dispatcherToken = dispatcher.register(receiver);
 
+  /**
+  * Updates the selected records (and, if updateTruth, truthRecords) by
+  * applying filters, selected range, and variantType.
+  *
+  * NB: mutates store state!
+  */
+  function updateRecords({updateTruth}) {
+    records = displayableRecords(fullRecords, range, variantType, filters);
+    if (updateTruth) {
+      // We don't apply filters to truth records.
+      truthRecords = recordsOfType(recordsInRange(fullTruthRecords, range), variantType);
+    }
+    trueFalsePositiveNegative = vcfTools.trueFalsePositiveNegative(records, truthRecords);
+  }
+
+  /**
+  * Updates the sort order of fullRecords.
+  *
+  * Takes the new path and order instead of first setting the new SortBy path
+  * and order so that we can run #reverse() on records if only order is being
+  * changed. [Perf opt hack].
+  *
+  * NB: mutates store state!
+  */
   function sortRecords(path, order) {
     // We only sort fullRecords, because they have to be filtered afterwards
     // anyway. We don't sort fullTruthRecords because it has to be sorted by
     // __KEY__, as we can't count on it having the attribute that fullRecords
     // has, e.g.  NORMAL::DP might exist in fullRecords only.
     if (_.isEqual(path, sortBy.path) && order !== sortBy.order) {
-      // If the sort column is the same but the sort order is different, we can
-      // just reverse the lists instead of resorting them.
       fullRecords.reverse();
     } else {
       fullRecords.sort(comparator);
@@ -106,16 +132,11 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
     } else if (filter) {
       filter.filterValue = filterValue;
     } else {
-      filters.push({path: path, filterValue: filterValue});
+      filters.push({path, filterValue});
     }
   }
 
-  var vcfParser = vcf.parser();
-  function deferredVcf(vcfPath) {
-    return $.get('/vcf' + vcfPath).then(function(data) {
-      return vcfParser(data);
-    });
-  }
+  // Load & parse VCF and, if required, the truth VCF.
   var deferreds = [deferredVcf(vcfPath)];
   if (truthVcfPath) deferreds.push(deferredVcf(truthVcfPath));
   $.when.apply(null, deferreds)
@@ -133,11 +154,9 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
       truthRecords = fullTruthRecords;
 
       if (truthVcfPath) {
-        trueFalsePositiveNegative = vcfTools.trueFalsePositiveNegative(
-          records, truthRecords, comparator);
+        trueFalsePositiveNegative = vcfTools.trueFalsePositiveNegative(records, truthRecords);
       }
       totalRecords = fullRecords.length;
-
 
       chromosomes = _.uniq(records.map(r => r.CHROM));
       chromosomes.sort(vcfTools.chromosomeComparator);
@@ -151,9 +170,6 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
   }
 
   return {
-      ////////////////////
-     // State queries. //
-    ////////////////////
     hasLoadedVcfs: function() {
       return hasLoadedVcfs;
     },
@@ -196,52 +212,46 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
     getState: function() {
       // Returns all the above state in an object.
       return {
-        hasLoadedVcfs: hasLoadedVcfs,
-        header: header,
-        records: records,
-        truthRecords: truthRecords,
-        trueFalsePositiveNegative: trueFalsePositiveNegative,
-        totalRecords: totalRecords,
-        selectedRecord: selectedRecord,
-        filters: filters,
-        selectedColumns: selectedColumns,
-        sortBy: sortBy,
-        range: range,
-        variantType: variantType,
-        chromosomes: chromosomes,
-        columns: columns
+        hasLoadedVcfs,
+        header,
+        records,
+        truthRecords,
+        trueFalsePositiveNegative,
+        totalRecords,
+        selectedRecord,
+        filters,
+        selectedColumns,
+        sortBy,
+        range,
+        variantType,
+        chromosomes,
+        columns,
       };
     },
 
-    // Additional queries, likely unneeded.
     getAllRecords: function() {
-      // Return all records (sorted).
       return fullRecords;
     },
     getAllTruthRecords: function() {
-      // Return all truth records (sorted).
       return fullTruthRecords;
     },
 
-    // Notification and dispatch functions.
     onChange: function(callback) {
       // Calls callback when the store changes.
       listenerCallbacks.push(callback);
       notifyChange();
     },
     registerDispatcher: function(dispatcher) {
-      dispatcherToken = dispatcher.register(reciever);
+      dispatcherToken = dispatcher.register(receiver);
     },
     unregisterDispatcher: function() {
       dispatcher.unregister(dispatcherToken);
     },
-    reciever: reciever
+    receiver: receiver
   };
 }
 
-
-// ---- Helper functions for filtering ---- \\
-
+// Returns true if the record is of given type.
 function isRecordOfType(record, variantType) {
   switch (variantType) {
     case 'ALL':
@@ -258,6 +268,7 @@ function isRecordOfType(record, variantType) {
   }
 }
 
+// Returns true is the record is within range.
 function isRecordWithinRange(record, range) {
   var {start, end, chromosome} = range;
 
@@ -276,6 +287,7 @@ function isRecordWithinRange(record, range) {
   }
 }
 
+// Returns a list of predicate functions for a given list of filters.
 function filtersToPredicates(filters) {
   return _.map(filters, filter => {
     var filterVal = filter.filterValue,
@@ -298,22 +310,24 @@ function filtersToPredicates(filters) {
   });
 }
 
+// Return records which pass the given filters.
 function recordsPassingFilters(records, filters) {
   var filterPreds = filtersToPredicates(filters),
       predicate = _.compose(_.every, utils.juxt(filterPreds));
   return _.filter(records, predicate);
 }
 
+// Return records within a given range.
 function recordsInRange(records, range) {
   return _.filter(records, record => isRecordWithinRange(record, range));
 }
 
+// Return records of a given variant type.
 function recordsOfType(records, variantType) {
   return _.filter(records, record => isRecordOfType(record, variantType));
 }
 
-// Applies all column filters, range selections, variant type selection to
-// records, returning a new list of records to be displayed.
+// Return list of records adhering to givene range, filters, and variantType.
 function displayableRecords(records, range, variantType, filters) {
   records = recordsInRange(records, range);
   records = recordsOfType(records, variantType);
@@ -321,6 +335,7 @@ function displayableRecords(records, range, variantType, filters) {
   return records;
 }
 
+// Return a comparator for a given order and path within a record.
 function recordComparatorFor(path, order) {
   if (path === null) {
     return vcfTools.recordComparator(order);
@@ -333,5 +348,12 @@ function recordComparatorFor(path, order) {
   }
 }
 
+// Return a promise getting & parsing the VCF at vcfPath.
+function deferredVcf(vcfPath) {
+  var vcfParser = vcf.parser();
+  return $.get('/vcf' + vcfPath).then(function(data) {
+    return vcfParser(data);
+  });
+}
 
 module.exports = RecordStore;

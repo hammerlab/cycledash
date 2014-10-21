@@ -30,7 +30,7 @@ describe('RecordStore', function() {
         sortedDps = _.pluck(_.pluck(rs.getRecords(), 'INFO'), 'DP');
     sortedDps.sort((a, b) => a - b);
 
-    rs.reciever({actionType: ACTION_TYPES.SORT_BY,
+    rs.receiver({actionType: ACTION_TYPES.SORT_BY,
                  path: ['INFO', 'DP'], order:'asc'});
 
     var storeDps = _.pluck(_.pluck(rs.getRecords(), 'INFO'), 'DP');
@@ -51,12 +51,12 @@ describe('RecordStore', function() {
     });
     filteredDpsGt = _.map(filteredDpsGt, record => record.NORMAL.GT);
 
-    rs.reciever({actionType: ACTION_TYPES.UPDATE_FILTER,
+    rs.receiver({actionType: ACTION_TYPES.UPDATE_FILTER,
                  path: ['INFO', 'DP'], filterValue: '>55'});
 
     var storeDps = _.pluck(_.pluck(rs.getRecords(), 'INFO'), 'DP');
 
-    rs.reciever({actionType: ACTION_TYPES.UPDATE_FILTER,
+    rs.receiver({actionType: ACTION_TYPES.UPDATE_FILTER,
                  path: ['NORMAL', 'GT'], filterValue: '1/1'});
 
     var storeDpsGt = _.pluck(_.pluck(rs.getRecords(), 'NORMAL'), 'GT');
@@ -73,7 +73,7 @@ describe('RecordStore', function() {
       return record.POS >= 66370;
     });
 
-    rs.reciever({actionType: ACTION_TYPES.SELECT_RECORD_RANGE,
+    rs.receiver({actionType: ACTION_TYPES.SELECT_RECORD_RANGE,
                  chromosome: '20', start: 66370, end: null});
 
     var storeRecords = rs.getRecords();
@@ -90,13 +90,13 @@ describe('RecordStore', function() {
     });
     validatedRecords = validatedRecords.sort((a, b) => b.POS - a.POS);
 
-    rs.reciever({actionType: ACTION_TYPES.SORT_BY,
+    rs.receiver({actionType: ACTION_TYPES.SORT_BY,
                  path: null, order:'desc'});
 
-    rs.reciever({actionType: ACTION_TYPES.UPDATE_FILTER,
+    rs.receiver({actionType: ACTION_TYPES.UPDATE_FILTER,
                  path: ['NORMAL', 'AD'], filterValue: '>25'});
 
-    rs.reciever({actionType: ACTION_TYPES.SELECT_RECORD_RANGE,
+    rs.receiver({actionType: ACTION_TYPES.SELECT_RECORD_RANGE,
                  chromosome: '20', start: 0, end: 70000});
 
     var storeRecords = rs.getRecords();

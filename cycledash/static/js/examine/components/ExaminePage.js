@@ -12,7 +12,7 @@ var _ = require('underscore'),
     Widgets = require('./Widgets');
 
 
-// The Root element of the /examine page
+// The root component of the page.
 var ExaminePage = React.createClass({
   propTypes: {
     recordStore: React.PropTypes.object.isRequired,
@@ -25,20 +25,7 @@ var ExaminePage = React.createClass({
     igvHttpfsUrl: React.PropTypes.string.isRequired
   },
   getInitialState: function() {
-    return {hasLoadedVcfs: false,
-            header: {},
-            records: [],
-            truthRecords: [],
-            trueFalsePositiveNegative: {},
-            totalRecords: 0,
-            selectedRecord: null,
-            fiters: [], // [{columnPath: ['...', '...'], filterValue: '...'}, ..]
-            selectedColumns: [],
-            sortBy: {columnPath: null, order: 'asc'}, // null sorts by default = CHR/POS
-            range: {start: null, end: null, chromosome: types.ALL_CHROMOSOMES},
-            variantType: 'ALL',
-            chromosomes: [],
-            columns: {}};
+    return this.props.recordStore.getState();
   },
   getDefaultProps: function() {
     return {karyogram: initializeKaryogram()};
@@ -88,7 +75,6 @@ var ExaminePage = React.createClass({
   },
   render: function() {
     return (
-/*jshint ignore:start */
         <div className="examine-page">
           <h1>Examining: <small>{this.props.vcfPath}</small></h1>
           <StatsSummary hasLoaded={this.state.hasLoadedVcfs}
@@ -131,7 +117,6 @@ var ExaminePage = React.createClass({
                         handleNextRecord={this.handleNextRecord}
                         handleClose={() => this.handleSelectRecord(null)} />
         </div>
-/*jshint ignore:end */
      );
    }
 });

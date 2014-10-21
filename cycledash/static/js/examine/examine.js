@@ -10,7 +10,8 @@ var React = require('react'),
 
 
 window.renderExaminePage = function(el, vcfPath, truthVcfPath,
-                                    normalBamPath, tumorBamPath, igvHttpfsUrl) {
+                                    normalBamPath, tumorBamPath,
+                                    igvHttpfsUrl) {
   var dispatcher = new Dispatcher();
   var recordActions = RecordActions(dispatcher);
   var recordStore = RecordStore(vcfPath, truthVcfPath, dispatcher);

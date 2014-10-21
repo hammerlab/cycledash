@@ -23,36 +23,36 @@ function RecordActions (dispatcher) {
     updateFilters: function({path, filterValue}) {
       dispatcher.dispatch({
         actionType: ACTION_TYPES.UPDATE_FILTER,
-        path: path,
-        filterValue: filterValue
+        path,
+        filterValue
       });
     },
     updateRecordRange: function({chromosome, start, end}) {
       dispatcher.dispatch({
         actionType: ACTION_TYPES.SELECT_RECORD_RANGE,
-        start: start,
-        end: end,
-        chromosome: chromosome
+        start,
+        end,
+        chromosome
       });
     },
     selectRecord: function(record) {
       dispatcher.dispatch({
         actionType: ACTION_TYPES.SELECT_RECORD,
-        record: record
+        record
       });
     },
     updateVariantType: function(variantType) {
       dispatcher.dispatch({
         actionType: ACTION_TYPES.UPDATE_VARIANT_TYPE,
-        variantType: variantType
+        variantType
       });
     },
     selectColumn: function({path, info, name}) {
       dispatcher.dispatch({
         actionType: ACTION_TYPES.SELECT_COLUMN,
-        path: path,
-        info: info,
-        name: name
+        path,
+        info,
+        name
       });
     }
   };

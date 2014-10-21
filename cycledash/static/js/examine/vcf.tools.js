@@ -5,33 +5,8 @@ var _ = require('underscore'),
     vcf = require('vcf.js');
 
 
-function chromosomeComparator(a, b) {
-  var aChr = Number(a) || a,
-      bChr = Number(b) || b;
-  if (aChr == bChr)
-    return 0;
-  else if (_.isString(aChr) && _.isString(bChr))
-    return aChr < bChr ? -1 : 1; // we want alphabetical ordering
-  else if (_.isNumber(aChr) && _.isNumber(bChr))
-    return aChr > bChr ? 1 : -1;
-  else if (_.isString(aChr))
-    return 1
-  else
-    return -1;
-}
-
-function recordComparator(direction) {
-  return function(a, b) {
-    if (direction === 'asc') {
-      return chromosomeComparator(a.CHROM, b.CHROM) || (a.POS - b.POS);
-    } else if (direction === 'desc') {
-      return chromosomeComparator(b.CHROM, a.CHROM) || (b.POS - a.POS);
-    }
-  }
-}
-
 /**
- * Returns {truePositives, falsePositives, falseNegatives} for the given records
+ * Return {truePositives, falsePositives, falseNegatives} for the given records
  * and truthRecords.
  */
 function trueFalsePositiveNegative(records, truthRecords) {
@@ -55,7 +30,7 @@ function trueFalsePositiveNegative(records, truthRecords) {
  * Unfortunately, we have to sort by __KEY__ first to get this speed. This is
  * still faster than the alternative, using unsorted records.
  */
-function trueFalsePositiveNegativeForSnvAndIndels(records, truths, comparator) {
+function trueFalsePositiveNegativeForSnvAndIndels(records, truths) {
   // Indexes into records and truthRecords.
   var ri = 0,
       ti = 0;
@@ -206,6 +181,33 @@ function deriveColumns(vcfData) {
     delete columns[majorName];
   });
   return columns;
+}
+
+// Comparator for chromosomes, first by number, then by lexicographic order.
+function chromosomeComparator(a, b) {
+  var aChr = Number(a) || a,
+      bChr = Number(b) || b;
+  if (aChr == bChr)
+    return 0;
+  else if (_.isString(aChr) && _.isString(bChr))
+    return aChr < bChr ? -1 : 1; // we want alphabetical ordering
+  else if (_.isNumber(aChr) && _.isNumber(bChr))
+    return aChr > bChr ? 1 : -1;
+  else if (_.isString(aChr))
+    return 1;
+  else
+    return -1;
+}
+
+// Return comparator for VCF records, by position in given direction.
+function recordComparator(direction) {
+  return function(a, b) {
+    if (direction === 'asc') {
+      return chromosomeComparator(a.CHROM, b.CHROM) || (a.POS - b.POS);
+    } else if (direction === 'desc') {
+      return chromosomeComparator(b.CHROM, a.CHROM) || (b.POS - a.POS);
+    }
+  };
 }
 
 
