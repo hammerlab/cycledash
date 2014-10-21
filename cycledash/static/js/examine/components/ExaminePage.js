@@ -5,6 +5,7 @@ var _ = require('underscore'),
     React = require('react'),
     idiogrammatik = require('idiogrammatik.js'),
     types = require('./types'),
+
     AttributeCharts = require('./AttributeCharts'),
     BioDalliance = require('./BioDalliance'),
     StatsSummary = require('./StatsSummary'),
@@ -76,17 +77,19 @@ var ExaminePage = React.createClass({
   render: function() {
     return (
         <div className="examine-page">
-          <h1>Examining: <small>{this.props.vcfPath}</small></h1>
-          <StatsSummary hasLoaded={this.state.hasLoadedVcfs}
-                        variantType={this.state.variantType}
-                        handleVariantTypeChange={this.handleVariantTypeChange}
-                        records={this.state.records}
-                        truthRecords={this.state.truthRecords}
-                        totalRecords={this.state.totalRecords} />
-          <Widgets.Loading hasLoaded={this.state.hasLoadedVcfs}
-                           files={[this.props.vcfPath, this.props.truthVcfPath]} />
-          <AttributeCharts records={this.state.records}
-                           selectedColumns={this.state.selectedColumns} />
+          <div className="top-material">
+            <StatsSummary hasLoaded={this.state.hasLoadedVcfs}
+                          variantType={this.state.variantType}
+                          handleVariantTypeChange={this.handleVariantTypeChange}
+                          records={this.state.records}
+                          truthRecords={this.state.truthRecords}
+                          totalRecords={this.state.totalRecords} />
+            <h1>Examining: <small>{this.props.vcfPath}</small></h1>
+            <Widgets.Loading hasLoaded={this.state.hasLoadedVcfs}
+                             files={[this.props.vcfPath, this.props.truthVcfPath]} />
+            <AttributeCharts records={this.state.records}
+                             selectedColumns={this.state.selectedColumns} />
+          </div>
           <Widgets.Karyogram data={this.props.karyogramData}
                              karyogram={this.props.karyogram}
                              position={this.state.range}

@@ -8,11 +8,14 @@ body {
     background: #ffffff url("/static/img/subtle-dots.png") repeat right top;
 }
 
+.top-material {
+  overflow: hidden;  /* expand to include floats */
+}
+
 /* Karyogram */
 .karyogram {
-    margin-top: 171px;  /* enough space for the global stats table */
-                        /* TODO: deactivate this if AttrCharts are shown. */
     box-shadow: inset 0 0 20px #F0F0F0;
+    margin: 5px 0;
 }
 
 /* VCFTable */
@@ -175,10 +178,7 @@ text {
 /* StatsSummary */
 #stats-container {
     width: 350px;
-    height: 190px;
-    position: absolute;
-    top: 37px;
-    right: 13px;
+    float: right;
 }
 #stats-container .variant-type-tabs li {
     border-radius: 3px 3px 0 0;
