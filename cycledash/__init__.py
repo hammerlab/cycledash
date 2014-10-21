@@ -6,7 +6,6 @@ from flask.ext.compress import Compress
 
 def initialize_application():
     app = Flask(__name__)
-    Compress(app)
 
     _configure_application(app)
     _configure_logging(app)
@@ -35,6 +34,7 @@ def _configure_application(app):
 
 
 app = initialize_application()
+Compress(app)
 db = SQLAlchemy(app)
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
