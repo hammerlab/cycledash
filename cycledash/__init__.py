@@ -1,10 +1,12 @@
 from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.cache import Cache
+from flask.ext.compress import Compress
 
 
 def initialize_application():
     app = Flask(__name__)
+    Compress(app)
 
     _configure_application(app)
     _configure_logging(app)

@@ -15,5 +15,9 @@ ALLOW_LOCAL_VCFS = os.environ.get('ALLOW_LOCAL_VCFS', USE_RELOADER)
 
 TYPEKIT_URL = os.environ.get('TYPEKIT_URL', None)
 
+# These are the same as Compress's defaults, but with 'text/plain' added.
+# This is important to us because VCF file are transmitted as 'text/plain'.
+COMPRESS_MIMETYPES=['text/html', 'text/plain', 'text/css', 'text/xml',
+                    'application/json', 'application/javascript']
 
 del os
