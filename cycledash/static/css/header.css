@@ -27,3 +27,9 @@ nav.navigation .active a:hover {
 nav.navigation .active {
     font-weight: bold;
 }
+nav #deployed-git-hash {
+    float: right;
+    padding: 2px 5px 0 0;
+    color: #d3d3d3;
+    font-family: monospace;
+}

@@ -20,4 +20,7 @@ TYPEKIT_URL = os.environ.get('TYPEKIT_URL', None)
 COMPRESS_MIMETYPES=['text/html', 'text/plain', 'text/css', 'text/xml',
                     'application/json', 'application/javascript']
 
+import subprocess
+DEPLOYED_GIT_HASH = subprocess.check_output(['git', 'rev-parse', 'HEAD'])[:-1]
+
 del os
