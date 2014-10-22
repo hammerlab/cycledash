@@ -157,6 +157,7 @@ var BioDalliance = React.createClass({
     });
 
     $(window).on('keydown', (e) => {
+      if (!this.props.selectedRecord) return;
       if (e.which == 27 /* esc */ && this.props.selectedRecord) {
         e.preventDefault();
         this.props.handleClose();
