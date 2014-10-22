@@ -47,22 +47,21 @@ var Karyogram = React.createClass({
       .call(karyogram);
 
     var firstPos = null,
-        selection = {}, // the current highlight/selected range
-        shifted = false, // if the shift key is down
-        focused = false; // if the kgram has focus on the page
+        selection = {},  // the current highlight/selected range
+        shiftKey = false,  // if the shift key is down
+        focused = false;  // if the kgram has focus on the page
 
     var that = this; // so that in 'dragend' handler we have both the real this, and the component this
     karyogram.drag()
       .on('dragstart', function() {
         var position = karyogram.position(this);
-        if (!position.chromosome || !shifted) return;
-        console.log('drag started', shifted);
+        if (!position.chromosome || !shiftKey) return;
         firstPos = position;
       })
       .on('drag', function() {
         var pos = karyogram.position(this);
         if (selection.remove) selection.remove();
-        if (!pos.chromosome || !shifted || pos.chromosome !== firstPos.chromosome)
+        if (!pos.chromosome || !shiftKey || pos.chromosome !== firstPos.chromosome)
           return;
         var chr = pos.chromosome.name, start = firstPos.basePair, end = pos.basePair;
         if (start > end) var temp = start, start = end, end = temp;
@@ -72,7 +71,7 @@ var Karyogram = React.createClass({
       .on('dragend', function() {
         var pos = karyogram.position(this);
         if (selection.remove) selection.remove();
-        if (!pos.chromosome || !shifted || pos.chromosome !== firstPos.chromosome)
+        if (!pos.chromosome || !shiftKey || pos.chromosome !== firstPos.chromosome)
           return;
         var chr = pos.chromosome.name, start = firstPos.basePair, end = pos.basePair;
         if (start > end) var temp = start, start = end, end = temp;
@@ -94,20 +93,20 @@ var Karyogram = React.createClass({
         karyogram.on('.zoom', null);
       });
 
-    window.onkeydown = function(e) {
+    window.addEventListener('keydown', function(e) {
       if (e.shiftKey) {
         document.getElementsByTagName("body")[0].style.cursor = "text";
-        shifted = true;
+        shiftKey = true;
         karyogram.on(".zoom", null);
       }
-    }.bind(this);
-    window.onkeyup = function(e) {
+    }.bind(this));
+    window.addEventListener('keyup', function(e) {
       document.getElementsByTagName("body")[0].style.cursor = "default";
-      if (shifted && !e.shiftKey) {
-        shifted = false;
+      if (shiftKey && !e.shiftKey) {
+        shiftKey = false;
         karyogram.call(karyogram.zoom());
       }
-    }.bind(this);
+    }.bind(this));
 
     this.setState({karyogram: karyogram});
   },
