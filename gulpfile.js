@@ -82,7 +82,7 @@ gulp.task('build', function() {
 
 // Copy over prebuilt Biodalliance files from node_modules.
 gulp.task('dalliance', function() {
-  gulp.src('./node_modules/dalliance/{css,fonts,img}/*.*',
+  gulp.src('./node_modules/dalliance/{css,fonts,img,help}/*.*',
            {base: './node_modules/dalliance'})
     .pipe(gulp.dest('./cycledash/static/dalliance'));
 
