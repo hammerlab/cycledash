@@ -57,7 +57,7 @@ th.uber-column {
 th.uber-column:last-child {
     border: none;
 }
-.tooltip {
+.vcf-table .tooltip {
     display: none;
     border-radius: 3px;
     position: absolute;
@@ -70,18 +70,18 @@ th.uber-column:last-child {
     font-color: #3d3d3d;
     z-index: 1000;
 }
-.tooltip p {
+.vcf-table .tooltip p {
     font-weight: 500;
     text-align: left;
     padding: 2px 13px;
 }
-.tooltip p strong {
+.vcf-table .tooltip p strong {
     font-weight: bold;
 }
-th.attr span:hover + .tooltip {
+.vcf-table th.attr span:hover + .tooltip {
     display: block;
 }
-.tooltip:after, .tooltip:before {
+.vcf-table .tooltip:after, .tooltip:before {
     bottom: 100%;
     left: 50%;
     border: solid transparent;
@@ -91,13 +91,13 @@ th.attr span:hover + .tooltip {
     position: absolute;
     pointer-events: none;
 }
-.tooltip:after {
+.vcf-table .tooltip:after {
     border-color: rgba(255, 255, 255, 0);
     border-bottom-color: #ffffff;
     border-width: 10px;
     margin-left: -10px;
 }
-.tooltip:before {
+.vcf-table .tooltip:before {
     border-color: rgba(52, 52, 52, 0);
     border-bottom-color: #343434;
     border-width: 11px;
