@@ -5,7 +5,8 @@ var _ = require('underscore'),
     d3 = require('d3/d3'),
     React = require('react'),
     types = require('./types'),
-    idiogrammatik = require('idiogrammatik.js');
+    idiogrammatik = require('idiogrammatik.js'),
+    GSTAINED_CHROMOSOMES = require('../../../data/gstained-chromosomes');
 
 
 var Karyogram = React.createClass({
@@ -16,7 +17,7 @@ var Karyogram = React.createClass({
     var chromosome = props.position.chromosome,
         start = props.position.start,
         end = props.position.end,
-        kgram = this.props.karyogram;
+        kgram = this.state.karyogram;
     kgram.highlights().remove();
 
     if (chromosome !== this.props.position.chromosome) {
@@ -39,59 +40,76 @@ var Karyogram = React.createClass({
     }
   },
   componentDidMount: function() {
+    var karyogram = idiogrammatik().width(1400).highlightHeight(59);
+
     d3.select(this.getDOMNode())
-      .datum(this.props.data)
-      .call(this.props.karyogram);
+      .datum(GSTAINED_CHROMOSOMES)
+      .call(karyogram);
 
     var firstPos = null,
-        selection = {},  // the current highlight/selected range
-        shifted = false;  // if the shift key is down
+        selection = {}, // the current highlight/selected range
+        shifted = false, // if the shift key is down
+        focused = false; // if the kgram has focus on the page
 
-    this.props.karyogram
-      .on('dragstart', function(position, kgram) {
+    var that = this; // so that in 'dragend' handler we have both the real this, and the component this
+    karyogram.drag()
+      .on('dragstart', function() {
+        var position = karyogram.position(this);
         if (!position.chromosome || !shifted) return;
+        console.log('drag started', shifted);
         firstPos = position;
       })
-      .on('drag', function(pos, kgram) {
+      .on('drag', function() {
+        var pos = karyogram.position(this);
         if (selection.remove) selection.remove();
         if (!pos.chromosome || !shifted || pos.chromosome !== firstPos.chromosome)
           return;
         var chr = pos.chromosome.name, start = firstPos.basePair, end = pos.basePair;
         if (start > end) var temp = start, start = end, end = temp;
 
-        selection = kgram.highlight(chr, start, end);
+        selection = karyogram.highlight(chr, start, end);
       })
-      .on('dragend', (pos, kgram) => {
+      .on('dragend', function() {
+        var pos = karyogram.position(this);
         if (selection.remove) selection.remove();
         if (!pos.chromosome || !shifted || pos.chromosome !== firstPos.chromosome)
           return;
         var chr = pos.chromosome.name, start = firstPos.basePair, end = pos.basePair;
         if (start > end) var temp = start, start = end, end = temp;
 
-        this.props.handleRangeChange(chr, start, end);
-        selection = kgram.highlight(chr, start, end);
+        that.props.handleRangeChange({chromosome: chr, start, end});
+        selection = karyogram.highlight(chr, start, end);
+      });
+
+    karyogram
+      .on('.zoom', null) // disable zoom capture by default;
+      .on('click.focus', function() { // enable zooming on click
+        if (!focused) {
+          focused = true;
+          karyogram.call(karyogram.zoom());
+        }
+      })
+      .on('mouseout', function() { // and disable again when moused out
+        focused = false;
+        karyogram.on('.zoom', null);
       });
 
     window.onkeydown = function(e) {
       if (e.shiftKey) {
         document.getElementsByTagName("body")[0].style.cursor = "text";
         shifted = true;
-        try {
-          // This disables pan/zoom by unsetting the x domain.
-          this.props.karyogram.zoomBehavior().x(null);
-        } catch(err) {
-          // We catch here, because setting the x attr above throws, though
-          // it does what we want without causing problems...
-        }
+        karyogram.on(".zoom", null);
       }
     }.bind(this);
     window.onkeyup = function(e) {
       document.getElementsByTagName("body")[0].style.cursor = "default";
       if (shifted && !e.shiftKey) {
         shifted = false;
-        this.props.karyogram.zoomBehavior().x(this.props.karyogram.scale());
+        karyogram.call(karyogram.zoom());
       }
     }.bind(this);
+
+    this.setState({karyogram: karyogram});
   },
   render: function() {
     return <div className="karyogram"></div>;
@@ -120,7 +138,4 @@ var Loading = React.createClass({
   }
 });
 
-module.exports = {
-  Karyogram: Karyogram,
-  Loading: Loading
-};
+module.exports = {Karyogram, Loading};

@@ -18,7 +18,6 @@ var ExaminePage = React.createClass({
   propTypes: {
     recordStore: React.PropTypes.object.isRequired,
     recordActions: React.PropTypes.object.isRequired,
-    karyogramData: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     vcfPath: React.PropTypes.string.isRequired,
     truthVcfPath: React.PropTypes.string,
     normalBamPath:  React.PropTypes.string,
@@ -27,9 +26,6 @@ var ExaminePage = React.createClass({
   },
   getInitialState: function() {
     return this.props.recordStore.getState();
-  },
-  getDefaultProps: function() {
-    return {karyogram: initializeKaryogram()};
   },
   componentDidMount: function() {
     this.props.recordStore.onChange(() => {
@@ -90,9 +86,7 @@ var ExaminePage = React.createClass({
             <AttributeCharts records={this.state.records}
                              selectedColumns={this.state.selectedColumns} />
           </div>
-          <Widgets.Karyogram data={this.props.karyogramData}
-                             karyogram={this.props.karyogram}
-                             position={this.state.range}
+          <Widgets.Karyogram position={this.state.range}
                              handleRangeChange={this.handleRangeChange} />
           <VCFTable ref="vcfTable"
                     hasLoaded={this.state.hasLoadedVcfs}
@@ -123,11 +117,5 @@ var ExaminePage = React.createClass({
      );
    }
 });
-
-function initializeKaryogram() {
-  return idiogrammatik()
-           .width(1400)
-           .highlightHeight(59);
-}
 
 module.exports = ExaminePage;

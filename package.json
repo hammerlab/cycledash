@@ -6,7 +6,7 @@
     "d3": "^3.4.11",
     "dalliance": "danvk/dalliance#dist",
     "flux": "^2.0.1",
-    "idiogrammatik.js": "^0.1.2",
+    "idiogrammatik.js": "^1.1.1",
     "jquery": "^2.1.1",
     "jquery-mousewheel": "^3.1.12",
     "react": "^0.11.2",
