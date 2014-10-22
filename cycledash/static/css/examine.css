@@ -31,6 +31,9 @@ input {
 th#position input {
     width: 100px;
 }
+th#position input:disabled {
+    display: none;
+}
 th {
     font-size: 19px;
     position: relative;
