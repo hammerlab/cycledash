@@ -2,7 +2,6 @@
 "use strict";
 
 var React = require('react'),
-    GSTAINED_CHROMOSOMES = require('../../data/gstained-chromosomes'),
     ExaminePage = require('./components/ExaminePage'),
     Dispatcher = require('./Dispatcher'),
     RecordStore = require('./RecordStore'),
@@ -22,6 +21,5 @@ window.renderExaminePage = function(el, vcfPath, truthVcfPath,
                                      truthVcfPath={truthVcfPath}
                                      normalBamPath={normalBamPath}
                                      tumorBamPath={tumorBamPath}
-                                     igvHttpfsUrl={igvHttpfsUrl}
-                                     karyogramData={GSTAINED_CHROMOSOMES} />, el);
+                                     igvHttpfsUrl={igvHttpfsUrl} />, el);
 };

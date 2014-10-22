@@ -160,7 +160,9 @@ def trends(caller_name):
 @app.route('/vcf/<path:vcf_path>')
 @cache.cached()
 def hdfs_vcf(vcf_path):
-    if app.config['ALLOW_LOCAL_VCFS']:
+    if (app.config['ALLOW_LOCAL_VCFS'] and
+        '__tests__/js/data' in vcf_path):
+        # we only load test data that we mean to load locally
         vcf_text = open(vcf_path).read()
     else:
         url = WEBHDFS_ENDPOINT + vcf_path + WEBHDFS_OPEN_OP
