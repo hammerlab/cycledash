@@ -270,3 +270,10 @@ text {
     min-height: 200px;
   }
 }
+
+/* Widget.Loading */
+.loading-initial-data .error {
+    color: red;
+    font-size: 1.2em;
+    font-weight: 700;
+}

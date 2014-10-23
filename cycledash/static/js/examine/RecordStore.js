@@ -23,6 +23,7 @@ var _ = require('underscore'),
 function RecordStore(vcfPath, truthVcfPath, dispatcher) {
   // Initial state of the store. This is mutable. There be monsters.
   var hasLoadedVcfs = false,
+      loadError = null,
       header = {},
       records = [],
       truthRecords = [],
@@ -147,6 +148,18 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
   if (truthVcfPath) deferreds.push(deferredVcf(truthVcfPath));
   $.when.apply(null, deferreds)
     .done((vcfData, truthVcfData) => {
+      var vcfParser = vcf.parser();
+      try {
+        vcfData = vcfParser(vcfData[0]);
+      } catch (e) {
+        return handleVcfParseError(vcfPath, e);
+      }
+      try {
+        truthVcfData = vcfParser(truthVcfData[0]);
+      } catch (e) {
+        return handleVcfParseError(truthVcfPath, e);
+      }
+
       hasLoadedVcfs = true;
 
       header = vcfData.header;
@@ -169,16 +182,27 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
       columns = vcfTools.deriveColumns(vcfData);
 
       notifyChange();
+    })
+    .fail((jqXHR, errorName, errorMessage) => {
+      loadError = jqXHR.responseText + ': ' + jqXHR.vcfPath;
+      notifyChange();
     });
   // Calls all registered listening callbacks.
   function notifyChange() {
     _.each(listenerCallbacks, cb => { cb(); });
   }
 
+  function handleVcfParseError(vcfPath, e) {
+    console.error('Error while parsing VCFs: ', e);
+    loadError = 'Error while parsing VCF ' + vcfPath + ': ' + e;
+    notifyChange();
+  }
+
   return {
     getState: function() {
       return {
         hasLoadedVcfs,
+        loadError,
         header,
         records,
         truthRecords,
@@ -314,12 +338,11 @@ function recordComparatorFor(path, order) {
   }
 }
 
-// Return a promise getting & parsing the VCF at vcfPath.
+// Return a promise getting the VCF text at vcfPath.
 function deferredVcf(vcfPath) {
-  var vcfParser = vcf.parser();
-  return $.get('/vcf' + vcfPath).then(function(data) {
-    return vcfParser(data);
-  });
+  var p = $.get("/vcf" + vcfPath);
+  p.vcfPath = vcfPath;
+  return p;
 }
 
 module.exports = RecordStore;
