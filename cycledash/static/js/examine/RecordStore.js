@@ -151,21 +151,23 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
   var deferreds = [deferredVcf(vcfPath)];
   if (truthVcfPath) deferreds.push(deferredVcf(truthVcfPath));
   $.when.apply(null, deferreds)
-    .done((vcfData, truthVcfData) => {
+    .done((vcfResponse, truthResponse) => {
+      vcfBytes = vcfResponse[0];
+      truthVcfBytes = truthVcfPath && truthResponse[0];
+
       var vcfParser = vcf.parser();
+      var vcfData, truthVcfData;
       try {
-        vcfData = vcfParser(vcfData[0]);
+        vcfData = vcfParser(vcfResponse[0]);
       } catch (e) {
         return handleVcfParseError(vcfPath, e);
       }
       try {
-        truthVcfData = vcfParser(truthVcfData[0]);
+        truthVcfData = vcfParser(truthResponse[0]);
       } catch (e) {
         return handleVcfParseError(truthVcfPath, e);
       }
 
-      vcfBytes = vcfData;
-      truthVcfBytes = truthVcfData;
       hasLoadedVcfs = true;
 
       header = vcfData.header;
