@@ -101,7 +101,8 @@ var Karyogram = React.createClass({
 var Loading = React.createClass({
   propTypes: {
     hasLoaded: React.PropTypes.bool.isRequired,
-    files: React.PropTypes.arrayOf(React.PropTypes.string).isRequired
+    files: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
+    error: React.PropTypes.string
   },
   render: function() {
     if (this.props.hasLoaded) {

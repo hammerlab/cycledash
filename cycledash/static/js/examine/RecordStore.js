@@ -151,12 +151,13 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
       var vcfParser = vcf.parser();
       try {
         vcfData = vcfParser(vcfData[0]);
+      } catch (e) {
+        return handleVcfParseError(vcfPath, e);
+      }
+      try {
         truthVcfData = vcfParser(truthVcfData[0]);
       } catch (e) {
-        console.error('Error while parsing VCFs: ', e);
-        loadError = 'Error while parsing VCF: ' + e;
-        notifyChange();
-        return;
+        return handleVcfParseError(truthVcfPath, e);
       }
 
       hasLoadedVcfs = true;
@@ -189,6 +190,12 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
   // Calls all registered listening callbacks.
   function notifyChange() {
     _.each(listenerCallbacks, cb => { cb(); });
+  }
+
+  function handleVcfParseError(vcfPath, e) {
+    console.error('Error while parsing VCFs: ', e);
+    loadError = 'Error while parsing VCF ' + vcfPath + ': ' + e;
+    notifyChange();
   }
 
   return {
