@@ -40,6 +40,10 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
       chromosomes = [],
       columns = {};
 
+  // Original bytes of VCF files, to avoid duplicate requests by BioDalliance.
+  var truthVcfBytes = null,
+      vcfBytes = null;
+
   // Callbacks registered by listening components, registered with #onChange().
   var listenerCallbacks = [];
 
@@ -160,6 +164,8 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
         return handleVcfParseError(truthVcfPath, e);
       }
 
+      vcfBytes = vcfData;
+      truthVcfBytes = truthVcfData;
       hasLoadedVcfs = true;
 
       header = vcfData.header;
@@ -219,12 +225,10 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
       };
     },
 
-    getAllRecords: function() {
-      return fullRecords;
-    },
-    getAllTruthRecords: function() {
-      return fullTruthRecords;
-    },
+    getAllRecords: () => fullRecords,
+    getAllTruthRecords: () => fullTruthRecords,
+    getVcfBytes: () => vcfBytes,
+    getTruthVcfBytes: () => truthVcfBytes,
 
     onChange: function(callback) {
       // Calls callback when the store changes.

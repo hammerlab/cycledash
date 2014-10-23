@@ -12,8 +12,9 @@ var BioDalliance = React.createClass({
     // Currently selected variant, or null for no selection.
     selectedRecord: React.PropTypes.object,
     vcfPath: React.PropTypes.string.isRequired,
-    // Truth VCF should become optional once /examine no longer requires it.
+    vcfBytes: React.PropTypes.string,  // if available, otherwise fall back to vcfPath
     truthVcfPath: React.PropTypes.string,
+    truthVcfBytes: React.PropTypes.string,  // analogous to vcfBytes
     normalBamPath:  React.PropTypes.string,
     tumorBamPath:  React.PropTypes.string,
     // Event handlers
@@ -58,44 +59,45 @@ var BioDalliance = React.createClass({
   lazilyCreateDalliance: function() {
     if (this.browser) return;
 
+    var vcfSource = (name, path, bytes) => {
+      var source = {
+        name: name,
+        tier_type: 'memstore',
+        payload: 'vcf'
+      };
+      if (bytes) {
+        source.blob = new Blob([bytes]);
+      } else {
+        source.uri = this.hdfsUrl(path);
+      }
+      return source;
+    };
+
+    var bamSource = (name, path) => ({
+        name: name,
+        bamURI: this.hdfsUrl(path),
+        tier_type: 'bam',
+        style: bamStyle,
+        className: 'pileup'
+    });
+
     var sources = [
-          {
-            name: 'Genome',
-            twoBitURI: 'http://www.biodalliance.org/datasets/hg19.2bit',
-            tier_type: 'sequence'
-          },
-          {
-            name: 'Run VCF',
-            uri: this.hdfsUrl(this.props.vcfPath),
-            tier_type: 'memstore',
-            payload: 'vcf'
-          }
+        {
+          name: 'Genome',
+          twoBitURI: 'http://www.biodalliance.org/datasets/hg19.2bit',
+          tier_type: 'sequence'
+        },
+        vcfSource('Run VCF', this.props.vcfPath, this.props.vcfBytes)
     ];
     if (this.props.truthVcfPath) {
-      sources.push({
-          name: 'Truth VCF',
-          uri: this.hdfsUrl(this.props.truthVcfPath),
-          tier_type: 'memstore',
-          payload: 'vcf'
-      });
+      sources.push(vcfSource('Truth VCF', this.props.truthVcfPath, this.props.truthVcfBytes));
     }
+
     if (this.props.normalBamPath) {
-      sources.push({
-          name: 'Normal',
-          bamURI: this.hdfsUrl(this.props.normalBamPath),
-          tier_type: 'bam',
-          style: bamStyle,
-          className: 'pileup'
-      });
+      sources.push(bamSource('Normal', this.props.normalBamPath));
     }
     if (this.props.tumorBamPath) {
-      sources.push({
-            name: 'Tumor',
-            bamURI: this.hdfsUrl(this.props.tumorBamPath),
-            tier_type: 'bam',
-            style: bamStyle,
-            className: 'pileup'
-      });
+      sources.push(bamSource('Tumor', this.props.tumorBamPath));
     }
 
     // BioDalliance steals these events. We just want default browser behavior.

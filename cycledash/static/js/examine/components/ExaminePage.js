@@ -71,46 +71,49 @@ var ExaminePage = React.createClass({
     }
   },
   render: function() {
+    var state = this.state, props = this.props;  // shorthand
     return (
         <div className="examine-page">
           <div className="top-material">
-            <StatsSummary hasLoaded={this.state.hasLoadedVcfs}
-                          variantType={this.state.variantType}
+            <StatsSummary hasLoaded={state.hasLoadedVcfs}
+                          variantType={state.variantType}
                           handleVariantTypeChange={this.handleVariantTypeChange}
-                          records={this.state.records}
-                          truthRecords={this.state.truthRecords}
-                          totalRecords={this.state.totalRecords} />
-            <h1>Examining: <small>{this.props.vcfPath}</small></h1>
-            <Widgets.Loading hasLoaded={this.state.hasLoadedVcfs}
-                             error={this.state.loadError}
-                             files={[this.props.vcfPath, this.props.truthVcfPath]} />
-            <AttributeCharts records={this.state.records}
-                             selectedColumns={this.state.selectedColumns} />
+                          records={state.records}
+                          truthRecords={state.truthRecords}
+                          totalRecords={state.totalRecords} />
+            <h1>Examining: <small>{props.vcfPath}</small></h1>
+            <Widgets.Loading hasLoaded={state.hasLoadedVcfs}
+                             error={state.loadError}
+                             files={[props.vcfPath, props.truthVcfPath]} />
+            <AttributeCharts records={state.records}
+                             selectedColumns={state.selectedColumns} />
           </div>
-          <Widgets.Karyogram position={this.state.range}
+          <Widgets.Karyogram position={state.range}
                              handleRangeChange={this.handleRangeChange} />
           <VCFTable ref="vcfTable"
-                    hasLoaded={this.state.hasLoadedVcfs}
-                    records={this.state.records}
-                    position={this.state.range}
-                    header={this.state.header}
-                    columns={this.state.columns}
-                    selectedColumns={this.state.selectedColumns}
-                    selectedRecord={this.state.selectedRecord}
-                    chromosomes={this.state.chromosomes}
-                    sortBy={this.state.sortBy}
+                    hasLoaded={state.hasLoadedVcfs}
+                    records={state.records}
+                    position={state.range}
+                    header={state.header}
+                    columns={state.columns}
+                    selectedColumns={state.selectedColumns}
+                    selectedRecord={state.selectedRecord}
+                    chromosomes={state.chromosomes}
+                    sortBy={state.sortBy}
                     handleSortByChange={this.handleSortByChange}
                     handleChartChange={this.handleChartChange}
                     handleFilterUpdate={this.handleFilterUpdate}
                     handleChromosomeChange={this.handleChromosomeChange}
                     handleRangeChange={this.handleRangeChange}
                     handleSelectRecord={this.handleSelectRecord} />
-          <BioDalliance vcfPath={this.props.vcfPath}
-                        truthVcfPath={this.props.truthVcfPath}
-                        normalBamPath={this.props.normalBamPath}
-                        tumorBamPath={this.props.tumorBamPath}
-                        igvHttpfsUrl={this.props.igvHttpfsUrl}
-                        selectedRecord={this.state.selectedRecord}
+          <BioDalliance vcfPath={props.vcfPath}
+                        vcfBytes={props.recordStore.getVcfBytes()}
+                        truthVcfPath={props.truthVcfPath}
+                        truthVcfBytes={props.recordStore.getTruthVcfBytes()}
+                        normalBamPath={props.normalBamPath}
+                        tumorBamPath={props.tumorBamPath}
+                        igvHttpfsUrl={props.igvHttpfsUrl}
+                        selectedRecord={state.selectedRecord}
                         handlePreviousRecord={this.handlePreviousRecord}
                         handleNextRecord={this.handleNextRecord}
                         handleClose={() => this.handleSelectRecord(null)} />
