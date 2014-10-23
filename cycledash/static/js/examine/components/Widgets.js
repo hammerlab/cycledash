@@ -110,8 +110,7 @@ var Loading = React.createClass({
       console.error("Error loading VCFs:", this.props.error);
       return (
         <div className="loading-initial-data">
-          <h1 className="error">Error loading</h1>
-          <p>{this.props.error.jqXHR.responseText}: {this.props.error.jqXHR.vcfPath}</p>
+          <p className="error">{this.props.error}</p>
         </div>
       );
     } else {

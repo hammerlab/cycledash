@@ -149,8 +149,15 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
   $.when.apply(null, deferreds)
     .done((vcfData, truthVcfData) => {
       var vcfParser = vcf.parser();
-      vcfData = vcfParser(vcfData[0]);
-      truthVcfData = vcfParser(truthVcfData[0]);
+      try {
+        vcfData = vcfParser(vcfData[0]);
+        truthVcfData = vcfParser(truthVcfData[0]);
+      } catch (e) {
+        console.error('Error while parsing VCFs: ', e);
+        loadError = 'Error while parsing VCF: ' + e;
+        notifyChange();
+        return;
+      }
 
       hasLoadedVcfs = true;
 
@@ -176,7 +183,7 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
       notifyChange();
     })
     .fail((jqXHR, errorName, errorMessage) => {
-      loadError = {jqXHR, errorName, errorMessage};
+      loadError = jqXHR.responseText + ': ' + jqXHR.vcfPath;
       notifyChange();
     });
   // Calls all registered listening callbacks.
