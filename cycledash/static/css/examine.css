@@ -267,3 +267,8 @@ text {
     min-height: 200px;
   }
 }
+
+/* Widget.Loading */
+.loading-initial-data .error {
+    color: red;
+}

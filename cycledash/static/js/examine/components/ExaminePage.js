@@ -86,6 +86,7 @@ var ExaminePage = React.createClass({
                           totalRecords={this.state.totalRecords} />
             <h1>Examining: <small>{this.props.vcfPath}</small></h1>
             <Widgets.Loading hasLoaded={this.state.hasLoadedVcfs}
+                             error={this.state.loadError}
                              files={[this.props.vcfPath, this.props.truthVcfPath]} />
             <AttributeCharts records={this.state.records}
                              selectedColumns={this.state.selectedColumns} />
