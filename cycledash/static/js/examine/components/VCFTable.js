@@ -348,6 +348,19 @@ var VCFRecord = React.createClass({
     columns: React.PropTypes.object.isRequired,
     isSelected: React.PropTypes.bool.isRequired
   },
+  formatRefAlt: function(record) {
+    var ref = record.REF,
+        alts = record.ALT;
+    return alts.map((alt) => {
+      if (ref.length == 1 && alt.length > 1) {
+        return '(Insert ' + (alt.length - 1) + ')';
+      } else if (alt.length == 1 && ref.length > 1) {
+        return '(Delete ' + (ref.length - 1) + ')';
+      } else {
+        return ref + '/' + alt;
+      }
+    }).join(',');
+  },
   render: function() {
     var tds = [];
     _.each(this.props.columns, (columns, topLevelColumnName) => {
@@ -364,7 +377,7 @@ var VCFRecord = React.createClass({
     return (
       <tr className={classes}>
         <td title="chr::position" className="pos">{this.props.record.CHROM}::{this.props.record.POS}</td>
-        <td title="REF/ALT">{this.props.record.REF}/{this.props.record.ALT}</td>
+        <td title="REF/ALT">{this.formatRefAlt(this.props.record)}</td>
         {tds}
       </tr>
     );
