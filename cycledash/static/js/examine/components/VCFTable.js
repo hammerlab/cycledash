@@ -373,12 +373,13 @@ var VCFRecord = React.createClass({
       }
     });
     var classes = React.addons.classSet({selected: this.props.isSelected});
+    var record = this.props.record;
     return (
       <tr className={classes}>
-        <td title="chr::position" className="pos">{this.props.record.CHROM}::{this.props.record.POS}</td>
-        <td className="ref" title="REF">{this.props.record.REF}</td>
+        <td title="chr::position" className="pos">{record.CHROM}::{record.POS}</td>
+        <td className="ref" title={record.REF}>{record.REF}</td>
         <td className="arrow">→</td>
-        <td className="alt" title="ALT">{this.props.record.ALT}</td>
+        <td className="alt" title={record.ALT}>{record.ALT}</td>
         {tds}
       </tr>
     );
