@@ -33,7 +33,7 @@ function fakeGet(realPath) {
     // Return an already-resolved deferred with the data.
     var data = require('fs').readFileSync(realPath, 'utf8');
 
-    return $.when(data);
+    return $.when([data]);
   };
 }
 

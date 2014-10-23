@@ -6,18 +6,21 @@ var _ = require('underscore'),
     ACTION_TYPES = require('../../cycledash/static/js/examine/RecordActions.js').ACTION_TYPES,
     $ = require('jquery');
 
+var TEST_VCF_PATH = '__tests__/js/data/snv.vcf';
+
 describe('RecordStore', function() {
   var RecordStore, RecordActions, Dispatcher;
 
   function getFreshRecordStore() {
-    spyOn($, 'get').andCallFake(Utils.fakeGet('__tests__/js/data/snv.vcf'));
-    return  RecordStore('/vcf/snv.vcf', '/vcf/snv.vcf');
+    spyOn($, 'get').andCallFake(Utils.fakeGet(TEST_VCF_PATH));
+    return RecordStore('/vcf/snv.vcf', '/vcf/snv.vcf');
   }
 
   beforeEach(function() {
     RecordStore = require('../../cycledash/static/js/examine/RecordStore.js');
     $ = require('jquery');
   });
+
 
   it('should load VCF records', function() {
     var rs = getFreshRecordStore();
