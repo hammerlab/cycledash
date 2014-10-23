@@ -156,17 +156,25 @@ var BioDalliance = React.createClass({
       }
     });
 
-    $(window).on('keydown', (e) => {
+    // This uses a capture-phase event listener so that it gets informed of ESC
+    // key presses before BioDalliance, which will capture them. We only want
+    // to bypass the usual event bubbling system for ESC, not for arrow keys.
+    window.addEventListener('keydown', (e) => {
       if (!this.props.selectedRecord) return;
-      if (e.which == 27 /* esc */ && this.props.selectedRecord) {
+      var isDallianceActive = $(document.activeElement).is('.dalliance');
+
+      if (e.which == 27 /* esc */) {
         e.preventDefault();
         this.props.handleClose();
-      } else if (e.which == 37 /* left arrow */) {
+      }
+      
+      if (isDallianceActive) return;
+      if (e.which == 37 /* left arrow */) {
         this.handleLeft(e);
       } else if (e.which == 39 /* right arrow */) {
         this.handleRight(e);
       }
-    });
+    }, true /* capture */);
   },
   componentDidUpdate: function() {
     this.update();
