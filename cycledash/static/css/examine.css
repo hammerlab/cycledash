@@ -41,6 +41,26 @@ th {
     font-size: 19px;
     position: relative;
 }
+th.arrow, td.arrow {
+    width: 20px;
+    max-width: 20px;
+    padding: 0;
+    margin: 0;
+}
+th.ref, td.ref, th.alt, td.alt {
+    width: 100px;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+th.ref, td.ref {
+    padding-right: 0;
+    text-align: right;
+}
+th.alt, td.alt {
+    padding-left: 0;
+    text-align: left;
+}
 th.attr > span.chartable {
     cursor: pointer;
     border-bottom: 1px dashed #333;

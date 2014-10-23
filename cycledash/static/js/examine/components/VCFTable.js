@@ -132,7 +132,7 @@ var VCFTableHeader = React.createClass({
     return (
       <thead>
         <tr>
-          <th colSpan={2}>{/* This is the uber column for position and ref/alt. */}</th>
+          <th colSpan={4}>{/* This is the uber column for position and ref/alt. */}</th>
           {uberColumns}
         </tr>
         <tr>
@@ -140,7 +140,7 @@ var VCFTableHeader = React.createClass({
             chr::position
             <a className={sorterClasses} onClick={this.handleSortByChange}></a>
           </th>
-          <th>REF / ALT</th>
+          <th className="ref">REF</th><th className="arrow">→</th><th className="alt">ALT</th>
           {columnHeaders}
         </tr>
       </thead>
@@ -279,9 +279,14 @@ var VCFTableFilter = React.createClass({
                    disabled={!this.props.position.chromosome}
                    ref="endPos" value={end || ''} onChange={this.handleRangeChange} />
           </th>
-          <th>
-            <input name="refAlt" className="infoFilter" type="text"
-                   onChange={this.handleFilterUpdate(types.REF_ALT_PATH)} />
+          <th className="ref">
+            <input name="ref" className="infoFilter" type="text"
+                   onChange={this.handleFilterUpdate(['REF'])} />
+          </th>
+          <th>→</th>
+          <th className="alt">
+            <input name="alt" className="infoFilter" type="text"
+                   onChange={this.handleFilterUpdate(['ALT'])} />
           </th>
           {columnFilterFields}
         </tr>
@@ -355,20 +360,6 @@ var VCFRecord = React.createClass({
       return txt.substr(0, maxLength - 1) + '…';
     }
   },
-  formatRefAlt: function(record) {
-    var ref = record.REF,
-        alts = record.ALT;
-    return alts.map((alt) => {
-      var suffix = '';
-      if (ref.length == 1 && alt.length > 1) {
-        suffix = ' (I' + (alt.length - 1) + ')';
-      } else if (alt.length == 1 && ref.length > 1) {
-        suffix = ' (D' + (ref.length - 1) + ')';
-      }
-      return this.ellipsize(ref, 10) + ' / ' + this.ellipsize(alt, 10) + suffix;
-
-    }).join(',');
-  },
   render: function() {
     var tds = [];
     _.each(this.props.columns, (columns, topLevelColumnName) => {
@@ -385,7 +376,9 @@ var VCFRecord = React.createClass({
     return (
       <tr className={classes}>
         <td title="chr::position" className="pos">{this.props.record.CHROM}::{this.props.record.POS}</td>
-        <td title="REF/ALT">{this.formatRefAlt(this.props.record)}</td>
+        <td className="ref" title="REF">{this.props.record.REF}</td>
+        <td className="arrow">→</td>
+        <td className="alt" title="ALT">{this.props.record.ALT}</td>
         {tds}
       </tr>
     );
