@@ -104,4 +104,22 @@ describe('RecordStore', function() {
     expect(storeRecords.length).toEqual(validatedRecords.length);
     expect(_.isEqual(storeRecords, validatedRecords)).toEqual(true);
   });
+
+  it('should apply a filter, then remove it', function() {
+    var rs = getFreshRecordStore();
+    var getAlts = () => rs.getState().records.map((r) => r.ALT[0]);
+    var originalAlts = getAlts();
+
+    rs.receiver({actionType: ACTION_TYPES.UPDATE_FILTER,
+                path: ['ALT'], filterValue: 'C'});
+    var filteredAlts = getAlts();
+
+    rs.receiver({actionType: ACTION_TYPES.UPDATE_FILTER,
+                path: ['ALT'], filterValue: ''});
+    var defilteredAlts = getAlts();
+
+    expect(originalAlts.length).toEqual(10);
+    expect(filteredAlts).toEqual(['C']);
+    expect(defilteredAlts.length).toEqual(10);
+  });
 });

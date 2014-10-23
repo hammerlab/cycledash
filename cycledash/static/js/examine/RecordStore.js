@@ -132,7 +132,7 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
    * NB: mutates store state!
    */
   function updateFilters(path, filterValue) {
-    var filter = _.findWhere(filters, {path: path});
+    var filter = _.find(filters, (f) => _.isEqual(path, f.path));
     if (filter && filterValue.length === 0) {
       filters = _.without(filters, filter);
     } else if (filter) {
