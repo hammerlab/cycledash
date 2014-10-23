@@ -348,17 +348,25 @@ var VCFRecord = React.createClass({
     columns: React.PropTypes.object.isRequired,
     isSelected: React.PropTypes.bool.isRequired
   },
+  ellipsize: function(txt, maxLength) {
+    if (txt.length <= maxLength) {
+      return txt;
+    } else {
+      return txt.substr(0, maxLength - 1) + '…';
+    }
+  },
   formatRefAlt: function(record) {
     var ref = record.REF,
         alts = record.ALT;
     return alts.map((alt) => {
+      var suffix = '';
       if (ref.length == 1 && alt.length > 1) {
-        return '(Insert ' + (alt.length - 1) + ')';
+        suffix = ' (I' + (alt.length - 1) + ')';
       } else if (alt.length == 1 && ref.length > 1) {
-        return '(Delete ' + (ref.length - 1) + ')';
-      } else {
-        return ref + '/' + alt;
+        suffix = ' (D' + (ref.length - 1) + ')';
       }
+      return this.ellipsize(ref, 10) + ' / ' + this.ellipsize(alt, 10) + suffix;
+
     }).join(',');
   },
   render: function() {
