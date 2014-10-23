@@ -227,8 +227,6 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
       };
     },
 
-    getAllRecords: () => fullRecords,
-    getAllTruthRecords: () => fullTruthRecords,
     getVcfBytes: () => vcfBytes,
     getTruthVcfBytes: () => truthVcfBytes,
 
