@@ -15,8 +15,10 @@ var BioDalliance = React.createClass({
     vcfBytes: React.PropTypes.string,  // if available, otherwise fall back to vcfPath
     truthVcfPath: React.PropTypes.string,
     truthVcfBytes: React.PropTypes.string,  // analogous to vcfBytes
-    normalBamPath:  React.PropTypes.string,
-    tumorBamPath:  React.PropTypes.string,
+    normalBamPath: React.PropTypes.string,
+    normalBaiChunks: React.PropTypes.object,
+    tumorBamPath: React.PropTypes.string,
+    tumorBaiChunks: React.PropTypes.object,
     // Event handlers
     handleClose: React.PropTypes.func.isRequired,
     handlePreviousRecord: React.PropTypes.func.isRequired,
@@ -73,12 +75,13 @@ var BioDalliance = React.createClass({
       return source;
     };
 
-    var bamSource = (name, path) => ({
+    var bamSource = (name, path, chunks) => ({
         name: name,
         bamURI: this.hdfsUrl(path),
         tier_type: 'bam',
         style: bamStyle,
-        className: 'pileup'
+        className: 'pileup',
+        indexChunks: chunks
     });
 
     var sources = [
@@ -94,10 +97,10 @@ var BioDalliance = React.createClass({
     }
 
     if (this.props.normalBamPath) {
-      sources.push(bamSource('Normal', this.props.normalBamPath));
+      sources.push(bamSource('Normal', this.props.normalBamPath, this.props.normalBaiChunks));
     }
     if (this.props.tumorBamPath) {
-      sources.push(bamSource('Tumor', this.props.tumorBamPath));
+      sources.push(bamSource('Tumor', this.props.tumorBamPath, this.props.tumorBaiChunks));
     }
 
     // BioDalliance steals these events. We just want default browser behavior.
