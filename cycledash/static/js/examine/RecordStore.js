@@ -137,7 +137,7 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
    * NB: mutates store state!
    */
   function updateFilters(path, filterValue) {
-    var filter = _.findWhere(filters, {path: path});
+    var filter = _.find(filters, (f) => _.isEqual(path, f.path));
     if (filter && filterValue.length === 0) {
       filters = _.without(filters, filter);
     } else if (filter) {
@@ -294,11 +294,7 @@ function filtersToPredicates(filters) {
         else return val < Number(filterVal.slice(1));
       } else {  // treat it like a regexp
         var re = new RegExp(filterVal);
-        if (_.isEqual(path, types.REF_ALT_PATH)) {
-          return re.test(record.REF + "/" + record.ALT);
-        } else {
-          return re.test(String(val));
-        }
+        return re.test(String(val));
       }
     };
   });

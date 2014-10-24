@@ -132,7 +132,7 @@ var VCFTableHeader = React.createClass({
     return (
       <thead>
         <tr>
-          <th colSpan={2}>{/* This is the uber column for position and ref/alt. */}</th>
+          <th colSpan={4}>{/* This is the uber column for position and ref/alt. */}</th>
           {uberColumns}
         </tr>
         <tr>
@@ -140,7 +140,7 @@ var VCFTableHeader = React.createClass({
             chr::position
             <a className={sorterClasses} onClick={this.handleSortByChange}></a>
           </th>
-          <th>REF / ALT</th>
+          <th className="ref">REF</th><th className="arrow">→</th><th className="alt">ALT</th>
           {columnHeaders}
         </tr>
       </thead>
@@ -279,9 +279,14 @@ var VCFTableFilter = React.createClass({
                    disabled={!this.props.position.chromosome}
                    ref="endPos" value={end || ''} onChange={this.handleRangeChange} />
           </th>
-          <th>
-            <input name="refAlt" className="infoFilter" type="text"
-                   onChange={this.handleFilterUpdate(types.REF_ALT_PATH)} />
+          <th className="ref">
+            <input name="ref" className="infoFilter" type="text"
+                   onChange={this.handleFilterUpdate(['REF'])} />
+          </th>
+          <th>→</th>
+          <th className="alt">
+            <input name="alt" className="infoFilter" type="text"
+                   onChange={this.handleFilterUpdate(['ALT'])} />
           </th>
           {columnFilterFields}
         </tr>
@@ -361,10 +366,13 @@ var VCFRecord = React.createClass({
       }
     });
     var classes = React.addons.classSet({selected: this.props.isSelected});
+    var record = this.props.record;
     return (
       <tr className={classes}>
-        <td title="chr::position" className="pos">{this.props.record.CHROM}::{this.props.record.POS}</td>
-        <td title="REF/ALT">{this.props.record.REF}/{this.props.record.ALT}</td>
+        <td title="chr::position" className="pos">{record.CHROM}::{record.POS}</td>
+        <td className="ref" title={record.REF}>{record.REF}</td>
+        <td className="arrow">→</td>
+        <td className="alt" title={record.ALT}>{record.ALT}</td>
         {tds}
       </tr>
     );
