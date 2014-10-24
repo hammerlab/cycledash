@@ -7,6 +7,11 @@ var React = require('react'),
 require('jquery-mousewheel')($);
 
 
+// Indicator value that the BAI chunks are still loading.
+var CHUNKS_LOADING = 'loading',
+    CHUNKS_NOT_AVAILABLE = null;
+
+
 var BioDalliance = React.createClass({
   propTypes: {
     // Currently selected variant, or null for no selection.
@@ -16,9 +21,7 @@ var BioDalliance = React.createClass({
     truthVcfPath: React.PropTypes.string,
     truthVcfBytes: React.PropTypes.string,  // analogous to vcfBytes
     normalBamPath: React.PropTypes.string,
-    normalBaiChunks: React.PropTypes.object,
     tumorBamPath: React.PropTypes.string,
-    tumorBaiChunks: React.PropTypes.object,
     // Event handlers
     handleClose: React.PropTypes.func.isRequired,
     handlePreviousRecord: React.PropTypes.func.isRequired,
@@ -26,9 +29,16 @@ var BioDalliance = React.createClass({
     // Configuration
     igvHttpfsUrl: React.PropTypes.string.isRequired
   },
+  getInitialState: () => ({
+    // Chunk props can either be null (not available), loading or the chunks.
+    normalBaiChunks: CHUNKS_LOADING,
+    tumorBaiChunks: CHUNKS_LOADING,
+  }),
   render: function() {
     var style = {};
-    if (this.props.selectedRecord == null) {
+    if (this.props.selectedRecord == null ||
+        this.state.normalBaiChunks == CHUNKS_LOADING ||
+        this.state.tumorBaiChunks == CHUNKS_LOADING) {
       style = {display: 'none'};
     }
 
@@ -97,10 +107,10 @@ var BioDalliance = React.createClass({
     }
 
     if (this.props.normalBamPath) {
-      sources.push(bamSource('Normal', this.props.normalBamPath, this.props.normalBaiChunks));
+      sources.push(bamSource('Normal', this.props.normalBamPath, this.state.normalBaiChunks));
     }
     if (this.props.tumorBamPath) {
-      sources.push(bamSource('Tumor', this.props.tumorBamPath, this.props.tumorBaiChunks));
+      sources.push(bamSource('Tumor', this.props.tumorBamPath, this.state.tumorBaiChunks));
     }
 
     // BioDalliance steals these events. We just want default browser behavior.
@@ -140,7 +150,30 @@ var BioDalliance = React.createClass({
       this.panToSelection();
     }
   },
+  fetchIndexChunks: function() {
+    var makeObj = (k, v) => { var o = {}; o[k] = v; return o; };
+
+    [['normalBaiChunks', this.props.normalBamPath],
+     ['tumorBaiChunks', this.props.tumorBamPath]].forEach(v => {
+        [propName, bamPath] = v;
+        if (!bamPath) {
+          this.setState(makeObj(propName, CHUNKS_NOT_AVAILABLE));
+          return;
+        }
+
+        var chunkPath = bamPath.replace('.bam', '.bam.bai.json');
+        $.get(this.hdfsUrl(chunkPath))
+          .done((chunks) => {
+            console.log('setting', propName, 'to', chunks);
+            this.setState(makeObj(propName, chunks));
+          }).fail((jqXHR, textStatus) => {
+            console.log('setting', propName, 'to n/a');
+            this.setState(makeObj(propName, CHUNKS_NOT_AVAILABLE));
+          });
+      });
+  },
   componentDidMount: function() {
+    this.fetchIndexChunks();
     this.update();
 
     $(this.refs.inspector.getDOMNode()).on('mousewheel.biodalliance', (e) => {

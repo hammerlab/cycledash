@@ -18,8 +18,6 @@ window.renderExaminePage = function(el, run, igvHttpfsUrl) {
                                      vcfPath={run.vcfPath}
                                      truthVcfPath={run.truthVcfPath}
                                      normalBamPath={run.normalPath}
-                                     normalBaiChunks={run.normalBaiChunks}
                                      tumorBamPath={run.tumorPath}
-                                     tumorBaiChunks={run.tumorBaiChunks}
                                      igvHttpfsUrl={igvHttpfsUrl} />, el);
 };
