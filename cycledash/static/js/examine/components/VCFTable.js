@@ -353,13 +353,6 @@ var VCFRecord = React.createClass({
     columns: React.PropTypes.object.isRequired,
     isSelected: React.PropTypes.bool.isRequired
   },
-  ellipsize: function(txt, maxLength) {
-    if (txt.length <= maxLength) {
-      return txt;
-    } else {
-      return txt.substr(0, maxLength - 1) + '…';
-    }
-  },
   render: function() {
     var tds = [];
     _.each(this.props.columns, (columns, topLevelColumnName) => {
