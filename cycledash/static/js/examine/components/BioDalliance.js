@@ -155,16 +155,16 @@ var BioDalliance = React.createClass({
     propBamPathPairs.forEach(v => {
         [propName, bamPath] = v;
         if (!bamPath) {
-          this.setState(_.object(propName, CHUNKS_NOT_AVAILABLE));
+          this.setState(_.object([propName], [CHUNKS_NOT_AVAILABLE]));
           return;
         }
 
         var chunkPath = bamPath.replace('.bam', '.bam.bai.json');
         $.getJSON(this.hdfsUrl(chunkPath))
           .done((chunks) => {
-            this.setState(_.object(propName, chunks));
+            this.setState(_.object([propName], [chunks]));
           }).fail((jqXHR, textStatus) => {
-            this.setState(_.object(propName, CHUNKS_NOT_AVAILABLE));
+            this.setState(_.object([propName], [CHUNKS_NOT_AVAILABLE]));
           });
       });
   },
