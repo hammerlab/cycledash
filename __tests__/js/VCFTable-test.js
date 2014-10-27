@@ -29,11 +29,11 @@ describe('VCFTable', function() {
   function makeTestVCFTable(vcfData) {
     var columns = vcfTools.deriveColumns(vcfData);
 
-    var pos = {start: null, end: null, chromosome: null};
+    var range = {start: null, end: null, chromosome: null};
     return TestUtils.renderIntoDocument(
                 <VCFTable hasLoaded={true}
                           records={vcfData.records}
-                          position={pos}
+                          range={range}
                           header={vcfData.header}
                           columns={columns}
                           selectedColumns={null}
