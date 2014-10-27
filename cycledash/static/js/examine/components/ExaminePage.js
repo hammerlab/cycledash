@@ -10,7 +10,7 @@ var _ = require('underscore'),
     StatsSummary = require('./StatsSummary'),
     VCFTable = require('./VCFTable'),
     Karyogram = require('./Karyogram'),
-    Loading = require('./Loading');
+    LoadingStatus = require('./LoadingStatus');
 
 
 // The root component of the page.
@@ -82,20 +82,20 @@ var ExaminePage = React.createClass({
                           truthRecords={state.truthRecords}
                           totalRecords={state.totalRecords} />
             <h1>Examining: <small>{props.vcfPath}</small></h1>
-            <Loading hasLoaded={state.hasLoadedVcfs}
-                     error={state.loadError}
-                     files={[props.vcfPath, props.truthVcfPath]} />
+            <LoadingStatus hasLoaded={state.hasLoadedVcfs}
+                           error={state.loadError}
+                           files={[props.vcfPath, props.truthVcfPath]} />
             <AttributeCharts records={state.records}
                              selectedColumns={state.selectedColumns} />
           </div>
           <Karyogram hasLoaded={state.hasLoadedVcfs}
-                     position={state.range}
+                     range={state.range}
                      records={props.recordStore.getFullRecords()}
                      handleRangeChange={this.handleRangeChange} />
           <VCFTable ref="vcfTable"
                     hasLoaded={state.hasLoadedVcfs}
                     records={state.records}
-                    position={state.range}
+                    range={state.range}
                     header={state.header}
                     columns={state.columns}
                     selectedColumns={state.selectedColumns}

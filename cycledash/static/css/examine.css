@@ -9,7 +9,7 @@ body {
 }
 
 .top-material {
-  overflow: hidden;  /* expand to include floats */
+    overflow: hidden;  /* expand to include floats */
 }
 
 /* Karyogram */
@@ -28,7 +28,7 @@ body {
 
 /* VCFTable */
 .vcf-table {
-  padding-top: 20px;
+    padding-top: 20px;
 }
 .vcf-table input {
     border: none;
@@ -40,10 +40,10 @@ body {
     font-size: 13px;
     border-radius: 3px;
 }
-th#position input {
+th#range input {
     width: 100px;
 }
-th#position input:disabled {
+th#range input:disabled {
     display: none;
 }
 th {
@@ -177,7 +177,7 @@ thead, tbody, table {
 }
 
 tr.selected {
-  background-color: lightblue;
+    background-color: lightblue;
 }
 
 /* AttributeCharts */
@@ -251,53 +251,53 @@ text {
 
 /* BioDalliance */
 .variant-inspector {
-  position: fixed;
-  left: 0;
-  right: 0;
-  height: 850px;
-  bottom: 0;
-  background-color: white;
+    position: fixed;
+    left: 0;
+    right: 0;
+    height: 850px;
+    bottom: 0;
+    background-color: white;
 }
 .variant-inspector .close-button, .variant-inspector .right-button {
-  float: right;
-  text-decoration: none;
-  margin-right: 5px;
+    float: right;
+    text-decoration: none;
+    margin-right: 5px;
 }
 .variant-inspector .left-button {
-  float: left;
-  text-decoration: none;
-  margin-left: 5px;
+    float: left;
+    text-decoration: none;
+    margin-left: 5px;
 }
 
 #svgHolder {
-  position: relative;
-  bottom: 0;
-  border: 1px solid #ccc;
-  overflow-y: auto;
-  margin: 0 5%;
-  padding: 10px;
+    position: relative;
+    bottom: 0;
+    border: 1px solid #ccc;
+    overflow-y: auto;
+    margin: 0 5%;
+    padding: 10px;
 }
 .dalliance-root {
-  max-height: 80000px !important;
+    max-height: 80000px !important;
 }
 .dalliance .tier-holder {
-  overflow-y: hidden;
+    overflow-y: hidden;
 }
 .dalliance .tier.pileup {
-  border-top: 1px solid black;
-  overflow-y: auto;
-  max-height: 300px;
-  min-height: 300px;
+    border-top: 1px solid black;
+    overflow-y: auto;
+    max-height: 300px;
+    min-height: 300px;
 }
 
 @media(max-height:1000px) {
-  .variant-inspector {
-    height: 550px;
-  }
-  .dalliance .tier.pileup {
-    max-height: 200px;
-    min-height: 200px;
-  }
+    .variant-inspector {
+        height: 550px;
+    }
+    .dalliance .tier.pileup {
+        max-height: 200px;
+        min-height: 200px;
+    }
 }
 
 /* Widget.Loading */

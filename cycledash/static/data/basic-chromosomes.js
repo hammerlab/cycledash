@@ -1,3 +1,6 @@
+// This is a list of chromosome bands in the format expected by
+// idiogrammatik.js, taken from GRCh38.
+
 module.exports = [
     {
         "bands": [

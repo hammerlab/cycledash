@@ -1,5 +1,5 @@
 /** @jsx React.DOM */
-"use strict";
+'use strict';
 
 var _ = require('underscore'),
     d3 = require('d3/d3'),
@@ -9,10 +9,14 @@ var _ = require('underscore'),
     vcf = require('vcf.js'),
     CHROMOSOMES = require('../../../data/basic-chromosomes');
 
-
+/**
+ * This component wraps an idiogrammatik instance and handles highlighting,
+ * coloring by variant depth (currently independent of filters), focus/scrolling
+ * (karyogram only gets focused if it's clicked), and chromosome labeling.
+ */
 var Karyogram = React.createClass({
   propTypes: {
-    position: React.PropTypes.object.isRequired,
+    range: React.PropTypes.object.isRequired,
     hasLoaded: React.PropTypes.bool.isRequired,
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     handleRangeChange: React.PropTypes.func.isRequired
@@ -25,11 +29,11 @@ var Karyogram = React.createClass({
       maxVariantsInABand: 0
     };
   },
-  componentWillReceiveProps: function(props) {
-    if (!this.props.hasLoaded && props.hasLoaded) {
+  componentWillReceiveProps: function(newProps) {
+    if (!this.props.hasLoaded && newProps.hasLoaded) {
       var chromosomes = this.state.chromosomes,
           width = this.getDOMNode().offsetWidth,
-          chromosomes = addVariantDensity(chromosomes, props.records, width),
+          chromosomes = addVariantDensity(chromosomes, newProps.records, width),
           maxVariantsInABand = d3.max(chromosomes, c => d3.max(c.bands, b => b.value)),
           karyogram = this.initializeKaryogram({width, maxVariantsInABand});
       this.setState({chromosomes, maxVariantsInABand, karyogram});
@@ -37,17 +41,18 @@ var Karyogram = React.createClass({
 
     if (!this.state.karyogram) return;
 
-    var chromosome = props.position.chromosome,
-        start = props.position.start,
-        end = props.position.end,
+    var {chromosome, start, end} = newProps.range,
         kgram = this.state.karyogram;
     kgram.highlights().remove();
 
-    if (chromosome !== this.props.position.chromosome) {
-      if (chromosome === null) kgram.zoom(kgram.ALL_CHROMOSOMES);
-      else kgram.zoom(chromosome);
+    if (chromosome !== this.props.range.chromosome) {
+      if (chromosome === null) {
+        kgram.zoom(kgram.ALL_CHROMOSOMES);
+      } else {
+        kgram.zoom(chromosome);
+      }
     }
-    if (this.props.position.chromosome !== types.ALL_CHROMOSOMES) {
+    if (newProps.range.chromosome !== types.ALL_CHROMOSOMES) {
       if (!start && !end) {
         // We don't want to highlight the whole chromosome, that's cluttering.
       } else if (start && !end) {
@@ -87,25 +92,25 @@ var Karyogram = React.createClass({
     var firstPos = null,
         selection = {},  // the current highlight/selected range
         shiftKey = false,  // if the shift key is down
-        that = this;
+        component = this;
 
-    window.addEventListener('keydown', function(e) {
+    window.addEventListener('keydown', e => {
       if (e.shiftKey && this.state.focused) {
-        document.getElementsByTagName("body")[0].style.cursor = "text";
+        document.body.style.cursor = 'text';
         shiftKey = true;
-        that.setState({focused: true});
-        karyogram.on(".zoom", null);
+        component.setState({focused: true});
+        karyogram.on('.zoom', null);
       }
-    }.bind(this));
+    });
 
-    window.addEventListener('keyup', function(e) {
-      document.getElementsByTagName("body")[0].style.cursor = "default";
+    window.addEventListener('keyup', e => {
+      document.getElementsByTagName('body')[0].style.cursor = 'default';
       if (shiftKey && !e.shiftKey) {
         shiftKey = false;
         karyogram.call(karyogram.zoom());
-        if (!this.state.focused) that.setState({focused: false});
+        if (!this.state.focused) component.setState({focused: false});
       }
-    }.bind(this));
+    });
 
     karyogram.drag()
       .on('dragstart', function() {
@@ -131,7 +136,7 @@ var Karyogram = React.createClass({
         var chr = pos.chromosome.name, start = firstPos.basePair, end = pos.basePair;
         if (start > end) var temp = start, start = end, end = temp;
 
-        that.props.handleRangeChange({chromosome: chr, start, end});
+        component.props.handleRangeChange({chromosome: chr, start, end});
         selection = karyogram.highlight(chr, start, end);
       });
   },
@@ -154,12 +159,12 @@ var Karyogram = React.createClass({
   },
   /** Return configured karyogram object to be rendered into the DOM. */
   initializeKaryogram: function({width, maxVariantsInABand}) {
-    var that = this,
+    var component = this,
         depthColorScale = d3.scale.linear()
             .domain([0, maxVariantsInABand])
         .range(['#e8e8e8', 'black']);
 
-    var kgram =  idiogrammatik()
+    var kgram = idiogrammatik()
         .width(width)
         .idiogramHeight(11)
         .highlightHeight(59)
@@ -180,17 +185,18 @@ var Karyogram = React.createClass({
             .attr('y', -9)
             .style('cursor', 'pointer')
             .text(d => d.name)
-            .attr('x', d => scale(d.absoluteStart))
+            .attr('x', d => scale(d.absoluteStart + (d.totalBases / 2)))
+            .attr('text-anchor', 'middle')
             .on('click', function() {
-              that.props.handleRangeChange({chromosome: this.__data__.name,
-                                            start: null,
-                                            end: null});
+              component.props.handleRangeChange({chromosome: this.__data__.name,
+                                                 start: null,
+                                                 end: null});
               kgram.call(kgram.zoom());
-              that.setState({focused: true});
+              component.setState({focused: true});
             })
             .on('mouseover', function() {
               kgram.call(kgram.zoom());
-              that.setState({focused: true});
+              component.setState({focused: true});
             });
         });
     return kgram;

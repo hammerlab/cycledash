@@ -5,7 +5,7 @@ var _ = require('underscore'),
     React = require('react/addons');
 
 
-var Loading = React.createClass({
+var LoadingStatus = React.createClass({
   propTypes: {
     hasLoaded: React.PropTypes.bool.isRequired,
     files: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
@@ -35,4 +35,4 @@ var Loading = React.createClass({
   }
 });
 
-module.exports = Loading;
+module.exports = LoadingStatus;
