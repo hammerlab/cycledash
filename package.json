@@ -11,7 +11,7 @@
     "jquery-mousewheel": "^3.1.12",
     "react": "^0.11.2",
     "underscore": "^1.7.0",
-    "vcf.js": "^0.2.5"
+    "vcf.js": "^0.2.6"
   },
   "devDependencies": {
     "browserify": "^5.11.1",
