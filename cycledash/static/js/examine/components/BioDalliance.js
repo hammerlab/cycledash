@@ -6,11 +6,9 @@ var React = require('react'),
 
 require('jquery-mousewheel')($);
 
-
 // Indicator value that the BAI chunks are still loading.
 var CHUNKS_LOADING = 'loading',
     CHUNKS_NOT_AVAILABLE = null;
-
 
 var BioDalliance = React.createClass({
   propTypes: {
@@ -164,10 +162,8 @@ var BioDalliance = React.createClass({
         var chunkPath = bamPath.replace('.bam', '.bam.bai.json');
         $.ajax(this.hdfsUrl(chunkPath), {dataType: 'json'})
           .done((chunks) => {
-            console.log('setting', propName, 'to', chunks);
             this.setState(makeObj(propName, chunks));
           }).fail((jqXHR, textStatus) => {
-            console.log('setting', propName, 'to n/a');
             this.setState(makeObj(propName, CHUNKS_NOT_AVAILABLE));
           });
       });

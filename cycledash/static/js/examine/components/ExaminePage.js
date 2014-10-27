@@ -21,9 +21,7 @@ var ExaminePage = React.createClass({
     vcfPath: React.PropTypes.string.isRequired,
     truthVcfPath: React.PropTypes.string,
     normalBamPath:  React.PropTypes.string,
-    normalBaiChunks: React.PropTypes.object,
     tumorBamPath:  React.PropTypes.string,
-    tumorBaiChunks: React.PropTypes.object,
     igvHttpfsUrl: React.PropTypes.string.isRequired
   },
   getInitialState: function() {
@@ -113,9 +111,7 @@ var ExaminePage = React.createClass({
                         truthVcfPath={props.truthVcfPath}
                         truthVcfBytes={props.recordStore.getTruthVcfBytes()}
                         normalBamPath={props.normalBamPath}
-                        normalBaiChunks={props.normalBaiChunks}
                         tumorBamPath={props.tumorBamPath}
-                        tumorBaiChunks={props.tumorBaiChunks}
                         igvHttpfsUrl={props.igvHttpfsUrl}
                         selectedRecord={state.selectedRecord}
                         handlePreviousRecord={this.handlePreviousRecord}
