@@ -162,7 +162,7 @@ var BioDalliance = React.createClass({
         }
 
         var chunkPath = bamPath.replace('.bam', '.bam.bai.json');
-        $.get(this.hdfsUrl(chunkPath))
+        $.ajax(this.hdfsUrl(chunkPath), {dataType: 'json'})
           .done((chunks) => {
             console.log('setting', propName, 'to', chunks);
             this.setState(makeObj(propName, chunks));
