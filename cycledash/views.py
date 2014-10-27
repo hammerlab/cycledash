@@ -68,19 +68,6 @@ def runs():
 @app.route('/runs/<run_id>/examine')
 def examine(run_id):
     run = Run.query.get_or_404(run_id).to_camel_dict()
-
-    # Hack to load in index chunks. Eventually these should be in a database.
-    def getIndexChunks(baiPath):
-        try:
-            p = os.path.normpath(os.path.join(__file__, '..', 'static', 'data',
-                    os.path.basename(baiPath) + '.bai.json'))
-            return json.load(open(p))
-        except IOError:
-            return None
-
-    run['normalBaiChunks'] = getIndexChunks(run['normalPath'])
-    run['tumorBaiChunks'] = getIndexChunks(run['tumorPath'])
-
     return render_template('examine.html', run=run, run_kvs=RUN_ADDL_KVS)
 
 
