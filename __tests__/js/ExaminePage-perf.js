@@ -10,39 +10,24 @@
  * TODO: do some sorting and filtering.
  */
 
-var proxyquire = require('proxyquire');
-proxyquire.preserveCache();
+require('./testdom')('<html><body></body></html>');
+var React = require('react/addons'),
+    fs = require('fs'),
+    _ = require('underscore'),
+    sinon = require('sinon');
 
-var stubs = {};
-var stubRequire = function(moduleName) {
-  return proxyquire(moduleName, stubs);
-};
+global.reactModulesToStub = [
+  'components/BioDalliance.js',
+  'components/AttributeCharts.js'
+];
 
-stubRequire('./testdom')('<html><body></body></html>');
-var React = stubRequire('react/addons'),
-    fs = stubRequire('fs'),
-    _ = stubRequire('underscore'),
-    sinon = stubRequire('sinon');
-
-var makeStubComponent = function() {
-  var c = React.createClass({render: function() { return null; }});
-  c['@global'] = true;
-  //c['@noCallThru'] = true;
-  return c;
-};
-stubs = {
-  './BioDalliance': makeStubComponent(),
-  './Widgets': makeStubComponent(),
-  './AttributeCharts': makeStubComponent()
-};
-
-var Utils = stubRequire('./Utils');
-var ExaminePage = stubRequire('../../cycledash/static/js/examine/components/ExaminePage');
-var RecordStore = stubRequire('../../cycledash/static/js/examine/RecordStore');
-var RecordActions = stubRequire('../../cycledash/static/js/examine/RecordActions').RecordActions;
-var Dispatcher = stubRequire('../../cycledash/static/js/examine/Dispatcher');
+var Utils = require('./Utils');
+var ExaminePage = require('../../cycledash/static/js/examine/components/ExaminePage');
+var RecordStore = require('../../cycledash/static/js/examine/RecordStore');
+var RecordActions = require('../../cycledash/static/js/examine/RecordActions').RecordActions;
+var Dispatcher = require('../../cycledash/static/js/examine/Dispatcher');
 var TestUtils = React.addons.TestUtils;
-var $ = stubRequire('jquery');
+var $ = require('jquery');
 
 
 class Timer {
@@ -69,15 +54,13 @@ describe('ExaminePage', function() {
   });
 
   it('should perform reasonably', function() {
-     console.log(' in it');
-
      // We prefer to parse the VCFs ourselves to get more fine-grained timing
      // data. To make this work, we intercept both the ExaminePage XHR and the
      // VCF parser.
-     var vcf = stubRequire('vcf.js');
+     var vcf = require('vcf.js');
      var runVcf, truthVcf;
      var parseVcf = vcf.parser();  // Note: the real deal, not a fake!
-     sinon.stub($, 'get', path => $.when(path));
+     sinon.stub($, 'get', path => $.when([path]));
      sinon.stub(vcf, 'parser', () => function(path) {
        if (path == '/vcf/run') {
          return runVcf;
@@ -86,7 +69,7 @@ describe('ExaminePage', function() {
        }
        throw 'Unexpected VCF path: ' + path;
      });
-     var env = stubRequire('process').env;
+     var env = require('process').env;
      if (!env.RUN_VCF || !env.TRUTH_VCF) {
        throw new Error("ENV must have RUN_VCF and TRUTH_VCF. See scripts/perf-test.sh");
      }
@@ -103,7 +86,6 @@ describe('ExaminePage', function() {
      var dispatcher = new Dispatcher();
      var recordActions = RecordActions(dispatcher);
      var recordStore = RecordStore(vcfPath, truthVcfPath, dispatcher);
-     console.log('calling render');
      var examine = TestUtils.renderIntoDocument(
        <ExaminePage recordStore={recordStore}
                     recordActions={recordActions}
@@ -111,7 +93,6 @@ describe('ExaminePage', function() {
                     truthVcfPath={truthVcfPath}
                     normalBamPath="" tumorBamPath=""
                     igvHttpfsUrl="" karyogramData="" />);
-     console.log('done with render');
      timer.tick('Constructed <ExaminePage/>');
 
      examine.setState({selectedRecord: examine.state.records[0]});

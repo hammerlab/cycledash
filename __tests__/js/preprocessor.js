@@ -4,7 +4,18 @@ var ReactTools = require('react-tools');
 
 var origJs = require.extensions['.js'];
 
+var reactStub = 'module.exports = require("react").createClass({render:function(){return null;}});';
+
 function transform(module, filename) {
+  if (global.reactModulesToStub) {
+    var stubs = global.reactModulesToStub;
+    for (var i = 0; i < stubs.length; i++) {
+      if (filename.substr(-stubs[i].length) == stubs[i]) {
+        return module._compile(reactStub, filename);
+      }
+    }
+  }
+
   var content;
   content = fs.readFileSync(filename, 'utf8');
   if (content.indexOf('@jsx') > 0) {
