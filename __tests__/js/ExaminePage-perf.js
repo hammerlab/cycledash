@@ -58,7 +58,7 @@ describe('ExaminePage', function() {
      var vcf = require('vcf.js');
      var runVcf, truthVcf;
      var parseVcf = vcf.parser();  // Note: the real deal, not a fake!
-     sinon.stub($, 'get', path => $.when(path));
+     sinon.stub($, 'get', path => $.when([path]));
      sinon.stub(vcf, 'parser', () => function(path) {
        if (path == '/vcf/run') {
          return runVcf;
