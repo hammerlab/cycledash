@@ -4,13 +4,13 @@
 var _ = require('underscore'),
     React = require('react'),
     idiogrammatik = require('idiogrammatik.js'),
-    types = require('./types'),
 
     AttributeCharts = require('./AttributeCharts'),
     BioDalliance = require('./BioDalliance'),
     StatsSummary = require('./StatsSummary'),
     VCFTable = require('./VCFTable'),
-    Widgets = require('./Widgets');
+    Karyogram = require('./Karyogram'),
+    LoadingStatus = require('./LoadingStatus');
 
 
 // The root component of the page.
@@ -71,7 +71,7 @@ var ExaminePage = React.createClass({
     }
   },
   render: function() {
-    var state = this.state, props = this.props;  // shorthand
+    var state = this.state, props = this.props;
     return (
         <div className="examine-page">
           <div className="top-material">
@@ -82,18 +82,20 @@ var ExaminePage = React.createClass({
                           truthRecords={state.truthRecords}
                           totalRecords={state.totalRecords} />
             <h1>Examining: <small>{props.vcfPath}</small></h1>
-            <Widgets.Loading hasLoaded={state.hasLoadedVcfs}
-                             error={state.loadError}
-                             files={[props.vcfPath, props.truthVcfPath]} />
+            <LoadingStatus hasLoaded={state.hasLoadedVcfs}
+                           error={state.loadError}
+                           files={[props.vcfPath, props.truthVcfPath]} />
             <AttributeCharts records={state.records}
                              selectedColumns={state.selectedColumns} />
           </div>
-          <Widgets.Karyogram position={state.range}
-                             handleRangeChange={this.handleRangeChange} />
+          <Karyogram hasLoaded={state.hasLoadedVcfs}
+                     range={state.range}
+                     records={props.recordStore.getFullRecords()}
+                     handleRangeChange={this.handleRangeChange} />
           <VCFTable ref="vcfTable"
                     hasLoaded={state.hasLoadedVcfs}
                     records={state.records}
-                    position={state.range}
+                    range={state.range}
                     header={state.header}
                     columns={state.columns}
                     selectedColumns={state.selectedColumns}

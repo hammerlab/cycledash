@@ -19,7 +19,7 @@ var VCFTable = React.createClass({
     // List of chromosomes found in the VCF
     chromosomes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     // The position object, from ExaminePage, denoting the current range selected
-    position: types.PositionType,
+    range: types.PositionType,
     // List of VCF records
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     // The VCF header, used to get information about the INFO fields
@@ -54,7 +54,7 @@ var VCFTable = React.createClass({
                         handleSortByChange={this.props.handleSortByChange}
                         handleChartChange={this.props.handleChartChange} />
         <VCFTableFilter columns={this.props.columns}
-                        position={this.props.position}
+                        range={this.props.range}
                         chromosomes={this.props.chromosomes}
                         handleFilterUpdate={this.props.handleFilterUpdate}
                         handleChromosomeChange={this.props.handleChromosomeChange}
@@ -219,7 +219,7 @@ var InfoColumnTooltip = React.createClass({
 var VCFTableFilter = React.createClass({
   propTypes: {
     chromosomes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
-    position: types.PositionType,
+    range: types.PositionType,
     handleChromosomeChange: React.PropTypes.func.isRequired,
     handleRangeChange: React.PropTypes.func.isRequired,
     columns: React.PropTypes.object.isRequired
@@ -232,7 +232,7 @@ var VCFTableFilter = React.createClass({
   handleRangeChange: function(e) {
     var start = this.refs.startPos.getDOMNode().value,
     end = this.refs.endPos.getDOMNode().value,
-    chromosome = this.props.position.chromosome;
+    chromosome = this.props.range.chromosome;
     this.props.handleRangeChange({chromosome,
                                   start: Number(start) || null,
                                   end: Number(end) || null});
@@ -243,8 +243,8 @@ var VCFTableFilter = React.createClass({
     };
   },
   render: function() {
-    var {position, kgram} = this.props,
-        {start, end} = position;
+    var {range, kgram} = this.props,
+        {start, end} = range;
 
     var chromosomeOptions = this.props.chromosomes.map(function(chromosome) {
       return (
@@ -266,17 +266,17 @@ var VCFTableFilter = React.createClass({
     return (
       <thead>
         <tr>
-          <th id="position">
+          <th id="range">
             <select onChange={this.handleChromosomeChange}
-                    ref="chromosome" value={this.props.position.chromosome || 'all'}>
+                    ref="chromosome" value={this.props.range.chromosome || 'all'}>
               <option name="chromosome" key="all" value="all">&lt;all&gt;</option>
               {chromosomeOptions}
             </select>
             <input name="start" type="text" placeholder="start"
-                   disabled={!this.props.position.chromosome}
+                   disabled={!this.props.range.chromosome}
                    ref="startPos" value={start || ''} onChange={this.handleRangeChange} />
             <input name="end" type="text" placeholder="end"
-                   disabled={!this.props.position.chromosome}
+                   disabled={!this.props.range.chromosome}
                    ref="endPos" value={end || ''} onChange={this.handleRangeChange} />
           </th>
           <th className="ref">
