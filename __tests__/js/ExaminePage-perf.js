@@ -48,51 +48,51 @@ class Timer {
 describe('ExaminePage', function() {
 
   it('should perform reasonably', function() {
-     // We prefer to parse the VCFs ourselves to get more fine-grained timing
-     // data. To make this work, we intercept both the ExaminePage XHR and the
-     // VCF parser.
-     var vcf = require('vcf.js');
-     var runVcf, truthVcf;
-     var parseVcf = vcf.parser();  // Note: the real deal, not a fake!
-     sinon.stub($, 'get', path => $.when([path]));
-     sinon.stub(vcf, 'parser', () => function(path) {
-       if (path == '/vcf/run') {
-         return runVcf;
-       } else if (path == '/vcf/truth') {
-         return truthVcf;
-       }
-       throw 'Unexpected VCF path: ' + path;
-     });
-     var env = require('process').env;
-     if (!env.RUN_VCF || !env.TRUTH_VCF) {
-       throw new Error("ENV must have RUN_VCF and TRUTH_VCF. See scripts/perf-test.sh");
-     }
+    // We prefer to parse the VCFs ourselves to get more fine-grained timing
+    // data. To make this work, we intercept both the ExaminePage XHR and the
+    // VCF parser.
+    var vcf = require('vcf.js');
+    var runVcf, truthVcf;
+    var parseVcf = vcf.parser();  // Note: the real deal, not a fake!
+    sinon.stub($, 'get', path => $.when([path]));
+    sinon.stub(vcf, 'parser', () => function(path) {
+      if (path == '/vcf/run') {
+        return runVcf;
+      } else if (path == '/vcf/truth') {
+        return truthVcf;
+      }
+      throw 'Unexpected VCF path: ' + path;
+    });
+    var env = require('process').env;
+    if (!env.RUN_VCF || !env.TRUTH_VCF) {
+      throw new Error("ENV must have RUN_VCF and TRUTH_VCF. See scripts/perf-test.sh");
+    }
 
-     var timer = new Timer();
-     runVcf = parseVcf(fs.readFileSync(env.RUN_VCF, {encoding:'utf8'}));
-     timer.tick('Parsed run VCF');
-     truthVcf = parseVcf(fs.readFileSync(env.TRUTH_VCF, {encoding:'utf8'}));
-     timer.tick('Parsed truth VCF');
+    var timer = new Timer();
+    runVcf = parseVcf(fs.readFileSync(env.RUN_VCF, {encoding:'utf8'}));
+    timer.tick('Parsed run VCF');
+    truthVcf = parseVcf(fs.readFileSync(env.TRUTH_VCF, {encoding:'utf8'}));
+    timer.tick('Parsed truth VCF');
 
-     var vcfPath = "/run";
-     var truthVcfPath = "/truth";
+    var vcfPath = "/run";
+    var truthVcfPath = "/truth";
 
-     var dispatcher = new Dispatcher();
-     var recordActions = RecordActions(dispatcher);
-     var recordStore = RecordStore(vcfPath, truthVcfPath, dispatcher);
-     var examine = TestUtils.renderIntoDocument(
-       <ExaminePage recordStore={recordStore}
-                    recordActions={recordActions}
-                    vcfPath={vcfPath}
-                    truthVcfPath={truthVcfPath}
-                    normalBamPath="" tumorBamPath=""
-                    igvHttpfsUrl="" karyogramData="" />);
-     timer.tick('Constructed <ExaminePage/>');
+    var dispatcher = new Dispatcher();
+    var recordActions = RecordActions(dispatcher);
+    var recordStore = RecordStore(vcfPath, truthVcfPath, dispatcher);
+    var examine = TestUtils.renderIntoDocument(
+      <ExaminePage recordStore={recordStore}
+                   recordActions={recordActions}
+                   vcfPath={vcfPath}
+                   truthVcfPath={truthVcfPath}
+                   normalBamPath="" tumorBamPath=""
+                   igvHttpfsUrl="" karyogramData="" />);
+    timer.tick('Constructed <ExaminePage/>');
 
-     examine.setState({selectedRecord: examine.state.records[0]});
-     timer.tick('Selected first record');
+    examine.setState({selectedRecord: examine.state.records[0]});
+    timer.tick('Selected first record');
 
-     examine.setState({selectedRecord: examine.state.records[99]});
-     timer.tick('Selected 99th record');
-   });
+    examine.setState({selectedRecord: examine.state.records[99]});
+    timer.tick('Selected 99th record');
+  });
 });

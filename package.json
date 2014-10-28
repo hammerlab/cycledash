@@ -20,20 +20,14 @@
     "gulp": "^3.8.8",
     "gulp-livereload": "^2.1.1",
     "gulp-react": "^1.0.1",
-    "jest-cli": "^0.1.18",
+    "mocha": "^2.0.1",
     "react-tools": "^0.11.1",
     "reactify": "^0.14.0",
     "uglifyify": "^2.5.0",
     "vinyl-source-stream": "^1.0.0",
     "watchify": "^1.0.2"
   },
-  "jest": {
-    "scriptPreprocessor": "<rootDir>/preprocessor.js",
-    "unmockedModulePathPatterns": [
-      "<rootDir>/node_modules/react"
-    ]
-  },
   "scripts": {
-    "test": "jest __tests__/js/*-test.js"
+    "test": "mocha --compilers .:__tests__/js/preprocessor.js __tests__/js/*-test.js"
   }
 }

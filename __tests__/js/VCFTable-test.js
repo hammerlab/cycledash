@@ -24,7 +24,7 @@ describe('VCFTable', function() {
                           selectedColumns={[]}
                           selectedRecord={null}
                           chromosomes={['20']}
-                          sortBy={[null, 'desc']}
+                          sortBy={{path: null, order: 'desc'}}
                           handleSortByChange={_.noop}
                           handleChartChange={_.noop}
                           handleFilterUpdate={_.noop}

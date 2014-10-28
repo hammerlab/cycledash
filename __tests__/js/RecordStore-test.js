@@ -1,32 +1,27 @@
 /** @jsx React.DOM */
-jest.autoMockOff();
+require('./testdom')('<html><body></body></html>');
 
 var _ = require('underscore'),
     Utils = require('./Utils.js'),
     ACTION_TYPES = require('../../cycledash/static/js/examine/RecordActions.js').ACTION_TYPES,
-    $ = require('jquery');
+    $ = require('jquery'),
+    sinon = require('sinon'),
+    RecordStore = require('../../cycledash/static/js/examine/RecordStore.js');
+    assert = require('assert');
 
 var TEST_VCF_PATH = '__tests__/js/data/snv.vcf';
+sinon.stub($, 'get', Utils.fakeGet(TEST_VCF_PATH));
 
 describe('RecordStore', function() {
-  var RecordStore, RecordActions, Dispatcher;
-
   function getFreshRecordStore() {
-    spyOn($, 'get').andCallFake(Utils.fakeGet(TEST_VCF_PATH));
     return RecordStore('/vcf/snv.vcf', '/vcf/snv.vcf');
   }
-
-  beforeEach(function() {
-    RecordStore = require('../../cycledash/static/js/examine/RecordStore.js');
-    $ = require('jquery');
-  });
-
 
   it('should load VCF records', function() {
     var rs = getFreshRecordStore();
 
-    expect(rs.getState().hasLoadedVcfs).toEqual(true);
-    expect(rs.getState().records.length).toEqual(10);
+    assert.ok(rs.getState().hasLoadedVcfs);
+    assert.equal(rs.getState().records.length, 10);
   });
 
   it('should sort records by INFO:DP', function() {
@@ -41,8 +36,8 @@ describe('RecordStore', function() {
 
     var storeDps = _.pluck(_.pluck(rs.getState().records, 'INFO'), 'DP');
 
-    expect(storeDps).toEqual(sortedDps);
-    expect(storeDps).not.toEqual(originalDps);
+    assert.deepEqual(storeDps, sortedDps);
+    assert.notDeepEqual(storeDps, originalDps);
   });
 
   it('should filter to DP > 55 and then NORMAL:GT = 1/1', function() {
@@ -66,8 +61,8 @@ describe('RecordStore', function() {
 
     var storeDpsGt = _.pluck(_.pluck(rs.getState().records, 'NORMAL'), 'GT');
 
-    expect(storeDps).toEqual(filteredDps);
-    expect(storeDpsGt).toEqual(filteredDpsGt);
+    assert.deepEqual(storeDps, filteredDps);
+    assert.deepEqual(storeDpsGt, filteredDpsGt);
   });
 
   it('should select a range within chromosome 20', function() {
@@ -82,7 +77,7 @@ describe('RecordStore', function() {
 
     var storeRecords = rs.getState().records;
 
-    expect(storeRecords.length).toEqual(withinRangeRecords.length);
+    assert.equal(storeRecords.length, withinRangeRecords.length);
   });
 
   it('should select a range, filter by NORMAL:AD > 25, and sort by desc position', function() {
@@ -104,8 +99,8 @@ describe('RecordStore', function() {
 
     var storeRecords = rs.getState().records;
 
-    expect(storeRecords.length).toEqual(validatedRecords.length);
-    expect(_.isEqual(storeRecords, validatedRecords)).toEqual(true);
+    assert.equal(storeRecords.length, validatedRecords.length);
+    assert.deepEqual(storeRecords, validatedRecords);
   });
 
   it('should apply a filter, then remove it', function() {
@@ -121,8 +116,8 @@ describe('RecordStore', function() {
                 path: ['ALT'], filterValue: ''});
     var defilteredAlts = getAlts();
 
-    expect(originalAlts.length).toEqual(10);
-    expect(filteredAlts).toEqual(['C']);
-    expect(defilteredAlts.length).toEqual(10);
+    assert.equal(originalAlts.length, 10);
+    assert.deepEqual(filteredAlts, ['C']);
+    assert.equal(defilteredAlts.length, 10);
   });
 });
