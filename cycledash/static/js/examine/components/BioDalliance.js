@@ -69,6 +69,16 @@ var BioDalliance = React.createClass({
   lazilyCreateDalliance: function() {
     if (this.browser) return;
 
+    // Workaround for https://github.com/dasmoth/dalliance/issues/125
+    var uniquelyNamedBlob = (function() {
+      var id = 0;
+      return function(bytes) {
+        var blob = new Blob([bytes]);
+        blob.name = id++;
+        return blob;
+      }
+    })();
+
     var vcfSource = (name, path, bytes) => {
       var source = {
         name: name,
@@ -76,7 +86,7 @@ var BioDalliance = React.createClass({
         payload: 'vcf'
       };
       if (bytes) {
-        source.blob = new Blob([bytes]);
+        source.blob = uniquelyNamedBlob(bytes);
       } else {
         source.uri = this.hdfsUrl(path);
       }
