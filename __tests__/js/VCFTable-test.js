@@ -1,31 +1,16 @@
 /** @jsx React.DOM */
-jest
-    .dontMock('../../cycledash/static/js/examine/components/VCFTable.js')
-    .dontMock('../../cycledash/static/js/examine/vcf.tools.js')
-    .dontMock('./Utils.js')
-    .dontMock('jquery')
-    .dontMock('fs')
-    .dontMock('vcf.js')
-    .dontMock('underscore')
-    ;
+require('./testdom')('<html><body></body></html>');
 
 var vcfTools = require('../../cycledash/static/js/examine/vcf.tools.js'),
     _ = require('underscore'),
     $ = require('jquery'),
     assert = require('assert'),
-    Utils = require('./Utils.js')
-    ;
+    Utils = require('./Utils.js'),
+    React = require('react/addons'),
+    VCFTable = require('../../cycledash/static/js/examine/components/VCFTable.js'),
+    TestUtils = React.addons.TestUtils;
 
 describe('VCFTable', function() {
-  // modules -- must be require'd in beforeEach() or it().
-  var React, TestUtils, VCFTable;
-
-  beforeEach(function() {
-    React = require('react/addons');
-    VCFTable = require('../../cycledash/static/js/examine/components/VCFTable.js');
-    TestUtils = React.addons.TestUtils;
-  });
-
   function makeTestVCFTable(vcfData) {
     var columns = vcfTools.deriveColumns(vcfData);
 
@@ -36,7 +21,7 @@ describe('VCFTable', function() {
                           range={range}
                           header={vcfData.header}
                           columns={columns}
-                          selectedColumns={null}
+                          selectedColumns={[]}
                           selectedRecord={null}
                           chromosomes={['20']}
                           sortBy={[null, 'desc']}
@@ -54,7 +39,7 @@ describe('VCFTable', function() {
 
     var ths = Utils.findInComponent('th.attr', table);
     var attributes = _.map(ths, th => $(th).attr('data-attribute'));
-    expect(attributes).toEqual(
+    assert.deepEqual(attributes,
       ['INFO::DP', 'INFO::SS', 'INFO::SSC', 'INFO::GPV', 'INFO::SPV',
        'NORMAL::GT', 'NORMAL::GQ', 'NORMAL::DP', 'NORMAL::RD', 'NORMAL::AD',
        'NORMAL::FREQ', 'NORMAL::DP4',
@@ -63,11 +48,11 @@ describe('VCFTable', function() {
     ]);
 
     var rows = Utils.findInComponent('tbody tr', table);
-    expect(rows.length).toEqual(10);
+    assert.equal(rows.length, 10);
 
     var positions = _.map(Utils.findInComponent('td.pos', table),
                           td => td.textContent);
-    expect(positions).toEqual([
+    assert.deepEqual(positions, [
       '20::61795',
       '20::62731',
       '20::63799',
@@ -84,7 +69,7 @@ describe('VCFTable', function() {
   it('should render selected rows', function() {
     var vcfData = Utils.loadVcfData('__tests__/js/data/snv.vcf');
     var table = makeTestVCFTable(vcfData);
-    expect(Utils.findInComponent('tr.selected', table)).toEqual([]);
+    assert.deepEqual(Utils.findInComponent('tr.selected', table), []);
 
     function selectedPos() {
       var selectedPos = Utils.findInComponent('tr.selected td.pos', table);
@@ -93,13 +78,13 @@ describe('VCFTable', function() {
     }
 
     table.setProps({selectedRecord: vcfData.records[0]});
-    expect(selectedPos()).toEqual('20::61795');
+    assert.equal(selectedPos(), '20::61795');
 
     table.setProps({selectedRecord: vcfData.records[5]});
-    expect(selectedPos()).toEqual('20::66370');
+    assert.equal(selectedPos(), '20::66370');
 
     table.setProps({selectedRecord: null});
-    expect(Utils.findInComponent('tr.selected', table)).toEqual([]);
+    assert.deepEqual(Utils.findInComponent('tr.selected', table), []);
   });
 
   it('should render selected columns', function() {
@@ -112,15 +97,15 @@ describe('VCFTable', function() {
                    td => $(td).attr('data-attribute'));
     }
 
-    expect(selectedColumns()).toEqual([]);
+    assert.deepEqual(selectedColumns(), []);
 
     table.setProps({selectedColumns: [columns.INFO.DP]});
-    expect(selectedColumns()).toEqual(['INFO::DP']);
+    assert.deepEqual(selectedColumns(), ['INFO::DP']);
 
     table.setProps({selectedColumns: [columns.INFO.DP, columns.NORMAL.AD]});
-    expect(selectedColumns()).toEqual(['INFO::DP', 'NORMAL::AD']);
+    assert.deepEqual(selectedColumns(), ['INFO::DP', 'NORMAL::AD']);
 
     table.setProps({selectedColumns: []});
-    expect(selectedColumns()).toEqual([]);
+    assert.deepEqual(selectedColumns(), []);
   });
 });
