@@ -1,9 +1,9 @@
 // Via http://www.asbjornenge.com/wwc/testing_react_components.html
 module.exports = function(markup) {
   if (typeof document !== 'undefined') return;
-  var jsdom = require("jsdom").jsdom;
+  var jsdom = require('jsdom').jsdom;
   global.document = jsdom(markup || '');
-  global.window = document.createWindow();
+  global.window = document.parentWindow;
   global.navigator = {
     userAgent: 'node.js'
   };
