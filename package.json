@@ -24,6 +24,7 @@
     "mocha": "^2.0.1",
     "react-tools": "^0.11.1",
     "reactify": "^0.14.0",
+    "sinon": "^1.11.1",
     "uglifyify": "^2.5.0",
     "vinyl-source-stream": "^1.0.0",
     "watchify": "^1.0.2"
