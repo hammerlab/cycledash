@@ -1,4 +1,8 @@
-// Source: https://github.com/Khan/react-components/blob/master/test/compiler.js
+// Based on github.com/Khan/react-components/blob/master/test/compiler.js
+//
+// If globals.reactModulesToStub is defined, it should be an array of paths to
+// modules which you'd like to replace with single, empty React components. Any
+// path suffix will do.
 var fs = require('fs');
 var ReactTools = require('react-tools');
 
