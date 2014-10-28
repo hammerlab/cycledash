@@ -2,7 +2,8 @@
 "use strict";
 
 var React = require('react'),
-    $ = require('jquery');
+    $ = require('jquery'),
+    _ = require('underscore');
 
 require('jquery-mousewheel')($);
 

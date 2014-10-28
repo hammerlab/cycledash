@@ -5,7 +5,7 @@ var _ = require('underscore'),
     d3 = require('d3/d3'),
     React = require('react'),
     utils = require('../utils');
-var d3BarChart = require('./d3.bar-chart');
+var d3BarChart = require('./d3.bar-chart')(d3);
 
 
 /**

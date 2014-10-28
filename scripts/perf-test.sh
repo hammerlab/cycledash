@@ -9,4 +9,5 @@ fi
 export RUN_VCF=$1
 export TRUTH_VCF=$2
 
-jest __tests__/js/ExaminePage-perf.js
+#mocha --compilers .:__tests__/js/preprocessor.js __tests__/js/ExaminePage-perf.js --debug-brk --ui bdd -g 'ExaminePage'
+mocha --compilers .:__tests__/js/preprocessor.js __tests__/js/ExaminePage-perf.js
