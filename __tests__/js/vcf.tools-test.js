@@ -1,16 +1,10 @@
 /** @jsx */
-jest
-    .dontMock('fs')
-    .dontMock('vcf.js')
-    .dontMock('../../cycledash/static/js/examine/vcf.tools.js')
-    .dontMock('underscore')
-    .dontMock('./Utils.js');
+require('./testdom')('<html><body></body></html>');
 
 var assert = require('assert'),
     vcfTools = require('../../cycledash/static/js/examine/vcf.tools.js'),
     _ = require('underscore'),
-    Utils = require('./Utils.js')
-    ;
+    Utils = require('./Utils.js');
 
 var svs = [{__KEY__: '1', POS: 0, INFO: { END: 100}},
            {__KEY__: '2', POS: 100, INFO: { END: 200}},
@@ -55,13 +49,13 @@ describe('VCF.tools', function() {
       var columns = vcfTools.deriveColumns(vcfData);
 
       // The full object is quite large. We assert specific aspects for brevity.
-      expect(_.keys(columns)).toEqual(['INFO', 'NORMAL', 'TUMOR']);
-      expect(_.keys(columns.INFO)).toEqual(['DP', 'SS', 'SSC', 'GPV', 'SPV']);
-      expect(_.keys(columns.NORMAL)).toEqual(
+      assert.deepEqual(_.keys(columns), ['INFO', 'NORMAL', 'TUMOR']);
+      assert.deepEqual(_.keys(columns.INFO), ['DP', 'SS', 'SSC', 'GPV', 'SPV']);
+      assert.deepEqual(_.keys(columns.NORMAL),
           ['GT', 'GQ', 'DP', 'RD', 'AD', 'FREQ', 'DP4']);
-      expect(_.keys(columns.NORMAL)).toEqual(_.keys(columns.TUMOR));
+      assert.deepEqual(_.keys(columns.NORMAL), _.keys(columns.TUMOR));
 
-      expect(columns.INFO.DP).toEqual({
+      assert.deepEqual(columns.INFO.DP, {
           name: 'DP',
           path: [ 'INFO', 'DP' ],
           info: {
@@ -72,7 +66,7 @@ describe('VCF.tools', function() {
           }
         });
 
-      expect(columns.NORMAL.AD).toEqual({
+      assert.deepEqual(columns.NORMAL.AD, {
           name: 'AD',
           path: [ 'NORMAL', 'AD' ],
           info: {

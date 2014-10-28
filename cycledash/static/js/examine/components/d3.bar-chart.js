@@ -1,10 +1,5 @@
 "use strict";
-
-// Check for the existence (or require) d3.js, which is required.
-if (d3 === 'undefined') {
-  throw "d3.js must be required/included before d3.bar-chart.";
-}
-
+module.exports = function(d3) {
 
 function uniq(list) {
   return list.reduce(function(a,v){
@@ -457,4 +452,5 @@ function d3_bars() {
   return chart;
 }
 
-module.exports = d3_bars;
+return d3_bars;
+};
