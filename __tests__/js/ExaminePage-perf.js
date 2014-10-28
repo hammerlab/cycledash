@@ -47,12 +47,6 @@ class Timer {
 
 describe('ExaminePage', function() {
 
-  // modules -- must be require'd in beforeEach() or it().
-  // var React, TestUtils, ExaminePage, $, RecordStore, RecordActions, Dispatcher;
-
-  beforeEach(function() {
-  });
-
   it('should perform reasonably', function() {
      // We prefer to parse the VCFs ourselves to get more fine-grained timing
      // data. To make this work, we intercept both the ExaminePage XHR and the
