@@ -6,7 +6,6 @@ against and posts the f1score, recall, and precision scores to CycleDash.
 import uuid
 
 import json
-import pysam
 import requests
 import vcf
 
@@ -21,6 +20,7 @@ def score(run_id, hdfs_vcf_path, hdfs_truth_vcf_path):
     """
     submit_url = RUNS_URL.format(CYCLEDASH_PORT, run_id)
     try:
+        import pysam
         submission_path = hdfsToLocalPath(hdfs_vcf_path)
         truth_path = hdfsToLocalPath(hdfs_truth_vcf_path)
         pysam.tabix_index(truth_path, preset='vcf') # Required for DREAM evaluator.
