@@ -6,11 +6,8 @@ against and posts the f1score, recall, and precision scores to CycleDash.
 import uuid
 
 import json
-import pysam
 import requests
-import vcf
 
-import workers.scripts.dream_evaluator as dream
 from workers.shared import hdfsToLocalPath, worker, CYCLEDASH_PORT, RUNS_URL
 
 
@@ -19,6 +16,8 @@ def score(run_id, hdfs_vcf_path, hdfs_truth_vcf_path):
     """Run the DREAM evaluator on a VCF and its Truth on HDFS, PUT the
     result to CycleDash.
     """
+    import pysam
+    import workers.scripts.dream_evaluator as dream
     submit_url = RUNS_URL.format(CYCLEDASH_PORT, run_id)
     try:
         submission_path = hdfsToLocalPath(hdfs_vcf_path)
