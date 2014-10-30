@@ -7,9 +7,7 @@ import uuid
 
 import json
 import requests
-import vcf
 
-import workers.scripts.concordance_counter
 from workers.shared import (hdfsToLocalPath, worker, CYCLEDASH_PORT, RUNS_URL,
                             CONCORDANCE_URL)
 
@@ -23,6 +21,7 @@ def concordance(run_ids_key):
     vcfs = {}
     truth_vcfs = set()
     try:
+        import workers.scripts.concordance_counter
         run_ids = (int(run_id) for run_id in run_ids_key.split(','))
         for run_id in run_ids:
             run_json = requests.get(RUNS_URL.format(CYCLEDASH_PORT, run_id)).text
