@@ -88,6 +88,7 @@ th.uber-column:last-child {
 }
 .vcf-table .tooltip {
     display: none;
+    word-wrap: break-word;
     border-radius: 3px;
     position: absolute;
     top: 110%;
