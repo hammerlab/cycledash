@@ -38,16 +38,19 @@ var AttributeChart = React.createClass({
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
   },
   TOTAL_BINS: 10,
+  isIntegerType: function() {
+    var typeString = utils.getIn(this.props.column, ["info", "Type"]);
+    return typeString === "Integer";
+  },
   binRecords: function(records) {
     var path = this.props.column.path;
-    var typeString = utils.getIn(this.props.column, ["info", "Type"]);
     var values = records.map(function(record) { return utils.getIn(record, path); });
     var binScale = d3.scale.ordinal().domain(d3.range(this.TOTAL_BINS + 1))
       .rangePoints([d3.min(values), d3.max(values)]);
     var binRange = binScale.range();
 
     // Make integer-bounded bins for integer fields by rounding the edges
-    if (typeString === "Integer") {
+    if (this.isIntegerType()) {
       binRange = binRange.map(bin => isNaN(bin) ? 0 : Math.round(bin));
     }
 
@@ -55,9 +58,10 @@ var AttributeChart = React.createClass({
     return bins.map(bin => ({count: bin.length, bin: bin.x}));
   },
   renderHistogram: function(records) {
+    var formatString = this.isIntegerType() ? 'd' : '.1f';
     var datum = this.binRecords(records),
         barChart = d3BarChart()
-           .xTickFormatter(d3.format('.1f'))
+           .xTickFormatter(d3.format(formatString))
            .width(450).height(250).margin({top:0, bottom:30, right:0, left: 50})
            .yLabel('Count')
            .intraGroupPadding(0.033)
