@@ -48,7 +48,7 @@ var AttributeChart = React.createClass({
 
     // Make integer-bounded bins for integer fields by rounding the edges
     if (typeString === "Integer") {
-      binRange = binRange.map(bin => Math.round(bin));
+      binRange = binRange.map(bin => isNaN(bin) ? 0 : Math.round(bin));
     }
 
     var bins = d3.layout.histogram().bins(binRange)(values);
