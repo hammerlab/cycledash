@@ -49,6 +49,7 @@ th#range input:disabled {
 th {
     font-size: 19px;
     position: relative;
+    white-space: nowrap;
 }
 th.arrow, td.arrow {
     width: 20px;
@@ -69,9 +70,6 @@ th.ref, td.ref {
 th.alt, td.alt {
     padding-left: 0;
     text-align: left;
-}
-th.attr {
-    white-space: nowrap;
 }
 th.attr > span.chartable {
     cursor: pointer;
