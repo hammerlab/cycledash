@@ -294,10 +294,15 @@ function filtersToPredicates(filters) {
         path = filter.path;
     return record => {
       var val = utils.getIn(record, path);
-      if (_.contains(['<', '>'], filterVal[0])) {  // then do a numeric test
+      if (_.contains(['<', '>', '='], filterVal[0])) {  // then do a numeric test
         val = Number(val);
-        if (filterVal[0] === '>') return val > Number(filterVal.slice(1));
-        else return val < Number(filterVal.slice(1));
+        if (filterVal[0] === '>') {
+          return val > Number(filterVal.slice(1));
+        } else if (filterVal[0] === '>') {
+          return val < Number(filterVal.slice(1));
+        } else if (filterVal[0] === '=') {
+          return val == Number(filterVal.slice(1));
+        }
       } else {  // treat it like a regexp
         var re = new RegExp(filterVal);
         return re.test(String(val));
