@@ -40,8 +40,19 @@ var AttributeChart = React.createClass({
   TOTAL_BINS: 10,
   binRecords: function(records) {
     var path = this.props.column.path,
-        values = records.map(function(record) { return utils.getIn(record, path); }),
-        bins = d3.layout.histogram().bins(this.TOTAL_BINS)(values);
+      col = this.props.column;
+    var typeString = utils.getIn(col, ["info", "Type"]);
+    var values = records.map(function(record) { return utils.getIn(record, path); });
+    var binScale = d3.scale.ordinal().domain(d3.range(this.TOTAL_BINS + 1))
+      .rangePoints([d3.min(values), d3.max(values)]);
+    var binRange = binScale.range();
+
+    // Make integer-bounded bins for integer fields
+    if (typeString === "Integer") {
+      binRange = binRange.map(bin => parseInt(bin));
+    }
+
+    var bins = d3.layout.histogram().bins(binRange)(values);
     return bins.map(bin => ({count: bin.length, bin: bin.x}));
   },
   renderHistogram: function(records) {
