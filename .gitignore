@@ -16,3 +16,4 @@ cycledash/static/lib/reactify/
 cycledash/static/lib/watchify/
 test/tests.bundled.js
 cycledash/static/dalliance/
+coverage.html
