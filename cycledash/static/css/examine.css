@@ -49,6 +49,7 @@ th#range input:disabled {
 th {
     font-size: 19px;
     position: relative;
+    white-space: nowrap;
 }
 th.arrow, td.arrow {
     width: 20px;
