@@ -6,3 +6,4 @@ set -o errexit
 nosetests
 
 npm test
+./scripts/travis-coverage.sh
