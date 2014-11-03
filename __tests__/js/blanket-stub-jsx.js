@@ -16,21 +16,15 @@ module.exports = function(blanket) {
       return origJs(localModule, filename);
     }
 
-    if (transformer.shouldStub(filename)) {
-      return transformer.transform(localModule, filename);
-    }
-
     // React-ify as necessary.
-    var content;
-    content = fs.readFileSync(filename, 'utf8');
-    if (content.indexOf('@jsx') > 0) {
-      content = ReactTools.transform(content, {harmony: true});
-    }
+    var content = transformer.transform(filename) ||
+        fs.readFileSync(filename, 'utf8');
 
-    // Don't instrument code unless it passes the filter.
+    // Don't instrument code unless it passes the filter & is non-stubby.
     var pattern = blanket.options('filter');
     var normalizedFilename = blanket.normalizeBackslashes(filename);
-    if (!blanket.matchPattern(normalizedFilename, pattern)) {
+    if (transformer.shouldStub(filename) ||
+        !blanket.matchPattern(normalizedFilename, pattern)) {
       return localModule._compile(content, normalizedFilename);
     }
 

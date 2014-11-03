@@ -11,6 +11,7 @@ var reactStub = 'module.exports = require("react").createClass({render:function(
 
 var origJs;
 
+// Should this file be stubbed out for testing?
 function shouldStub(filename) {
   if (!global.reactModulesToStub) return false;
 
@@ -23,28 +24,39 @@ function shouldStub(filename) {
   return false;
 }
 
-function transform(module, filename) {
+// Returns transformed JS if transformation was necessary, otherwise null.
+function transform(filename) {
   if (shouldStub(filename)) {
-    return module._compile(reactStub, filename);
+    return reactStub;
   }
 
-  var content;
-  content = fs.readFileSync(filename, 'utf8');
+  var content = fs.readFileSync(filename, 'utf8');
   if (content.indexOf('@jsx') > 0) {
-    var compiled = ReactTools.transform(content, {harmony: true});
-    return module._compile(compiled, filename);
+    return ReactTools.transform(content, {harmony: true});
+  } else {
+    return null;
+  }
+}
+
+// Implements the node.js "compiler" API
+function compile(module, filename) {
+  var transformedJs = transform(filename);
+  if (transformedJs) {
+    return module._compile(transformedJs, filename);
   } else {
     return (origJs || require.extensions['.js'])(module, filename);
   }
 }
 
+// Install the JSX+Stub compiler for JS files.
 function install() {
   origJs = require.extensions['.js'];
-  require.extensions['.js'] = transform;
+  require.extensions['.js'] = compile;
 }
 
 module.exports = {
   shouldStub: shouldStub,
   transform: transform,
+  compile: compile,
   install: install
 };
