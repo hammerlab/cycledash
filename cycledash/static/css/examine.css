@@ -70,6 +70,9 @@ th.alt, td.alt {
     padding-left: 0;
     text-align: left;
 }
+th.attr {
+    white-space: nowrap;
+}
 th.attr > span.chartable {
     cursor: pointer;
     border-bottom: 1px dashed #333;
