@@ -40,6 +40,20 @@ describe('RecordStore', function() {
     assert.notDeepEqual(storeDps, originalDps);
   });
 
+  it('should filter to DP = 53', function() {
+    var rs = getFreshRecordStore();
+
+    var filteredDps = _.filter(_.pluck(_.pluck(
+      rs.getState().records, 'INFO'), 'DP'), dp => dp == 53);
+
+    rs.receiver({actionType: ACTION_TYPES.UPDATE_FILTER,
+                 path: ['INFO', 'DP'], filterValue: '=53'});
+
+    var storeDps = _.pluck(_.pluck(rs.getState().records, 'INFO'), 'DP');
+
+    assert.deepEqual(storeDps, filteredDps);
+  });
+
   it('should filter to DP > 55 and then NORMAL:GT = 1/1', function() {
     var rs = getFreshRecordStore();
 
