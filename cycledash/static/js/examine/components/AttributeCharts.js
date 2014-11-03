@@ -39,9 +39,8 @@ var AttributeChart = React.createClass({
   },
   TOTAL_BINS: 10,
   binRecords: function(records) {
-    var path = this.props.column.path,
-      col = this.props.column;
-    var typeString = utils.getIn(col, ["info", "Type"]);
+    var path = this.props.column.path;
+    var typeString = utils.getIn(this.props.column, ["info", "Type"]);
     var values = records.map(function(record) { return utils.getIn(record, path); });
     var binScale = d3.scale.ordinal().domain(d3.range(this.TOTAL_BINS + 1))
       .rangePoints([d3.min(values), d3.max(values)]);
