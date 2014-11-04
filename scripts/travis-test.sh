@@ -3,6 +3,6 @@
 set -o errexit
 
 . ./ENV.sh
-nosetests
+nosetests --where=__tests__/python
 
 npm test

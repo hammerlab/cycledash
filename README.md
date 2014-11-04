@@ -130,7 +130,7 @@ CycleDash uses [nosetests](https://nose.readthedocs.org/en/latest/) for Python t
 To run tests:
 
 ```
-nosetests   # Run Python tests
+nosetests --where=__tests__/python   # Run Python tests
 npm test   # Run JS tests
 ```
 
