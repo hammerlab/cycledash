@@ -20,4 +20,15 @@ function juxt(fns) {
   return o => _.map(fns, fn => fn(o));
 }
 
-module.exports = { getIn, juxt };
+/**
+ * Given a path and records, get all non-null/undefined/NaN values at that path.
+ */
+function recordValues(records, path) {
+  return records.map(function(record) {
+    return getIn(record, path);
+  }).filter(function(record) {
+    return !(_.isNull(record) || _.isUndefined(record) || _.isNaN(record));
+  });
+}
+
+module.exports = { getIn, juxt, recordValues };
