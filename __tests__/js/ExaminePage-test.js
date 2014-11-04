@@ -1,14 +1,5 @@
 /** @jsx React.DOM */
-/**
- * Performance test for ExaminePage.
- *
- * You probably want to run this via the scripts/perf-test.sh script.
- *
- * This loads two VCF files (specified in environment variables), renders an
- * ExaminePage and then selects two records, one after the other.
- *
- * TODO: do some sorting and filtering.
- */
+// TODO: do some sorting and filtering.
 
 require('./testdom')('<html><body></body></html>');
 var React = require('react/addons'),
@@ -30,21 +21,6 @@ var ExaminePage = require('../../cycledash/static/js/examine/components/ExamineP
     Utils = require('./Utils'),
     $ = require('jquery'),
     vcf = require('vcf.js');
-
-
-class Timer {
-  constructor() {
-    console.log('Starting timer...');
-    this.startMs = Date.now();
-    this.lastTickMs = this.startMs;
-  }
-
-  tick(msg) {
-    var tickMs = Date.now();
-    console.log((tickMs - this.startMs) + 'ms, ' + (tickMs - this.lastTickMs) + 'ms lap: ' + msg);
-    this.lastTickMs = tickMs;
-  }
-}
 
 
 describe('ExaminePage', function() {
@@ -73,15 +49,9 @@ describe('ExaminePage', function() {
     // it's a performance test) or via Mocha (in which case it's a unit test).
     var env = require('process').env;
     var testDataFile = '__tests__/js/data/snv.vcf'
-    var runVcfPath = env.RUN_VCF || testDataFile;
-    var truthVcfPath = env.TRUTH_VCF || testDataFile;
-    var isUnitTest = runVcfPath == testDataFile && truthVcfPath == testDataFile;
 
-    var timer = new Timer();
-    runVcf = parseVcf(fs.readFileSync(runVcfPath, {encoding:'utf8'}));
-    timer.tick('Parsed run VCF');
-    truthVcf = parseVcf(fs.readFileSync(truthVcfPath, {encoding:'utf8'}));
-    timer.tick('Parsed truth VCF');
+    runVcf = parseVcf(fs.readFileSync(testDataFile, {encoding:'utf8'}));
+    truthVcf = parseVcf(fs.readFileSync(testDataFile, {encoding:'utf8'}));
 
     var vcfPath = "/run";
     var truthVcfPath = "/truth";
@@ -96,7 +66,6 @@ describe('ExaminePage', function() {
                    truthVcfPath={truthVcfPath}
                    normalBamPath="" tumorBamPath=""
                    igvHttpfsUrl="" karyogramData="" />);
-    timer.tick('Constructed <ExaminePage/>');
 
     function selectedPos() {
       var selectedPos =
@@ -104,14 +73,12 @@ describe('ExaminePage', function() {
       assert.ok(selectedPos.length <= 1);
       return selectedPos.length == 1 ? selectedPos[0].textContent : null;
     }
-    if (isUnitTest) assert.equal(null, selectedPos());
+    assert.equal(null, selectedPos());
 
     examine.setState({selectedRecord: examine.state.records[0]});
-    timer.tick('Selected first record');
-    if (isUnitTest) assert.equal('20::61795', selectedPos());
+    assert.equal('20::61795', selectedPos());
 
     examine.setState({selectedRecord: examine.state.records[9]});
-    timer.tick('Selected 9th record');
-    if (isUnitTest) assert.equal('20::75254', selectedPos());
+    assert.equal('20::75254', selectedPos());
   });
 });
