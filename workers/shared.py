@@ -1,8 +1,9 @@
 import os
-import requests
+import urlparse
 import uuid
 
 import celery
+import config
 import pywebhdfs.webhdfs
 import pywebhdfs.errors
 
@@ -10,9 +11,8 @@ import pywebhdfs.errors
 CELERY_BACKEND = os.environ.get('CELERY_BACKEND')
 CELERY_BROKER = os.environ.get('CELERY_BROKER')
 
-WEBHDFS_HOST = 'demeter.hpc.mssm.edu'
-WEBHDFS_PORT = 14000
-WEBHDFS_USER = 'cycledash'
+WEBHDFS_HOST, WEBHDFS_PORT = (
+        urlparse.urlparse(config.WEBHDFS_URL).netloc.split(':'))
 
 CYCLEDASH_PORT = os.environ.get('PORT')
 RUNS_URL = 'http://localhost:{}/runs/{}'
@@ -23,7 +23,7 @@ worker = celery.Celery(broker=CELERY_BROKER, backend=CELERY_BACKEND)
 
 def _getHdfsClient():
     return pywebhdfs.webhdfs.PyWebHdfsClient(
-            host=WEBHDFS_HOST, port=WEBHDFS_PORT, user_name=WEBHDFS_USER)
+            host=WEBHDFS_HOST, port=WEBHDFS_PORT, user_name=config.WEBHDFS_USER)
 
 
 def getContentsFromHdfs(hdfs_path):
