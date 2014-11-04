@@ -44,17 +44,17 @@ var AttributeChart = React.createClass({
   },
   binRecords: function(records) {
     var path = this.props.column.path;
-    var values = records.map(function(record) { return utils.getIn(record, path); });
-    var binScale = d3.scale.ordinal().domain(d3.range(this.TOTAL_BINS + 1))
-      .rangePoints([d3.min(values), d3.max(values)]);
-    var binRange = binScale.range();
+    var values = records.map(function(record) {
+      return utils.getIn(record, path);
+    });
 
-    // Make integer-bounded bins for integer fields by rounding the edges
-    if (this.isIntegerType()) {
-      binRange = binRange.map(bin => isNaN(bin) ? 0 : Math.round(bin));
-    }
+    var binScale = d3.scale.linear().domain([d3.min(values), d3.max(values)])
 
-    var bins = d3.layout.histogram().bins(binRange)(values);
+    // Nice extends the domain to round-number edges, while ticks splits
+    // the domain into round-number divisions.
+    var ticks = binScale.nice().ticks(this.TOTAL_BINS);
+
+    var bins = d3.layout.histogram().bins(ticks)(values);
     return bins.map(bin => ({count: bin.length, bin: bin.x}));
   },
   renderHistogram: function(records) {
