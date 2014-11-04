@@ -7,14 +7,28 @@ var _ = require('underscore'),
     $ = require('jquery'),
     sinon = require('sinon'),
     RecordStore = require('../../cycledash/static/js/examine/RecordStore.js');
+    ExamineUtils = require('../../cycledash/static/js/examine/utils.js');
     assert = require('assert');
 
 var TEST_VCF_PATH = '__tests__/js/data/snv.vcf';
-sinon.stub($, 'get', Utils.fakeGet(TEST_VCF_PATH));
 
 describe('RecordStore', function() {
+  before(function() {
+    sinon.stub($, 'get', Utils.fakeGet(TEST_VCF_PATH));
+  });
+  after(function() {
+    $.get.restore();
+  });
+
   function getFreshRecordStore() {
     return RecordStore('/vcf/snv.vcf', '/vcf/snv.vcf');
+  }
+
+  function getValues(recordStore, ...path) {
+    return recordStore.getState().records.map(r => ExamineUtils.getIn(r, path));
+  }
+  function getPositions(recordStore) {
+    return recordStore.getState().records.map(r => r.CHROM + '::' + r.POS);
   }
 
   it('should load VCF records', function() {
@@ -27,14 +41,14 @@ describe('RecordStore', function() {
   it('should sort records by INFO:DP', function() {
     var rs = getFreshRecordStore();
 
-    var originalDps = _.pluck(_.pluck(rs.getState().records, 'INFO'), 'DP'),
-        sortedDps = _.pluck(_.pluck(rs.getState().records, 'INFO'), 'DP');
+    var originalDps = getValues(rs, 'INFO', 'DP'),
+        sortedDps = getValues(rs, 'INFO', 'DP');
     sortedDps.sort((a, b) => a - b);
 
     rs.receiver({actionType: ACTION_TYPES.SORT_BY,
                  path: ['INFO', 'DP'], order:'asc'});
 
-    var storeDps = _.pluck(_.pluck(rs.getState().records, 'INFO'), 'DP');
+    var storeDps = getValues(rs, 'INFO', 'DP');
 
     assert.deepEqual(storeDps, sortedDps);
     assert.notDeepEqual(storeDps, originalDps);
@@ -56,51 +70,27 @@ describe('RecordStore', function() {
 
   it('should filter to DP > 55 and then NORMAL:GT = 1/1', function() {
     var rs = getFreshRecordStore();
-
-    var filteredDps = _.filter(_.pluck(_.pluck(
-      rs.getState().records, 'INFO'), 'DP'), dp => dp > 55);
-
-    var filteredDpsGt = _.filter(rs.getState().records, record => {
-      return record.INFO.DP > 55 && record.NORMAL.GT == '1/1';
-    });
-    filteredDpsGt = _.map(filteredDpsGt, record => record.NORMAL.GT);
-
     rs.receiver({actionType: ACTION_TYPES.UPDATE_FILTER,
                  path: ['INFO', 'DP'], filterValue: '>55'});
 
-    var storeDps = _.pluck(_.pluck(rs.getState().records, 'INFO'), 'DP');
+    var storeDps = getValues(rs, 'INFO', 'DP');
+    assert.deepEqual(storeDps, [81, 68, 72, 66, 64, 74]);
 
     rs.receiver({actionType: ACTION_TYPES.UPDATE_FILTER,
                  path: ['NORMAL', 'GT'], filterValue: '1/1'});
-
-    var storeDpsGt = _.pluck(_.pluck(rs.getState().records, 'NORMAL'), 'GT');
-
-    assert.deepEqual(storeDps, filteredDps);
-    assert.deepEqual(storeDpsGt, filteredDpsGt);
+    assert.deepEqual(getPositions(rs), ['20::66370', '20::68749']);
   });
 
   it('should select a range within chromosome 20', function() {
     var rs = getFreshRecordStore();
-
-    var withinRangeRecords = _.filter(rs.getState().records, record => {
-      return record.POS >= 66370;
-    });
-
     rs.receiver({actionType: ACTION_TYPES.SELECT_RECORD_RANGE,
                  chromosome: '20', start: 66370, end: null});
-
-    var storeRecords = rs.getState().records;
-
-    assert.equal(storeRecords.length, withinRangeRecords.length);
+    assert.deepEqual(getPositions(rs),
+        ['20::66370', '20::68749', '20::69094', '20::69408', '20::75254']);
   });
 
   it('should select a range, filter by NORMAL:AD > 25, and sort by desc position', function() {
     var rs = getFreshRecordStore();
-
-    var validatedRecords = _.filter(rs.getState().records, record => {
-      return record.POS < 70000 && record.NORMAL.AD > 25;
-    });
-    validatedRecords = validatedRecords.sort((a, b) => b.POS - a.POS);
 
     rs.receiver({actionType: ACTION_TYPES.SORT_BY,
                  path: null, order:'desc'});
@@ -111,10 +101,8 @@ describe('RecordStore', function() {
     rs.receiver({actionType: ACTION_TYPES.SELECT_RECORD_RANGE,
                  chromosome: '20', start: 0, end: 70000});
 
-    var storeRecords = rs.getState().records;
-
-    assert.equal(storeRecords.length, validatedRecords.length);
-    assert.deepEqual(storeRecords, validatedRecords);
+    assert.deepEqual(getPositions(rs),
+        ['20::66370', '20::65900']);
   });
 
   it('should apply a filter, then remove it', function() {
