@@ -3,7 +3,8 @@ import requests
 import uuid
 
 import celery
-import pywebhdfs
+import pywebhdfs.webhdfs
+import pywebhdfs.errors
 
 
 CELERY_BACKEND = os.environ.get('CELERY_BACKEND')
@@ -39,7 +40,7 @@ def doesHdfsFileExist(hdfs_path):
     """Determine whether a file exists on HDFS. Shouldn't have leading '/'."""
     hdfs = _getHdfsClient()
     try:
-        stat = hdfs.get_file_dir_status(path)
+        stat = hdfs.get_file_dir_status(hdfs_path)
     except pywebhdfs.errors.FileNotFound:
         return False
     else:

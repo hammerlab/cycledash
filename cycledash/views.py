@@ -17,7 +17,7 @@ from cycledash.validations import (UpdateRunSchema, CreateRunSchema,
 
 import workers.concordance
 import workers.scorer
-import workers.bai_indexer
+import workers.indexer
 
 
 WEBHDFS_ENDPOINT = app.config['WEBHDFS_URL'] + '/webhdfs/v1/'
@@ -48,7 +48,7 @@ def start_workers_for_run(run):
     if run.truth_vcf_path:
         workers.scorer.score.delay(run.id, run.vcf_path, run.truth_vcf_path)
     def index_bai(bam_path):
-        workers.bai_indexer.index.delay(bam_path[1:])
+        workers.indexer.index.delay(bam_path[1:])
     index_bai(run.normal_path)
     index_bai(run.tumor_path)
 

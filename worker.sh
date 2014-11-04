@@ -6,6 +6,6 @@ source ./ENV.sh
 
 celery --loglevel=info \
     -A workers.shared \
-    -I workers.concordance,workers.scorer,workers.bai_indexer \
+    -I workers.concordance,workers.scorer,workers.indexer \
     worker \
     -n worker.$1
