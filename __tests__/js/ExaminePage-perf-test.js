@@ -76,7 +76,6 @@ describe('ExaminePage', function() {
     var runVcfPath = env.RUN_VCF || testDataFile;
     var truthVcfPath = env.TRUTH_VCF || testDataFile;
     var isUnitTest = runVcfPath == testDataFile && truthVcfPath == testDataFile;
-    console.log('isUnitTest', isUnitTest);
 
     var timer = new Timer();
     runVcf = parseVcf(fs.readFileSync(runVcfPath, {encoding:'utf8'}));
