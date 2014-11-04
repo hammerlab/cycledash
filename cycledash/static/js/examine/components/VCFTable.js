@@ -162,8 +162,11 @@ var ColumnHeader = React.createClass({
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
   },
   isChartable: function() {
-    var values = utils.recordValues(this.props.records, this.props.column.path);
-    return (!_.isEmpty(values) &&
+    var hasValues = _.some(this.props.records, record =>
+      _.isFinite(utils.getIn(record, this.props.column.path))
+    );
+
+    return (hasValues &&
             _.contains(['Integer', 'Float'], this.props.info['Type']));
   },
   render: function() {
