@@ -38,16 +38,37 @@ var AttributeChart = React.createClass({
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
   },
   TOTAL_BINS: 10,
+  isIntegerType: function() {
+    var typeString = utils.getIn(this.props.column, ["info", "Type"]);
+    return typeString === "Integer";
+  },
+  recordValues: function(records, path) {
+    var values = [];
+    _.each(records, function(record) {
+      var value = utils.getIn(record, path);
+      if (_.isFinite(value)) {
+        values.push(value);
+      }
+    });
+
+    return values;
+  },
   binRecords: function(records) {
-    var path = this.props.column.path,
-        values = records.map(function(record) { return utils.getIn(record, path); }),
-        bins = d3.layout.histogram().bins(this.TOTAL_BINS)(values);
+    var values = this.recordValues(records, this.props.column.path);
+    var binScale = d3.scale.linear().domain([d3.min(values), d3.max(values)]);
+
+    // Nice extends the domain to round-number edges, while ticks splits
+    // the domain into round-number divisions.
+    var ticks = binScale.nice().ticks(this.TOTAL_BINS);
+
+    var bins = d3.layout.histogram().bins(ticks)(values);
     return bins.map(bin => ({count: bin.length, bin: bin.x}));
   },
   renderHistogram: function(records) {
+    var formatString = this.isIntegerType() ? 'd' : '.1f';
     var datum = this.binRecords(records),
         barChart = d3BarChart()
-           .xTickFormatter(d3.format('.1f'))
+           .xTickFormatter(d3.format(formatString))
            .width(450).height(250).margin({top:0, bottom:30, right:0, left: 50})
            .yLabel('Count')
            .intraGroupPadding(0.033)
