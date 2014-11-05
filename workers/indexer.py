@@ -5,6 +5,7 @@ file already available, it will generate one and put it on HDFS.
 """
 
 import json
+
 import bai_indexer
 from StringIO import StringIO
 
