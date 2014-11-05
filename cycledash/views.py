@@ -17,6 +17,7 @@ from cycledash.validations import (UpdateRunSchema, CreateRunSchema,
 
 import workers.concordance
 import workers.scorer
+import workers.indexer
 
 
 WEBHDFS_ENDPOINT = app.config['WEBHDFS_URL'] + '/webhdfs/v1/'
@@ -43,6 +44,15 @@ def format_doc():
     return Response(plaintext.FORMAT_TEXT, mimetype='text/plain')
 
 
+def start_workers_for_run(run):
+    if run.truth_vcf_path:
+        workers.scorer.score.delay(run.id, run.vcf_path, run.truth_vcf_path)
+    def index_bai(bam_path):
+        workers.indexer.index.delay(bam_path[1:])
+    index_bai(run.normal_path)
+    index_bai(run.tumor_path)
+
+
 @app.route('/runs', methods=['POST', 'GET'])
 def runs():
     if request.method == 'POST':
@@ -54,8 +64,7 @@ def runs():
         run = Run(**data)
         db.session.add(run)
         db.session.commit()
-        if run.truth_vcf_path:
-            workers.scorer.score.delay(run.id, run.vcf_path, run.truth_vcf_path)
+        start_workers_for_run(run)
         return redirect(url_for('runs'))
     elif request.method == 'GET':
         runs = [run.to_camel_dict() for run in Run.query.all()]

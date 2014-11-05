@@ -3,7 +3,7 @@
 set -o errexit
 
 . ./ENV.sh
-nosetests
+nosetests __tests__/python
 
 npm test
 ./scripts/travis-coverage.sh
