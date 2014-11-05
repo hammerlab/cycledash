@@ -55,7 +55,7 @@ var AttributeChart = React.createClass({
   },
   binRecords: function(records) {
     var values = this.recordValues(records, this.props.column.path);
-    var binScale = d3.scale.linear().domain([d3.min(values), d3.max(values)])
+    var binScale = d3.scale.linear().domain([d3.min(values), d3.max(values)]);
 
     // Nice extends the domain to round-number edges, while ticks splits
     // the domain into round-number divisions.
