@@ -8,7 +8,7 @@ from flask import (request, redirect, Response, render_template, jsonify,
                    url_for, abort)
 import requests
 
-from cycledash import app, db, cache
+from cycledash import app, db
 from cycledash.helpers import prepare_request_data, update_object
 from cycledash.models import Run, Concordance
 import cycledash.plaintext as plaintext
@@ -167,7 +167,6 @@ def trends(caller_name):
 # Flask seems to have some trouble dealing with forward-slashes in URLs.
 # (It is added on automatically when requesting a HDFS file).
 @app.route('/vcf/<path:vcf_path>')
-@cache.cached()
 def hdfs_vcf(vcf_path):
     if (app.config['ALLOW_LOCAL_VCFS'] and
         '__tests__/js/data' in vcf_path):
