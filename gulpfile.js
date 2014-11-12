@@ -1,11 +1,12 @@
-var gulp = require('gulp'),
-    livereload = require('gulp-livereload'),
+var _ = require('underscore'),
     browserify = require('browserify'),
-    watchify = require('watchify'),
+    gulp = require('gulp'),
+    livereload = require('gulp-livereload'),
+    peg = require('gulp-peg'),
     reactify = require('reactify'),
-    uglifyify = require('uglifyify'),
     source = require('vinyl-source-stream'),
-    _ = require('underscore');
+    uglifyify = require('uglifyify'),
+    watchify = require('watchify');
 
 
 var PATHS = {
@@ -13,6 +14,7 @@ var PATHS = {
   examineDest: './cycledash/static/js/dist/',  // Where the compiled JS bundle will go.
   examineJs: ['cycledash/static/js/*.js'],  // All of the JS files we want to watch for changes.
   css: ['./cycledash/static/css/*.css'],  // The CSS we want to watch for changes.
+  pegGrammar: './grammars/querylanguage.pegjs',
   polyfills: [
     './node_modules/es5-shim/es5-shim.min.js',
     './node_modules/es5-shim/es5-sham.min.js'
@@ -64,7 +66,7 @@ gulp.task('watch', function() {
 gulp.task('default', ['watch', 'js']);
 
 // Build production resources and copy them into the serving directory.
-gulp.task('prod', ['build', 'dalliance'])
+gulp.task('prod', ['peg', 'build', 'dalliance'])
 
 // Task which builds the production-ready JS.
 // Minified, polyfilled, JSX & ES6, and browserified.
@@ -89,6 +91,12 @@ gulp.task('dalliance', function() {
   gulp.src('./node_modules/dalliance/build/*.js',
            {base: './node_modules/dalliance/build'})
     .pipe(gulp.dest('./cycledash/static/dalliance'));
+});
+
+gulp.task('peg', function() {
+  gulp.src(PATHS.pegGrammar)
+      .pipe(peg().on('error', console.error))
+      .pipe(gulp.dest('./cycledash/static/lib'));
 });
 
 gulp.task('help', function() {
