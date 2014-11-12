@@ -22,6 +22,8 @@ start
 
 ws "whitespace" = [ \t\n\r]*
 and = ws "AND"i ws
+doublequote = '"'
+singlequote = "'"
 
 filters_and_ranges
   = (
@@ -35,13 +37,15 @@ filter_or_range
   / range
 
 filter
-  = k:field ws op:op ws v:value { return {type: 'filter', field: k, value: op+v} }
+  = k:field ws op:op ws v:value { return {type: 'filter', field: k, op: op, value: v} }
 
 field
-  = value
+  = chars:[0-9a-z.]i+ { return chars.join(''); }
 
 value
   = chars:[0-9a-z.]i+ { return chars.join(''); }
+  / doublequote chars:[^"]* doublequote { return chars.join(''); }
+  / singlequote chars:[^']* singlequote { return chars.join(''); }
 
 op
   = "<="
@@ -49,6 +53,8 @@ op
   / ">="
   / ">"
   / "="
+  / "LIKE"i { return "LIKE"; }
+  / "RLIKE"i { return "RLIKE"; }
 
 range "range"
   = contig:contig range:range_range?

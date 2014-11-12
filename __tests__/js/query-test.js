@@ -17,8 +17,9 @@ describe('Query Langauge', function() {
   }
 
   it('should parse simple filters', function() {
-    expectParse('A < 10', {filters:[{value:'<10', column_name:['A']}]});
-    expectParse('B = ABC', {filters:[{value:'=ABC', column_name:['B']}]});
+    expectParse('A < 10', {filters:[{type: '<', value:'10', columnName:['A']}]});
+    expectParse('B = ABC', {filters:[{type: '=', value:'ABC', columnName:['B']}]});
+    expectParse('INFO.DP like "ABC"', {filters:[{type: 'LIKE', value:'ABC', columnName:['INFO', 'DP']}]});
   });
 
   it('should parse ranges', function() {
@@ -29,16 +30,20 @@ describe('Query Langauge', function() {
   });
 
   it('should parse simple order bys', function() {
-    expectParse('ORDER BY A', {sortBy:[{order:'asc', column_name: ['A']}]});
-    expectParse('ORDER BY B DESC', {sortBy:[{order:'desc', column_name: ['B']}]});
-    expectParse('ORDER BY INFO.DP ASC', {sortBy:[{order:'asc', column_name: ['INFO', 'DP']}]});
+    expectParse('ORDER BY A', {sortBy:[{order:'asc', columnName: ['A']}]});
+    expectParse('ORDER BY B DESC', {sortBy:[{order:'desc', columnName: ['B']}]});
+    expectParse('ORDER BY INFO.DP ASC', {sortBy:[{order:'asc', columnName: ['INFO', 'DP']}]});
+  });
+
+  it('should parse quoted filters with spaces', function() {
+    expectParse('A like \'A"" C\'', {filters:[{type: 'LIKE', value:'A"" C', columnName:['A']}]});
   });
 
   it('should parse compound filters', function() {
     expectParse('A < 10 AND B >= ABC', {
       filters: [
-        {value:'<10', column_name:['A']},
-        {value:'>=ABC', column_name:['B']}
+        {type: '<', value:'10', columnName:['A']},
+        {type: '>=', value:'ABC', columnName:['B']}
       ]
     });
   });
@@ -46,7 +51,7 @@ describe('Query Langauge', function() {
   it('should parse compound filters with ranges', function() {
     expectParse('20:1234- AND A < 10', {
       range: {contig:'20', start: '1234'},
-      filters: [{value: '<10', column_name: ['A']}]
+      filters: [{type: '<', value: '10', columnName: ['A']}]
     });
   });
 
@@ -55,10 +60,10 @@ describe('Query Langauge', function() {
                 {
                   range: {contig: 'X', start: '345', end: '4567'},
                   filters: [
-                    {value: '<=10', column_name: ['A']},
-                    {value: '=ABC', column_name: ['B']}
+                    {type: '<=', value: '10', columnName: ['A']},
+                    {type: '=', value: 'ABC', columnName: ['B']}
                   ],
-                  sortBy:[{order:'asc', column_name: ['INFO', 'DP']}]
+                  sortBy:[{order:'asc', columnName: ['INFO', 'DP']}]
                 });
   });
 

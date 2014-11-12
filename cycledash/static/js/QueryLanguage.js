@@ -56,12 +56,21 @@ function parse(query, columnNames) {
     if (!_.contains(columnNames, field)) {
       errors.push({error: 'Unknown field ' + field});
     } else {
-      item['column_name'] = field.split('.');
+      item['columnName'] = field.split('.');
       delete item['field'];
     }
   });
   if (errors.length) {
     return errors[0];
+  }
+
+  // Change `op` to `type`
+  if (filter) {
+    filter.forEach((item) => {
+      var op = item.op;
+      delete item.op;
+      item.type = op;
+    });
   }
 
   // Normalize "sort" fields.
