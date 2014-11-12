@@ -1,0 +1,151 @@
+<!--
+This is a playground for working with CQL query completion.
+
+To use it:
+  gulp peg
+  python -m SimpleHTTPServer
+  open http://localhost:8000/__tests__/playground/typeahead.html
+-->
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+
+<style>
+#input, .twitter-typeahead .tt-query, .twitter-typeahead .tt-hint {
+  padding-left: 30px;
+}
+.typeahead-input {
+  position: relative;
+  font-size: 24px;
+}
+#cql-status {
+  position: absolute;
+  left: 7px;
+  top: 3px;
+  width: 16px;
+  height: 16px;
+  z-index: 1;
+}
+.good {
+  background: green;
+}
+.error {
+  background: red;
+}
+
+.tt-hint {
+  color: gray;
+}
+
+.error-message {
+  min-height: 20px;
+}
+
+#json-output {
+  white-space: pre;
+  font-family: monospace;
+  margin-top: 2em;
+}
+
+/* Styles from http://stackoverflow.com/a/20205623/388951 */
+.tt-query {
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+
+.tt-hint {
+    color: #999
+}
+
+.tt-dropdown-menu {
+    min-width: 422px;
+    margin-top: 12px;
+    padding: 8px 0;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    box-shadow: 0 5px 10px rgba(0,0,0,.2);
+}
+
+.tt-suggestion {
+    padding: 3px 20px;
+    font-size: 18px;
+    line-height: 24px;
+}
+
+.tt-suggestion.tt-cursor {
+    color: #fff;
+    background-color: #0097cf;
+
+}
+
+.tt-suggestion p {
+    margin: 0;
+}
+</style>
+
+<body>
+    <div class="container">
+      <h1>Typeahead CQL demo</h1>
+      <div class="error-message"></div>
+      <div class="typeahead-input">
+        <span id="cql-status"></span>
+        <input type="text" size=50 id="input">
+      </div>
+      <div id="json-output"></div>
+    </div>
+
+<script src="require.js"></script>
+<script src="http://fb.me/JSXTransformer-0.11.2.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.10.4/typeahead.bundle.min.js"></script>
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+
+<script>
+window.compiler = function(contents) {
+  return JSXTransformer.transform(contents, {harmony:true}).code;
+};
+window.requireOverrides = {
+  'underscore': _
+};
+
+var QueryLanguage = require('../../cycledash/static/js/QueryLanguage.js'),
+    QueryCompletion = require('../../cycledash/static/js/QueryCompletion.js');
+
+var columnNames = ['A', 'B', 'INFO.DP'];
+
+var mySource = QueryCompletion.createTypeaheadSource(QueryLanguage.parse, columnNames);
+
+// Indicate whether the query is valid in the UI.
+function checkSyntax(query) {
+  var parsedQuery = QueryLanguage.parse(query, columnNames);
+  if (parsedQuery.error) {
+    $('.error-message').text(parsedQuery.error);
+    $('#cql-status').removeClass('good').addClass('error');
+  } else {
+    $('.error-message').empty();
+    $('#cql-status').removeClass('error').addClass('good');
+    $('#json-output').text(JSON.stringify(parsedQuery, null, '  '));
+  }
+}
+
+$('#input').typeahead({
+        highlight: true,
+        minLength: 0
+      }, {
+        name: 'my-dataset',
+        source: function(q, callback) {
+          checkSyntax(q);
+          mySource(q, callback);
+        }
+      })
+      .on('change', checkSyntax);
+</script>
+
+</body>
