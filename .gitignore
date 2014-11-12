@@ -11,6 +11,7 @@ bundled.js
 .bin
 .bundled.js
 cycledash/static/lib/browserify/
+cycledash/static/lib/querylanguage.js
 cycledash/static/lib/react-tools/
 cycledash/static/lib/reactify/
 cycledash/static/lib/watchify/
