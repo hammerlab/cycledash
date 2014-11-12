@@ -55,5 +55,4 @@ tests:
     config:
       <<: *std-config
       injectJs: |
-        c = document.createEvent('MouseEvent');
         $('[data-attribute="NORMAL::RD"] .tooltip').show();
