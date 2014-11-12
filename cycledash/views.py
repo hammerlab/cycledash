@@ -168,8 +168,7 @@ def trends(caller_name):
 # (It is added on automatically when requesting a HDFS file).
 @app.route('/vcf/<path:vcf_path>')
 def hdfs_vcf(vcf_path):
-    if (app.config['ALLOW_LOCAL_VCFS'] and
-        '__tests__/js/data' in vcf_path):
+    if app.config['ALLOW_LOCAL_VCFS'] and vcf_path.startswith('__tests__/'):
         # we only load test data that we mean to load locally
         vcf_text = open(vcf_path).read()
     else:
