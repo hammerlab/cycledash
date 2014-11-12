@@ -48,3 +48,12 @@ tests:
         c = document.createEvent('MouseEvent');
         c.initMouseEvent('click', true, true, window);
         $('[data-attribute="NORMAL::RD"] .chartable').get(0).dispatchEvent(c);
+
+  - name: examine-tooltip
+    description: Examine page showing a Normal Read Depth tooltip
+    url: http://localhost:5001/runs/4/examine
+    config:
+      <<: *std-config
+      injectJs: |
+        c = document.createEvent('MouseEvent');
+        $('[data-attribute="NORMAL::RD"] .tooltip').show();
