@@ -141,4 +141,15 @@ CycleDash uses dpxdt for perceptual diff testing. To update the reference screen
 dpxdt update __tests__/pdifftests
 ```
 
+To determine whether there are any pixels that have changed before/after, and to
+generate a perceptual diff that will make it clear where the changes are, use
+the following command:
+
+*Note*: you will need to have imagemagick installed for the following command to
+succeed.
+
+```
+dpxdt test __tests__/pdifftests
+```
+
 Running `git status` after this should indicate whether the screenshots have changed.
