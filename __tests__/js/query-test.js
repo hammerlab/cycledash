@@ -5,7 +5,7 @@ var _ = require('underscore'),
     QueryLanguage = require('../../cycledash/static/js/QueryLanguage.js');
 
 
-describe('Query Langauge', function() {
+describe('Query Language', function() {
   var columns = ['A', 'B', 'INFO.DP'];
 
   function expectParse(query, expectedResult) {
@@ -23,7 +23,7 @@ describe('Query Langauge', function() {
   });
 
   it('should parse ranges', function() {
-    expectParse('20', {range: {contig: '20'}});
+    expectParse('20:', {range: {contig: '20'}});
     expectParse('20:1234-', {range: {contig: '20', start: '1234'}});
     expectParse('20:-4,567', {range: {contig: '20', end: '4567'}});
     expectParse('X:345-4,567', {range: {contig: 'X', start: '345', end: '4567'}});
@@ -52,6 +52,29 @@ describe('Query Langauge', function() {
     expectParse('20:1234- AND A < 10', {
       range: {contig:'20', start: '1234'},
       filters: [{type: '<', value: '10', columnName: ['A']}]
+    });
+  });
+
+  it('should parse compound order bys', function() {
+    expectParse('ORDER BY A, B', {
+      sortBy:[{order:'asc', columnName: ['A']},
+              {order:'asc', columnName: ['B']}]
+    });
+
+    expectParse('ORDER BY A DESC, B', {
+      sortBy:[{order:'desc', columnName: ['A']},
+              {order:'asc', columnName: ['B']}]
+    });
+
+    expectParse('ORDER BY A ASC, B ASC', {
+      sortBy:[{order:'asc', columnName: ['A']},
+              {order:'asc', columnName: ['B']}]
+    });
+
+    expectParse('ORDER BY A ASC, B, INFO.DP DESC', {
+      sortBy:[{order:'asc', columnName: ['A']},
+              {order:'asc', columnName: ['B']},
+              {order:'desc', columnName: ['INFO', 'DP']}]
     });
   });
 

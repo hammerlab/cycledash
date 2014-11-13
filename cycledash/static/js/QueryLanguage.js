@@ -29,7 +29,7 @@ function parse(query, columnNames) {
   // Massage this into the JSON format that the backend expects.
 
   // Group by type & remove the type tags.
-  var {filter,range,sort} = _.groupBy(parsedQuery, (info) => {
+  var {filter, range, sort} = _.groupBy(parsedQuery, (info) => {
     var type = info.type;
     delete info.type;
     return type;
@@ -37,6 +37,13 @@ function parse(query, columnNames) {
 
   if (range && range.length > 1) {
     return {error: 'You may only specify one range (got ' + range.length + ')'};
+  }
+  if (sort) {
+    if (sort.length > 1) {
+      throw "Bug in the grammar: should only have one sort.";
+    } else {
+      sort = sort[0];
+    }
   }
 
   // Flatten range structs
@@ -51,7 +58,7 @@ function parse(query, columnNames) {
 
   // Validate fields, converting to column names as we go.
   var errors = [];
-  _.union(filter,sort).forEach((item) => {
+  _.union(filter, sort && sort.fields).forEach((item) => {
     var field = item.field;
     if (!_.contains(columnNames, field)) {
       errors.push({error: 'Unknown field ' + field});
@@ -75,10 +82,11 @@ function parse(query, columnNames) {
 
   // Normalize "sort" fields.
   if (sort) {
-    sort.forEach((o) => {
+    sort.fields.forEach((o) => {
       if (!o.order) o.order = 'asc';
       o.order = o.order.toLowerCase();
     });
+    sort = sort.fields;
   }
 
   return dropFalsyValues({filters: filter, sortBy: sort, range: range});

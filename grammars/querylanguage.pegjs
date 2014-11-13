@@ -4,13 +4,13 @@
  * Sample queries that it can parse:
  *   A < 10
  *   B = ABC
- *   20
+ *   20:
  *   20:1234-
  *   20:-4,567
  *   X:345-4,567
  *   ORDER BY A
  *   ORDER BY B DESC
- *   ORDER BY INFO.DP ASC
+ *   ORDER BY A, INFO.DP ASC
  *   A < 10 AND B >= ABC
  *   20:1234- AND A < 10
  *   A <= 10 and X:345-4,567 and B = ABC ORDER BY INFO.DP ASC
@@ -36,18 +36,18 @@ filter_or_range
   = filter
   / range
 
-filter
+filter "filter"
   = k:field ws op:op ws v:value { return {type: 'filter', field: k, op: op, value: v} }
 
-field
+field "field"
   = chars:[0-9a-z.]i+ { return chars.join(''); }
 
-value
+value "value"
   = chars:[0-9a-z.]i+ { return chars.join(''); }
   / doublequote chars:[^"]* doublequote { return chars.join(''); }
   / singlequote chars:[^']* singlequote { return chars.join(''); }
 
-op
+op "op"
   = "<="
   / "<"
   / ">="
@@ -57,7 +57,7 @@ op
   / "RLIKE"i { return "RLIKE"; }
 
 range "range"
-  = contig:contig range:range_range?
+  = contig:contig ":" range:range_range?
     { return { type: 'range', contig: contig, range: range } }
 
 contig
@@ -66,13 +66,20 @@ contig
   / "Y"
 
 range_range
-  = ":" start:(comma_num)? "-" end:(comma_num)?
+  = start:(comma_num)? "-" end:(comma_num)?
     { return {start: start, end: end} }
 
 comma_num "number with commas"
   = chars:[0-9,]+ { return parseInt(chars.join(',').replace(/,/g, ''), 10) }
 
 order_by
-  = "ORDER BY"i ws field:field ws order:("ASC"i / "DESC"i)?
-    { return { type: 'sort', field: field, order:order } }
+  = "ORDER BY"i ws field_list:order_field_list
+    { return { type: 'sort', fields: field_list } }
 
+order_field
+  = field:field ws order:("ASC"i / "DESC"i)?
+    { return {field: field, order: order} }
+
+order_field_list
+  = first:order_field rest:(ws "," ws v:order_field { return v; })*
+    { return [first].concat(rest); }
