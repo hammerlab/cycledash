@@ -63,7 +63,7 @@ function parse(query, columnNames) {
     if (!_.contains(columnNames, field)) {
       errors.push({error: 'Unknown field ' + field});
     } else {
-      item['columnName'] = field.split('.');
+      item['columnName'] = field;
       delete item['field'];
     }
   });

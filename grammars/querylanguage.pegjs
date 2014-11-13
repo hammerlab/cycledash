@@ -40,7 +40,7 @@ filter "filter"
   = k:field ws op:op ws v:value { return {type: 'filter', field: k, op: op, value: v} }
 
 field "field"
-  = chars:[0-9a-z.]i+ { return chars.join(''); }
+  = chars:[0-9a-z.:]i+ { return chars.join(''); }
 
 value "value"
   = chars:[0-9a-z.]i+ { return chars.join(''); }

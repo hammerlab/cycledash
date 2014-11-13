@@ -6,7 +6,7 @@ var _ = require('underscore'),
 
 
 describe('Query Language', function() {
-  var columns = ['A', 'B', 'INFO.DP'];
+  var columns = ['A', 'B', 'INFO.DP', 'INFO:AF'];
 
   function expectParse(query, expectedResult) {
     var result = QueryLanguage.parse(query, columns);
@@ -17,9 +17,14 @@ describe('Query Language', function() {
   }
 
   it('should parse simple filters', function() {
-    expectParse('A < 10', {filters:[{type: '<', value:'10', columnName:['A']}]});
-    expectParse('B = ABC', {filters:[{type: '=', value:'ABC', columnName:['B']}]});
-    expectParse('INFO.DP like "ABC"', {filters:[{type: 'LIKE', value:'ABC', columnName:['INFO', 'DP']}]});
+    expectParse('A < 10', {filters:[{type: '<', value:'10', columnName:'A'}]});
+    expectParse('B = ABC', {filters:[{type: '=', value:'ABC', columnName:'B'}]});
+    expectParse('INFO.DP like "ABC"', {
+      filters:[{type: 'LIKE', value:'ABC', columnName:'INFO.DP'}]
+    });
+    expectParse('INFO:AF rlike "^.*$"', {
+      filters:[{type: 'RLIKE', value:'^.*$', columnName:'INFO:AF'}]
+    });
   });
 
   it('should parse ranges', function() {
@@ -30,20 +35,20 @@ describe('Query Language', function() {
   });
 
   it('should parse simple order bys', function() {
-    expectParse('ORDER BY A', {sortBy:[{order:'asc', columnName: ['A']}]});
-    expectParse('ORDER BY B DESC', {sortBy:[{order:'desc', columnName: ['B']}]});
-    expectParse('ORDER BY INFO.DP ASC', {sortBy:[{order:'asc', columnName: ['INFO', 'DP']}]});
+    expectParse('ORDER BY A', {sortBy:[{order:'asc', columnName: 'A'}]});
+    expectParse('ORDER BY B DESC', {sortBy:[{order:'desc', columnName: 'B'}]});
+    expectParse('ORDER BY INFO.DP ASC', {sortBy:[{order:'asc', columnName: 'INFO.DP'}]});
   });
 
   it('should parse quoted filters with spaces', function() {
-    expectParse('A like \'A"" C\'', {filters:[{type: 'LIKE', value:'A"" C', columnName:['A']}]});
+    expectParse('A like \'A"" C\'', {filters:[{type: 'LIKE', value:'A"" C', columnName:'A'}]});
   });
 
   it('should parse compound filters', function() {
     expectParse('A < 10 AND B >= ABC', {
       filters: [
-        {type: '<', value:'10', columnName:['A']},
-        {type: '>=', value:'ABC', columnName:['B']}
+        {type: '<', value:'10', columnName:'A'},
+        {type: '>=', value:'ABC', columnName:'B'}
       ]
     });
   });
@@ -51,30 +56,30 @@ describe('Query Language', function() {
   it('should parse compound filters with ranges', function() {
     expectParse('20:1234- AND A < 10', {
       range: {contig:'20', start: '1234'},
-      filters: [{type: '<', value: '10', columnName: ['A']}]
+      filters: [{type: '<', value: '10', columnName: 'A'}]
     });
   });
 
   it('should parse compound order bys', function() {
     expectParse('ORDER BY A, B', {
-      sortBy:[{order:'asc', columnName: ['A']},
-              {order:'asc', columnName: ['B']}]
+      sortBy:[{order:'asc', columnName: 'A'},
+              {order:'asc', columnName: 'B'}]
     });
 
     expectParse('ORDER BY A DESC, B', {
-      sortBy:[{order:'desc', columnName: ['A']},
-              {order:'asc', columnName: ['B']}]
+      sortBy:[{order:'desc', columnName: 'A'},
+              {order:'asc', columnName: 'B'}]
     });
 
     expectParse('ORDER BY A ASC, B ASC', {
-      sortBy:[{order:'asc', columnName: ['A']},
-              {order:'asc', columnName: ['B']}]
+      sortBy:[{order:'asc', columnName: 'A'},
+              {order:'asc', columnName: 'B'}]
     });
 
     expectParse('ORDER BY A ASC, B, INFO.DP DESC', {
-      sortBy:[{order:'asc', columnName: ['A']},
-              {order:'asc', columnName: ['B']},
-              {order:'desc', columnName: ['INFO', 'DP']}]
+      sortBy:[{order:'asc', columnName: 'A'},
+              {order:'asc', columnName: 'B'},
+              {order:'desc', columnName: 'INFO.DP'}]
     });
   });
 
@@ -83,10 +88,10 @@ describe('Query Language', function() {
                 {
                   range: {contig: 'X', start: '345', end: '4567'},
                   filters: [
-                    {type: '<=', value: '10', columnName: ['A']},
-                    {type: '=', value: 'ABC', columnName: ['B']}
+                    {type: '<=', value: '10', columnName: 'A'},
+                    {type: '=', value: 'ABC', columnName: 'B'}
                   ],
-                  sortBy:[{order:'asc', columnName: ['INFO', 'DP']}]
+                  sortBy:[{order:'asc', columnName: 'INFO.DP'}]
                 });
   });
 
