@@ -149,7 +149,7 @@ To determine whether there are any pixels that have changed before/after, and to
 generate a perceptual diff that will make it clear where the changes are, use
 the following command:
 
-**Note**: you will need to have imagemagick installed for the following command to
+**Note**: you will need to have [imagemagick](http://www.imagemagick.org/) installed for the following command to
 succeed.
 
 ```
