@@ -7,15 +7,10 @@ var _ = require('underscore'),
 
 describe('Query Completion', function() {
   var columns = ['A', 'B', 'INFO.DP'];
-  var completer = QueryCompletion.createTypeaheadSource(QueryLanguage.parse, columns);
 
   // Returns a list of possible complete queries.
   function getCompletions(prefix) {
-    var results = null;
-    // In principle the callback could be async, but we know that it's not.
-    completer(prefix, (v) => { results = v; });
-    assert.ok(results);
-    return results.map((v) => v.value);
+    return QueryCompletion.getCompletions(prefix, QueryLanguage.parse, columns);
   }
 
   function assertCompletions(prefix, expectedCompletions) {
@@ -42,6 +37,15 @@ describe('Query Completion', function() {
     assertCompletions('ORDER BY ',
                      ['ORDER BY A', 'ORDER BY B', 'ORDER BY INFO.DP']);
     assertCompletions('ORDER BY A A', ['ORDER BY A ASC']);
+  });
+
+  it('Should auto-complete field names in ORDER BY', function() {
+    assertCompletions('ORDER BY I', ['ORDER BY INFO.DP']);
+    assertCompletions('ORDER BY IN', ['ORDER BY INFO.DP']);
+    assertCompletions('ORDER BY INF', ['ORDER BY INFO.DP']);
+    assertCompletions('ORDER BY INFO', ['ORDER BY INFO.DP']);
+    assertCompletions('ORDER BY INFO.D', ['ORDER BY INFO.DP']);
+    assertCompletions('ORDER BY INFO.DP', []);  // valid query
   });
 
   /*
@@ -77,7 +81,6 @@ describe('Query Completion', function() {
 
 /*
 To-do:
-- "ORDER BY I" doesn't complete to "ORDER BY INFO.DP".
 - Mandatory space: "ORDER BYA" and "A<10 ANDA>10" shouldn't be valid.
 - Value completion that's aware of the current field
 - Completion when the query is already valid.

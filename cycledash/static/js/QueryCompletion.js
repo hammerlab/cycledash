@@ -75,6 +75,17 @@ function firstToken(str) {
   }
 }
 
+// Returns the string w/o the last token.
+// e.g. "ORDER BY IN" --> "ORDER BY "
+function withoutLastToken(str) {
+  var m = str.match(/^(.*)[^ ]+$/);
+  if (m) {
+    return m[1];
+  } else {
+    return null;
+  }
+}
+
 // Given a PEG.js expectation object, return possible strings which could
 // fulfill that expectation, e.g. 'filter' -> 'A = 0'.
 function completionsForExpectation(expectation, columnNames, rejectedText) {
@@ -112,20 +123,8 @@ function completionsForExpectation(expectation, columnNames, rejectedText) {
   return [];
 }
 
-/**
- * Returns a typeahead.js-compatible completion source for a CQL grammar.
- * - parse is the PEG.js parse function
- * - columnNames is a list of column names which may be used in the grammar.
- *
- * The returned function takes a query prefix and calls a callback with
- * possible completions.
- *
- * For example, if columnNames=['A', 'B'], then:
- * 'ORDER BY ' -> callback([{value: 'ORDER BY A'}, {value: 'ORDER BY B'}])
- */
-function createTypeaheadSource(parse, columnNames) {
-
-return function (query, callback) {
+// Workhorse function: given a query prefix, return a list of completions
+function getCompletions(query, parse, columnNames) {
   var completions = [];
 
   if (query == '') {
@@ -150,7 +149,9 @@ return function (query, callback) {
       });
       completions = completions.concat(newCompletions);
     } else {
-      // Probably an invalid column name.
+      // Probably an invalid column name. Pop off the last token and try to get completions.
+      var subquery = withoutLastToken(query);
+      completions = getCompletions(subquery, parse, columnNames);
     }
   } else {
     // It's a valid query! Nothing to do...
@@ -171,11 +172,27 @@ return function (query, callback) {
     return token && query + token;  // nulls are dropped by _.compact
   })));
 
-  callback(valueify(completions));
+  return completions;
 };
 
+/**
+ * Returns a typeahead.js-compatible completion source for a CQL grammar.
+ * - parse is the PEG.js parse function
+ * - columnNames is a list of column names which may be used in the grammar.
+ *
+ * The returned function takes a query prefix and calls a callback with
+ * possible completions.
+ *
+ * For example, if columnNames=['A', 'B'], then:
+ * 'ORDER BY ' -> callback([{value: 'ORDER BY A'}, {value: 'ORDER BY B'}])
+ */
+function createTypeaheadSource(parse, columnNames) {
+  return function(query, callback) {
+    callback(getCompletions(query, parse, columnNames).map((v) => ({value:v})));
+  }
 }
 
 module.exports = {
-  createTypeaheadSource
+  createTypeaheadSource,
+  getCompletions
 };
