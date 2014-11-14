@@ -23,6 +23,14 @@
 //      and keeps your JavaScript completely separate from your HTML, I
 //      recommend to load smoothie.js from the library's root directory.
 
+/**
+ * Modifications to the original Smoothie require.js (made by danvk):
+ * - window.compiler hook to enable transpilation (e.g. for JSX/harmony)
+ * - window.requireOverrides to plug in specific return values (e.g. to make
+ *     require('underscore') return the version of underscore that you
+ *     previously sourced with <script>).
+ */
+
 // NOTE The load parameter points to the function, which prepares the
 //      environment for each module and runs its code. Scroll down to the end of
 //      the file to see the function definition.
