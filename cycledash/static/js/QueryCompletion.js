@@ -15,30 +15,20 @@
  */
 
 var _ = require('underscore');
+var {
+  cartesianProductOf,
+  filterPrefix,
+  firstToken,
+  flatMap,
+  normalizeSpacing,
+  withoutLastToken
+} = require('./CompletionUtils.js');
 
 // -- Utility methods --
-
-function isLiteral(expectation) {
-  return expectation.type == 'literal';
-}
-
-// Filter the list down to strings which start with prefix.
-function filterPrefix(list, prefix) {
-  var len = prefix.length;
-  return list.filter(function(item) {
-    return item.substr(0, len) == prefix;
-  });
-}
 
 // Wrap each item in {value: ...}. This is what typeahead.js expects.
 function valueify(list) {
   return list.map(value => ({value}));
-}
-
-// Builds a new list by applying a function to all elements of the list and
-// concatenating the resulting lists.
-function flatMap(list, fn) {
-  return _.flatten(_.map(list, fn), true /* shallow flatten */);
 }
 
 // Legal operators in the CQL language.
@@ -51,39 +41,6 @@ var operators = [
   'LIKE',
   'RLIKE'
 ];
-
-// Returns the cartesian product of its input lists, e.g.
-// cartesianProductOf([1,2], [3,4]) -> [[1,3], [1,4], [2,3], [2,4]]
-// Based on http://stackoverflow.com/a/12628791/388951
-function cartesianProductOf() {
-  return _.reduce(arguments, function(a, b) {
-    return flatMap(a, function(x) {
-      return _.map(b, y => x.concat([y]));
-    });
-  }, [[]]);
-};
-
-// Returns the first token in str,
-// e.g. "foo bar" -> "foo", "  baz quux" -> "  baz".
-function firstToken(str) {
-  var m = str.match(/[ ]*[^ ]+/);
-  if (m) {
-    return m[0];
-  } else {
-    return null;
-  }
-}
-
-// Returns the string w/o the last token.
-// e.g. "ORDER BY IN" --> "ORDER BY "
-function withoutLastToken(str) {
-  var m = str.match(/^(.*)[^ ]+$/);
-  if (m) {
-    return m[1];
-  } else {
-    return null;
-  }
-}
 
 // Given a PEG.js expectation object, return possible strings which could
 // fulfill that expectation, e.g. 'filter' -> 'A = 0'.

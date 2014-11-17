@@ -7,6 +7,7 @@ var _ = require('underscore'),
 
 describe('Query Completion', function() {
   var columns = ['A', 'B', 'INFO.DP'];
+  var filterPrefix = QueryCompletion.filterPrefix;
 
   // Returns a list of possible complete queries.
   function getCompletions(prefix) {
@@ -76,6 +77,32 @@ describe('Query Completion', function() {
       'ORDER BY A, INFO.DP'
     ]);
   });
+
+  it('Should work with lowercase keywords', function() {
+    assertCompletions('A > 10 a', ['A > 10 aND']);
+    assertCompletions('o', ['oRDER']);
+    assertCompletions('order', ['order BY']);
+  });
+
+  it('Should ignore extra/elided spaces', function() {
+    assertCompletions('ORDER BY      I',
+                     ['ORDER BY      INFO.DP']);
+
+    assertCompletions('   ORDER BY      I',
+                     ['   ORDER BY      INFO.DP']);
+
+    assertCompletions('A   ', [
+                      'A   <=',
+                      'A   <',
+                      'A   >=',
+                      'A   >',
+                      'A   =',
+                      'A   LIKE',
+                      'A   RLIKE'
+                     ]);
+
+    assertCompletions('A<', ['A<=', 'A< 0']);
+  });
 });
 
 
@@ -84,6 +111,5 @@ To-do:
 - Mandatory space: "ORDER BYA" and "A<10 ANDA>10" shouldn't be valid.
 - Value completion that's aware of the current field
 - Completion when the query is already valid.
-- Normalized spacing: 'A>' should complete the same as 'A >'
 ~ Completion for range selections
 */
