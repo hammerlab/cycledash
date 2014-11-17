@@ -1,5 +1,3 @@
-/** @jsx React.DOM */
-
 /**
  * This module provides query completion (typeahead) for the CQL language.
  * For example, when given "ORD" it will return ["ORDER"] as a possible
@@ -12,6 +10,8 @@
  * This completion engine fills in all possible values of each expression type
  * to build a set of possible completions. It then culls this set down to those
  * which parse correctly and are extensions of what the user has typed.
+ *
+ * @jsx React.DOM
  */
 
 var _ = require('underscore');
@@ -32,12 +32,13 @@ function filterPrefix(list, prefix) {
 
 // Wrap each item in {value: ...}. This is what typeahead.js expects.
 function valueify(list) {
-  return list.map(function(item) { return {value: item}; });
+  return list.map(value => ({value}));
 }
 
-// Like map(), but the function can add 0, 1, ... N items to the resulting list.
+// Builds a new list by applying a function to all elements of the list and
+// concatenating the resulting lists.
 function flatMap(list, fn) {
-  return _.flatten(_.map(list, fn), true);
+  return _.flatten(_.map(list, fn), true /* shallow flatten */);
 }
 
 // Legal operators in the CQL language.
@@ -53,14 +54,12 @@ var operators = [
 
 // Returns the cartesian product of its input lists, e.g.
 // cartesianProductOf([1,2], [3,4]) -> [[1,3], [1,4], [2,3], [2,4]]
-// See http://stackoverflow.com/a/12628791/388951
+// Based on http://stackoverflow.com/a/12628791/388951
 function cartesianProductOf() {
   return _.reduce(arguments, function(a, b) {
-    return _.flatten(_.map(a, function(x) {
-      return _.map(b, function(y) {
-        return x.concat([y]);
-      });
-    }), true);
+    return flatMap(a, function(x) {
+      return _.map(b, y => x.concat([y]));
+    });
   }, [[]]);
 };
 
@@ -93,13 +92,13 @@ function completionsForExpectation(expectation, columnNames, rejectedText) {
     case 'filter':
       // Return columns x operators x {0}
       // TODO: normalize spacing
-      return cartesianProductOf(columnNames, operators, ['0']).map((p) => p.join(' '));
+      return cartesianProductOf(columnNames, operators, ['0']).map(p => p.join(' '));
 
     case 'field':
       return columnNames;
 
     case '"ORDER BY"':
-      return cartesianProductOf(["ORDER BY"], columnNames).map((p) => p.join(' '));
+      return cartesianProductOf(["ORDER BY"], columnNames).map(p => p.join(' '));
 
     case '"AND"':
       // Just need one valid completion.
@@ -111,7 +110,6 @@ function completionsForExpectation(expectation, columnNames, rejectedText) {
       } else {
         return [rejectedText + '-'];
       }
-      return [];
 
     default:
       if (expectation.type == 'literal') {
@@ -120,7 +118,7 @@ function completionsForExpectation(expectation, columnNames, rejectedText) {
       return [];
   }
 
-  return [];
+  throw "Shouldn't get here.";
 }
 
 // Workhorse function: given a query prefix, return a list of completions
@@ -132,7 +130,7 @@ function getCompletions(query, parse, columnNames) {
     // Only the first token matters for completion, but these need to be valid
     // queries in order to not be filtered out later.
     completions = completions
-        .concat(columnNames.map((c) => c + ' = 0'))
+        .concat(columnNames.map(c => c + ' = 0'))
         .concat(['ORDER BY ' + columnNames[0]])
         .concat(['20:']);
   }
@@ -167,7 +165,7 @@ function getCompletions(query, parse, columnNames) {
   });
 
   // Only offer one whitespace-delimited token at a time.
-  completions = _.uniq(_.compact(_.map(completions, (completion) => {
+  completions = _.uniq(_.compact(_.map(completions, completion => {
     var token = firstToken(completion.substr(query.length));
     return token && query + token;  // nulls are dropped by _.compact
   })));
@@ -188,7 +186,7 @@ function getCompletions(query, parse, columnNames) {
  */
 function createTypeaheadSource(parse, columnNames) {
   return function(query, callback) {
-    callback(getCompletions(query, parse, columnNames).map((v) => ({value:v})));
+    callback(getCompletions(query, parse, columnNames).map(v => ({value:v})));
   }
 }
 
