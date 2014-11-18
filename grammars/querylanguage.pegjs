@@ -21,14 +21,15 @@ start
     { return [].concat(frs || []).concat(obs || []) }
 
 ws "whitespace" = [ \t\n\r]*
-and = ws "AND"i ws
+req_ws "required whitespace" = [ \t\n\r]+
+and = "AND"i
 doublequote = '"'
 singlequote = "'"
 
 filters_and_ranges
   = (
       first:filter_or_range
-      rest:(and v:filter_or_range { return v; })*
+      rest:(req_ws and req_ws v:filter_or_range { return v; })*
       { return [first].concat(rest); }
     )?
 
@@ -73,12 +74,12 @@ comma_num "number with commas"
   = chars:[0-9,]+ { return parseInt(chars.join(',').replace(/,/g, ''), 10) }
 
 order_by
-  = "ORDER BY"i ws field_list:order_field_list
+  = "ORDER BY"i req_ws field_list:order_field_list
     { return { type: 'sort', fields: field_list } }
 
 order_field
-  = field:field ws order:("ASC"i / "DESC"i)?
-    { return {field: field, order: order} }
+  = field:field order:(req_ws ("ASC"i / "DESC"i))?
+    { return {field: field, order: order && order[1]} }
 
 order_field_list
   = first:order_field rest:(ws "," ws v:order_field { return v; })*
