@@ -1,14 +1,14 @@
 """Defines all views for CycleDash."""
 import collections
-import datetime
 import json
-import os
 
 from flask import (request, redirect, Response, render_template, jsonify,
                    url_for, abort)
 import requests
 
-from cycledash import app, db
+from cycledash import app, db, cache
+from cycledash import app, db, cache
+import cycledash.genotypes as gt
 from cycledash.helpers import prepare_request_data, update_object
 from cycledash.models import Run, Concordance
 import cycledash.plaintext as plaintext
@@ -18,17 +18,20 @@ from cycledash.validations import (UpdateRunSchema, CreateRunSchema,
 import workers.concordance
 import workers.scorer
 import workers.indexer
+import workers.genotype_extractor
 
+
+# TODO rename/remove
+def md(lst):
+    return map(dict, lst)
 
 WEBHDFS_ENDPOINT = app.config['WEBHDFS_URL'] + '/webhdfs/v1/'
 WEBHDFS_OPEN_OP = '?user.name={}&op=OPEN'.format(app.config['WEBHDFS_USER'])
 
-RUN_ADDL_KVS = {'Tumor BAM': 'tumorPath', 'Normal BAM': 'tumorPath',
-                'Reference': 'referencePath', 'VCF': 'vcfPath',
-                'Notes': 'notes', 'False Positive': 'falsePositive',
-                'True Positive': 'truePositive', 'Truth VCF': 'truthVcfPath',
-                'Hash': 'SHA1', 'Precision': 'precision', 'recall': 'recall',
-                'f1score': 'f1score'}
+RUN_ADDL_KVS = {'Tumor BAM': 'tumor_bam_uri',
+                'Normal BAM': 'normal_bam_uri',
+                'VCF': 'uri',
+                'Notes': 'notes'}
 
 
 @app.route('/')
@@ -45,12 +48,14 @@ def format_doc():
 
 
 def start_workers_for_run(run):
-    if run.truth_vcf_path:
-        workers.scorer.score.delay(run.id, run.vcf_path, run.truth_vcf_path)
+    # if run.truth_vcf_path:
+    #     TODO: This is broken, as run does not have an ID at this point...
+    #     workers.scorer.score.delay(run.id, run.vcf_path, run.truth_vcf_path)
     def index_bai(bam_path):
         workers.indexer.index.delay(bam_path[1:])
     index_bai(run.normal_path)
     index_bai(run.tumor_path)
+    workers.genotype_extractor.extractor.delay(json.dumps(run))
 
 
 @app.route('/runs', methods=['POST', 'GET'])
@@ -59,25 +64,39 @@ def runs():
         try:
             data = CreateRunSchema(prepare_request_data(request))
         except Exception as e:
-            return jsonify({'error': 'Run validation',
-                            'message': str(e)})
-        run = Run(**data)
-        db.session.add(run)
-        db.session.commit()
+            return jsonify({'error': 'Run validation', 'message': str(e)})
         start_workers_for_run(run)
         return redirect(url_for('runs'))
     elif request.method == 'GET':
-        runs = [run.to_camel_dict() for run in Run.query.all()]
+        con = db.engine.connect()
+        vcfs = md(con.execute('select * from vcfs order by id desc;').fetchall())
+        con.close()
         if 'text/html' in request.accept_mimetypes:
-            return render_template('runs.html', runs=runs, run_kvs=RUN_ADDL_KVS)
+            return render_template('runs.html', runs=vcfs, run_kvs=RUN_ADDL_KVS)
         elif 'application/json' in request.accept_mimetypes:
-            return jsonify({'runs': runs})
+            return jsonify({'runs': vcfs})
+
+
+@app.route('/runs/<run_id>/genotypes')
+def genotypes(run_id):
+    return jsonify(gt.get(run_id, json.loads(request.args.get('q'))))
+
+
+@app.route('/runs/<run_id>/columns')
+def columns(run_id):
+    return jsonify({'columns': gt.columns(run_id)})
+
+
+@app.route('/runs/<run_id>/contigs')
+def contigs(run_id):
+    return jsonify({'contigs': gt.contigs(run_id)})
 
 
 @app.route('/runs/<run_id>/examine')
 def examine(run_id):
-    run = Run.query.get_or_404(run_id).to_camel_dict()
-    return render_template('examine.html', run=run, run_kvs=RUN_ADDL_KVS)
+    with db.engine.connect() as con:
+        vcf = md(con.execute('select * from vcfs where id = {};'.format(run_id)).fetchall())[0]
+    return render_template('examine.html', run=dict(vcf))
 
 
 @app.route('/runs/<run_ids_key>/concordance', methods=['GET', 'PUT'])

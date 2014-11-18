@@ -18,8 +18,6 @@ var ExaminePage = React.createClass({
   propTypes: {
     recordStore: React.PropTypes.object.isRequired,
     recordActions: React.PropTypes.object.isRequired,
-    vcfPath: React.PropTypes.string.isRequired,
-    truthVcfPath: React.PropTypes.string,
     normalBamPath:  React.PropTypes.string,
     tumorBamPath:  React.PropTypes.string,
     igvHttpfsUrl: React.PropTypes.string.isRequired
@@ -32,20 +30,24 @@ var ExaminePage = React.createClass({
       this.setState(this.props.recordStore.getState());
     });
   },
-  handleRangeChange: function({chromosome, start, end}) {
-    this.props.recordActions.updateRecordRange({chromosome, start, end});
+  handleRangeChange: function({contig, start, end}) {
+    this.props.recordActions.updateRecordRange({contig, start, end});
   },
-  handleFilterUpdate: function({path, filterValue}) {
-    this.props.recordActions.updateFilters({path, filterValue});
+  handleContigChange: function(contig) {
+    var start = null, end = null;
+    this.props.recordActions.updateRecordRange({contig, start, end});
   },
-  handleChartChange: function({path, info, name}) {
-    this.props.recordActions.selectColumn({path, info, name});
+  handleFilterUpdate: function({columnName, filterValue, type}) {
+    this.props.recordActions.updateFilters({columnName, filterValue, type});
   },
-  handleSortByChange: function({path, order}) {
-    this.props.recordActions.updateSorter({path, order});
+  handleSortByChange: function({columnName, order}) {
+    this.props.recordActions.updateSorter({columnName, order});
   },
-  handleChromosomeChange: function(chromosome) {
-    this.props.recordActions.updateRecordRange({chromosome, start: null, end: null});
+  handlePageRequest: function() {
+    this.props.recordActions.pageRequest();
+  },
+  handleChartChange: function({columnName, info, name}) {
+    this.props.recordActions.selectColumn({columnName, info, name});
   },
   handleVariantTypeChange: function(vtype) {
     this.props.recordActions.updateVariantType(vtype);
@@ -73,55 +75,46 @@ var ExaminePage = React.createClass({
   render: function() {
     var state = this.state, props = this.props;
     return (
-        <div className="examine-page">
-          <div className="top-material">
-            <StatsSummary hasLoaded={state.hasLoadedVcfs}
-                          variantType={state.variantType}
-                          handleVariantTypeChange={this.handleVariantTypeChange}
-                          records={state.records}
-                          truthRecords={state.truthRecords}
-                          totalRecords={state.totalRecords} />
-            <h1>Examining: <small>{props.vcfPath}</small></h1>
-            <LoadingStatus hasLoaded={state.hasLoadedVcfs}
-                           error={state.loadError}
-                           files={[props.vcfPath, props.truthVcfPath]} />
-            <AttributeCharts records={state.records}
-                             selectedColumns={state.selectedColumns} />
-          </div>
-          <Karyogram hasLoaded={state.hasLoadedVcfs}
-                     range={state.range}
-                     records={props.recordStore.getFullRecords()}
-                     handleRangeChange={this.handleRangeChange} />
-          <VCFTable ref="vcfTable"
-                    hasLoaded={state.hasLoadedVcfs}
-                    records={state.records}
-                    range={state.range}
-                    header={state.header}
-                    columns={state.columns}
-                    selectedColumns={state.selectedColumns}
-                    selectedRecord={state.selectedRecord}
-                    chromosomes={state.chromosomes}
-                    sortBy={state.sortBy}
-                    handleSortByChange={this.handleSortByChange}
-                    handleChartChange={this.handleChartChange}
-                    handleFilterUpdate={this.handleFilterUpdate}
-                    handleChromosomeChange={this.handleChromosomeChange}
-                    handleRangeChange={this.handleRangeChange}
-                    handleSelectRecord={this.handleSelectRecord} />
-          <BioDalliance vcfPath={props.vcfPath}
-                        vcfBytes={props.recordStore.getVcfBytes()}
-                        truthVcfPath={props.truthVcfPath}
-                        truthVcfBytes={props.recordStore.getTruthVcfBytes()}
-                        normalBamPath={props.normalBamPath}
-                        tumorBamPath={props.tumorBamPath}
-                        igvHttpfsUrl={props.igvHttpfsUrl}
-                        selectedRecord={state.selectedRecord}
-                        handlePreviousRecord={this.handlePreviousRecord}
-                        handleNextRecord={this.handleNextRecord}
-                        handleClose={() => this.handleSelectRecord(null)} />
+      <div className="examine-page">
+        <StatsSummary hasLoaded={state.hasLoaded}
+                      variantType={state.variantType}
+                      handleVariantTypeChange={this.handleVariantTypeChange}
+                      stats={state.stats} />
+        <div className="top-material">
+          <h1>Examining: <small>{props.vcfPath}</small></h1>
+          <LoadingStatus hasLoaded={state.hasLoaded}
+                         error={state.loadError}
+                         files={[props.vcfPath, props.truthVcfPath]} />
         </div>
+        <BioDalliance vcfPath={props.vcfPath}
+                      truthVcfPath={props.truthVcfPath}
+                      normalBamPath={props.normalBamPath}
+                      tumorBamPath={props.tumorBamPath}
+                      igvHttpfsUrl={props.igvHttpfsUrl}
+                      selectedRecord={state.selectedRecord}
+                      handlePreviousRecord={this.handlePreviousRecord}
+                      handleNextRecord={this.handleNextRecord}
+                      handleClose={() => this.handleSelectRecord(null)} />
+        <VCFTable ref="vcfTable"
+                  hasLoaded={state.hasLoaded}
+                  records={state.records}
+                  range={state.range}
+                  columns={state.columns}
+                  selectedColumns={state.selectedColumns}
+                  selectedRecord={state.selectedRecord}
+                  contigs={state.contigs}
+                  sortBys={state.sortBys}
+                  handleSortByChange={this.handleSortByChange}
+                  handleChartChange={this.handleChartChange}
+                  handleFilterUpdate={this.handleFilterUpdate}
+                  handleContigChange={this.handleContigChange}
+                  handlePageRequest={this.handlePageRequest}
+                  handleRangeChange={this.handleRangeChange}
+                  handleSelectRecord={this.handleSelectRecord} />
+      </div>
      );
    }
 });
 
 module.exports = ExaminePage;
+

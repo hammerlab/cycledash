@@ -20,29 +20,36 @@ var _ = require('underscore'),
     types = require('./components/types');
 
 
-function RecordStore(vcfPath, truthVcfPath, dispatcher) {
+// Records to show on a page (max records fetched from CycleDash server).
+var RECORD_LIMIT = 250;
+
+var DEFAULT_SORT_BYS = [{columnName: 'contig', order: 'asc'},
+                        {columnName: 'position', order: 'asc'}];
+
+
+function RecordStore(vcfId, dispatcher) {
   // Initial state of the store. This is mutable. There be monsters.
-  var hasLoadedVcfs = false,
+  var hasLoaded = false,
       loadError = null,
-      header = {},
+
       records = [],
-      truthRecords = [],
-      fullRecords = [],
-      fullTruthRecords = [],
-      trueFalsePositiveNegative = {},
-      totalRecords = 0,
+
+      stats = {},
       selectedRecord = null,
-      filters = [],
       selectedColumns = [],
-      sortBy = {path: null, order: 'asc'},
+
+      filters = [],
+      sortBys = [{columnName: 'position', order: 'asc'}],
       range = {start: null, end: null, chromosome: types.ALL_CHROMOSOMES},
-      variantType = 'ALL',
-      chromosomes = [],
+      variantType = 'ALL', // TODO(ihodes): implement
+
+      contigs = [],
       columns = {};
 
-  // Original bytes of VCF files, to avoid duplicate requests by BioDalliance.
-  var truthVcfBytes = null,
-      vcfBytes = null;
+  // State for paging the server for records. Page should be reset to 0 on most
+  // operations.
+  var page = 0,
+      limit = RECORD_LIMIT;
 
   // Callbacks registered by listening components, registered with #onChange().
   var listenerCallbacks = [];
@@ -50,44 +57,43 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
   // Token identifying this store within the dispatcher.
   var dispatcherToken = null;
 
-  // Record comparison function.
-  var comparator = recordComparatorFor(sortBy.path, sortBy.order);
-
   function receiver(action) {
     switch(action.actionType) {
       case ACTION_TYPES.SORT_BY:
-        comparator = recordComparatorFor(action.path, action.order);
-        sortRecords(action.path, action.order);
-        sortBy = _.pick(action, 'path', 'order');
-        updateRecords({updateTruth: true});
+        updateSortBys(action.columnName, action.order);
+        updateGenotypes({append: false});
         break;
       case ACTION_TYPES.UPDATE_FILTER:
-        updateFilters(action.path, action.filterValue);
-        updateRecords({updateTruth: false});
+        updateFilters(action.columnName, action.filterValue, action.type);
+        updateGenotypes({append: false});
         break;
       case ACTION_TYPES.SELECT_RECORD_RANGE:
-        range = _.pick(action, 'start', 'end', 'chromosome');
-        updateRecords({updateTruth: true});
+        updateRange(action.contig, action.start, action.end);
+        updateGenotypes({append: false});
+        break;
+      case ACTION_TYPES.REQUEST_PAGE:
+        updateGenotypes({append: true});
         break;
       case ACTION_TYPES.UPDATE_VARIANT_TYPE:
-        variantType = action.variantType;
-        updateRecords({updateTruth: true});
+        // TODO(ihodes): variantType = action.variantType;
         break;
       case ACTION_TYPES.SELECT_COLUMN:
+        // TODO(ihodes): impl
         var col = _.find(selectedColumns, c => _.isEqual(c.path, action.path));
         if (!col) {
-          selectedColumns.push({path: action.path, info: action.info, name: action.name});
+          selectedColumns.push({path: action.path,
+                                info: action.info,
+                                name: action.name});
         } else {
           selectedColumns = _.without(selectedColumns, col);
         }
         break;
       case ACTION_TYPES.SELECT_RECORD:
+        // TODO(ihodes): impl
         selectedRecord = action.record;
         break;
     }
-    // Now that the state is updated, we notify listening components that it's
-    // time to query the Store for new state.
-    notifyChange();
+     // TODO(ihodes): this should be debounced
 
     // Required: lets the dispatcher to know that the Store is done processing.
     return true;
@@ -95,111 +101,109 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
   if (dispatcher) dispatcherToken = dispatcher.register(receiver);
 
   /**
-   * Updates the selected records (and, if updateTruth, truthRecords) by applying
-   * filters, selected range, and variantType. Also updates true/false pos/neg
-   * values.
+   * Queries the backend for the set of genotypes matching the current
+   * parameters.
    *
    * NB: mutates store state!
    */
-  function updateRecords({updateTruth}) {
-    records = displayableRecords(fullRecords, range, variantType, filters);
-    if (updateTruth) {
-      // We don't apply filters to truth records.
-      truthRecords = recordsOfType(recordsInRange(fullTruthRecords, range), variantType);
-    }
-    trueFalsePositiveNegative = vcfTools.trueFalsePositiveNegative(records, truthRecords);
-  }
-
-  /**
-   * Updates the sort order of fullRecords.
-   *
-   * Takes the new path and order instead of first setting the new SortBy path
-   * and order so that we can run #reverse() on records if only order is being
-   * changed. [Perf opt hack].
-   *
-   * NB: mutates store state!
-   */
-  function sortRecords(path, order) {
-    // We only sort fullRecords, because they have to be filtered afterwards
-    // anyway. We don't sort fullTruthRecords because it has to be sorted by
-    // __KEY__, as we can't count on it having the attribute that fullRecords
-    // has, e.g.  NORMAL::DP might exist in fullRecords only.
-    if (_.isEqual(path, sortBy.path) && order !== sortBy.order) {
-      fullRecords.reverse();
+  function _updateGenotypes({append}) {
+    // Exmaple query:
+    // var query = {"range": {"contig": 1, "start": 800000, "end": 2000000},
+    //              "sortBy": [{"columnName": "sample:DP", "order": "desc"},
+    //                         {"columnName": "position", "order": "desc"}],
+    //              "filters": [{"columnName": "sample:DP", "value": "<60"},
+    //                          {"columnName": "sample:DP", "value": ">50"},
+    //                          {"columnName": "reference", "value": "=G"}]};
+    // TODO(ihodes): DEBUG
+    if (append) {
+      page = page + 1;
     } else {
-      fullRecords.sort(comparator);
+      page = 0;
     }
+
+    var query = queryFrom(range, filters, sortBys);
+
+    $.when(deferredGenotypes(vcfId, query))
+      .done(response => {
+        if (append) {
+          // TODO: BUG: This can result in a out-of-order records, if a later
+          //            XHR returns before an earlier XHR.
+          records = records.concat(response.records);
+        } else {
+          stats = response.stats;
+          records = response.records;
+        }
+        notifyChange();
+      });
+  }
+  var updateGenotypes = _.throttle(_updateGenotypes, 500);
+
+  // Returns a JS object query for sending to the backend.
+  function queryFrom(range, filters, sortBys) {
+    var sbs = sortBys;
+    if (sortBys[0].columnName == 'position') {
+      sbs = DEFAULT_SORT_BYS.map(sb => {
+        sb.order = sortBys[0].order;
+        return sb;
+      });
+    }
+    return {
+      range: range,
+      filters: filters,
+      sortBy: sbs,
+      page: page,
+      limit: limit
+    };
   }
 
   /**
-   * Updates the filters by path and filterValue.
+   * Updates the filters by columnName and filterValue.
    *
    * NB: mutates store state!
    */
-  function updateFilters(path, filterValue) {
-    var filter = _.find(filters, (f) => _.isEqual(path, f.path));
-    if (filter && filterValue.length === 0) {
+  function updateFilters(columnName, filterValue, type) {
+    // TODO(ihodes): be careful with how we remove filters: we could have two+
+    //               filters applied to a given columnName, e.g. selection a
+    //               range of interesting sample:DP
+    var filter = _.find(filters, f => _.isEqual(columnName, f.columnName));
+    if (filter) {
       filters = _.without(filters, filter);
-    } else if (filter) {
-      filter.filterValue = filterValue;
-    } else {
-      filters.push({path, filterValue});
+    }
+    if (filterValue.length > 0) {
+      filters.push({columnName, filterValue, type});
     }
   }
 
-  // Load & parse VCF and, if required, the truth VCF.
-  var deferreds = [deferredVcf(vcfPath)];
-  if (truthVcfPath) deferreds.push(deferredVcf(truthVcfPath));
-  $.when.apply(null, deferreds)
-    .done((vcfResponse, truthResponse) => {
-      var vcfParser = vcf.parser();
-      var vcfData, truthVcfData;
-      if (truthVcfPath) {
-        vcfBytes = vcfResponse[0];
-        truthVcfBytes = truthVcfPath && truthResponse[0];
-      } else {
-        vcfBytes = vcfResponse;
-      }
+  /**
+   * Updates the sortBys by columnName and order.
+   *
+   * NB: mutates store state!
+   */
+  function updateSortBys(columnName, order) {
+    // Right now, we just sort by one column (this will change on CQL
+    // integration).
+    sortBys = [{columnName, order}];
+  }
 
-      try {
-        vcfData = vcfParser(vcfBytes);
-      } catch (e) {
-        return handleVcfParseError(vcfPath, e);
-      }
-      try {
-        if (truthVcfPath) truthVcfData = vcfParser(truthVcfBytes);
-      } catch (e) {
-        return handleVcfParseError(truthVcfPath, e);
-      }
+  /**
+   * Updates the range.
+   *
+   * NB: mutates store state!
+   */
+  function updateRange(contig, start, end) {
+    range = {contig, start, end};
+  }
 
-      hasLoadedVcfs = true;
-
-      header = vcfData.header;
-      fullRecords = vcfData.records;
-      fullTruthRecords = truthVcfPath ? truthVcfData.records : [];
-
-      fullRecords.sort(comparator);
-      fullTruthRecords.sort(comparator);
-
-      records = fullRecords;
-      truthRecords = fullTruthRecords;
-
-      if (truthVcfPath) {
-        trueFalsePositiveNegative = vcfTools.trueFalsePositiveNegative(records, truthRecords);
-      }
-      totalRecords = fullRecords.length;
-
-      chromosomes = _.uniq(records.map(r => r.CHROM));
-      chromosomes.sort(vcfTools.chromosomeComparator);
-      columns = vcfTools.deriveColumns(vcfData);
-
-      notifyChange();
-    })
-    .fail((jqXHR, errorName, errorMessage) => {
-      loadError = jqXHR.responseText + ': ' + jqXHR.vcfPath;
-      notifyChange();
+  // Initializing the RecordStore with basic information (columns, the contigs
+  // in the VCF), and request first records to display.
+  $.when(deferredColumns(vcfId), deferredContigs(vcfId))
+    .done((columnsResponse, contigsResponse) => {
+      hasLoaded = true;
+      columns = columnsResponse[0].columns;
+      contigs = contigsResponse[0].contigs;
+      updateGenotypes({append: false});
     });
-  // Calls all registered listening callbacks.
+
   function notifyChange() {
     _.each(listenerCallbacks, cb => { cb(); });
   }
@@ -213,28 +217,20 @@ function RecordStore(vcfPath, truthVcfPath, dispatcher) {
   return {
     getState: function() {
       return {
-        hasLoadedVcfs,
+        hasLoaded,
         loadError,
-        header,
         records,
-        truthRecords,
-        trueFalsePositiveNegative,
-        totalRecords,
+        stats,
         selectedRecord,
         filters,
         selectedColumns,
-        sortBy,
+        sortBys,
         range,
         variantType,
-        chromosomes,
+        contigs,
         columns,
       };
     },
-
-    getFullRecords: () => fullRecords,
-    getFullTruthRecords: () => fullTruthRecords,
-    getVcfBytes: () => vcfBytes,
-    getTruthVcfBytes: () => truthVcfBytes,
 
     onChange: function(callback) {
       // Calls callback when the store changes.
@@ -349,11 +345,19 @@ function recordComparatorFor(path, order) {
   }
 }
 
-// Return a promise getting the VCF text at vcfPath.
-function deferredVcf(vcfPath) {
-  var p = $.get("/vcf" + vcfPath);
-  p.vcfPath = vcfPath;
-  return p;
+// Return deferred GET for the column spec for a given VCF.
+function deferredColumns(vcfId) {
+  return $.get('/runs/' + vcfId + '/columns');
+}
+
+// Return deferred GET for the contigs in a given VCF.
+function deferredContigs(vcfId) {
+  return $.get('/runs/' + vcfId + '/contigs');
+}
+
+// Return a deferred GET returning genotypes and stats.
+function deferredGenotypes(vcfId, query) {
+  return $.get('/runs/' + vcfId + '/genotypes?q=' + JSON.stringify(query));
 }
 
 module.exports = RecordStore;

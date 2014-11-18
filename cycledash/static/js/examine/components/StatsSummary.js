@@ -11,9 +11,7 @@ var _ = require('underscore'),
 var StatsSummary = React.createClass({
   propTypes: {
     hasLoaded: React.PropTypes.bool.isRequired,
-    truthRecords: React.PropTypes.arrayOf(React.PropTypes.object),
-    records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-    totalRecords: React.PropTypes.number.isRequired,
+    stats: React.PropTypes.object.isRequired,
     handleVariantTypeChange: React.PropTypes.func.isRequired,
     variantType: React.PropTypes.string.isRequired
   },
@@ -25,11 +23,10 @@ var StatsSummary = React.createClass({
                          handleVariantTypeChange={this.props.handleVariantTypeChange} />
         <VariantStats variantType={this.props.variantType}
                       hasLoaded={this.props.hasLoaded}
-                      truthRecords={this.props.truthRecords}
-                      records={this.props.records} />
+                      stats={this.props.stats} />
         <RecordsShown hasLoaded={this.props.hasLoaded}
-                      numberOfFilteredRecords={this.props.records.length}
-                      totalNumberOfRecords={this.props.totalRecords} />
+                      numberOfFilteredRecords={this.props.stats.totalRecords}
+                      totalNumberOfRecords={this.props.stats.totalUnfilteredRecords} />
       </div>
     );
   }
@@ -59,25 +56,14 @@ var VariantTypeTabs = React.createClass({
 var VariantStats = React.createClass({
   propTypes: {
     variantType: React.PropTypes.string.isRequired,
-    records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-    truthRecords: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+    stats: React.PropTypes.object.isRequired,
     hasLoaded: React.PropTypes.bool.isRequired
-  },
-  stats: function() {
-    var {records, truthRecords} = this.props;
-    return vcfTools.trueFalsePositiveNegative(records, truthRecords);
-  },
-  precRecF1: function(truePositives, falsePositives, totalTrue) {
-    var precision = truePositives / (truePositives + falsePositives),
-        recall = truePositives / this.props.truthRecords.length,
-        f1score = 2 * (precision * recall) / (precision + recall);
-    return {precision, recall, f1score};
   },
   render: function() {
     var fmt = this.props.hasLoaded ? d3.format(',') : _.constant('-'),
         dfmt = this.props.hasLoaded ? d3.format('.4f') : _.constant('-'),
-        {truePositives, falsePositives, falseNegatives} = this.stats(),
-        {precision, recall, f1score} = this.precRecF1(truePositives, falsePositives);
+        {truePositives, falsePositives,
+         falseNegatives, precision, recall, f1score} = this.props.stats;
 
     return (
       <div className="precision-recall">
@@ -118,8 +104,8 @@ var VariantStats = React.createClass({
 var RecordsShown = React.createClass({
   propTypes: {
     hasLoaded: React.PropTypes.bool.isRequired,
-    numberOfFilteredRecords: React.PropTypes.number.isRequired,
-    totalNumberOfRecords: React.PropTypes.number.isRequired
+    numberOfFilteredRecords: React.PropTypes.number,
+    totalNumberOfRecords: React.PropTypes.number
   },
   render: function() {
     var fmt = d3.format(','),
