@@ -71,7 +71,7 @@ function cartesianProductOf() {
   }, [[]]);
 };
 
-// Returns the first token in str,
+// Returns the first token in str, including leading whitespace.
 // e.g. "foo bar" -> "foo", "  baz quux" -> "  baz".
 function firstToken(str) {
   var m = str.match(/[ ]*[^ ]+/);
@@ -82,7 +82,7 @@ function firstToken(str) {
   }
 }
 
-// Returns the string w/o the last token.
+// Returns the string w/o the last token. This leaves trailing whitespace.
 // e.g. "ORDER BY IN" --> "ORDER BY "
 function withoutLastToken(str) {
   var m = str.match(/[^ ]+$/);
