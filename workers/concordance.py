@@ -8,8 +8,8 @@ import uuid
 import json
 import requests
 
-from workers.shared import (hdfsToLocalPath, worker, CYCLEDASH_PORT, RUNS_URL,
-                            CONCORDANCE_URL)
+from workers.shared import (hdfs_to_local_path, worker, CYCLEDASH_PORT,
+                            RUNS_URL, CONCORDANCE_URL)
 
 
 @worker.task
@@ -27,11 +27,11 @@ def concordance(run_ids_key):
             run_json = requests.get(RUNS_URL.format(CYCLEDASH_PORT, run_id)).text
             run = json.loads(run_json)
             concordance_name = run['variantCallerName'] + '-' + str(run['id'])
-            vcfs[concordance_name] = hdfsToLocalPath(run['vcfPath'])
+            vcfs[concordance_name] = hdfs_to_local_path(run['vcfPath'])
             if run['truthVcfPath']:
                 truth_vcfs.add(run['truthVcfPath'])
         if len(truth_vcfs) == 1:
-            vcfs['Truth'] = hdfsToLocalPath(truth_vcfs.pop())
+            vcfs['Truth'] = hdfs_to_local_path(truth_vcfs.pop())
         concordance_data = workers.scripts.concordance_counter.concordance(vcfs)
         print concordance_data
         results = {'concordance_json': concordance_data,
