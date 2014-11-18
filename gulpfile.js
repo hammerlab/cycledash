@@ -22,7 +22,7 @@ var PATHS = {
 };
 
 var REACT_OPTS = {es6: true},
-    BROWSERIFY_OPTS =  _.extend({entries: PATHS.examineSrc, debug: true}, watchify.args)
+    BROWSERIFY_OPTS =  _.extend({entries: PATHS.examineSrc, debug: true}, watchify.args);
 
 
 // Generates compiled JS bundle, automatically recompiling and reloading the
@@ -66,7 +66,8 @@ gulp.task('watch', function() {
 gulp.task('default', ['watch', 'js']);
 
 // Build production resources and copy them into the serving directory.
-gulp.task('prod', ['peg', 'build', 'dalliance'])
+gulp.task('prod', ['peg', 'build', 'dalliance']);
+
 
 // Task which builds the production-ready JS.
 // Minified, polyfilled, JSX & ES6, and browserified.
@@ -79,7 +80,7 @@ gulp.task('build', function() {
                                           // will minify all of the module code.
     .bundle()
     .pipe(source('bundled.js'))
-    .pipe(gulp.dest(PATHS.examineDest))
+    .pipe(gulp.dest(PATHS.examineDest));
 });
 
 // Copy over prebuilt Biodalliance files from node_modules.

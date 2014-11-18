@@ -113,8 +113,6 @@ var VCFTableHeader = React.createClass({
                                          column={column}
                                          sortBys={this.props.sortBys}
                                          isSelected={isSelected}
-                                         handleSortByChange={this.handleSortByChange}
-                                         handleChartToggle={this.handleChartToggle(column)}
                                          handleSortByChange={sortHandle}
                                          handleChartToggle={this.handleChartToggle(column)} />);
       };

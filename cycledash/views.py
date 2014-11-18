@@ -6,8 +6,7 @@ from flask import (request, redirect, Response, render_template, jsonify,
                    url_for, abort)
 import requests
 
-from cycledash import app, db, cache
-from cycledash import app, db, cache
+from cycledash import app, db
 import cycledash.genotypes as gt
 from cycledash.helpers import prepare_request_data, update_object
 from cycledash.models import Run, Concordance
