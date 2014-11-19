@@ -1,0 +1,23 @@
+{
+  "immed": true,
+  "newcap": true,
+  "noarg": true,
+  "sub": true,
+  "undef": true,
+  "trailing": true,
+  "maxlen": 200,
+  "esnext": true,
+  "strict": true,
+  "lastsemic": false,
+  "shadow": true,
+  "browser": true,
+  "node": true,
+  "globals": {
+    "d3": true,
+    "_": true,
+    "$": true,
+    "Browser": true,
+    "React": true
+  },
+  "maxerr": 100000
+}

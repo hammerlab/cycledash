@@ -6,4 +6,6 @@ set -o errexit
 nosetests __tests__/python
 
 npm test
+
+./scripts/lint.sh
 ./scripts/travis-coverage.sh
