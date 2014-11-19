@@ -3,9 +3,7 @@
 
 var _ = require('underscore'),
     d3 = require('d3'),
-    React = require('react/addons'),
-    vcf = require('vcf.js'),
-    vcfTools = require('../vcf.tools');
+    React = require('react/addons');
 
 
 var StatsSummary = React.createClass({

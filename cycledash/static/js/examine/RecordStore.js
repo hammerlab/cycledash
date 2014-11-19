@@ -12,8 +12,6 @@
 "use strict";
 
 var _ = require('underscore'),
-    vcf = require('vcf.js'),
-    vcfTools = require('./vcf.tools'),
     utils = require('./utils'),
     $ = require('jquery'),
     ACTION_TYPES = require('./RecordActions').ACTION_TYPES,
@@ -22,7 +20,6 @@ var _ = require('underscore'),
 
 // Records to show on a page (max records fetched from CycleDash server).
 var RECORD_LIMIT = 250;
-
 var DEFAULT_SORT_BYS = [{columnName: 'contig', order: 'asc'},
                         {columnName: 'position', order: 'asc'}];
 
@@ -92,8 +89,6 @@ function RecordStore(vcfId, dispatcher) {
         selectedRecord = action.record;
         break;
     }
-     // TODO(ihodes): this should be debounced
-
     // Required: lets the dispatcher to know that the Store is done processing.
     return true;
   }
@@ -137,8 +132,8 @@ function RecordStore(vcfId, dispatcher) {
         notifyChange();
       });
   }
-  var updateGenotypes = _.debounce(_.throttle(_updateGenotypes, 500 /* ms */),
-                                   500 /* ms */);
+  var updateGenotypes =
+      _.debounce(_.throttle(_updateGenotypes, 500 /* ms */), 500 /* ms */);
 
   // Returns a JS object query for sending to the backend.
   function queryFrom(range, filters, sortBy, page, limit) {
@@ -333,19 +328,6 @@ function displayableRecords(records, range, variantType, filters) {
   records = recordsOfType(records, variantType);
   records = recordsPassingFilters(records, filters);
   return records;
-}
-
-// Return a comparator for a given order and path within a record.
-function recordComparatorFor(path, order) {
-  if (path === null) {
-    return vcfTools.recordComparator(order);
-  } else {
-    return (a, b) => {
-      var aVal = utils.getIn(a, path),
-          bVal = utils.getIn(b, path);
-      return order === 'asc' ? aVal - bVal : bVal - aVal;
-    };
-  }
 }
 
 // Return deferred GET for the column spec for a given VCF.

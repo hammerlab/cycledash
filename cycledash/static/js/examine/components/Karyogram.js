@@ -6,7 +6,6 @@ var _ = require('underscore'),
     React = require('react/addons'),
     types = require('./types'),
     idiogrammatik = require('idiogrammatik.js'),
-    vcf = require('vcf.js'),
     CHROMOSOMES = require('../../../data/basic-chromosomes');
 
 /**

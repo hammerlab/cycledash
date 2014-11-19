@@ -40,7 +40,7 @@ def contigs(vcf_id):
 
 def get(vcf_id, query):
     """Return a genotypes in a vcf conforming to the given query, as well as a
-    dictof stats calculated on them.
+    dict of stats calculated on them.
 
     If a truth_vcf is associated with this VCF, stats include true/false,
     positive/negative stats, as well as precision, recall, and f1score. Stats
@@ -70,7 +70,7 @@ def get(vcf_id, query):
                                                    vcf_id, fns)
         genotypes = connection.execute(combined_sql, parameters)
         genotypes = [dict(gt) for gt in genotypes.fetchall()]
-    # TODO: dervice truth_vcf, replace None with it
+    # TODO: derive truth_vcf, replace None with it
     stats = calculate_stats(vcf_id, None, query)
     return {'records': genotypes, 'stats': stats}
 
@@ -164,13 +164,13 @@ def _filter_sql(filt, idx, table=''):
     name = 'filter' + str(idx)
     arg = {name: value}
     query += {
-        '=': " = %({})s",
-        '<': "::INTEGER < %({})s",
-        '>': "::INTEGER > %({})s",
-        '>=': "::INTEGER >= %({})s",
-        '<=': "::INTEGER <= %({})s",
-        'RLIKE': " ~* %({})s",
-        'LIKE': " LIKE %({})s"
+        '=': ' = %({})s',
+        '<': '::INTEGER < %({})s',
+        '>': '::INTEGER > %({})s',
+        '>=': '::INTEGER >= %({})s',
+        '<=': '::INTEGER <= %({})s',
+        'RLIKE': ' ~* %({})s',
+        'LIKE': ' LIKE %({})s'
     }.get(op_name, '').format(name)
     return query
 
