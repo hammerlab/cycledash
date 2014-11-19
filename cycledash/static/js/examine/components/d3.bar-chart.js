@@ -15,7 +15,7 @@ function uniq(list) {
 function getter(name) {
   return function(d) {
     return d[name];
-  }
+  };
 }
 
 
@@ -241,7 +241,7 @@ function d3_bars() {
           .text(title)
           .style("text-anchor", "middle")
           .attr("class", "chartTitle")
-          .attr("transform", "translate(" + chartWidth/2 + "," + -margin.top/2  + ")")
+          .attr("transform", "translate(" + chartWidth/2 + "," + -margin.top/2  + ")");
 
       xAxis
         .tickFormat(xTickFormatter);

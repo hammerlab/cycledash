@@ -230,7 +230,7 @@ function addVariantDensity(chromosomes, records, bins) {
     chromosome.bands = _.map(_.range(innerBins), bIdx => {
       var start = bIdx * basesPerBin,
           end = (bIdx + 1) * basesPerBin,
-          value = vcf.fetch(records, chromosome.name, start, end).length;
+          value = 0;  // vcf.fetch(records, chromosome.name, start, end).length;
       return {value, start, end};
     });
   });

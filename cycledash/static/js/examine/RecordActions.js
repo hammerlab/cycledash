@@ -12,7 +12,7 @@ var ACTION_TYPES = {
   SELECT_COLUMN: 'SELECT_COLUMN'
 };
 
-function RecordActions (dispatcher) {
+function getRecordActions(dispatcher) {
   return {
     updateSorter: function({columnName, order}) {
       dispatcher.dispatch({
@@ -65,4 +65,4 @@ function RecordActions (dispatcher) {
   };
 }
 
-module.exports = {ACTION_TYPES, RecordActions};
+module.exports = {ACTION_TYPES, getRecordActions};

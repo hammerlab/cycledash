@@ -1,4 +1,6 @@
 /** @jsx React.DOM */
+'use strict';
+
 var parser = require('../lib/querylanguage.js'),
     _ = require('underscore');
 

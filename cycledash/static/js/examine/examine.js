@@ -4,14 +4,14 @@
 var React = require('react'),
     ExaminePage = require('./components/ExaminePage'),
     Dispatcher = require('./Dispatcher'),
-    RecordStore = require('./RecordStore'),
-    RecordActions = require('./RecordActions').RecordActions;
+    createRecordStore = require('./RecordStore'),
+    getRecordActions = require('./RecordActions').getRecordActions;
 
 
 window.renderExaminePage = function(el, run, igvHttpfsUrl) {
   var dispatcher = new Dispatcher();
-  var recordActions = RecordActions(dispatcher);
-  var recordStore = RecordStore(run.id, dispatcher);
+  var recordActions = getRecordActions(dispatcher);
+  var recordStore = createRecordStore(run.id, dispatcher);
 
   React.renderComponent(<ExaminePage recordStore={recordStore}
                                      recordActions={recordActions}

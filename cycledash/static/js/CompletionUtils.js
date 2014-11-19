@@ -5,6 +5,7 @@
  *
  * @jsx React.DOM
  */
+'use strict';
 
 var _ = require('underscore');
 
@@ -69,7 +70,7 @@ function cartesianProductOf() {
       return _.map(b, y => x.concat([y]));
     });
   }, [[]]);
-};
+}
 
 // Returns the first token in str, including leading whitespace.
 // e.g. "foo bar" -> "foo", "  baz quux" -> "  baz".
