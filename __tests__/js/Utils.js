@@ -4,23 +4,14 @@
  * @jsx
  */
 
-var $ = require('jquery'),
-    vcf = require('vcf.js');
+var $ = require('jquery');
+
 
 /**
  * Apply a CSS selector to a React tree. Returns an array of DOM nodes.
  */
 function findInComponent(selector, component) {
   return $(component.getDOMNode()).find(selector).toArray();
-}
-
-/**
- * Load and parse a VCF file from the local file system.
- */
-function loadVcfData(path) {
-  var vcfParser = vcf.parser();
-  var data = require('fs').readFileSync(path, {encoding: 'utf8'});
-  return vcfParser(data);
 }
 
 // Fake for jQuery's $.get() which returns a test VCF.
@@ -40,6 +31,5 @@ function fakeGet(realPath) {
 
 module.exports = {
   findInComponent,
-  loadVcfData,
   fakeGet
 };

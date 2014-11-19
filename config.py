@@ -6,7 +6,7 @@ if use_reloader and use_reloader.lower() == 'false':
     use_reloader = False
 USE_RELOADER = use_reloader
 
-SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
+SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URI']
 PORT = int(os.environ.get('PORT', 5000))
 WEBHDFS_USER = os.environ['WEBHDFS_USER']
 WEBHDFS_URL = os.environ['WEBHDFS_URL']

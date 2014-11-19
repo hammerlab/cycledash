@@ -1,6 +1,7 @@
 import nose
 
 from cycledash.helpers import underscorize
+from workers.relational_vcfs import vcf_to_csv
 
 
 def test_underscorize():
@@ -13,3 +14,18 @@ def test_underscorize():
     }
     for example, expected in camel_to_underscored_expectations.iteritems():
         assert underscorize(example) == expected
+
+
+def test_vcf_to_csv():
+    import vcf, csv
+    vcfreader = vcf.Reader(open('__tests__/js/data/snv.vcf'))
+    columns = ['sample:DP', 'info:VAF', 'info:DP', 'something']
+    filename = vcf_to_csv(vcfreader, columns, None,
+                          default_values={'something': True})
+
+    with open(filename) as fd:
+        rows = list(csv.reader(fd))
+
+    assert rows[0] == ['44', '', '81', 'True']
+    assert rows[-1] == ['40', '', '74', 'True']
+    assert len(rows) == 20

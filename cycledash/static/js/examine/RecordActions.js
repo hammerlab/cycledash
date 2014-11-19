@@ -6,6 +6,7 @@ var ACTION_TYPES = {
   SORT_BY: 'SORT_BY',
   UPDATE_FILTER: 'UPDATE_FILTER',
   SELECT_RECORD_RANGE: 'SELECT_RECORD_RANGE',
+  REQUEST_PAGE: 'REQUEST_PAGE',
   SELECT_RECORD: 'SELECT_RECORD',
   UPDATE_VARIANT_TYPE: 'UPDATE_VARIANT_TYPE',
   SELECT_COLUMN: 'SELECT_COLUMN'
@@ -13,26 +14,32 @@ var ACTION_TYPES = {
 
 function RecordActions (dispatcher) {
   return {
-    updateSorter: function({path, order}) {
+    updateSorter: function({columnName, order}) {
       dispatcher.dispatch({
         actionType: ACTION_TYPES.SORT_BY,
-        path,
+        columnName,
         order
       });
     },
-    updateFilters: function({path, filterValue}) {
+    updateFilters: function({columnName, type, filterValue}) {
       dispatcher.dispatch({
         actionType: ACTION_TYPES.UPDATE_FILTER,
-        path,
+        columnName,
+        type,
         filterValue
       });
     },
-    updateRecordRange: function({chromosome, start, end}) {
+    updateRecordRange: function({contig, start, end}) {
       dispatcher.dispatch({
         actionType: ACTION_TYPES.SELECT_RECORD_RANGE,
         start,
         end,
-        chromosome
+        contig
+      });
+    },
+    requestPage: function() {
+      dispatcher.dispatch({
+        actionType: ACTION_TYPES.REQUEST_PAGE
       });
     },
     selectRecord: function(record) {
@@ -47,16 +54,15 @@ function RecordActions (dispatcher) {
         variantType
       });
     },
-    selectColumn: function({path, info, name}) {
+    selectColumn: function({columnName, info, name}) {
       dispatcher.dispatch({
         actionType: ACTION_TYPES.SELECT_COLUMN,
-        path,
+        columnName,
         info,
         name
       });
     }
   };
 }
-
 
 module.exports = {ACTION_TYPES, RecordActions};

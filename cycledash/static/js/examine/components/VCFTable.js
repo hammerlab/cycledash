@@ -1,5 +1,5 @@
 /** @jsx React.DOM */
-"use strict";
+'use strict';
 
 var _ = require('underscore'),
     React = require('react/addons'),
@@ -16,23 +16,22 @@ var VCFTable = React.createClass({
     selectedColumns: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     // Currently selected VCF record.
     selectedRecord: React.PropTypes.object,
-    // List of chromosomes found in the VCF
-    chromosomes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
+    // List of contigs found in the VCF
+    contigs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     // The position object, from ExaminePage, denoting the current range selected
     range: types.PositionType,
     // List of VCF records
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-    // The VCF header, used to get information about the INFO fields
-    header: React.PropTypes.object.isRequired,
     // Attribute by which we are sorting
-    sortBy: React.PropTypes.object.isRequired,
+    sortBys: React.PropTypes.array.isRequired,
     // Function which takes a chart attribute name and propagates the change up
     handleChartChange: React.PropTypes.func.isRequired,
     handleSortByChange: React.PropTypes.func.isRequired,
     handleFilterUpdate: React.PropTypes.func.isRequired,
-    handleChromosomeChange: React.PropTypes.func.isRequired,
+    handleContigChange: React.PropTypes.func.isRequired,
     handleRangeChange: React.PropTypes.func.isRequired,
-    handleSelectRecord: React.PropTypes.func.isRequired
+    handleSelectRecord: React.PropTypes.func.isRequired,
+    handleRequestPage: React.PropTypes.func.isRequired
   },
   // Call this to scroll a record to somewhere close to the top of the page.
   scrollRecordToTop: function(record) {
@@ -46,23 +45,23 @@ var VCFTable = React.createClass({
   },
   render: function() {
     return (
-      <table className="vcf-table" ref="vcfTable">
+      <table className='vcf-table' ref='vcfTable'>
         <VCFTableHeader columns={this.props.columns}
                         selectedColumns={this.props.selectedColumns}
-                        sortBy={this.props.sortBy}
-                        header={this.props.header}
+                        sortBys={this.props.sortBys}
                         handleSortByChange={this.props.handleSortByChange}
                         handleChartChange={this.props.handleChartChange}
                         records={this.props.records} />
         <VCFTableFilter columns={this.props.columns}
                         range={this.props.range}
-                        chromosomes={this.props.chromosomes}
+                        contigs={this.props.contigs}
                         handleFilterUpdate={this.props.handleFilterUpdate}
-                        handleChromosomeChange={this.props.handleChromosomeChange}
+                        handleContigChange={this.props.handleContigChange}
                         handleRangeChange={this.props.handleRangeChange} />
         <VCFTableBody records={this.props.records}
                       columns={this.props.columns}
                       selectedRecord={this.props.selectedRecord}
+                      handleRequestPage={this.props.handleRequestPage}
                       handleSelectRecord={this.props.handleSelectRecord} />
       </table>
     );
@@ -71,10 +70,9 @@ var VCFTable = React.createClass({
 
 var VCFTableHeader = React.createClass({
   propTypes: {
-    header: React.PropTypes.object.isRequired,
     selectedColumns: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     columns: React.PropTypes.object.isRequired,
-    sortBy: React.PropTypes.object.isRequired,
+    sortBys: React.PropTypes.array.isRequired,
     handleChartChange: React.PropTypes.func.isRequired,
     handleSortByChange: React.PropTypes.func.isRequired,
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
@@ -84,52 +82,48 @@ var VCFTableHeader = React.createClass({
       this.props.handleChartChange(column);
     };
   },
-  handleSortByChange: function(e) {
-    var currentPath = e.currentTarget.parentElement
-        .attributes.getNamedItem('data-attribute')
-        .value.split('::');
-    var {path, order} = this.props.sortBy;
-    if (!path || _.isEqual(path, currentPath)) {
-      order = order == 'asc' ? 'desc' : 'asc';
-    } else {
-      order = 'asc';
+  handleSortByChange: function(columnName) {
+    return (e) => {
+      var sortBy = this.props.sortBys[0],
+          order = 'asc';
+      if (sortBy && sortBy.columnName == columnName) {
+        order = sortBy.order == 'asc' ? 'desc' : 'asc'
+      }
+      this.props.handleSortByChange({columnName, order});
     }
-    if (currentPath[0] === 'position') {
-      path = null;
-    } else {
-      path = currentPath;
-    }
-    this.props.handleSortByChange({path, order});
   },
   render: function() {
     var uberColumns = [],
         columnHeaders = [];
 
-    window.cols = [];
     _.each(this.props.columns, (columns, topLevelColumnName) => {
       uberColumns.push(
-        <th colSpan={_.keys(columns).length} className="uber-column" key={topLevelColumnName}>
+        <th colSpan={_.keys(columns).length} className='uber-column' key={topLevelColumnName}>
           {topLevelColumnName}
         </th>
       );
       for (var columnName in columns) {
-        var column = columns[columnName];
-        var isSelected = _.any(this.props.selectedColumns, el => _.isEqual(el, column));
+        var column = columns[columnName],
+            isSelected = _.any(this.props.selectedColumns, el => _.isEqual(el, column)),
+            sortHandle = this.handleSortByChange(column.path.join(':'));
+
         columnHeaders.push(<ColumnHeader info={column.info}
-                                         key={column.path.join('::')}
+                                         key={column.path.join(':')}
                                          column={column}
-                                         sortBy={this.props.sortBy}
+                                         sortBys={this.props.sortBys}
                                          isSelected={isSelected}
-                                         handleSortByChange={this.handleSortByChange}
-                                         handleChartToggle={this.handleChartToggle(column)}
-                                         records={this.props.records} />);
+                                         records={this.props.records}
+                                         handleSortByChange={sortHandle}
+                                         handleChartToggle={this.handleChartToggle(column)} />);
       };
     });
+
+    var sortBy = this.props.sortBys[0];
     var sorterClasses = React.addons.classSet({
       'sort': true,
-      'desc': this.props.sortBy.order === 'desc',
-      'asc': this.props.sortBy.order === 'asc',
-      'sorting-by': this.props.sortBy.path === null
+      'desc': sortBy.order === 'desc',
+      'asc': sortBy.order === 'asc',
+      'sorting-by': sortBy.columnName == 'position'
     });
 
     return (
@@ -139,11 +133,11 @@ var VCFTableHeader = React.createClass({
           {uberColumns}
         </tr>
         <tr>
-          <th data-attribute="position">
-            chr::position
-            <a className={sorterClasses} onClick={this.handleSortByChange}></a>
+          <th data-attribute='position'>
+            contig::position
+            <a className={sorterClasses} onClick={this.handleSortByChange('position')}></a>
           </th>
-          <th className="ref">REF</th><th className="arrow">→</th><th className="alt">ALT</th>
+          <th className='ref'>REF</th><th className='arrow'>→</th><th className='alt'>ALT</th>
           {columnHeaders}
         </tr>
       </thead>
@@ -158,16 +152,14 @@ var ColumnHeader = React.createClass({
     handleChartToggle: React.PropTypes.func.isRequired,
     isSelected: React.PropTypes.bool.isRequired,
     handleSortByChange: React.PropTypes.func.isRequired,
-    sortBy: React.PropTypes.object.isRequired,
-    records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
+    sortBys: React.PropTypes.array.isRequired,
+    records: React.PropTypes.array.isRequired
   },
   isChartable: function() {
-    var hasValues = _.some(this.props.records, record =>
-      _.isFinite(utils.getIn(record, this.props.column.path))
-    );
-
-    return (hasValues &&
-            _.contains(['Integer', 'Float'], this.props.info['Type']));
+    var props = this.props,
+        hasValues = _.some(props.records, r =>
+                           _.isFinite(r[props.column.columnName]));
+    return (hasValues && _.contains(['Integer', 'Float'], props.info.type));
   },
   render: function() {
     var tooltip;
@@ -179,19 +171,23 @@ var ColumnHeader = React.createClass({
       'selected': this.props.isSelected,
     });
 
-    var sortByPath = this.props.sortBy.path,
-        order = this.props.sortBy.order;
-    if (sortByPath) var sortingBy = _.isEqual(sortByPath, this.props.column.path);
+    var order = null,
+        sortingBy = false,
+        sortBy = this.props.sortBys[0];
+    if (sortBy) {
+      sortingBy = sortBy.columnName == this.props.column.path.join(':'),
+      order = sortBy.order;
+    }
     var aClasses = React.addons.classSet({
-      'sorting-by': sortingBy,
-      'desc': order === 'desc',
-      'asc': order === 'asc',
-      'sort': true
-    });
+        'sorting-by': sortingBy,
+        'desc': order === 'desc',
+        'asc': order === 'asc',
+        'sort': true
+      });
 
     if (this.isChartable()) {
       var sorter = <a className={aClasses} onClick={this.props.handleSortByChange}></a>;
-      var chartToggle = (<span className="chartable"
+      var chartToggle = (<span className='chartable'
                                onClick={this.props.handleChartToggle}>
                            {this.props.column.name}
                          </span>);
@@ -200,7 +196,7 @@ var ColumnHeader = React.createClass({
     }
 
     return (
-      <th className={thClasses} data-attribute={this.props.column.path.join('::')}>
+      <th className={thClasses} data-attribute={this.props.column.path.join(':')}>
         {chartToggle}
         {tooltip}
         {sorter}
@@ -215,14 +211,14 @@ var InfoColumnTooltip = React.createClass({
     info: React.PropTypes.object.isRequired
   },
   render: function() {
-    var infoText = this.props.info['Description'],
-        infoType = this.props.info['Type'],
+    var infoText = this.props.info.description,
+        infoType = this.props.info.type,
         path = this.props.column.path.join(' → ');
     return (
-      <div className="tooltip">
-        <p className="description">{infoText}</p>
-        <p className="description">{path}</p>
-        <p className="type">Type: <strong>{infoType}</strong></p>
+      <div className='tooltip'>
+        <p className='description'>{infoText}</p>
+        <p className='description'>{path}</p>
+        <p className='type'>Type: <strong>{infoType}</strong></p>
       </div>
     );
   }
@@ -230,37 +226,46 @@ var InfoColumnTooltip = React.createClass({
 
 var VCFTableFilter = React.createClass({
   propTypes: {
-    chromosomes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
+    contigs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     range: types.PositionType,
-    handleChromosomeChange: React.PropTypes.func.isRequired,
+    handleContigChange: React.PropTypes.func.isRequired,
     handleRangeChange: React.PropTypes.func.isRequired,
     columns: React.PropTypes.object.isRequired
   },
-  handleChromosomeChange: function(e) {
-    var chromosome = this.refs.chromosome.getDOMNode().value;
-    if (chromosome === 'all') chromosome = null;
-    this.props.handleChromosomeChange(chromosome);
+  handleContigChange: function(e) {
+    var contig = this.refs.contig.getDOMNode().value;
+    if (contig === 'all') contig = null;
+    this.props.handleContigChange(contig);
   },
   handleRangeChange: function(e) {
     var start = this.refs.startPos.getDOMNode().value,
-    end = this.refs.endPos.getDOMNode().value,
-    chromosome = this.props.range.chromosome;
-    this.props.handleRangeChange({chromosome,
+        end = this.refs.endPos.getDOMNode().value,
+        contig = this.props.range.contig;
+    this.props.handleRangeChange({contig,
                                   start: Number(start) || null,
                                   end: Number(end) || null});
   },
   handleFilterUpdate: function(path) {
     return e => {
-      this.props.handleFilterUpdate({filterValue: e.currentTarget.value, path: path});
+      var value = e.currentTarget.value;
+      var op;
+      if (value.length > 1 && _.contains(['LIKE', 'RLIKE', '>', '<', '='], value[0])) {
+        op = value[0];
+        value = value.slice(1);
+      } else {
+        op = 'RLIKE'
+      }
+      var filter = {filterValue: value, columnName: path.join(':'), type: op};
+      this.props.handleFilterUpdate(filter);
     };
   },
   render: function() {
     var {range, kgram} = this.props,
         {start, end} = range;
 
-    var chromosomeOptions = this.props.chromosomes.map(function(chromosome) {
+    var contigOptions = this.props.contigs.map(function(contig) {
       return (
-        <option name="chromosome" key={chromosome} value={chromosome}>{chromosome}</option>
+        <option name='contig' key={contig} value={contig}>{contig}</option>
       );
     }.bind(this));
     var columnFilterFields = [];
@@ -269,7 +274,7 @@ var VCFTableFilter = React.createClass({
         var column = columns[columnName];
         columnFilterFields.push(
           <th key={topLevelColumnName + column.name}>
-            <input name={column.name} className="infoFilter" type="text"
+            <input name={column.name} className='infoFilter' type='text'
                    onChange={this.handleFilterUpdate(column.path)} />
           </th>
         );
@@ -278,27 +283,27 @@ var VCFTableFilter = React.createClass({
     return (
       <thead>
         <tr>
-          <th id="range">
-            <select onChange={this.handleChromosomeChange}
-                    ref="chromosome" value={this.props.range.chromosome || 'all'}>
-              <option name="chromosome" key="all" value="all">&lt;all&gt;</option>
-              {chromosomeOptions}
+          <th id='range'>
+            <select onChange={this.handleContigChange}
+                    ref='contig' value={this.props.range.contig || 'all'}>
+              <option name='contig' key='all' value='all'>&lt;all&gt;</option>
+              {contigOptions}
             </select>
-            <input name="start" type="text" placeholder="start"
-                   disabled={!this.props.range.chromosome}
-                   ref="startPos" value={start || ''} onChange={this.handleRangeChange} />
-            <input name="end" type="text" placeholder="end"
-                   disabled={!this.props.range.chromosome}
-                   ref="endPos" value={end || ''} onChange={this.handleRangeChange} />
+            <input name='start' type='text' placeholder='start'
+                   disabled={!this.props.range.contig}
+                   ref='startPos' value={start || ''} onChange={this.handleRangeChange} />
+            <input name='end' type='text' placeholder='end'
+                   disabled={!this.props.range.contig}
+                   ref='endPos' value={end || ''} onChange={this.handleRangeChange} />
           </th>
-          <th className="ref">
-            <input name="ref" className="infoFilter" type="text"
-                   onChange={this.handleFilterUpdate(['REF'])} />
+          <th className='ref'>
+            <input name='ref' className='infoFilter' type='text'
+                   onChange={this.handleFilterUpdate(['reference'])} />
           </th>
           <th>→</th>
-          <th className="alt">
-            <input name="alt" className="infoFilter" type="text"
-                   onChange={this.handleFilterUpdate(['ALT'])} />
+          <th className='alt'>
+            <input name='alt' className='infoFilter' type='text'
+                   onChange={this.handleFilterUpdate(['alternates'])} />
           </th>
           {columnFilterFields}
         </tr>
@@ -314,29 +319,26 @@ var VCFTableBody = React.createClass({
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     columns: React.PropTypes.object.isRequired,
     selectedRecord: React.PropTypes.object,
-    handleSelectRecord: React.PropTypes.func.isRequired
+    handleSelectRecord: React.PropTypes.func.isRequired,
+    handleRequestPage: React.PropTypes.func.isRequired
   },
-  BOTTOM_BUFFER: 500, // distance in px from bottom at which we load more records
-  getInitialState: function() {
-    return {numRowsToShow: 100};
-  },
+  BOTTOM_BUFFER: 5000, // distance in px from bottom at which we load more records
   componentDidMount: function() {
+    var handleRequestPage = this.props.handleRequestPage;
     $(window).on('scroll.vcftable', () => {
       // Show more rows if the browser viewport is close to the bottom and
       // there are more rows to be shown.
-      if (this.state.numRowsToShow >= this.props.records.length) return;
-
       var $table = $(this.refs.lazyload.getDOMNode()),
           tableBottom = $table.position().top + $table.height(),
           windowBottom = $(window).scrollTop() + $(window).height();
       if (tableBottom < windowBottom + this.BOTTOM_BUFFER) {
-        this.setState({numRowsToShow: this.state.numRowsToShow + 100});
+        handleRequestPage();
       }
     });
 
     $(this.refs.lazyload.getDOMNode()).on('click', 'tr', (e) => {
-      this.props.handleSelectRecord(
-          this.props.records[$(e.currentTarget).index()]);
+      var selectedRecord = this.props.records[$(e.currentTarget).index()];
+      this.props.handleSelectRecord(selectedRecord);
     });
   },
   componentWillUnmount: function() {
@@ -344,15 +346,19 @@ var VCFTableBody = React.createClass({
     $(this.refs.lazyload.getDOMNode()).off('click');
   },
   render: function() {
-    var selectedRecord = this.props.selectedRecord;
-    var selKey = selectedRecord ? selectedRecord.__KEY__ : null;
-    var rows = _.first(this.props.records, this.state.numRowsToShow)
-        .map((record, idx) => <VCFRecord record={record}
-                                         columns={this.props.columns}
-                                         key={record.__KEY__}
-                                         isSelected={record.__KEY__ == selKey} />);
+    var selectedRecord = this.props.selectedRecord,
+        selKey = selectedRecord ? selectedRecord.__KEY__ : null,
+        rows = this.props.records.map((record, idx) => {
+          var key = record.contig + record.position + record.reference + record.alternates;
+          return (
+              <VCFRecord record={record}
+                         columns={this.props.columns}
+                         key={key}
+                         isSelected={false && record.__KEY__ == selKey} />
+          );
+        });
     return (
-      <tbody ref="lazyload">
+      <tbody ref='lazyload'>
         {rows}
       </tbody>
     );
@@ -371,8 +377,8 @@ var VCFRecord = React.createClass({
       for (var columnName in columns) {
         var column = columns[columnName];
         tds.push(
-          <td key={column.path.join('::')} title={column.path.join('→')}>
-            {String(utils.getIn(this.props.record, column.path))}
+          <td key={column.path.join(':')} title={column.path.join('→')}>
+            {String(this.props.record[column.path.join(':')])}
           </td>
         );
       }
@@ -381,10 +387,10 @@ var VCFRecord = React.createClass({
     var record = this.props.record;
     return (
       <tr className={classes}>
-        <td title="chr::position" className="pos">{record.CHROM}::{record.POS}</td>
-        <td className="ref" title={record.REF}>{record.REF}</td>
-        <td className="arrow">→</td>
-        <td className="alt" title={record.ALT}>{record.ALT}</td>
+        <td title='contig:position' className='pos'>{record.contig}::{record.position}</td>
+        <td className='ref' title={record.reference}>{record.reference}</td>
+        <td className='arrow'>→</td>
+        <td className='alt' title={record.alternates}>{record.alternates}</td>
         {tds}
       </tr>
     );

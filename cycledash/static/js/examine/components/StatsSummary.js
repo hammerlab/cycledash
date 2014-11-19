@@ -3,33 +3,29 @@
 
 var _ = require('underscore'),
     d3 = require('d3'),
-    React = require('react/addons'),
-    vcf = require('vcf.js'),
-    vcfTools = require('../vcf.tools');
+    React = require('react/addons');
 
 
 var StatsSummary = React.createClass({
   propTypes: {
     hasLoaded: React.PropTypes.bool.isRequired,
-    truthRecords: React.PropTypes.arrayOf(React.PropTypes.object),
-    records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-    totalRecords: React.PropTypes.number.isRequired,
+    stats: React.PropTypes.object.isRequired,
     handleVariantTypeChange: React.PropTypes.func.isRequired,
     variantType: React.PropTypes.string.isRequired
   },
   render: function() {
-    if (this.props.truthRecords === null) return null;
+    var props = this.props;
+    if (props.truthRecords === null) return null;
     return (
       <div id="stats-container">
-        <VariantTypeTabs variantType={this.props.variantType}
-                         handleVariantTypeChange={this.props.handleVariantTypeChange} />
-        <VariantStats variantType={this.props.variantType}
-                      hasLoaded={this.props.hasLoaded}
-                      truthRecords={this.props.truthRecords}
-                      records={this.props.records} />
-        <RecordsShown hasLoaded={this.props.hasLoaded}
-                      numberOfFilteredRecords={this.props.records.length}
-                      totalNumberOfRecords={this.props.totalRecords} />
+        <VariantTypeTabs variantType={props.variantType}
+                         handleVariantTypeChange={props.handleVariantTypeChange} />
+        <VariantStats variantType={props.variantType}
+                      hasLoaded={props.hasLoaded}
+                      stats={props.stats} />
+        <RecordsShown hasLoaded={props.hasLoaded}
+                      numberOfFilteredRecords={props.stats.totalRecords}
+                      totalNumberOfRecords={props.stats.totalUnfilteredRecords} />
       </div>
     );
   }
@@ -59,25 +55,14 @@ var VariantTypeTabs = React.createClass({
 var VariantStats = React.createClass({
   propTypes: {
     variantType: React.PropTypes.string.isRequired,
-    records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-    truthRecords: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+    stats: React.PropTypes.object.isRequired,
     hasLoaded: React.PropTypes.bool.isRequired
-  },
-  stats: function() {
-    var {records, truthRecords} = this.props;
-    return vcfTools.trueFalsePositiveNegative(records, truthRecords);
-  },
-  precRecF1: function(truePositives, falsePositives, totalTrue) {
-    var precision = truePositives / (truePositives + falsePositives),
-        recall = truePositives / this.props.truthRecords.length,
-        f1score = 2 * (precision * recall) / (precision + recall);
-    return {precision, recall, f1score};
   },
   render: function() {
     var fmt = this.props.hasLoaded ? d3.format(',') : _.constant('-'),
         dfmt = this.props.hasLoaded ? d3.format('.4f') : _.constant('-'),
-        {truePositives, falsePositives, falseNegatives} = this.stats(),
-        {precision, recall, f1score} = this.precRecF1(truePositives, falsePositives);
+        {truePositives, falsePositives,
+         falseNegatives, precision, recall, f1score} = this.props.stats;
 
     return (
       <div className="precision-recall">

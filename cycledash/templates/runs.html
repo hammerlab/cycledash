@@ -121,9 +121,9 @@ input.selector {
         <input type="checkbox" value="{{ run['id'] }}" class="selector">
         <a class="btn btn-default btn-xs" href="/runs/{{ run['id'] }}/examine">Examine</a>
       </td>
-      <td>{{ run['variantCallerName'] }}</td>
-      <td>{{ run['submittedAt'] }}</td>
-      <td>{{ run['dataset'] }}</td>
+      <td>{{ run['caller_name'] }}</td>
+      <td>{{ run['created_at'] }}</td>
+      <td>{{ run['dataset_name'] }}</td>
     </tr>
     <tr class="run-info" data-runId="{{ run['id'] }}">
       <td colspan=4>
