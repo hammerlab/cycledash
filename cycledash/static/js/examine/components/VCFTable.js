@@ -87,10 +87,10 @@ var VCFTableHeader = React.createClass({
       var sortBy = this.props.sortBys[0],
           order = 'asc';
       if (sortBy && sortBy.columnName == columnName) {
-        order = sortBy.order == 'asc' ? 'desc' : 'asc'
+        order = sortBy.order == 'asc' ? 'desc' : 'asc';
       }
       this.props.handleSortByChange({columnName, order});
-    }
+    };
   },
   render: function() {
     var uberColumns = [],
@@ -115,7 +115,7 @@ var VCFTableHeader = React.createClass({
                                          records={this.props.records}
                                          handleSortByChange={sortHandle}
                                          handleChartToggle={this.handleChartToggle(column)} />);
-      };
+      }
     });
 
     var sortBy = this.props.sortBys[0];
@@ -175,7 +175,7 @@ var ColumnHeader = React.createClass({
         sortingBy = false,
         sortBy = this.props.sortBys[0];
     if (sortBy) {
-      sortingBy = sortBy.columnName == this.props.column.path.join(':'),
+      sortingBy = sortBy.columnName == this.props.column.path.join(':');
       order = sortBy.order;
     }
     var aClasses = React.addons.classSet({
@@ -185,14 +185,15 @@ var ColumnHeader = React.createClass({
         'sort': true
       });
 
+    var chartToggle, sorter=null;
     if (this.isChartable()) {
-      var sorter = <a className={aClasses} onClick={this.props.handleSortByChange}></a>;
-      var chartToggle = (<span className='chartable'
-                               onClick={this.props.handleChartToggle}>
-                           {this.props.column.name}
-                         </span>);
+      sorter = <a className={aClasses} onClick={this.props.handleSortByChange}></a>;
+      chartToggle = (<span className='chartable'
+                           onClick={this.props.handleChartToggle}>
+                       {this.props.column.name}
+                     </span>);
     } else {
-      var chartToggle = <span>{this.props.column.name}</span>;
+      chartToggle = <span>{this.props.column.name}</span>;
     }
 
     return (
@@ -253,7 +254,7 @@ var VCFTableFilter = React.createClass({
         op = value[0];
         value = value.slice(1);
       } else {
-        op = 'RLIKE'
+        op = 'RLIKE';
       }
       var filter = {filterValue: value, columnName: path.join(':'), type: op};
       this.props.handleFilterUpdate(filter);

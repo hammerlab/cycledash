@@ -24,7 +24,7 @@ var DEFAULT_SORT_BYS = [{columnName: 'contig', order: 'asc'},
                         {columnName: 'position', order: 'asc'}];
 
 
-function RecordStore(vcfId, dispatcher) {
+function createRecordStore(vcfId, dispatcher) {
   // Initial state of the store. This is mutable. There be monsters.
   var hasLoaded = false,
       loadError = null,
@@ -346,4 +346,4 @@ function deferredGenotypes(vcfId, query) {
   return $.get('/runs/' + vcfId + '/genotypes?q=' + queryString);
 }
 
-module.exports = RecordStore;
+module.exports = createRecordStore;

@@ -13,6 +13,7 @@
  *
  * @jsx React.DOM
  */
+'use strict';
 
 var _ = require('underscore');
 var {
@@ -62,11 +63,10 @@ function completionsForExpectation(expectation, columnNames, rejectedText) {
       return ["AND " + columnNames[0] + " = 0"];
 
     case 'range':
-      if (rejectedText == '') {
+      if (rejectedText === '') {
         return ['20:'];
-      } else {
-        return [rejectedText + '-'];
       }
+      return [rejectedText + '-'];
 
     default:
       if (expectation.type == 'literal') {
@@ -82,7 +82,7 @@ function completionsForExpectation(expectation, columnNames, rejectedText) {
 function getCompletions(query, parse, columnNames) {
   var completions = [];
 
-  if (query == '') {
+  if (query === '') {
     // Initial possibilities: filter, order, range
     // Only the first token matters for completion, but these need to be valid
     // queries in order to not be filtered out later.
@@ -128,7 +128,7 @@ function getCompletions(query, parse, columnNames) {
   })));
 
   return completions;
-};
+}
 
 /**
  * Returns a typeahead.js-compatible completion source for a CQL grammar.
@@ -144,7 +144,7 @@ function getCompletions(query, parse, columnNames) {
 function createTypeaheadSource(parse, columnNames) {
   return function(query, callback) {
     callback(getCompletions(query, parse, columnNames).map(v => ({value:v})));
-  }
+  };
 }
 
 module.exports = {

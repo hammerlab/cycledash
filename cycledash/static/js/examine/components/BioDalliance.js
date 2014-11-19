@@ -35,7 +35,7 @@ var BioDalliance = React.createClass({
   }),
   render: function() {
     var style = {};
-    if (this.props.selectedRecord == null ||
+    if (!this.props.selectedRecord ||
         this.state.normalBaiChunks == CHUNKS_LOADING ||
         this.state.tumorBaiChunks == CHUNKS_LOADING) {
       style = {display: 'none'};
@@ -77,7 +77,7 @@ var BioDalliance = React.createClass({
         var blob = new Blob([bytes]);
         blob.name = id++;
         return blob;
-      }
+      };
     })();
 
     var vcfSource = (name, path, bytes) => {
@@ -164,7 +164,7 @@ var BioDalliance = React.createClass({
                             ['tumorBaiChunks', this.props.tumorBamPath]];
       
     propBamPathPairs.forEach(v => {
-        [propName, bamPath] = v;
+        var [propName, bamPath] = v;
         if (!bamPath) {
           this.setState(_.object([propName], [CHUNKS_NOT_AVAILABLE]));
           return;
@@ -186,7 +186,7 @@ var BioDalliance = React.createClass({
     $(this.refs.inspector.getDOMNode()).on('mousewheel.biodalliance', (e) => {
       var $target = $(e.target);
       var $tiers = $target.parents('.tier.pileup');
-      if ($tiers.length == 0) {
+      if ($tiers.length === 0) {
         e.preventDefault();
       }
     }).on('mousewheel.biodalliance', '.tier.pileup', (e, d) => {
