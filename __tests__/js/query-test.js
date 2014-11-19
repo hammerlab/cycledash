@@ -105,5 +105,7 @@ describe('Query Language', function() {
   it('should reject syntax errors', function() {
     expectParse('ORDER', {error: 'SyntaxError'});
     expectParse('A >', {error: 'SyntaxError'});
+    expectParse('A > 0 ANDB < 0', {error: 'SyntaxError'});
+    expectParse('ORDER BYB', {error: 'SyntaxError'});
   });
 });
