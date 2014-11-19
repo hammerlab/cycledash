@@ -137,6 +137,7 @@ CycleDash uses [nosetests](https://nose.readthedocs.org/en/latest/) for Python t
 To run tests:
 
 ```
+source ENV.sh  # make sure all our environment variables are around
 nosetests __tests__/python   # Run Python tests
 npm test   # Run JS tests
 ```
