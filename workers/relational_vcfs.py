@@ -7,8 +7,6 @@ import tempfile
 import sqlalchemy
 
 
-CHUNK_SIZE = 100 # size of relations to inserted at once
-
 SAMPLE_PREFIX = 'sample:'
 INFO_PREFIX = 'info:'
 SAMPLE_NAME_KEY = 'sample_name'
@@ -19,12 +17,12 @@ COLUMN_MAPPING = {'position': 'POS', 'contig': 'CHROM',
 
 
 def columns(table):
-    """Return an OrderedDict of columns: types in  the given Table."""
-    return OrderedDict((c.name, c.type.python_type) for c in table.columns)
+    """Return a list of columns in the given table."""
+    return [c.name for c in table.columns]
 
 
 def prefix_keys(dct, prefix):
-    """Return a dict dct with all keys prefixed with string prefix."""
+    """Return a dict with all keys prefixed with string prefix."""
     return {prefix + str(key): val for key, val in dct.iteritems()}
 
 
@@ -50,13 +48,13 @@ def flatten_record(record, info_prefix, sample_prefix, sample_name_key):
 
 def flat_record_to_relation(flat_record, columns,
                             column_mapping, default_values):
-    """Return a list generated from record conforming to types in
-    columns, and the fields corresponding to the values in the relation. The
-    relation is in the same order as columns.
+    """Return a list generated from flat_record conforming to types in
+    columns, and the fields corresponding to the values in the flat_record.
+    The relation is in the same order as columns.
 
     Args:
-        flat_record: A dict of {field: value} represending a VCF record.
-        columns: An OrderedDict of {field: python_types}.
+        flat_record: A dict of {field: value} representing a VCF record.
+        columns: An list of column names.
         column_mapping: A dict mapping field names in columns to field names in
             record, if some are expected to be named differently.
         default_values: A dict of {field: value} to replace values of a certain
@@ -70,17 +68,17 @@ def flat_record_to_relation(flat_record, columns,
         ValueError: An error occurred casting a record value to a column's type.
     """
     relation = []
-    for field, _ in columns.iteritems():
+    for field in columns:
         record_field = field
         value = None
         if field in column_mapping:
             record_field = column_mapping[field]
-        if field in default_values:
-            value = default_values.get(field)
-        elif record_field in flat_record:
+        if record_field in flat_record:
             value = flat_record[record_field]
             # We ignore all types (== TEXT).
             value = str(value) if value is not None else ''
+        elif record_field in default_values:
+            value = default_values.get(field)
         # Append it even if it's None; every relation is fully defined.
         relation.append(value)
     return relation
@@ -106,32 +104,23 @@ def records_to_relations(records, columns, **kwargs):
     return relations
 
 
-def vcf_to_csv(vcfdata, table, filename, **kwargs):
+def vcf_to_csv(vcfdata, columns, filename, **kwargs):
     """Insert all flattened records in VCF into a CSV.
 
     Args:
         vcfdata: A vcf.Reader of records.
-        table: A sqlalchemy.Table that the CSV header is derived from.
+        columns: An list of columns.
         filename: The name of the CSV to be written to.
-    Optional Args:
-        info_prefix: String prefix to apply to INFO fields in the VCF.
-        sample_prefix: String prefix to apply to SAMPLE fields in the VCF.
-        sample_name_key: Field name in table for the name of the sample in VCF.
-        default_values: A dict of {field: value} to replace values of a certain
-            field in relation with the default value.
-        column_mapping: A dict of {field: field} mapping field names in columns
-            to field names in record, if some are named differently.
 
     Returns:
-        None.
+        The name of the CSV file.
     """
     if filename is None:
         csvfile = tempfile.NamedTemporaryFile(delete=False)
         filename = csvfile.name
     else:
         csvfile = open(filename, 'w')
-    table_cols = columns(table)
-    relations = records_to_relations(vcfdata, table_cols, **kwargs)
+    relations = records_to_relations(vcfdata, columns, **kwargs)
     csv.writer(csvfile).writerows(relations)
     csvfile.close()
     return filename
@@ -150,13 +139,28 @@ def insert_csv(filename, tablename, engine):
 def insert_vcf_with_copy(vcfreader, tablename, engine, **kwargs):
     """Inserts the calls from the VCF into the given table in engine
 
+    Args:
+        vcfreader: A PyVCF Reader object on the VCf being inserted.
+        tablename: The string name of the table being inserted into.
+        engine: A SQLAlchemy engine object to the datbase.
+
+    Optional Args:
+        info_prefix: String prefix to apply to INFO fields in the VCF.
+        sample_prefix: String prefix to apply to SAMPLE fields in the VCF.
+        sample_name_key: Field name in table for the name of the sample in VCF.
+        default_values: A dict of {field: value} to replace values of a certain
+            field in relation with the default value.
+        column_mapping: A dict of {field: field} mapping field names in columns
+            to field names in record, if some are named differently.
+
     Optimized via COPY from a temporary CSV.
     """
     con = engine.connect()
     meta = sqlalchemy.MetaData(bind=con)
     meta.reflect()
     table = meta.tables.get(tablename)
-    filename = vcf_to_csv(vcfreader, table, None, **kwargs)
+    table_cols = columns(table)
+    filename = vcf_to_csv(vcfreader, table_cols, None, **kwargs)
     insert_csv(filename, tablename, engine)
     con.close()
 

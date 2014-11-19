@@ -24,25 +24,25 @@ DATABASE_URI = os.environ['DATABASE_URI']
 worker = celery.Celery(broker=CELERY_BROKER, backend=CELERY_BACKEND)
 
 
-def _getHdfsClient():
+def _get_hdfs_client():
     return pywebhdfs.webhdfs.PyWebHdfsClient(host=WEBHDFS_HOST,
                                              port=WEBHDFS_PORT,
                                              user_name=config.WEBHDFS_USER)
 
 
-def getContentsFromHdfs(hdfs_path):
+def get_contents_from_hdfs(hdfs_path):
     if not hdfs_path:
         raise ValueError('HDFS path must be provided.')
 
     if hdfs_path.startswith('/'):
         hdfs_path = hdfs_path[1:]
 
-    return _getHdfsClient().read_file(hdfs_path)
+    return _get_hdfs_client().read_file(hdfs_path)
 
 
-def doesHdfsFileExist(hdfs_path):
+def does_hdfs_file_exist(hdfs_path):
     """Determine whether a file exists on HDFS. Shouldn't have leading '/'."""
-    hdfs = _getHdfsClient()
+    hdfs = _get_hdfs_client()
     try:
         stat = hdfs.get_file_dir_status(hdfs_path)
     except pywebhdfs.errors.FileNotFound:
@@ -55,22 +55,21 @@ class HdfsFileAlreadyExistsError(Exception):
     pass
 
 
-def putNewFileToHdfs(hdfs_path, contents):
+def put_new_file_to_hdfs(hdfs_path, contents):
     """Place contents in a new file on HDFS.
 
     hdfs_path should not have a leading '/'.
     Raises HdfsFileAlreadyExistsError is the file already exists.
     """
-    if doesHdfsFileExist(hdfs_path):
+    if does_hdfs_file_exist(hdfs_path):
         raise HdfsFileAlreadyExistsError(hdfs_path)
 
-    _getHdfsClient().create_file(hdfs_path, contents)
+    _get_hdfs_client().create_file(hdfs_path, contents)
 
 
 def hdfs_to_local_path(hdfs_path):
-    contents = getContentsFromHdfs(hdfs_path)
+    contents = get_contents_from_hdfs(hdfs_path)
 
-    # Have to store VCF in a file because vcf.Reader can only read from a file.
     filename = '/tmp/' + uuid.uuid4().get_hex() + '.vcf'
     with open(filename, 'w') as fsock:
         fsock.write(contents)
@@ -78,19 +77,9 @@ def hdfs_to_local_path(hdfs_path):
     return filename
 
 
-def hdfs_to_vcf(hdfs_vcf_path):
+def load_vcf_from_hdfs(hdfs_vcf_path):
     """Return a vcf.Reader, header text for the given VCF residing on HDFS."""
-    url = WEBHDFS_URL + hdfs_vcf_path + WEBHDFS_OPEN_OP
-    response = requests.get(url)
-    if response.status_code != 200:
-        raise ValueError('VCF at "' + hdfs_vcf_path + '" cannot be retrieved.')
-    text = response.text
-
-    # Have to store VCF in a file because vcf.Reader can only read from a file.
-    filename = '/tmp/' + uuid.uuid4().get_hex() + '.vcf'
-    with open(filename, 'w') as fsock:
-        fsock.write(text)
-
+    text = get_contents_from_hdfs(hdfs_vcf_path)
     header = '\n'.join(l for l in text.split('\n') if l.startswith('#'))
 
-    return pyvcf.Reader(open(filename)), header
+    return pyvcf.Reader(l for l in text.split('\n')), header

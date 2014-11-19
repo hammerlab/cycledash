@@ -9,7 +9,7 @@ actually contain values, and stores a list of them in the vcf table.
 import json
 from sqlalchemy import create_engine, MetaData
 
-from workers.shared import hdfs_to_vcf, worker, DATABASE_URI
+from workers.shared import load_vcf_from_hdfs, worker, DATABASE_URI
 from workers.relational_vcfs import insert_vcf_with_copy
 
 
@@ -22,9 +22,10 @@ def extractor(run):
     engine, connection, metadata = initialize_database(DATABASE_URI)
 
     if vcf_exists(connection, run):
+        print 'VCF already exists with URI {}'.format(run['vcf_path'])
         return False
 
-    reader, header = hdfs_to_vcf(run['vcf_path'])
+    reader, header = load_vcf_from_hdfs(run['vcf_path'])
     insert_vcf_metadata(metadata, run, header)
     vcf_id = get_vcf_id(connection, run)
     insert_vcf_with_copy(reader, 'genotypes', engine,
@@ -56,7 +57,7 @@ def extant_columns(metadata, connection, vcf_id):
                if col.name.startswith('info:') or
                col.name.startswith('sample:'))
     query = 'SELECT '
-    query += ', '.join('max("' + col + '")' + ' as "' + col + '"' for col in columns)
+    query += ', '.join('max("{c}") as "{c}"'.format(c=col) for col in columns)
     query += ' FROM genotypes WHERE vcf_id = ' + str(vcf_id)
 
     maxed_columns = dict(connection.execute(query).fetchall()[0])

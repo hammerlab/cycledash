@@ -9,8 +9,8 @@ import json
 import bai_indexer
 from StringIO import StringIO
 
-from workers.shared import (getContentsFromHdfs, worker, putNewFileToHdfs,
-                            doesHdfsFileExist, HdfsFileAlreadyExistsError)
+from workers.shared import (get_contents_from_hdfs, worker, put_new_file_to_hdfs,
+                            does_hdfs_file_exist, HdfsFileAlreadyExistsError)
 
 @worker.task
 def index(hdfs_bam_path):
@@ -20,14 +20,14 @@ def index(hdfs_bam_path):
     bai_path = hdfs_bam_path.replace('.bam', '.bam.bai')
     bai_json_path = hdfs_bam_path.replace('.bam', '.bam.bai.json')
 
-    if doesHdfsFileExist(bai_json_path):
+    if does_hdfs_file_exist(bai_json_path):
         return  # nothing to do -- it's already been created
 
-    contents = getContentsFromHdfs(bai_path)
+    contents = get_contents_from_hdfs(bai_path)
     index_json = bai_indexer.index_stream(StringIO(contents))
     index_json_str = json.dumps(index_json)
 
     try:
-        putNewFileToHdfs(bai_json_path, index_json)
+        put_new_file_to_hdfs(bai_json_path, index_json)
     except HdfsFileAlreadyExistsError:
         pass  # we lost the race! (e.g. two runs were submitted simultaneously)
