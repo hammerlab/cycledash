@@ -10,14 +10,20 @@ from cycledash import db
  ##### The below functions are exposed via the controllers in views.py. #######
 ##############################################################################
 
-def columns(vcf_id):
+def spec(vcf_id):
     """Return a dict describing the layout of the columns to be displayed.
 
-    cf. vcf_header_spec"""
+    In form:
+    {INFO: {attr1: {path: ['INFO', 'attr1'],
+                          name: 'attr1',
+                          info: {type: 'Integer', description: 'This col. et'}},
+            ...},
+    SAMPLE: {attrA:  ...}}
+    """
     query = "SELECT vcf_header, header_spec FROM vcfs WHERE id = %s"
     with db.engine.connect() as connection:
         res = dict(connection.execute(query, (vcf_id,)).fetchall()[0])
-        spec = vcf_header_spec(res['vcf_header'], res['header_spec'])
+        spec = _vcf_header_spec(res['vcf_header'], res['header_spec'])
     return spec
 
 
@@ -33,19 +39,39 @@ def contigs(vcf_id):
 
 
 def get(vcf_id, query):
-    """Return a list of genotypes in a vcf conforming to the given query."""
+    """Return a genotypes in a vcf conforming to the given query, as well as a
+    dictof stats calculated on them.
+
+    If a truth_vcf is associated with this VCF, stats include true/false,
+    positive/negative stats, as well as precision, recall, and f1score. Stats
+    also include the number of records, and the number of records once filters
+    are applied.
+
+    A query is a dictionary which specifies the range, filters, limit, offset
+    and ordering which should be applied against genotypes before genotypes and
+    stats are returned.
+
+    It has structure:
+
+    {range: {contig: "X", start: 0, end: 250000000},
+     filters: [{columnName: 'info:DP', filterValye: '50', type: '<'}, ...],
+     sortBy: [{columnName: 'contig', order: 'asc'},
+              {columnName: 'position', order: 'asc'}, ...],
+     page: 10,
+     limit: 250
+    }
+
+    """
     with db.engine.connect() as connection:
         parameters = {'vcf_id': vcf_id}
-        combined_sql = ''
         fns = [_select_sql, _range_sql, _filters_sql, _sort_by_sql,
                _limit_offset_sql]
-        generated = (f(query, vcf_id) for f in fns)
-        for (sql, params) in generated:
-            parameters.update(params)
-            combined_sql += '\n' + sql
+        combined_sql, parameters = _generate_query('', parameters, query,
+                                                   vcf_id, fns)
         genotypes = connection.execute(combined_sql, parameters)
         genotypes = [dict(gt) for gt in genotypes.fetchall()]
-    stats = calculate_stats(vcf_id, vcf_id, query)
+    # TODO: dervice truth_vcf, replace None with it
+    stats = calculate_stats(vcf_id, None, query)
     return {'records': genotypes, 'stats': stats}
 
 
@@ -69,17 +95,20 @@ def calculate_stats(vcf_id, truth_vcf_id, query):
     return stats
 
 
-  ##############################################################################
- ##### The below functions are helpers used to generate SQL for the above. ####
-##############################################################################
+   #############################################################################
+  #### The below functions are helpers used to generate SQL for the above. ####
+ ####    - All functions below return (sql_string, param_dict).           ####
+#############################################################################
 
-def _select_sql(query, vcf_id):
+def _select_sql(query, vcf_id, table=''):
+    # 'table' isn't used here -- just conforms to other _X_sql fn's signatures.
     sql = "SELECT * FROM genotypes WHERE vcf_id = %(vcf_id)s"
     args = {'vcf_id': vcf_id}
     return sql, args
 
 
-def _limit_offset_sql(query, vcf_id):
+def _limit_offset_sql(query, vcf_id, table=''):
+    # 'table' isn't used here -- just conforms to other _X_sql fn's signatures.
     limit = query.get('limit')
     offset = int(query.get('page')) * int(query.get('limit'))
     args = {'limit': limit, 'offset': offset}
@@ -87,82 +116,99 @@ def _limit_offset_sql(query, vcf_id):
     return sql, args
 
 
-def _range_sql(query, vcf_id, table_prefix=''):
+def _range_sql(query, vcf_id, table=''):
     record_range = query.get('range', {})
     args = {}
     sql = ''
     contig = record_range.get('contig')
-    if table_prefix:
-        table_prefix = table_prefix + '.'
+    if table:
+        table = table + '.'
     if contig:
         args['contig'] = contig
-        sql += " AND {}contig = %(contig)s".format(table_prefix)
+        sql += " AND {}contig = %(contig)s".format(table)
         start = record_range.get('start')
         end = record_range.get('end')
         if start:
             args['start'] = start
-            sql += ' AND {}position >= %(start)s'.format(table_prefix)
+            sql += ' AND {}position >= %(start)s'.format(table)
         if end:
             args['end'] = end
-            sql += ' AND {}position < %(end)s'.format(table_prefix)
+            sql += ' AND {}position < %(end)s'.format(table)
     return sql, args
 
 
-def _filters_sql(query, vcf_id, table_prefix=''):
+def _filters_sql(query, vcf_id, table=''):
     filters = query.get('filters', [])
     if not filters:
         return '', {}
     combined_sql = ' '
     args = {}
     for idx, filt in enumerate(filters):
-        sql, arg = _filter_sql(filt, idx, table_prefix)
+        sql, arg = _filter_sql(filt, idx, table)
         args.update(arg)
         combined_sql += ' AND ' + sql
     return combined_sql, args
 
 
-def _filter_sql(filt, idx, table_prefix=''):
+def _filter_sql(filt, idx, table=''):
     column = filt.get('columnName')
     value = filt.get('filterValue')
     op_name = filt.get('type')
-    if table_prefix:
-        table_prefix = table_prefix + '.'
+    if table:
+        table = table + '.'
     # TODO(ihodes): SQL injection.
     if ':' in column:
-        query = table_prefix + '"' + column + '"'
+        query = '{}"{}"'.format(table, column)
     else:
-        query = table_prefix + column
+        query = table + column
     name = 'filter' + str(idx)
     arg = {name: value}
-    if op_name == '=':
-        query += " = %({})s".format(name)
-    elif op_name == '<':
-        query += "::INTEGER < %({})s".format(name)
-    elif op_name == '>':
-        query += "::INTEGER > %({})s".format(name)
-    elif op_name == '>=':
-        query += "::INTEGER >= %({})s".format(name)
-    elif op_name == '<=':
-        query += "::INTEGER <= %({})s".format(name)
-    elif op_name == 'RLIKE':
-        query += " ~* %({})s".format(name)
-    elif op_name == 'LIKE':
-        query += " LIKE %({})s".format(name)
-    return query, arg
+    query += {
+        '=': " = %({})s",
+        '<': "::INTEGER < %({})s",
+        '>': "::INTEGER > %({})s",
+        '>=': "::INTEGER >= %({})s",
+        '<=': "::INTEGER <= %({})s",
+        'RLIKE': " ~* %({})s",
+        'LIKE': " LIKE %({})s"
+    }.get(op_name, '').format(name)
+    return query
 
 
-def _sort_by_sql(query, vcf_id):
+def _sort_by_sql(query, vcf_id, table=''):
     sort_by = query.get('sortBy', [])
+    if not sort_by:
+        return '', {}
     sql = ' ORDER BY '
     orders = []
+    if table:
+        table += '.'
     for spec in sort_by:
-        col_name = spec.get('columnName')
-        stmt = ' "{}"'.format(col_name) # TODO(ihodes): SQL injection.
-        stmt += '::INTEGER ' if col_name != 'contig' else ' '
-        stmt += 'desc' if 'desc' == spec.get('order') else 'asc'
-        orders.append(stmt)
+        col_name = table + spec.get('columnName')
+        col_type = '::INTEGER ' if col_name != 'contig' else ' '
+        order = 'desc' if 'desc' == spec.get('order') else 'asc'
+        # TODO(ihodes): SQL injection.
+        orders.append('"{}"{} {}'.format(col_name, col_type, order))
     sql += ', '.join(orders)
     return sql, {}
+
+
+  ######################
+ ### Helper methods: ##
+######################
+
+def _generate_query(base_sql, base_params, query, vcf_id, sql_generator_functions,
+                    table=''):
+    """Return (sql_string, params) by applying the sql_generator_functions to
+    query, vcf_id, and tabnle_prefix, concatenating their results to base_sql,
+    and adding their params to base_params.
+    """
+    gen = (f(query, vcf_id, table=table)
+           for f in sql_generator_functions)
+    for sql, arg in gen:
+        base_params.update(arg)
+        base_sql += '\n' + sql
+    return base_sql, base_params
 
 
 # TODO(ihodes): SQL injection, clean up, test for truth_vcf_id existence, etc.
@@ -185,28 +231,34 @@ def genotype_statistics(connection, query, vcf_id, truth_vcf_id,
      AND gt.vcf_id = %(truth_vcf_id)s
     """
     fns = [_range_sql, _filters_sql]
-    generated = (f(query, vcf_id, table_prefix='g') for f in fns)
-    for sql, arg in generated:
-        true_pos_query += '\n' + sql
-    generated = (f(query, vcf_id, table_prefix='gt') for f in fns)
-    for sql, arg in generated:
-        true_pos_query += '\n' + sql
+    true_pos_query, _ = _generate_query(true_pos_query, {}, query, vcf_id, fns,
+                                        table='g')
+    true_pos_query, _ = _generate_query(true_pos_query, {}, query, vcf_id, fns,
+                                        table='gt')
 
     truth_records_query = """
     SELECT count(*) FROM genotypes
     WHERE vcf_id = %(truth_vcf_id)s
     """
     parameters = {'vcf_id': vcf_id, 'truth_vcf_id': truth_vcf_id}
-    generated = (f(query, vcf_id) for f in fns)
-    for sql, arg in generated:
-        parameters.update(arg)
-        truth_records_query += '\n' + sql
+    truth_records_query, parameters = _generate_query(truth_records_query,
+                                                      parameters, query,
+                                                      vcf_id, fns)
 
     total_truth_records = connection.execute(truth_records_query, parameters).fetchall()[0][0]
     true_positives = connection.execute(true_pos_query, parameters).fetchall()[0][0]
 
+    stats.update(_calculate_true_false_pos_neg(true_positives,
+                                               total_truth_records,
+                                               num_records))
+    return stats
+
+
+def _calculate_true_false_pos_neg(true_positives,
+                                  total_truth_records,
+                                  total_records):
     false_negatives = total_truth_records - true_positives
-    false_positives = num_records - true_positives
+    false_positives = total_records - true_positives
 
     denom = (true_positives + false_positives)
     precision = (float(true_positives) / denom) if denom > 0 else 0
@@ -215,7 +267,7 @@ def genotype_statistics(connection, query, vcf_id, truth_vcf_id,
     denom = precision + recall
     f1score = (2 * (precision * recall) / denom) if denom > 0 else 0
 
-    stats.update({
+    return {
         'truePositives': true_positives,
         'falsePositives': false_positives,
         'falseNegatives': false_negatives,
@@ -223,40 +275,30 @@ def genotype_statistics(connection, query, vcf_id, truth_vcf_id,
         'recall': recall,
         'f1score': f1score,
         'totalTruthRecords': total_truth_records
-    })
-
-    return stats
+    }
 
 
-def vcf_header_spec(vcf_header_text, extant_cols):
-    """Return dict repr of a VCF header.
-
-    In form:
-    {INFO: {attr1: {path: ['INFO', 'attr1'],
-                          name: 'attr1',
-                          info: {type: 'Integer', description: 'This col. et'}},
-            ...},
-     SAMPLE: {attrA:  ...}}
-    """
+def _vcf_header_spec(vcf_header_text, extant_cols):
+    """Return dict repr of a VCF header."""
     reader = vcf.Reader(line for line in vcf_header_text.split('\n'))
-
     res = OrderedDict()
-    res['INFO'] = OrderedDict()
-    for key, val in reader.infos.iteritems():
-        column_name = 'info' + ':' + val.id
-        if column_name not in extant_cols:
-            continue
-        res['INFO'][key] = {
-            'path': ['info', val.id],
-            'columnName': column_name,
-            'name': val.id,
-            'info': {
-                'type': val.type,
-                'number': val.num,
-                'description': val.desc
+    for (supercolumn, attr) in [('info', 'infos'), ('sample', 'formats')]:
+        res[supercolumn.upper()] = OrderedDict()
+        for key, val in reader.__dict__[attr].iteritems():
+            column_name = supercolumn + ':' + val.id
+            if column_name not in extant_cols:
+                continue
+            res[supercolumn.upper()][key] = {
+                'path': [supercolumn, val.id],
+                'columnName': column_name,
+                'name': val.id,
+                'info': {
+                    'type': val.type,
+                    'number': val.num,
+                    'description': val.desc
+                }
             }
-        }
-    res['SAMPLE'] = OrderedDict()
+
     res['SAMPLE']['Sample Name'] = {
         'path': ['sample_name'],
         'columnName': 'sample_name',
@@ -267,48 +309,10 @@ def vcf_header_spec(vcf_header_text, extant_cols):
             'description': 'The name of the sample'
         }
     }
-    for key, val in reader.formats.iteritems():
-        column_name = 'sample' + ':' + val.id
-        if column_name not in extant_cols:
-            continue
-        res['SAMPLE'][key] = {
-            'path': ['sample', val.id],
-            'columnName': column_name,
-            'name': val.id,
-            'info': {
-                'type': val.type,
-                'number': val.num,
-                'description': val.desc
-            }
-        }
-    return res
 
-# Request:
-#  vcf_id => X
-#  filters => [{attribute: '/sample:DP', value: '>50'}, // '/' designates the attribute a path
-#              {attribute: 'variantType', value: 'SNV'},
-#              {attribute: 'validated', value: true}]
-#  range => {contigName: '20', start: 1204, end: 598874987}  // nullable for ALL, start/end nullable for 0/[end]
-#  sortBy => [{path: 'sampleName:DP', order: 'desc'}, ...]
-#
-#  charts => [{path: '*'},  // for karyogram depth chart
-#             {path: 'info:DP'},  // for a depth chart
-#             {}... ]
-#
-#  page => 1 // handle paging of results
-#  limit => 100 // # records sent to client
-#
-#
-# Return:
-#  records => list of records on page
-#  charts => [{path: '*', vals: [1203, 12401204, ..]}]
-#  stats => {tp: 123, fp: 124, fn: 1241}
-#
-#
-# Issues: How do we know which columns to display in the UI? we don't want them
-#         to change based on the records returned?  This is a problem because
-#         different rows can have different FORMATs.
-#
-# NB: Note that different samples now end up on different rows.
-#
-#
+    # Remove empty supercolumns
+    for key, val in res.iteritems():
+        if not val.keys():
+            del res[key]
+
+    return res

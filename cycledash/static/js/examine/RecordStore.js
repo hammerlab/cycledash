@@ -34,7 +34,7 @@ function RecordStore(vcfId, dispatcher) {
 
       records = [],
 
-      stats = {},
+      stats = {totalRecords: 0, totalUnfilteredRecords: 0},
       selectedRecord = null,
       selectedColumns = [],
 
@@ -75,21 +75,20 @@ function RecordStore(vcfId, dispatcher) {
         updateGenotypes({append: true});
         break;
       case ACTION_TYPES.UPDATE_VARIANT_TYPE:
-        // TODO(ihodes): variantType = action.variantType;
+        // TODO(ihodes): implement: variantType = action.variantType;
         break;
       case ACTION_TYPES.SELECT_COLUMN:
-        // TODO(ihodes): impl
-        var col = _.find(selectedColumns, c => _.isEqual(c.path, action.path));
-        if (!col) {
-          selectedColumns.push({path: action.path,
-                                info: action.info,
-                                name: action.name});
-        } else {
-          selectedColumns = _.without(selectedColumns, col);
-        }
+        // TODO(ihodes): implement/todo (this is broken)
+        // var col = _.find(selectedColumns, c => _.isEqual(c.path, action.path));
+        // if (!col) {
+        //   selectedColumns.push({path: action.path,
+        //                         info: action.info,
+        //                         name: action.name});
+        // } else {
+        //   selectedColumns = _.without(selectedColumns, col);
+        // }
         break;
       case ACTION_TYPES.SELECT_RECORD:
-        // TODO(ihodes): impl
         selectedRecord = action.record;
         break;
     }
@@ -107,21 +106,23 @@ function RecordStore(vcfId, dispatcher) {
    * NB: mutates store state!
    */
   function _updateGenotypes({append}) {
-    // Exmaple query:
+    // Example query:
     // var query = {"range": {"contig": 1, "start": 800000, "end": 2000000},
     //              "sortBy": [{"columnName": "sample:DP", "order": "desc"},
     //                         {"columnName": "position", "order": "desc"}],
     //              "filters": [{"columnName": "sample:DP", "value": "<60"},
     //                          {"columnName": "sample:DP", "value": ">50"},
     //                          {"columnName": "reference", "value": "=G"}]};
-    // TODO(ihodes): DEBUG
+    //
+    // If append == true, instead of replacing the records, append the new
+    // records to our existing list.
     if (append) {
       page = page + 1;
     } else {
       page = 0;
     }
 
-    var query = queryFrom(range, filters, sortBys);
+    var query = queryFrom(range, filters, sortBys, page, limit);
 
     $.when(deferredGenotypes(vcfId, query))
       .done(response => {
@@ -136,28 +137,30 @@ function RecordStore(vcfId, dispatcher) {
         notifyChange();
       });
   }
-  var updateGenotypes = _.throttle(_updateGenotypes, 500);
+  var updateGenotypes = _.debounce(_.throttle(_updateGenotypes, 500 /* ms */),
+                                   500 /* ms */);
 
   // Returns a JS object query for sending to the backend.
-  function queryFrom(range, filters, sortBys) {
-    var sbs = sortBys;
-    if (sortBys[0].columnName == 'position') {
-      sbs = DEFAULT_SORT_BYS.map(sb => {
+  function queryFrom(range, filters, sortBy, page, limit) {
+    if (sortBy[0].columnName == 'position') {
+      sortBy = DEFAULT_SORT_BYS.map(sb => {
         sb.order = sortBys[0].order;
         return sb;
       });
     }
     return {
-      range: range,
-      filters: filters,
-      sortBy: sbs,
-      page: page,
-      limit: limit
+      range,
+      filters,
+      sortBy,
+      page,
+      limit
     };
   }
 
   /**
-   * Updates the filters by columnName and filterValue.
+   * Updates the filters by columnName and filterValue. Removes previous any
+   * previous filter which applies to the columnName, and then appends the new
+   * filter.
    *
    * NB: mutates store state!
    */
@@ -194,12 +197,12 @@ function RecordStore(vcfId, dispatcher) {
     range = {contig, start, end};
   }
 
-  // Initializing the RecordStore with basic information (columns, the contigs
+  // Initialize the RecordStore with basic information (columns, the contigs
   // in the VCF), and request first records to display.
-  $.when(deferredColumns(vcfId), deferredContigs(vcfId))
+  $.when(deferredSpec(vcfId), deferredContigs(vcfId))
     .done((columnsResponse, contigsResponse) => {
       hasLoaded = true;
-      columns = columnsResponse[0].columns;
+      columns = columnsResponse[0].spec;
       contigs = contigsResponse[0].contigs;
       updateGenotypes({append: false});
     });
@@ -346,8 +349,8 @@ function recordComparatorFor(path, order) {
 }
 
 // Return deferred GET for the column spec for a given VCF.
-function deferredColumns(vcfId) {
-  return $.get('/runs/' + vcfId + '/columns');
+function deferredSpec(vcfId) {
+  return $.get('/runs/' + vcfId + '/spec');
 }
 
 // Return deferred GET for the contigs in a given VCF.
@@ -357,7 +360,8 @@ function deferredContigs(vcfId) {
 
 // Return a deferred GET returning genotypes and stats.
 function deferredGenotypes(vcfId, query) {
-  return $.get('/runs/' + vcfId + '/genotypes?q=' + JSON.stringify(query));
+  var queryString = encodeURIComponent(JSON.stringify(query));
+  return $.get('/runs/' + vcfId + '/genotypes?q=' + queryString);
 }
 
 module.exports = RecordStore;

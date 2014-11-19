@@ -20,10 +20,6 @@ import workers.indexer
 import workers.genotype_extractor
 
 
-# TODO rename/remove
-def md(lst):
-    return map(dict, lst)
-
 WEBHDFS_ENDPOINT = app.config['WEBHDFS_URL'] + '/webhdfs/v1/'
 WEBHDFS_OPEN_OP = '?user.name={}&op=OPEN'.format(app.config['WEBHDFS_USER'])
 
@@ -52,8 +48,10 @@ def start_workers_for_run(run):
     #     workers.scorer.score.delay(run.id, run.vcf_path, run.truth_vcf_path)
     def index_bai(bam_path):
         workers.indexer.index.delay(bam_path[1:])
-    index_bai(run.normal_path)
-    index_bai(run.tumor_path)
+    if run.get('normal_path'):
+        index_bai(run['normal_path'])
+    if run.get('tumor_path'):
+        index_bai(run['tumor_path'])
     workers.genotype_extractor.extractor.delay(json.dumps(run))
 
 
@@ -63,12 +61,17 @@ def runs():
         try:
             data = CreateRunSchema(prepare_request_data(request))
         except Exception as e:
-            return jsonify({'error': 'Run validation', 'message': str(e)})
-        start_workers_for_run(run)
+            response = jsonify({'error': 'Run validation', 'message': str(e)})
+            response.status_code = 400
+            return response
+        print data
+        start_workers_for_run(data)
         return redirect(url_for('runs'))
     elif request.method == 'GET':
         con = db.engine.connect()
-        vcfs = md(con.execute('select * from vcfs order by id desc;').fetchall())
+        select_vcfs_sql = 'select * from vcfs order by id desc;'
+        vcfs = [dict(v)
+                for v in con.execute(select_vcfs_sql).fetchall()]
         con.close()
         if 'text/html' in request.accept_mimetypes:
             return render_template('runs.html', runs=vcfs, run_kvs=RUN_ADDL_KVS)
@@ -81,9 +84,9 @@ def genotypes(run_id):
     return jsonify(gt.get(run_id, json.loads(request.args.get('q'))))
 
 
-@app.route('/runs/<run_id>/columns')
-def columns(run_id):
-    return jsonify({'columns': gt.columns(run_id)})
+@app.route('/runs/<run_id>/spec')
+def examine_spec(run_id):
+    return jsonify({'spec': gt.spec(run_id)})
 
 
 @app.route('/runs/<run_id>/contigs')
@@ -94,7 +97,8 @@ def contigs(run_id):
 @app.route('/runs/<run_id>/examine')
 def examine(run_id):
     with db.engine.connect() as con:
-        vcf = md(con.execute('select * from vcfs where id = {};'.format(run_id)).fetchall())[0]
+        select_vcf_sql = 'select * from vcfs where id = {};'.format(run_id)
+        vcf = dict(con.execute(select_vcf_sql).fetchall()[0])
     return render_template('examine.html', run=dict(vcf))
 
 

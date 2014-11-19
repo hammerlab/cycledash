@@ -37,7 +37,7 @@ function RecordActions (dispatcher) {
         contig
       });
     },
-    pageRequest: function() {
+    requestPage: function() {
       dispatcher.dispatch({
         actionType: ACTION_TYPES.REQUEST_PAGE
       });

@@ -31,7 +31,7 @@ var VCFTable = React.createClass({
     handleContigChange: React.PropTypes.func.isRequired,
     handleRangeChange: React.PropTypes.func.isRequired,
     handleSelectRecord: React.PropTypes.func.isRequired,
-    handlePageRequest: React.PropTypes.func.isRequired
+    handleRequestPage: React.PropTypes.func.isRequired
   },
   // Call this to scroll a record to somewhere close to the top of the page.
   scrollRecordToTop: function(record) {
@@ -61,7 +61,7 @@ var VCFTable = React.createClass({
         <VCFTableBody records={this.props.records}
                       columns={this.props.columns}
                       selectedRecord={this.props.selectedRecord}
-                      handlePageRequest={this.props.handlePageRequest}
+                      handleRequestPage={this.props.handleRequestPage}
                       handleSelectRecord={this.props.handleSelectRecord} />
       </table>
     );
@@ -96,7 +96,6 @@ var VCFTableHeader = React.createClass({
     var uberColumns = [],
         columnHeaders = [];
 
-    window.cols = [];
     _.each(this.props.columns, (columns, topLevelColumnName) => {
       uberColumns.push(
         <th colSpan={_.keys(columns).length} className='uber-column' key={topLevelColumnName}>
@@ -113,6 +112,7 @@ var VCFTableHeader = React.createClass({
                                          column={column}
                                          sortBys={this.props.sortBys}
                                          isSelected={isSelected}
+                                         records={this.props.records}
                                          handleSortByChange={sortHandle}
                                          handleChartToggle={this.handleChartToggle(column)} />);
       };
@@ -152,15 +152,14 @@ var ColumnHeader = React.createClass({
     handleChartToggle: React.PropTypes.func.isRequired,
     isSelected: React.PropTypes.bool.isRequired,
     handleSortByChange: React.PropTypes.func.isRequired,
-    sortBys: React.PropTypes.array.isRequired
+    sortBys: React.PropTypes.array.isRequired,
+    records: React.PropTypes.array.isRequired
   },
   isChartable: function() {
-    var hasValues = _.some(this.props.records, record =>
-      _.isFinite(utils.getIn(record, this.props.column.path))
-    );
-
-    return (hasValues &&
-            _.contains(['Integer', 'Float'], this.props.info['Type']));
+    var props = this.props,
+        hasValues = _.some(props.records, r =>
+                           _.isFinite(r[props.column.columnName]));
+    return (hasValues && _.contains(['Integer', 'Float'], props.info.type));
   },
   render: function() {
     var tooltip;
@@ -212,8 +211,8 @@ var InfoColumnTooltip = React.createClass({
     info: React.PropTypes.object.isRequired
   },
   render: function() {
-    var infoText = this.props.info['description'],
-        infoType = this.props.info['type'],
+    var infoText = this.props.info.description,
+        infoType = this.props.info.type,
         path = this.props.column.path.join(' → ');
     return (
       <div className='tooltip'>
@@ -321,11 +320,11 @@ var VCFTableBody = React.createClass({
     columns: React.PropTypes.object.isRequired,
     selectedRecord: React.PropTypes.object,
     handleSelectRecord: React.PropTypes.func.isRequired,
-    handlePageRequest: React.PropTypes.func.isRequired
+    handleRequestPage: React.PropTypes.func.isRequired
   },
   BOTTOM_BUFFER: 5000, // distance in px from bottom at which we load more records
   componentDidMount: function() {
-    var handlePageRequest = this.props.handlePageRequest;
+    var handleRequestPage = this.props.handleRequestPage;
     $(window).on('scroll.vcftable', () => {
       // Show more rows if the browser viewport is close to the bottom and
       // there are more rows to be shown.
@@ -333,7 +332,7 @@ var VCFTableBody = React.createClass({
           tableBottom = $table.position().top + $table.height(),
           windowBottom = $(window).scrollTop() + $(window).height();
       if (tableBottom < windowBottom + this.BOTTOM_BUFFER) {
-        handlePageRequest();
+        handleRequestPage();
       }
     });
 

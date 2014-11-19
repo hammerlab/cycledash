@@ -16,17 +16,18 @@ var StatsSummary = React.createClass({
     variantType: React.PropTypes.string.isRequired
   },
   render: function() {
-    if (this.props.truthRecords === null) return null;
+    var props = this.props;
+    if (props.truthRecords === null) return null;
     return (
       <div id="stats-container">
-        <VariantTypeTabs variantType={this.props.variantType}
-                         handleVariantTypeChange={this.props.handleVariantTypeChange} />
-        <VariantStats variantType={this.props.variantType}
-                      hasLoaded={this.props.hasLoaded}
-                      stats={this.props.stats} />
-        <RecordsShown hasLoaded={this.props.hasLoaded}
-                      numberOfFilteredRecords={this.props.stats.totalRecords}
-                      totalNumberOfRecords={this.props.stats.totalUnfilteredRecords} />
+        <VariantTypeTabs variantType={props.variantType}
+                         handleVariantTypeChange={props.handleVariantTypeChange} />
+        <VariantStats variantType={props.variantType}
+                      hasLoaded={props.hasLoaded}
+                      stats={props.stats} />
+        <RecordsShown hasLoaded={props.hasLoaded}
+                      numberOfFilteredRecords={props.stats.totalRecords}
+                      totalNumberOfRecords={props.stats.totalUnfilteredRecords} />
       </div>
     );
   }
@@ -104,8 +105,8 @@ var VariantStats = React.createClass({
 var RecordsShown = React.createClass({
   propTypes: {
     hasLoaded: React.PropTypes.bool.isRequired,
-    numberOfFilteredRecords: React.PropTypes.number,
-    totalNumberOfRecords: React.PropTypes.number
+    numberOfFilteredRecords: React.PropTypes.number.isRequired,
+    totalNumberOfRecords: React.PropTypes.number.isRequired
   },
   render: function() {
     var fmt = d3.format(','),

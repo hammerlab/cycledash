@@ -43,8 +43,8 @@ var ExaminePage = React.createClass({
   handleSortByChange: function({columnName, order}) {
     this.props.recordActions.updateSorter({columnName, order});
   },
-  handlePageRequest: function() {
-    this.props.recordActions.pageRequest();
+  handleRequestPage: function() {
+    this.props.recordActions.requestPage();
   },
   handleChartChange: function({columnName, info, name}) {
     this.props.recordActions.selectColumn({columnName, info, name});
@@ -108,7 +108,7 @@ var ExaminePage = React.createClass({
                   handleChartChange={this.handleChartChange}
                   handleFilterUpdate={this.handleFilterUpdate}
                   handleContigChange={this.handleContigChange}
-                  handlePageRequest={this.handlePageRequest}
+                  handleRequestPage={this.handleRequestPage}
                   handleRangeChange={this.handleRangeChange}
                   handleSelectRecord={this.handleSelectRecord} />
       </div>
