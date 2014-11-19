@@ -171,5 +171,5 @@ CREATE TABLE genotypes (
 
        -- other
        "info:VAF" TEXT, -- variant allele frequency
-       "info:DPR" TEXT, -- avg depth in region
+       "info:DPR" TEXT -- avg depth in region
 );
