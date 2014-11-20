@@ -20,10 +20,10 @@ def spec(vcf_id):
             ...},
     SAMPLE: {attrA:  ...}}
     """
-    query = "SELECT vcf_header, header_spec FROM vcfs WHERE id = %s"
+    query = "SELECT vcf_header, extant_columns FROM vcfs WHERE id = %s"
     with db.engine.connect() as connection:
         res = dict(connection.execute(query, (vcf_id,)).fetchall()[0])
-        spec = _vcf_header_spec(res['vcf_header'], res['header_spec'])
+        spec = _vcf_header_spec(res['vcf_header'], res['extant_columns'])
     return spec
 
 
