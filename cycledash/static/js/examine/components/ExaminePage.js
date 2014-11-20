@@ -63,7 +63,6 @@ var ExaminePage = React.createClass({
     }
   },
   handleQueryChange: function(parsedQuery) {
-    console.log(parsedQuery);
     this.props.recordActions.setQuery(parsedQuery);
   },
   render: function() {

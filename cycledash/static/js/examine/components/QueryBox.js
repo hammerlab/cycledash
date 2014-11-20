@@ -4,7 +4,7 @@
  *
  * @jsx React.DOM
  */
-"use strict";
+'use strict';
 
 var _ = require('underscore'),
     React = require('react'),
@@ -83,7 +83,6 @@ var QueryBox = React.createClass({
       // See https://github.com/twitter/typeahead.js/pull/719
   },
   render: function() {
-    // QueryLanguage.parse;
     var statusClasses = React.addons.classSet({
       'query-status': true,
       'good': this.state.errorMessage === null,
@@ -91,11 +90,11 @@ var QueryBox = React.createClass({
     });
 
     return (
-      <div className="query-container">
-        <div ref="error" className="error-message">{this.state.errorMessage}</div>
-        <div className="typeahead-input">
-          <span ref="status" className={statusClasses}></span>
-          <input ref="input" className="query-input" type="text" placeholder="CQL Query" />
+      <div className='query-container'>
+        <div ref='error' className='error-message'>{this.state.errorMessage}</div>
+        <div className='typeahead-input'>
+          <span ref='status' className={statusClasses}></span>
+          <input ref='input' className='query-input' type='text' placeholder='CQL Query' />
         </div>
       </div>
     );
