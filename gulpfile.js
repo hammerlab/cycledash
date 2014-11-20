@@ -39,6 +39,7 @@ gulp.task('js', function() {
       .transform(_.extend({debug: true}, REACT_OPTS), reactify)
       .on('error', function(e) { console.log(e); })
       .bundle()
+      .on('error', function(e) { console.log(e.message); })
       .pipe(source('bundled.js'))
       .pipe(gulp.dest(PATHS.examineDest))
       .pipe(livereload({ auto: false })); // Because the 'watch' task has
