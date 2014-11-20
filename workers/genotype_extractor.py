@@ -1,4 +1,4 @@
-"""Prepares, and inserts, a submitted run into CycleDash's databse.
+"""Prepares, and inserts, a submitted run into CycleDash's database.
 
 This is a Celery worker.
 
