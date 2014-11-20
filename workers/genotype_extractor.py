@@ -92,7 +92,7 @@ def get_vcf_id(con, run):
 
 
 def delete_vcf(metadata, connection, run):
-    """Delete VCFs with this run ID, and return True if rows were deleted."""
+    """Delete VCFs with this URI, and return True if rows were deleted."""
     vcfs = metadata.tables.get('vcfs')
     result = vcfs.delete().where(vcfs.c.uri == run['vcf_path']).execute()
     return result.rowcount > 0
