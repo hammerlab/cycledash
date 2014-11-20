@@ -64,7 +64,6 @@ def runs():
             response = jsonify({'error': 'Run validation', 'message': str(e)})
             response.status_code = 400
             return response
-        print data
         start_workers_for_run(data)
         return redirect(url_for('runs'))
     elif request.method == 'GET':

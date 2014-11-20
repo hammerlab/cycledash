@@ -21,6 +21,8 @@ CONCORDANCE_URL = 'http://localhost:{}/runs/{}/concordance'
 
 DATABASE_URI = os.environ['DATABASE_URI']
 
+TEMPORARY_DIR = os.environ.get('TEMPORARY_DIR', None)
+
 worker = celery.Celery(broker=CELERY_BROKER, backend=CELERY_BACKEND)
 
 

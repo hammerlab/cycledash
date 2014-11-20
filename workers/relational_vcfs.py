@@ -2,6 +2,7 @@
 """
 from collections import OrderedDict
 import csv
+import os
 import tempfile
 
 import sqlalchemy
@@ -115,9 +116,12 @@ def vcf_to_csv(vcfdata, columns, filename, **kwargs):
     Returns:
         The name of the CSV file.
     """
+    tmp_dir = kwargs.get('temporary_dir', None)
     if filename is None:
-        csvfile = tempfile.NamedTemporaryFile(delete=False)
+        csvfile = tempfile.NamedTemporaryFile(delete=False, dir=tmp_dir)
         filename = csvfile.name
+        # In case a different process owner, e.g. postgres, needs to read it.
+        os.chmod(filename, 0o644)
     else:
         csvfile = open(filename, 'w')
     relations = records_to_relations(vcfdata, columns, **kwargs)
@@ -152,6 +156,8 @@ def insert_vcf_with_copy(vcfreader, tablename, engine, **kwargs):
             field in relation with the default value.
         column_mapping: A dict of {field: field} mapping field names in columns
             to field names in record, if some are named differently.
+        temporary_dir: Directory to which CSV files will be copied. Default
+            is the system-specific tempfile directory.
 
     Optimized via COPY from a temporary CSV.
     """
@@ -163,5 +169,3 @@ def insert_vcf_with_copy(vcfreader, tablename, engine, **kwargs):
     filename = vcf_to_csv(vcfreader, table_cols, None, **kwargs)
     insert_csv(filename, tablename, engine)
     con.close()
-
-
