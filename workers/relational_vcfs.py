@@ -140,9 +140,9 @@ def insert_vcf_with_copy(vcfreader, tablename, engine, **kwargs):
     """Inserts the calls from the VCF into the given table in engine
 
     Args:
-        vcfreader: A PyVCF Reader object on the VCf being inserted.
+        vcfreader: A PyVCF Reader object on the VCF being inserted.
         tablename: The string name of the table being inserted into.
-        engine: A SQLAlchemy engine object to the datbase.
+        engine: A SQLAlchemy engine object to the database.
 
     Optional Args:
         info_prefix: String prefix to apply to INFO fields in the VCF.
