@@ -9,7 +9,8 @@ actually contain values, and stores a list of them in the vcf table.
 import json
 from sqlalchemy import create_engine, MetaData
 
-from workers.shared import load_vcf_from_hdfs, worker, DATABASE_URI
+from workers.shared import (load_vcf_from_hdfs, worker,
+                            DATABASE_URI, TEMPORARY_DIR)
 from workers.relational_vcfs import insert_vcf_with_copy
 
 
@@ -29,7 +30,8 @@ def extractor(run):
     insert_vcf_metadata(metadata, run, header)
     vcf_id = get_vcf_id(connection, run)
     insert_vcf_with_copy(reader, 'genotypes', engine,
-                         default_values={'vcf_id': vcf_id})
+                         default_values={'vcf_id': vcf_id},
+                         temporary_dir=TEMPORARY_DIR)
 
     # Now we determine which columns actually exist in this VCF, and cache them
     # (as this is a time-consuming operation) in the vcfs table for later use.
