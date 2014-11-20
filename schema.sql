@@ -20,8 +20,8 @@ CREATE TABLE vcf_annotations (
        vcf_id BIGINT REFERENCES vcfs NOT NULL,
        annotation TEXT NOT NULL,
        type TEXT NOT NULL,
-       "chromosome:start" TEXT,
-       "chromosome:end" TEXT,
+       "contig:start" TEXT,
+       "contig:end" TEXT,
        "position:start" TEXT,
        "position:end" TEXT
 );
@@ -30,8 +30,8 @@ CREATE TABLE data_annotations (
        dataset_name TEXT, -- The denormalized foreign key of a dataset, stored in the vcfs table.
        annotation TEXT NOT NULL,
        type TEXT NOT NULL,
-       "chromosome:start" TEXT,
-       "chromosome:end" TEXT,
+       "contig:start" TEXT,
+       "contig:end" TEXT,
        "position:start" TEXT,
        "position:end" TEXT
 );
@@ -39,7 +39,7 @@ CREATE TABLE data_annotations (
 CREATE TABLE genotypes (
        vcf_id BIGINT REFERENCES vcfs NOT NULL,
        sample_name TEXT,
-       chromosome TEXT,
+       contig TEXT,
        position TEXT,
        id TEXT,
        reference TEXT,
