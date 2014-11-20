@@ -27,9 +27,6 @@ var VCFTable = React.createClass({
     // Function which takes a chart attribute name and propagates the change up
     handleChartChange: React.PropTypes.func.isRequired,
     handleSortByChange: React.PropTypes.func.isRequired,
-    handleFilterUpdate: React.PropTypes.func.isRequired,
-    handleContigChange: React.PropTypes.func.isRequired,
-    handleRangeChange: React.PropTypes.func.isRequired,
     handleSelectRecord: React.PropTypes.func.isRequired,
     handleRequestPage: React.PropTypes.func.isRequired
   },
@@ -52,12 +49,6 @@ var VCFTable = React.createClass({
                         handleSortByChange={this.props.handleSortByChange}
                         handleChartChange={this.props.handleChartChange}
                         records={this.props.records} />
-        <VCFTableFilter columns={this.props.columns}
-                        range={this.props.range}
-                        contigs={this.props.contigs}
-                        handleFilterUpdate={this.props.handleFilterUpdate}
-                        handleContigChange={this.props.handleContigChange}
-                        handleRangeChange={this.props.handleRangeChange} />
         <VCFTableBody records={this.props.records}
                       columns={this.props.columns}
                       selectedRecord={this.props.selectedRecord}
@@ -221,94 +212,6 @@ var InfoColumnTooltip = React.createClass({
         <p className='description'>{path}</p>
         <p className='type'>Type: <strong>{infoType}</strong></p>
       </div>
-    );
-  }
-});
-
-var VCFTableFilter = React.createClass({
-  propTypes: {
-    contigs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
-    range: types.PositionType,
-    handleContigChange: React.PropTypes.func.isRequired,
-    handleRangeChange: React.PropTypes.func.isRequired,
-    columns: React.PropTypes.object.isRequired
-  },
-  handleContigChange: function(e) {
-    var contig = this.refs.contig.getDOMNode().value;
-    if (contig === 'all') contig = null;
-    this.props.handleContigChange(contig);
-  },
-  handleRangeChange: function(e) {
-    var start = this.refs.startPos.getDOMNode().value,
-        end = this.refs.endPos.getDOMNode().value,
-        contig = this.props.range.contig;
-    this.props.handleRangeChange({contig,
-                                  start: Number(start) || null,
-                                  end: Number(end) || null});
-  },
-  handleFilterUpdate: function(path) {
-    return e => {
-      var value = e.currentTarget.value;
-      var op;
-      if (value.length > 1 && _.contains(['LIKE', 'RLIKE', '>', '<', '='], value[0])) {
-        op = value[0];
-        value = value.slice(1);
-      } else {
-        op = 'RLIKE';
-      }
-      var filter = {filterValue: value, columnName: path.join(':'), type: op};
-      this.props.handleFilterUpdate(filter);
-    };
-  },
-  render: function() {
-    var {range, kgram} = this.props,
-        {start, end} = range;
-
-    var contigOptions = this.props.contigs.map(function(contig) {
-      return (
-        <option name='contig' key={contig} value={contig}>{contig}</option>
-      );
-    }.bind(this));
-    var columnFilterFields = [];
-    _.each(this.props.columns, (columns, topLevelColumnName) => {
-      for (var columnName in columns) {
-        var column = columns[columnName];
-        columnFilterFields.push(
-          <th key={topLevelColumnName + column.name}>
-            <input name={column.name} className='infoFilter' type='text'
-                   onChange={this.handleFilterUpdate(column.path)} />
-          </th>
-        );
-      }
-    });
-    return (
-      <thead>
-        <tr>
-          <th id='range'>
-            <select onChange={this.handleContigChange}
-                    ref='contig' value={this.props.range.contig || 'all'}>
-              <option name='contig' key='all' value='all'>&lt;all&gt;</option>
-              {contigOptions}
-            </select>
-            <input name='start' type='text' placeholder='start'
-                   disabled={!this.props.range.contig}
-                   ref='startPos' value={start || ''} onChange={this.handleRangeChange} />
-            <input name='end' type='text' placeholder='end'
-                   disabled={!this.props.range.contig}
-                   ref='endPos' value={end || ''} onChange={this.handleRangeChange} />
-          </th>
-          <th className='ref'>
-            <input name='ref' className='infoFilter' type='text'
-                   onChange={this.handleFilterUpdate(['reference'])} />
-          </th>
-          <th>→</th>
-          <th className='alt'>
-            <input name='alt' className='infoFilter' type='text'
-                   onChange={this.handleFilterUpdate(['alternates'])} />
-          </th>
-          {columnFilterFields}
-        </tr>
-      </thead>
     );
   }
 });

@@ -17,13 +17,13 @@ describe('Query Language', function() {
   }
 
   it('should parse simple filters', function() {
-    expectParse('A < 10', {filters:[{type: '<', value:'10', columnName:'A'}]});
-    expectParse('B = ABC', {filters:[{type: '=', value:'ABC', columnName:'B'}]});
+    expectParse('A < 10', {filters:[{type: '<', filterValue:'10', columnName:'A'}]});
+    expectParse('B = ABC', {filters:[{type: '=', filterValue:'ABC', columnName:'B'}]});
     expectParse('INFO.DP like "ABC"', {
-      filters:[{type: 'LIKE', value:'ABC', columnName:'INFO.DP'}]
+      filters:[{type: 'LIKE', filterValue:'ABC', columnName:'INFO.DP'}]
     });
     expectParse('INFO:AF rlike "^.*$"', {
-      filters:[{type: 'RLIKE', value:'^.*$', columnName:'INFO:AF'}]
+      filters:[{type: 'RLIKE', filterValue:'^.*$', columnName:'INFO:AF'}]
     });
   });
 
@@ -41,14 +41,14 @@ describe('Query Language', function() {
   });
 
   it('should parse quoted filters with spaces', function() {
-    expectParse('A like \'A"" C\'', {filters:[{type: 'LIKE', value:'A"" C', columnName:'A'}]});
+    expectParse('A like \'A"" C\'', {filters:[{type: 'LIKE', filterValue:'A"" C', columnName:'A'}]});
   });
 
   it('should parse compound filters', function() {
     expectParse('A < 10 AND B >= ABC', {
       filters: [
-        {type: '<', value:'10', columnName:'A'},
-        {type: '>=', value:'ABC', columnName:'B'}
+        {type: '<', filterValue:'10', columnName:'A'},
+        {type: '>=', filterValue:'ABC', columnName:'B'}
       ]
     });
   });
@@ -56,7 +56,7 @@ describe('Query Language', function() {
   it('should parse compound filters with ranges', function() {
     expectParse('20:1234- AND A < 10', {
       range: {contig:'20', start: '1234'},
-      filters: [{type: '<', value: '10', columnName: 'A'}]
+      filters: [{type: '<', filterValue: '10', columnName: 'A'}]
     });
   });
 
@@ -88,8 +88,8 @@ describe('Query Language', function() {
                 {
                   range: {contig: 'X', start: '345', end: '4567'},
                   filters: [
-                    {type: '<=', value: '10', columnName: 'A'},
-                    {type: '=', value: 'ABC', columnName: 'B'}
+                    {type: '<=', filterValue: '10', columnName: 'A'},
+                    {type: '=', filterValue: 'ABC', columnName: 'B'}
                   ],
                   sortBy:[{order:'asc', columnName: 'INFO.DP'}]
                 });
