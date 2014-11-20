@@ -108,6 +108,16 @@ We use PostgreSQL as our datastore, with the schema described in `schema.sql`.
 
 In a psql session, you can load the schema with `\i schema.sql`, and you'll be good to go.
 
+On OS X, setting up psql might look like this:
+
+```
+brew install postgres
+postgres -D /usr/local/var/postgres
+createdb cycledash
+psql cycledash
+\i schema.sql
+```
+
 ### API Usage
 
 The primary endpoint for posting data to from an external source is `/runs`.
