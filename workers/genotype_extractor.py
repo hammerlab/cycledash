@@ -25,7 +25,9 @@ def extractor(run):
 
     if vcf_exists(connection, run):
         if config.ALLOW_VCF_OVERWRITES:
-            delete_vcf(connection, run)
+            was_deleted = delete_vcf(metadata, connection, run)
+            assert was_deleted, ("Rows should have been deleted if we are "
+                "deleting a VCF that exists")
         else:
             print 'VCF already exists with URI {}'.format(run['vcf_path'])
             return False
@@ -89,10 +91,11 @@ def get_vcf_id(con, run):
     return con.execute(query).first().id
 
 
-def delete_vcf(connection, run):
-    query = "DELETE FROM vcfs WHERE uri = '" + run['vcf_path'] + "'"
-    connection.execute(query)
-
+def delete_vcf(metadata, connection, run):
+    """Delete VCFs with this run ID, and return True if rows were deleted."""
+    vcfs = metadata.tables.get('vcfs')
+    result = vcfs.delete().where(vcfs.c.uri == run['vcf_path']).execute()
+    return result.rowcount > 0
 
 def vcf_exists(connection, run):
     """Return True if the VCF exists in the vcfs table, else return False."""
