@@ -84,7 +84,7 @@ def get_vcf_id(con, run):
 
 
 def vcf_exists(connection, run):
-    """Return True if the VCF exists in teh vcfs table, else return False."""
+    """Return True if the VCF exists in the vcfs table, else return False."""
     query = "SELECT * FROM vcfs WHERE uri = '" + run['vcf_path'] + "'"
     vcf_relation = connection.execute(query).first()
     return True if vcf_relation else False
