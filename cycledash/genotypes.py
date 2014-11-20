@@ -172,7 +172,7 @@ def _filter_sql(filt, idx, table=''):
         'RLIKE': ' ~* %({})s',
         'LIKE': ' LIKE %({})s'
     }.get(op_name, '').format(name)
-    return query
+    return query, arg
 
 
 def _sort_by_sql(query, vcf_id, table=''):
