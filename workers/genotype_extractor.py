@@ -35,7 +35,7 @@ def extractor(run):
     # (as this is a time-consuming operation) in the vcfs table for later use.
     extant_cols = json.dumps(extant_columns(metadata, connection, vcf_id))
     vcfs = metadata.tables.get('vcfs')
-    vcfs.update().where(vcfs.c.id == vcf_id).values(header_spec=extant_cols).execute()
+    vcfs.update().where(vcfs.c.id == vcf_id).values(extant_columns=extant_cols).execute()
 
     connection.close()
     return True

@@ -9,7 +9,7 @@ CREATE TABLE vcfs (
        notes TEXT, -- Any notes, params, etc the user might add. Ideally in JSON format.
        uri TEXT UNIQUE, -- URI of source file, if any
        vcf_header TEXT, -- Plaintext header of the VCF
-       header_spec TEXT, -- list of non-null columns in the VCF
+       extant_columns TEXT, -- JSON list of non-null columns in the VCF
 
        precision NUMERIC,
        recall NUMERIC,
