@@ -77,7 +77,7 @@ var QueryBox = React.createClass({
         if (e.which == 13 /* enter */) {
           handleChange(e);
         }
-      })
+      });
       // Would be nice to show a default set of suggestions, but there's no
       // typeahead.js support for this until v0.11.
       // See https://github.com/twitter/typeahead.js/pull/719

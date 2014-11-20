@@ -344,7 +344,7 @@ text {
 .query-status.good {
   background: green;
 }
-.query-status.error {
+.query-status.bad {
   background: red;
 }
 
