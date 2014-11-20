@@ -38,7 +38,7 @@ filter_or_range
   / range
 
 filter "filter"
-  = k:field ws op:op ws v:value { return {type: 'filter', field: k, op: op, value: v} }
+  = k:field ws op:op ws v:value { return {type: 'filter', field: k, op: op, filterValue: v} }
 
 field "field"
   = chars:[0-9a-z.:_-]i+ { return chars.join(''); }

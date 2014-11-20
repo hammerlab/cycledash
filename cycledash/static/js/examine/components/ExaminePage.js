@@ -4,12 +4,12 @@
 var _ = require('underscore'),
     React = require('react'),
     idiogrammatik = require('idiogrammatik.js'),
-
     AttributeCharts = require('./AttributeCharts'),
     BioDalliance = require('./BioDalliance'),
     StatsSummary = require('./StatsSummary'),
     VCFTable = require('./VCFTable'),
     Karyogram = require('./Karyogram'),
+    QueryBox = require('./QueryBox'),
     LoadingStatus = require('./LoadingStatus');
 
 
@@ -30,18 +30,8 @@ var ExaminePage = React.createClass({
       this.setState(this.props.recordStore.getState());
     });
   },
-  handleRangeChange: function({contig, start, end}) {
-    this.props.recordActions.updateRecordRange({contig, start, end});
-  },
-  handleContigChange: function(contig) {
-    var start = null, end = null;
-    this.props.recordActions.updateRecordRange({contig, start, end});
-  },
-  handleFilterUpdate: function({columnName, filterValue, type}) {
-    this.props.recordActions.updateFilters({columnName, filterValue, type});
-  },
   handleSortByChange: function({columnName, order}) {
-    this.props.recordActions.updateSorter({columnName, order});
+    this.props.recordActions.updateSortBy({columnName, order});
   },
   handleRequestPage: function() {
     this.props.recordActions.requestPage();
@@ -72,6 +62,9 @@ var ExaminePage = React.createClass({
       this.props.recordActions.selectRecord(records[newIdx]);
     }
   },
+  handleQueryChange: function(parsedQuery) {
+    this.props.recordActions.setQuery(parsedQuery);
+  },
   render: function() {
     var state = this.state, props = this.props;
     return (
@@ -95,6 +88,8 @@ var ExaminePage = React.createClass({
                       handlePreviousRecord={this.handlePreviousRecord}
                       handleNextRecord={this.handleNextRecord}
                       handleClose={() => this.handleSelectRecord(null)} />
+        <QueryBox columns={state.columns}
+                  handleQueryChange={this.handleQueryChange} />
         <VCFTable ref="vcfTable"
                   hasLoaded={state.hasLoaded}
                   records={state.records}
@@ -106,10 +101,7 @@ var ExaminePage = React.createClass({
                   sortBys={state.sortBys}
                   handleSortByChange={this.handleSortByChange}
                   handleChartChange={this.handleChartChange}
-                  handleFilterUpdate={this.handleFilterUpdate}
-                  handleContigChange={this.handleContigChange}
                   handleRequestPage={this.handleRequestPage}
-                  handleRangeChange={this.handleRangeChange}
                   handleSelectRecord={this.handleSelectRecord} />
       </div>
      );

@@ -23,6 +23,7 @@ var RECORD_LIMIT = 250;
 var DEFAULT_SORT_BYS = [{columnName: 'contig', order: 'asc'},
                         {columnName: 'position', order: 'asc'}];
 
+var ENTIRE_GENOME = {start: null, end: null, chromosome: types.ALL_CHROMOSOMES};
 
 function createRecordStore(vcfId, dispatcher) {
   // Initial state of the store. This is mutable. There be monsters.
@@ -36,8 +37,8 @@ function createRecordStore(vcfId, dispatcher) {
       selectedColumns = [],
 
       filters = [],
-      sortBys = [{columnName: 'position', order: 'asc'}],
-      range = {start: null, end: null, chromosome: types.ALL_CHROMOSOMES},
+      sortBys = DEFAULT_SORT_BYS,
+      range = ENTIRE_GENOME,
       variantType = 'ALL', // TODO(ihodes): implement
 
       contigs = [],
@@ -64,7 +65,7 @@ function createRecordStore(vcfId, dispatcher) {
         updateFilters(action.columnName, action.filterValue, action.type);
         updateGenotypes({append: false});
         break;
-      case ACTION_TYPES.SELECT_RECORD_RANGE:
+      case ACTION_TYPES.UPDATE_RANGE:
         updateRange(action.contig, action.start, action.end);
         updateGenotypes({append: false});
         break;
@@ -87,6 +88,10 @@ function createRecordStore(vcfId, dispatcher) {
         break;
       case ACTION_TYPES.SELECT_RECORD:
         selectedRecord = action.record;
+        break;
+      case ACTION_TYPES.SET_QUERY:
+        setQuery(action.query);
+        updateGenotypes({append: false});
         break;
     }
     // Required: lets the dispatcher to know that the Store is done processing.
@@ -190,6 +195,18 @@ function createRecordStore(vcfId, dispatcher) {
    */
   function updateRange(contig, start, end) {
     range = {contig, start, end};
+  }
+
+  /**
+   * Sets sortBy, range and filters all in one go.
+   * Unlike the update* methods, this clobbers whatever was there before.
+   *
+   * NB: mutates store state!
+   */
+  function setQuery(query) {
+    filters = query.filters || [];
+    sortBys = query.sortBy || DEFAULT_SORT_BYS;
+    range = query.range || ENTIRE_GENOME;
   }
 
   // Initialize the RecordStore with basic information (columns, the contigs

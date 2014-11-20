@@ -33,7 +33,7 @@ body {
 .vcf-table input {
     border: none;
     padding: 11px;
-    background: #dddddd;
+    background: #ddd;
     color: #1f2f1f;
     width: 45px;
     margin-left: 3px;
@@ -82,10 +82,7 @@ th.attr.selected > span {
     color: #969696;
 }
 th.uber-column {
-    border-right: 1px solid black;
-}
-th.uber-column:last-child {
-    border: none;
+    border-left: 1px solid #bbb;
 }
 .vcf-table .tooltip {
     display: none;
@@ -308,4 +305,89 @@ text {
     color: red;
     font-size: 1.2em;
     font-weight: 700;
+}
+
+/* CQL Typeahead */
+.query-container * { box-sizing: border-box; }
+.typeahead-input {
+  position: relative;
+  padding-right: 350px;  /* matches width of Stats Table */
+  margin-bottom: 20px;
+  /* reference, alternates */
+}
+.twitter-typeahead {
+  width: 100%;
+  padding-right: 20px;
+}
+.query-input, .twitter-typeahead .tt-query, .twitter-typeahead .tt-hint {
+  width: 100%;
+  height: 40px;
+  padding: 8px 12px;
+  font-size: 24px;
+  line-height: 30px;
+  border: 2px solid #ccc;
+  -webkit-border-radius: 8px;
+     -moz-border-radius: 8px;
+          border-radius: 8px;
+  outline: none;
+  padding-left: 30px;
+}
+.query-status {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  margin-top: -8px;
+  width: 16px;
+  height: 16px;
+  z-index: 1;
+}
+.query-status.good {
+  background: green;
+}
+.query-status.bad {
+  background: red;
+}
+
+.tt-hint {
+  color: gray;
+}
+
+.error-message {
+  min-height: 20px;
+}
+
+/* Styles from http://stackoverflow.com/a/20205623/388951 */
+.tt-query {
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+
+.tt-hint {
+    color: #999
+}
+
+.tt-dropdown-menu {
+    min-width: 422px;
+    margin-top: 12px;
+    padding: 8px 0;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    box-shadow: 0 5px 10px rgba(0,0,0,.2);
+}
+
+.tt-suggestion {
+    padding: 3px 20px;
+    font-size: 18px;
+    line-height: 24px;
+}
+
+.tt-suggestion.tt-cursor {
+    color: #fff;
+    background-color: #0097cf;
+
+}
+
+.tt-suggestion p {
+    margin: 0;
 }
