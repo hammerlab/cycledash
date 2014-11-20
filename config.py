@@ -1,17 +1,20 @@
 import os
 
-# ensure that false in config isn't interpreted as True
-use_reloader = os.environ.get('USE_RELOADER', False)
-if use_reloader and use_reloader.lower() == 'false':
-    use_reloader = False
-USE_RELOADER = use_reloader
+def handle_false(value):
+    if value and value.lower() == 'false':
+        value = False
+    return value
 
+# ensure that false in config isn't interpreted as True
+USE_RELOADER = handle_false(os.environ.get('USE_RELOADER', False))
 SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URI']
 PORT = int(os.environ.get('PORT', 5000))
 WEBHDFS_USER = os.environ['WEBHDFS_USER']
 WEBHDFS_URL = os.environ['WEBHDFS_URL']
 IGV_HTTPFS_URL = os.environ['IGV_HTTPFS_URL']
 ALLOW_LOCAL_VCFS = os.environ.get('ALLOW_LOCAL_VCFS', USE_RELOADER)
+ALLOW_VCF_OVERWRITES = handle_false(
+    os.environ.get('ALLOW_VCF_OVERWRITES', False))
 
 TYPEKIT_URL = os.environ.get('TYPEKIT_URL', None)
 

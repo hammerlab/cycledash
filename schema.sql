@@ -17,7 +17,7 @@ CREATE TABLE vcfs (
 );
 
 CREATE TABLE vcf_annotations (
-       vcf_id BIGINT REFERENCES vcfs NOT NULL,
+       vcf_id BIGINT REFERENCES vcfs ON DELETE CASCADE NOT NULL,
        annotation TEXT NOT NULL,
        type TEXT NOT NULL,
        "contig" TEXT,
@@ -35,7 +35,7 @@ CREATE TABLE data_annotations (
 );
 
 CREATE TABLE genotypes (
-       vcf_id BIGINT REFERENCES vcfs NOT NULL,
+       vcf_id BIGINT REFERENCES vcfs ON DELETE CASCADE NOT NULL,
        sample_name TEXT,
        contig TEXT,
        position INTEGER,

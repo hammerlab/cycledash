@@ -5,6 +5,7 @@ export CELERY_BROKER='amqp://localhost'
 export WEBHDFS_USER=username
 export WEBHDFS_URL=http://example.com:5000
 export IGV_HTTPFS_URL=http://example.com:9876
+export ALLOW_VCF_OVERWRITES=False
 
 # True for automatic reloading & debugging JS insertion.
 export USE_RELOADER=False

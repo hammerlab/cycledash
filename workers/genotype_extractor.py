@@ -6,6 +6,7 @@ Adds run metadata to the vcf table, then extracts genotypes from the VCF itself,
 adding them to the genotypes table. Finally, determines which columns in the vcf
 actually contain values, and stores a list of them in the vcf table.
 """
+import config
 import json
 from sqlalchemy import create_engine, MetaData
 
@@ -23,8 +24,13 @@ def extractor(run):
     engine, connection, metadata = initialize_database(DATABASE_URI)
 
     if vcf_exists(connection, run):
-        print 'VCF already exists with URI {}'.format(run['vcf_path'])
-        return False
+        if config.ALLOW_VCF_OVERWRITES:
+            was_deleted = delete_vcf(metadata, connection, run['vcf_path'])
+            assert was_deleted, ("Rows should have been deleted if we are "
+                "deleting a VCF that exists")
+        else:
+            print 'VCF already exists with URI {}'.format(run['vcf_path'])
+            return False
 
     reader, header = load_vcf_from_hdfs(run['vcf_path'])
     insert_vcf_metadata(metadata, run, header)
@@ -84,6 +90,12 @@ def get_vcf_id(con, run):
     query = "SELECT * FROM vcfs WHERE uri = '" + run['vcf_path'] + "'"
     return con.execute(query).first().id
 
+
+def delete_vcf(metadata, connection, uri):
+    """Delete VCFs with this URI, and return True if rows were deleted."""
+    vcfs = metadata.tables.get('vcfs')
+    result = vcfs.delete().where(vcfs.c.uri == uri).execute()
+    return result.rowcount > 0
 
 def vcf_exists(connection, run):
     """Return True if the VCF exists in the vcfs table, else return False."""
