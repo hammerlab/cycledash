@@ -108,7 +108,7 @@ We use PostgreSQL as our datastore, with the schema described in `schema.sql`.
 
 In a psql session, you can load the schema with `\i schema.sql`, and you'll be good to go.
 
-On OS X, setting up psql might look like this:
+On OS X, setting up and running psql might look like this:
 
 ```
 brew install postgres
