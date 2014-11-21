@@ -16,24 +16,24 @@ function isChar(letter) {
 // Tokenizes the string. Returns an array:
 // [{token,start,stop}, {token,start,stop}, ...]
 // where start/stop are the indices corresponding to the token in str.
-// whitespace tokens are removed. For example,
+// Whitespace tokens are removed. For example,
 // 'A B' --> [{token:'A',start:0,stop:1}, {token:'B',start:2,stop:3}]
 function tokenize(str) {
   var tokens = [];
-  var inQuote = false, inWhitespaceRun = true;
 
-  var i, c;
-  var newToken = () => {
-    tokens.push({token: '', start: i, stop: i});
+  // Helpers to add a new token and add to an existing token.
+  var newToken = (position) => {
+    tokens.push({token: '', start: position, stop: position});
   };
-  var addToToken = () => {
+  var addToToken = (position, character) => {
     var t = tokens[tokens.length - 1];
-    t.token += c;
-    t.stop = i + 1;
+    t.token += character;
+    t.stop = position + 1;
   };
   
-  for (i = 0; i < str.length; i++) {
-    c = str.charAt(i);
+  var inQuote = false, inWhitespaceRun = true;
+  for (var i = 0; i < str.length; i++) {
+    var c = str.charAt(i);
     if (c == ' ' && inWhitespaceRun) {
       continue;  // drop extra space
     }
@@ -41,24 +41,24 @@ function tokenize(str) {
       inQuote = !inQuote;
       inWhitespaceRun = false;
       if (inQuote) {
-        newToken();
-        addToToken();
+        newToken(i);
+        addToToken(i, c);
       } else {
-        addToToken();
-        newToken();
+        addToToken(i, c);
+        newToken(i);
       }
     } else if (c == ' ' && !inQuote && !inWhitespaceRun) {
-      newToken();
+      newToken(i);
       inWhitespaceRun = true;
     } else if (c != ' ' && inWhitespaceRun) {
       inWhitespaceRun = false;
-      newToken();
-      addToToken();
+      newToken(i);
+      addToToken(i, c);
     } else if (!inQuote && i > 0 && isChar(c) != isChar(str.charAt(i-1))) {
-      newToken();
-      addToToken();
+      newToken(i);
+      addToToken(i, c);
     } else {
-      addToToken();
+      addToToken(i, c);
     }
   }
   return tokens.filter(token => token.token);
@@ -71,8 +71,9 @@ function tokenize(str) {
 function _fuzzyStringMatch(shortStr, longStr) {
   shortStr = shortStr.toLowerCase();
   longStr = longStr.toLowerCase();
-  var j = 0;
-  for (var i = 0; i < shortStr.length; i++) {
+  // Walk through the two strings simultaneously.
+  var i = 0, j = 0;
+  for (; i < shortStr.length; i++) {
     var c = shortStr.charAt(i);
     for (; j < longStr.length; j++) {
       if (c == longStr.charAt(j)) {
@@ -88,10 +89,12 @@ function _fuzzyStringMatch(shortStr, longStr) {
 // and all other tokens are exact matches.
 //
 // This returns false if there is no match.
-// It returns shortStr with the next token added in the case of a match.
+// It returns shortStr with the next token added in the case of a match, or
+// replaced in the case of a fuzzy match.
 //
-// fuzzyMatch('Abe C Lncln', Abe C Lincoln') --> 'Abe C Lincoln'
-// fuzzyMatch('b C Lincoln', Abe C Lincoln') --> false
+// fuzzyMatch('Abe C',       'Abe C Lincoln') --> 'Abe C Lincoln'
+// fuzzyMatch('Abe C Lncln', 'Abe C Lincoln') --> 'Abe C Lincoln'
+// fuzzyMatch('b C Lincoln', 'Abe C Lincoln') --> false
 function fuzzyMatch(shortStr, longStr) {
   var shortTokens = tokenize(shortStr);
   var longTokens = tokenize(longStr);
@@ -113,16 +116,16 @@ function fuzzyMatch(shortStr, longStr) {
     if (!exactMatch(i)) return false;
   }
   if (fuzzy) {
-    if (exactMatch(i)) {
+    if (exactMatch(numExact)) {
       // if it's an exact match, go ahead and give the next token.
       numExact++;
-      fuzzy = false;
-    } else if (!fuzzyMatch(i)) {
+    } else if (!fuzzyMatch(numExact)) {
       return false;
     }
   }
 
   // Offer the original string, plus the next token from the completion.
+  // (Or replace the last token of the original string for a fuzzy match.)
   var base = '';
   if (numExact) {
     base = shortStr.slice(0, shortTokens[numExact - 1].stop) + ' ';
@@ -131,14 +134,13 @@ function fuzzyMatch(shortStr, longStr) {
 }
 
 // Filter down to queries which are "fuzzy matches".
-// Returns {query, oneToken} objects for each fuzzy match.
-// The "oneToken" value is the input query with the next token added.
+// Returns {query, completion} objects for each fuzzy match.
+// The "completion" value is the input query with the next token added.
 function fuzzyFilter(list, query) {
-  var o = [];
   return _.compact(list.map(item => {
     var m = fuzzyMatch(query, item);
     if (m) {
-      return {query: item, oneToken: m};
+      return {query: item, completion: m};
     } else {
       return null;
     }

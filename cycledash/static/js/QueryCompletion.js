@@ -37,7 +37,7 @@ var operators = [
 ];
 
 // Takes the cartesian product of its args (all lists) and joins them on ' '.
-function concatProductOf(args) {
+function concatProductOf() {
   return cartesianProductOf.apply(null, arguments).map(p => p.join(' '));
 }
 
@@ -119,14 +119,14 @@ function getCompletions(query, parse, columnNames) {
   // Filter down to completions which extend the query.
   completions = fuzzyFilter(completions, query);
 
-  // Filter down to completions which are grammatically valid.
+  // Filter down to completions which parse.
   completions = _.filter(completions, function({query, oneToken}) {
     var parsedQuery = parse(query, columnNames);
     return !parsedQuery.hasOwnProperty('error');
   });
 
   // Only offer one token at a time.
-  completions = _.uniq(_.compact(_.pluck(completions, 'oneToken')));
+  completions = _.uniq(_.compact(_.pluck(completions, 'completion')));
 
   return completions;
 }
