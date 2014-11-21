@@ -2,9 +2,11 @@
 // based on https://github.com/alex-seville/blanket/blob/master/src/node-loaders/coffee-script.js
 
 var fs = require('fs');
+    glob = require('glob'),
     path = require('path'),
     transformer = require('./jsx-stub-transformer'),
     ReactTools = require('react-tools');
+
 
 module.exports = function(blanket) {
 
@@ -42,4 +44,19 @@ module.exports = function(blanket) {
     });
   };
 
+  // Source all JS files so that they count towards the denominator.
+  require('./testdom')('<html><body></body></html>');
+  var antifilters = blanket.options('antifilter');
+  var pattern = './' + blanket.options('filter') + '/**/*.js';
+  glob.sync(pattern).forEach(function(path) {
+    var pathFromRoot = path.slice(2);
+    for (var i = 0; i < antifilters.length; i++) {
+      var antifilter = antifilters[i];
+      if (pathFromRoot.slice(0, antifilter.length) == antifilter) {
+        return;
+      }
+    }
+
+    require('../../' + pathFromRoot);
+  });
 };
