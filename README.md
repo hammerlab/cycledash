@@ -148,7 +148,7 @@ To run tests:
 
 ```
 source ENV.sh  # make sure all our environment variables are around
-nosetests __tests__/python   # Run Python tests
+nosetests tests/python   # Run Python tests
 npm test   # Run JS tests
 ```
 
@@ -157,7 +157,7 @@ npm test   # Run JS tests
 CycleDash uses dpxdt for perceptual diff testing. To update the reference screenshots:
 
 ```
-dpxdt update __tests__/pdifftests
+dpxdt update tests/pdifftests
 ```
 
 Running `git status` after this should indicate whether the screenshots have changed.
@@ -170,5 +170,5 @@ the following command:
 succeed.
 
 ```
-dpxdt test __tests__/pdifftests
+dpxdt test tests/pdifftests
 ```

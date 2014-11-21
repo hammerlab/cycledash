@@ -41,12 +41,12 @@
       "pattern": "cycledash/static/js",
       "data-cover-never": [
         "node_modules",
-        "__tests__"
+        "tests"
       ],
-      "loader": "../../../__tests__/js/blanket-stub-jsx.js"
+      "loader": "../../../tests/js/blanket-stub-jsx.js"
     }
   },
   "scripts": {
-    "test": "mocha --compilers .:__tests__/js/preprocessor.js __tests__/js/*-test.js"
+    "test": "mocha --compilers .:tests/js/preprocessor.js tests/js/*-test.js"
   }
 }

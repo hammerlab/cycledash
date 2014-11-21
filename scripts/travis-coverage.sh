@@ -5,5 +5,5 @@ set -o errexit
 NODE_ENV=test ./node_modules/.bin/mocha \
   --require blanket \
   --reporter mocha-lcov-reporter \
-  __tests__/js/*-test.js \
+  tests/js/*-test.js \
   | ./node_modules/coveralls/bin/coveralls.js
