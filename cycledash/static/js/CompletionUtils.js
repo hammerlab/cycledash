@@ -97,7 +97,7 @@ function fuzzyMatch(shortStr, longStr) {
   var longTokens = tokenize(longStr);
 
   if (longTokens.length < shortTokens.length) return false;
-  if (shortTokens.length == 0) {
+  if (shortTokens.length === 0) {
     return longTokens[0].token;
   }
 
@@ -138,7 +138,7 @@ function fuzzyFilter(list, query) {
   return _.compact(list.map(item => {
     var m = fuzzyMatch(query, item);
     if (m) {
-      return {query: item, oneToken: m}
+      return {query: item, oneToken: m};
     } else {
       return null;
     }
