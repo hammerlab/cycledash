@@ -161,7 +161,7 @@ function createRecordStore(vcfId, dispatcher) {
 
   function setSearchStringToQuery(query) {
     var queryString = encodeURI(JSON.stringify(query));
-    window.history.pushState(null, null, '?query=' + queryString);
+    window.history.replaceState(null, null, '?query=' + queryString);
   }
 
   // Returns the value with the given name in the URL search string.
@@ -172,8 +172,7 @@ function createRecordStore(vcfId, dispatcher) {
       var [key, val] = v.split('=');
       return decodeURIComponent(key) == name;
     }));
-    if (val)
-      return decodeURIComponent(val.split('=')[1]);
+    if (val) return decodeURIComponent(val.split('=')[1]);
   }
 
   /**
