@@ -23,7 +23,8 @@ var RECORD_LIMIT = 250;
 var DEFAULT_SORT_BYS = [{columnName: 'contig', order: 'asc'},
                         {columnName: 'position', order: 'asc'}];
 
-var ENTIRE_GENOME = {start: null, end: null, chromosome: types.ALL_CHROMOSOMES};
+var ENTIRE_GENOME = {start: null, end: null, contig: types.ALL_CHROMOSOMES};
+
 
 function createRecordStore(vcfId, dispatcher) {
   // Initial state of the store. This is mutable. There be monsters.
@@ -123,6 +124,7 @@ function createRecordStore(vcfId, dispatcher) {
     }
 
     var query = queryFrom(range, filters, sortBys, page, limit);
+    setSearchStringToQuery(query);
 
     $.when(deferredGenotypes(vcfId, query))
       .done(response => {
@@ -155,6 +157,23 @@ function createRecordStore(vcfId, dispatcher) {
       page,
       limit
     };
+  }
+
+  function setSearchStringToQuery(query) {
+    var queryString = encodeURI(JSON.stringify(query));
+    window.history.pushState(null, null, '?query=' + queryString);
+  }
+
+  // Returns the value with the given name in the URL search string.
+  function getQueryStringValue(name) {
+    var search = window.location.search.substring(1),
+        vars = search.split('&');
+    var val = _.first(_.filter(vars, v => {
+      var [key, val] = v.split('=');
+      return decodeURIComponent(key) == name;
+    }));
+    if (val)
+      return decodeURIComponent(val.split('=')[1]);
   }
 
   /**
@@ -216,6 +235,8 @@ function createRecordStore(vcfId, dispatcher) {
       hasLoaded = true;
       columns = columnsResponse[0].spec;
       contigs = contigsResponse[0].contigs;
+      var existingQuery = getQueryStringValue('query');
+      if (existingQuery) setQuery(JSON.parse(existingQuery));
       updateGenotypes({append: false});
     });
 
