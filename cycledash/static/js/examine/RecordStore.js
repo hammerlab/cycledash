@@ -160,7 +160,7 @@ function createRecordStore(vcfId, dispatcher) {
   }
 
   function setSearchStringToQuery(query) {
-    var queryString = encodeURI(JSON.stringify(query));
+    var queryString = encodeURIComponent(JSON.stringify(query));
     window.history.replaceState(null, null, '?query=' + queryString);
   }
 
@@ -234,8 +234,17 @@ function createRecordStore(vcfId, dispatcher) {
       hasLoaded = true;
       columns = columnsResponse[0].spec;
       contigs = contigsResponse[0].contigs;
+
       var existingQuery = getQueryStringValue('query');
-      if (existingQuery) setQuery(JSON.parse(existingQuery));
+      if (existingQuery) {
+        try {
+          var jsonQuery = JSON.parse(existingQuery);
+          setQuery(jsonQuery);
+        } catch (e) {
+          // query is invalid
+        }
+      }
+
       updateGenotypes({append: false});
     });
 
