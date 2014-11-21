@@ -21,9 +21,6 @@ $EDITOR ENV.sh                     # Fill in values.
 ./initialize_database.sh           # Create database tables
 ```
 
-For hammerlab folks, you'll want to set `WEBHDFS_URL` to
-`http://demeter.hpc.mssm.edu:14000`.
-
 ### Start CycleDash
 
 To start the application server:
