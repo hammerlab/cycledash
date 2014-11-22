@@ -143,7 +143,7 @@ select {
 table {
     border-collapse: collapse;
 }
-tr:nth-child(odd) {
+.vcf-table tr:nth-child(odd) {
     background: rgba(248, 249, 250, 0.5);
 }
 th .sort {
@@ -209,27 +209,9 @@ text {
 
 /* StatsSummary */
 #stats-container {
+    margin-top: 40px;
     width: 350px;
     float: right;
-}
-#stats-container .variant-type-tabs li {
-    border-radius: 3px 3px 0 0;
-    display: inline-block;
-    margin-left: 20px;
-    padding: 3px 13px;
-    border: 1px solid black;
-    border-bottom: none;
-    background-color: none;
-    cursor: pointer;
-}
-#stats-container .variant-type-tabs li:first-child {
-    margin-left: 0;
-}
-#stats-container .variant-type-tabs li.active {
-    background-color: white;
-    margin-bottom: -2px;
-    cursor: auto;
-    border-bottom: none;
 }
 #stats-container .precision-recall {
     border-radius: 3px 3px 0 0;
