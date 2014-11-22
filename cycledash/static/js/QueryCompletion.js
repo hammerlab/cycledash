@@ -18,19 +18,12 @@
 var _ = require('underscore');
 var {
   cartesianProductOf,
-  filterPrefix,
-  firstToken,
   flatMap,
-  normalizeSpacing,
-  withoutLastToken
+  fuzzyFilter,
+  splitLastToken
 } = require('./CompletionUtils.js');
 
 // -- Utility methods --
-
-// Wrap each item in {value: ...}. This is what typeahead.js expects.
-function valueify(list) {
-  return list.map(value => ({value}));
-}
 
 // Legal operators in the CQL language.
 var operators = [
@@ -43,20 +36,24 @@ var operators = [
   'RLIKE'
 ];
 
+// Takes the cartesian product of its args (all lists) and joins them on ' '.
+function concatProductOf() {
+  return cartesianProductOf.apply(null, arguments).map(p => p.join(' '));
+}
+
 // Given a PEG.js expectation object, return possible strings which could
 // fulfill that expectation, e.g. 'filter' -> 'A = 0'.
 function completionsForExpectation(expectation, columnNames, rejectedText) {
   switch (expectation.description) {
     case 'filter':
       // Return columns x operators x {0}
-      // TODO: normalize spacing
-      return cartesianProductOf(columnNames, operators, ['0']).map(p => p.join(' '));
+      return concatProductOf(columnNames, operators, ['0']);
 
     case 'field':
       return columnNames;
 
     case '"ORDER BY"':
-      return cartesianProductOf(["ORDER BY"], columnNames).map(p => p.join(' '));
+      return concatProductOf(["ORDER BY"], columnNames);
 
     case '"AND"':
       // Just need one valid completion.
@@ -95,37 +92,41 @@ function getCompletions(query, parse, columnNames) {
   var parsedQuery = parse(query, columnNames);
   if (parsedQuery.error) {
     if (parsedQuery.original && parsedQuery.original.expected) {
+      var expected = parsedQuery.original.expected;
+      // If it expected whitespace, add it on and try again.
+      if (expected.length == 1 && expected[0].description == 'required whitespace') {
+        return getCompletions(query + ' ', parse, columnNames);
+      }
+
+      // Build out completions for each possibility
       var start = query.substr(0, parsedQuery.original.offset);
       var rejectedText = query.substr(parsedQuery.original.offset);
-      var newCompletions = flatMap(parsedQuery.original.expected, function(e) {
-        return _.map(completionsForExpectation(e, columnNames, rejectedText), function(completion) {
-          return start + completion;
-        });
+      var newCompletions = flatMap(expected, function(e) {
+        return _.map(completionsForExpectation(e, columnNames, rejectedText),
+                     completion => start + completion);
       });
       completions = completions.concat(newCompletions);
     } else {
-      // Probably an invalid column name. Pop off the last token and try to get completions.
-      var subquery = withoutLastToken(query);
-      completions = getCompletions(subquery, parse, columnNames);
+      // Probably an invalid column name. Pop off the last token and try
+      // completing column names. Fuzzy matching happens below.
+      var [subquery, lastToken] = splitLastToken(query);
+      completions = completions.concat(concatProductOf([subquery], columnNames));
     }
   } else {
     // It's a valid query! Nothing to do...
   }
 
   // Filter down to completions which extend the query.
-  completions = filterPrefix(completions, query);
+  completions = fuzzyFilter(completions, query);
 
-  // Filter down to completions which are grammatically valid.
-  completions = _.filter(completions, function(query) {
+  // Filter down to completions which parse.
+  completions = _.filter(completions, function({query, oneToken}) {
     var parsedQuery = parse(query, columnNames);
     return !parsedQuery.hasOwnProperty('error');
   });
 
-  // Only offer one whitespace-delimited token at a time.
-  completions = _.uniq(_.compact(_.map(completions, completion => {
-    var token = firstToken(completion.substr(query.length));
-    return token && query + token;  // nulls are dropped by _.compact
-  })));
+  // Only offer one token at a time.
+  completions = _.uniq(_.compact(_.pluck(completions, 'completion')));
 
   return completions;
 }

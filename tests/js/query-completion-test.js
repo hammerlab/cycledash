@@ -6,7 +6,7 @@ var _ = require('underscore'),
     QueryCompletion = require('../../cycledash/static/js/QueryCompletion.js');
 
 describe('Query Completion', function() {
-  var columns = ['A', 'B', 'INFO.DP'];
+  var columns = ['A', 'B', 'INFO.DP', 'sample:GQ'];
   var filterPrefix = QueryCompletion.filterPrefix;
 
   // Returns a list of possible complete queries.
@@ -29,15 +29,27 @@ describe('Query Completion', function() {
 
   it('Should offer initial suggestions', function() {
     assertCompletions('',
-                     ['A', 'B', 'INFO.DP', 'ORDER', '20:']);
+                     ['A', 'B', 'INFO.DP', 'sample:GQ', 'ORDER', '20:']);
   });
 
   it('Should offer a sequence of ORDER BY completions', function() {
-    assertCompletions('O', ['ORDER']);
+    assertCompletions('O', ['ORDER', 'INFO.DP']);
     assertCompletions('ORDER', ['ORDER BY']);
+
+    assertCompletions('ORDER BY',
+                     ['ORDER BY A',
+                      'ORDER BY B',
+                      'ORDER BY INFO.DP',
+                      'ORDER BY sample:GQ']);
+
     assertCompletions('ORDER BY ',
-                     ['ORDER BY A', 'ORDER BY B', 'ORDER BY INFO.DP']);
-    assertCompletions('ORDER BY A A', ['ORDER BY A ASC']);
+                     ['ORDER BY A',
+                      'ORDER BY B',
+                      'ORDER BY INFO.DP',
+                      'ORDER BY sample:GQ']);
+
+    assertCompletions('ORDER BY A A',
+                     ['ORDER BY A ASC']);
   });
 
   it('Should auto-complete field names in ORDER BY', function() {
@@ -62,7 +74,11 @@ describe('Query Completion', function() {
 
   it('Should complete fields after AND', function() {
     assertCompletions('A=0 AND ',
-                     ['A=0 AND A', 'A=0 AND B', 'A=0 AND INFO.DP', 'A=0 AND 20:']);
+                     ['A=0 AND A',
+                      'A=0 AND B',
+                      'A=0 AND INFO.DP',
+                      'A=0 AND sample:GQ',
+                      'A=0 AND 20:']);
   });
 
   it('Should complete ORDER BY after filter', function() {
@@ -74,41 +90,54 @@ describe('Query Completion', function() {
     assertCompletions('ORDER BY A, ', [
       'ORDER BY A, A',
       'ORDER BY A, B',
-      'ORDER BY A, INFO.DP'
+      'ORDER BY A, INFO.DP',
+      'ORDER BY A, sample:GQ'
     ]);
   });
 
   it('Should work with lowercase keywords', function() {
-    assertCompletions('A > 10 a', ['A > 10 aND']);
-    assertCompletions('o', ['oRDER']);
+    assertCompletions('A > 10 a', ['A > 10 AND']);
+    assertCompletions('o', ['ORDER', 'INFO.DP']);  // fuzzy match
     assertCompletions('order', ['order BY']);
   });
 
   it('Should ignore extra/elided spaces', function() {
     assertCompletions('ORDER BY      I',
-                     ['ORDER BY      INFO.DP']);
+                     ['ORDER BY INFO.DP']);
+    assertCompletions('order by      in',
+                     ['order by INFO.DP']);
 
     assertCompletions('   ORDER BY      I',
-                     ['   ORDER BY      INFO.DP']);
+                     ['   ORDER BY INFO.DP']);
 
     assertCompletions('A   ', [
-                      'A   <=',
-                      'A   <',
-                      'A   >=',
-                      'A   >',
-                      'A   =',
-                      'A   LIKE',
-                      'A   RLIKE'
+                      'A <=',
+                      'A <',
+                      'A >=',
+                      'A >',
+                      'A =',
+                      'A LIKE',
+                      'A RLIKE'
                      ]);
 
-    assertCompletions('A<', ['A<=', 'A< 0']);
+    // Note: spacing a little odd here
+    assertCompletions('A<', ['A <=', 'A< 0']);
+  });
+
+  it('Should ignore case in field names', function() {
+    assertCompletions('in', ['INFO.DP']);
+  });
+
+  it('Should do fuzzy matching in field names', function() {
+    assertCompletions('order by q', ['order by sample:GQ']);
+    assertCompletions('order by DP', ['order by INFO.DP']);
+    assertCompletions('q', ['sample:GQ']);
   });
 });
 
 
 /*
 To-do:
-- Mandatory space: "ORDER BYA" and "A<10 ANDA>10" shouldn't be valid.
 - Value completion that's aware of the current field
 - Completion when the query is already valid.
 ~ Completion for range selections

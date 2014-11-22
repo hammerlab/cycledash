@@ -13,11 +13,24 @@ function isChar(letter) {
   return !!letter.match(/[A-Za-z0-9.:-]/);
 }
 
-// Normalize whitespace outside of quoted strings. Examples:
-// "a  b    c" -> "a b c"
-// "a>10" -> "a > 10"
-function normalizeSpacing(str) {
-  var normalized = '';
+// Tokenizes the string. Returns an array:
+// [{token,start,stop}, {token,start,stop}, ...]
+// where start/stop are the indices corresponding to the token in str.
+// Whitespace tokens are removed. For example,
+// 'A B' --> [{token:'A',start:0,stop:1}, {token:'B',start:2,stop:3}]
+function tokenize(str) {
+  var tokens = [];
+
+  // Helpers to add a new token and add to an existing token.
+  var newToken = (position) => {
+    tokens.push({token: '', start: position, stop: position});
+  };
+  var addToToken = (position, character) => {
+    var t = tokens[tokens.length - 1];
+    t.token += character;
+    t.stop = position + 1;
+  };
+  
   var inQuote = false, inWhitespaceRun = true;
   for (var i = 0; i < str.length; i++) {
     var c = str.charAt(i);
@@ -27,32 +40,112 @@ function normalizeSpacing(str) {
     if (c == '"') {
       inQuote = !inQuote;
       inWhitespaceRun = false;
-      if (inQuote && normalized[normalized.length - 1] != ' ') {
-        normalized += ' ';
+      if (inQuote) {
+        newToken(i);
+        addToToken(i, c);
+      } else {
+        addToToken(i, c);
+        newToken(i);
       }
     } else if (c == ' ' && !inQuote && !inWhitespaceRun) {
+      newToken(i);
       inWhitespaceRun = true;
     } else if (c != ' ' && inWhitespaceRun) {
       inWhitespaceRun = false;
+      newToken(i);
+      addToToken(i, c);
     } else if (!inQuote && i > 0 && isChar(c) != isChar(str.charAt(i-1))) {
-      normalized += ' ';  // add spaces around word boundaries.
+      newToken(i);
+      addToToken(i, c);
+    } else {
+      addToToken(i, c);
     }
-    normalized += c;
   }
-  return normalized;
+  return tokens.filter(token => token.token);
 }
 
-// Filter the list down to strings which start with prefix.
-// This is case-insensitive. If a list item matches in everything but case, it
-// will be "fixed", e.g. filterPrefix(['ABC'], 'a') -> ['aBC'].
-function filterPrefix(list, prefix) {
-  var normPrefix = normalizeSpacing(prefix).toLowerCase(),
-      len = normPrefix.length;
-  return list.filter(function(item) {
-    return normalizeSpacing(item).slice(0, len).toLowerCase() == normPrefix;
-  }).map(function(matchingItem) {
-    return prefix + normalizeSpacing(matchingItem).slice(len);
-  });
+// Returns true if each character in shortStr can be matched to a character in
+// longStr in an increasing sequence, e.g.
+// fuzzyStringMatch('Lncln', 'Lincoln') = true
+// Case insensitive.
+// This is an internal helper method.
+function fuzzyStringMatch(shortStr, longStr) {
+  shortStr = shortStr.toLowerCase();
+  longStr = longStr.toLowerCase();
+  // Walk through the two strings simultaneously.
+  var i = 0, j = 0;
+  for (; i < shortStr.length; i++) {
+    var c = shortStr.charAt(i);
+    for (; j < longStr.length; j++) {
+      if (c == longStr.charAt(j)) {
+        break;
+      }
+    }
+    if (j == longStr.length) return false;
+  }
+  return true;
+}
+
+// shortStr is a 'fuzzy match' for longStr if its last token is a fuzzy match
+// and all other tokens are exact matches.
+//
+// This returns false if there is no match.
+// It returns shortStr with the next token added in the case of a match, or
+// replaced in the case of a fuzzy match.
+//
+// fuzzyMatch('Abe C',       'Abe C Lincoln') --> 'Abe C Lincoln'
+// fuzzyMatch('Abe C Lncln', 'Abe C Lincoln') --> 'Abe C Lincoln'
+// fuzzyMatch('b C Lincoln', 'Abe C Lincoln') --> false
+function fuzzyMatch(shortStr, longStr) {
+  var shortTokens = tokenize(shortStr);
+  var longTokens = tokenize(longStr);
+
+  if (longTokens.length < shortTokens.length) return false;
+  if (shortTokens.length === 0) {
+    return longTokens[0].token;
+  }
+
+  // only do fuzzy match on the last token if it's still being typed.
+  var fuzzy = (shortStr.slice(-1) !== ' ');
+
+  var exactMatch = (i) => (shortTokens[i].token.toLowerCase() ===
+                           longTokens[i].token.toLowerCase());
+  var fuzzyMatch = (i) => fuzzyStringMatch(shortTokens[i].token, longTokens[i].token);
+
+  var numExact = shortTokens.length - (fuzzy ? 1 : 0);
+  for (var i = 0; i < numExact; i++) {
+    if (!exactMatch(i)) return false;
+  }
+  if (fuzzy) {
+    if (exactMatch(numExact)) {
+      // if it's an exact match, go ahead and give the next token.
+      numExact++;
+    } else if (!fuzzyMatch(numExact)) {
+      return false;
+    }
+  }
+
+  // Offer the original string, plus the next token from the completion.
+  // (Or replace the last token of the original string for a fuzzy match.)
+  var base = '';
+  if (numExact) {
+    base = shortStr.slice(0, shortTokens[numExact - 1].stop) + ' ';
+  }
+  return base + longTokens[numExact].token;
+}
+
+// Filter down to queries which are "fuzzy matches".
+// Returns {query, completion} objects for each fuzzy match.
+// The "completion" value is the input query with the next token added.
+function fuzzyFilter(list, query) {
+  return _.compact(list.map(item => {
+    var m = fuzzyMatch(query, item);
+    if (m) {
+      return {query: item, completion: m};
+    } else {
+      return null;
+    }
+  }));
 }
 
 // Builds a new list by applying a function to all elements of the list and
@@ -72,33 +165,25 @@ function cartesianProductOf() {
   }, [[]]);
 }
 
-// Returns the first token in str, including leading whitespace.
-// e.g. "foo bar" -> "foo", "  baz quux" -> "  baz".
-function firstToken(str) {
-  var m = str.match(/[ ]*[^ ]+/);
-  if (m) {
-    return m[0];
-  } else {
-    return null;
-  }
-}
-
-// Returns the string w/o the last token. This leaves trailing whitespace.
-// e.g. "ORDER BY IN" --> "ORDER BY "
-function withoutLastToken(str) {
+// Pops off the last token of a string.
+// Returns [rest of string, last token].
+// This leaves trailing whitespace on the string.
+// e.g. 'ORDER BY IN' --> ['ORDER BY ', 'IN']
+//      'ORDER BY ' --> ['ORDER BY ', '']
+function splitLastToken(str) {
   var m = str.match(/[^ ]+$/);
   if (m) {
-    return str.slice(0, m.index);
+    return [str.slice(0, m.index), str.slice(m.index)];
   } else {
-    return str;
+    return [str, ''];
   }
 }
 
 module.exports = {
   cartesianProductOf,
-  filterPrefix,
-  firstToken,
+  fuzzyMatch,
+  fuzzyFilter,
   flatMap,
-  normalizeSpacing,
-  withoutLastToken
+  splitLastToken,
+  tokenize
 };

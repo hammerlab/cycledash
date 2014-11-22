@@ -149,6 +149,12 @@ nosetests tests/python   # Run Python tests
 npm test   # Run JS tests
 ```
 
+To run an individual JavaScript test, you can use:
+
+```
+./node_modules/.bin/mocha --require mocha-clean --compilers .:__tests__/js/preprocessor.js path/to/test.js [--grep <regex>]
+```
+
 #### Perceptual Diff Testing
 
 CycleDash uses dpxdt for perceptual diff testing. To update the reference screenshots:
