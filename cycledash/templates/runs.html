@@ -43,7 +43,6 @@ input.selector {
 {% block body %}
 {{ nav("runs") }}
 <br/>
-<button id="concordance" class="btn btn-info">Concordance on Selected</button>
 <button id="show-submit" class="btn btn-default">Submit New Run</button>
 <form method="POST" action="/runs" role="form" id="submit">
   <h2>Add a new run:<button type="button" class="close" aria-hidden="true">&times;</button></h3>
@@ -93,40 +92,31 @@ input.selector {
   <button type="submit" class="btn btn-success">Submit</button>
 </form>
 
-<script>
-  d3.select("#concordance")
-    .on("click", function() {
-      var runs = document.querySelectorAll("input[type=checkbox]:checked");
-      runs = Array.prototype.slice.call(runs).map(function(v) { return v.value; });
-      if (runs.length != 0) {
-        var run_ids_key = runs.join(",");
-        window.location.href = "/runs/" + run_ids_key + "/concordance";
-      }
-    });
-</script>
-
 <table class="runs table">
   <thead>
     <tr>
       <th></th>
       <th>Caller Name</th>
-      <th>Submitted On</th>
       <th>Dataset</th>
+      <th>Submitted On</th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
 {%- for run in runs %}
     <tr class="run" data-runId="{{ run['id'] }}">
       <td>
-        <input type="checkbox" value="{{ run['id'] }}" class="selector">
         <a class="btn btn-default btn-xs" href="/runs/{{ run['id'] }}/examine">Examine</a>
       </td>
       <td>{{ run['caller_name'] }}</td>
-      <td>{{ run['created_at'] }}</td>
       <td>{{ run['dataset_name'] }}</td>
+      <td>{{ run['created_at'] }}</td>
+      <td>
+        {%- if run['validation_vcf'] %}<span class="label label-info">validation</span>{% endif -%}
+      </td>
     </tr>
     <tr class="run-info" data-runId="{{ run['id'] }}">
-      <td colspan=4>
+      <td colspan=5>
         <ul>
           {% for name, key in run_kvs.iteritems() %}
           {%- if run.get(key) %}
