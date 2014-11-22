@@ -66,9 +66,10 @@ function tokenize(str) {
 
 // Returns true if each character in shortStr can be matched to a character in
 // longStr in an increasing sequence, e.g.
-// _fuzzyStringMatch('Lncln', 'Lincoln') = true
+// fuzzyStringMatch('Lncln', 'Lincoln') = true
 // Case insensitive.
-function _fuzzyStringMatch(shortStr, longStr) {
+// This is an internal helper method.
+function fuzzyStringMatch(shortStr, longStr) {
   shortStr = shortStr.toLowerCase();
   longStr = longStr.toLowerCase();
   // Walk through the two strings simultaneously.
@@ -109,7 +110,7 @@ function fuzzyMatch(shortStr, longStr) {
 
   var exactMatch = (i) => (shortTokens[i].token.toLowerCase() ===
                            longTokens[i].token.toLowerCase());
-  var fuzzyMatch = (i) => _fuzzyStringMatch(shortTokens[i].token, longTokens[i].token);
+  var fuzzyMatch = (i) => fuzzyStringMatch(shortTokens[i].token, longTokens[i].token);
 
   var numExact = shortTokens.length - (fuzzy ? 1 : 0);
   for (var i = 0; i < numExact; i++) {
