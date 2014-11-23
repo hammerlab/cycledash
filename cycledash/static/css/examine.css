@@ -314,7 +314,7 @@ dt {
     clear: left;
     text-align: right;
     overflow: hidden;
-    text-overf‌​low: ellipsis;
+    text-overflow: ellipsis;
     white-space: nowrap;
 }
 
