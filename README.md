@@ -69,9 +69,9 @@ npm install
 gulp dalliance
 ```
 
-To update the PEG.js generated grammar after modifying CQL, run `gulp peg`.
+Run `gulp peg` to update the PEG.js generated grammar after modifying CQL.
 
-`gulp prod`, as introduced earlier, can be used to update all of the above (BioDalliance, PEG.js grammar, etc.)
+Run `gulp prod`, as introduced earlier, to update all of the above (BioDalliance, PEG.js grammar, etc.)
 
 #### Python
 
