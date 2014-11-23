@@ -6,6 +6,17 @@ import vcf
 from cycledash import db
 
 
+VCF_BY_ID_QUERY = """SELECT *
+FROM vcfs
+WHERE id = %(vcf_id)s
+"""
+
+TRUTH_BY_DATASET_QUERY = """SELECT *
+FROM vcfs
+WHERE dataset_name = %(dataset_name)s
+  AND validation_vcf = true
+"""
+
   ##############################################################################
  ##### The below functions are exposed via the controllers in views.py. #######
 ##############################################################################
@@ -70,8 +81,10 @@ def get(vcf_id, query):
                                                    vcf_id, fns)
         genotypes = connection.execute(combined_sql, parameters)
         genotypes = [dict(gt) for gt in genotypes.fetchall()]
-    # TODO: derive truth_vcf, replace None with it
-    stats = calculate_stats(vcf_id, None, query)
+    # TODO(ihodes): We try to guess it later; should give users a chance to
+    #               specify it (or multiple validations) in UI.
+    truth_vcf_id = None
+    stats = calculate_stats(vcf_id, truth_vcf_id, query)
     return {'records': genotypes, 'stats': stats}
 
 
@@ -80,7 +93,6 @@ def calculate_stats(vcf_id, truth_vcf_id, query):
     to query.
     """
     with db.engine.connect() as connection:
-        # TODO(ihodes): Try to guess truth_vcf_id if it's None.
         parameters = {'vcf_id': vcf_id}
         count_query = "SELECT count(*) FROM genotypes WHERE vcf_id = %(vcf_id)s"
         record_query = count_query
@@ -90,6 +102,15 @@ def calculate_stats(vcf_id, truth_vcf_id, query):
             record_query += '\n' + sql
         count = connection.execute(record_query, parameters).fetchall()[0][0]
         total_count = connection.execute(count_query, parameters).fetchall()[0][0]
+
+        # Try to guess truth_vcf_id if it's None.
+        if truth_vcf_id is None:
+            vcf = connection.execute(VCF_BY_ID_QUERY, vcf_id=vcf_id).first()
+            truth_rel = connection.execute(TRUTH_BY_DATASET_QUERY,
+                                           dataset_name=vcf['dataset_name']).first()
+            if truth_rel:
+                truth_vcf_id = truth_rel.id
+
         stats = genotype_statistics(connection, query, vcf_id, truth_vcf_id,
                                     count, total_count)
     return stats

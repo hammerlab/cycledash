@@ -26,6 +26,7 @@ def Castable(t):
 CreateRunSchema = Schema({
     Required('variant_caller_name'): unicode,
     Required('vcf_path'): PathString,
+    'truth_vcf_path': PathString,
     'normal_path': PathString,
     'tumor_path': PathString,
     'is_validation': bool,

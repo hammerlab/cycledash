@@ -140,12 +140,11 @@ def insert_csv(filename, tablename, engine):
     return cur
 
 
-def insert_vcf_with_copy(vcfreader, tablename, engine, **kwargs):
+def insert_genotypes_with_copy(vcfreader, engine, **kwargs):
     """Inserts the calls from the VCF into the given table in engine
 
     Args:
         vcfreader: A PyVCF Reader object on the VCF being inserted.
-        tablename: The string name of the table being inserted into.
         engine: A SQLAlchemy engine object to the database.
 
     Optional Args:
@@ -164,8 +163,8 @@ def insert_vcf_with_copy(vcfreader, tablename, engine, **kwargs):
     con = engine.connect()
     meta = sqlalchemy.MetaData(bind=con)
     meta.reflect()
-    table = meta.tables.get(tablename)
+    table = meta.tables.get('genotypes')
     table_cols = columns(table)
     filename = vcf_to_csv(vcfreader, table_cols, None, **kwargs)
-    insert_csv(filename, tablename, engine)
+    insert_csv(filename, 'genotypes', engine)
     con.close()
