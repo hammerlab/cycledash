@@ -54,7 +54,7 @@ def get(vcf_id, query):
     It has structure:
 
     {range: {contig: "X", start: 0, end: 250000000},
-     filters: [{columnName: 'info:DP', filterValye: '50', type: '<'}, ...],
+     filters: [{columnName: 'info:DP', filterValue: '50', type: '<'}, ...],
      sortBy: [{columnName: 'contig', order: 'asc'},
               {columnName: 'position', order: 'asc'}, ...],
      page: 10,
