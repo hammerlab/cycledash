@@ -324,10 +324,10 @@ text {
     width: 18px;
     height: 18px;
     z-index: 1;
-    border-radius: 20px;
 }
 .query-status.good {
     background: rgb(125, 236, 182);
+    border-radius: 20px;
 }
 .query-status.good:before {
     content: "✓";
@@ -338,6 +338,7 @@ text {
 }
 .query-status.bad {
     background: rgb(243, 45, 45);
+    border-radius: 1px;
 }
 .query-status.bad:before {
     content: "×";
