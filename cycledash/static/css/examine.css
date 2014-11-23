@@ -321,22 +321,37 @@ text {
     left: 10px;
     top: 50%;
     margin-top: -8px;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     z-index: 1;
     border-radius: 20px;
 }
 .query-status.good {
     background: rgb(125, 236, 182);
 }
+.query-status.good:before {
+    content: "✓";
+    position: relative;
+    left: 3px;
+    bottom: 2px;
+    color: white;
+}
 .query-status.bad {
     background: rgb(243, 45, 45);
+}
+.query-status.bad:before {
+    content: "×";
+    position: relative;
+    left: 3px;
+    bottom: 8px;
+    font-size: 1.5em;
+    color: white;
 }
 .tt-hint {
     color: gray;
 }
 .error-message {
-    min-height: 20px;
+    display: none;
 }
 
 /* Styles from http://stackoverflow.com/a/20205623/388951 */
