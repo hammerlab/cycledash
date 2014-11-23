@@ -10,18 +10,13 @@ var StatsSummary = React.createClass({
   propTypes: {
     hasLoaded: React.PropTypes.bool.isRequired,
     stats: React.PropTypes.object.isRequired,
-    handleVariantTypeChange: React.PropTypes.func.isRequired,
-    variantType: React.PropTypes.string.isRequired
   },
   render: function() {
     var props = this.props;
     if (props.truthRecords === null) return null;
     return (
       <div id="stats-container">
-        <VariantTypeTabs variantType={props.variantType}
-                         handleVariantTypeChange={props.handleVariantTypeChange} />
-        <VariantStats variantType={props.variantType}
-                      hasLoaded={props.hasLoaded}
+        <VariantStats hasLoaded={props.hasLoaded}
                       stats={props.stats} />
         <RecordsShown hasLoaded={props.hasLoaded}
                       numberOfFilteredRecords={props.stats.totalRecords}
@@ -31,30 +26,8 @@ var StatsSummary = React.createClass({
   }
 });
 
-var VariantTypeTabs = React.createClass({
-  propTypes: {
-    handleVariantTypeChange: React.PropTypes.func.isRequired,
-    variantType: React.PropTypes.string.isRequired
-  },
-  handleVariantTypeChange: function(e) {
-    this.props.handleVariantTypeChange(e.target.textContent);
-  },
-  render: function() {
-    var tabs = _.map(['ALL', 'SNV', 'INDEL', 'SV'], (vType) => {
-      var cls = React.addons.classSet({'active' : this.props.variantType == vType});
-      return (
-        <li onClick={this.handleVariantTypeChange} className={cls} key={vType}>
-          {vType}
-        </li>
-      );
-    });
-    return <ul className="variant-type-tabs">{tabs}</ul>;
-  }
-});
-
 var VariantStats = React.createClass({
   propTypes: {
-    variantType: React.PropTypes.string.isRequired,
     stats: React.PropTypes.object.isRequired,
     hasLoaded: React.PropTypes.bool.isRequired
   },

@@ -39,9 +39,6 @@ var ExaminePage = React.createClass({
   handleChartChange: function({columnName, info, name}) {
     this.props.recordActions.selectColumn({columnName, info, name});
   },
-  handleVariantTypeChange: function(vtype) {
-    this.props.recordActions.updateVariantType(vtype);
-  },
   handleSelectRecord: function(record) {
     this.props.recordActions.selectRecord(record);
     this.refs.vcfTable.scrollRecordToTop(record);
@@ -70,8 +67,6 @@ var ExaminePage = React.createClass({
     return (
       <div className="examine-page">
         <StatsSummary hasLoaded={state.hasLoaded}
-                      variantType={state.variantType}
-                      handleVariantTypeChange={this.handleVariantTypeChange}
                       stats={state.stats} />
         <div className="top-material">
           <h1>Examining: <small>{props.vcfPath}</small></h1>
