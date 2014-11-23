@@ -14,7 +14,8 @@ WHERE id = %(vcf_id)s
 TRUTH_BY_DATASET_QUERY = """SELECT *
 FROM vcfs
 WHERE dataset_name = %(dataset_name)s
-  AND validation_vcf = true"""
+  AND validation_vcf = true
+"""
 
   ##############################################################################
  ##### The below functions are exposed via the controllers in views.py. #######
