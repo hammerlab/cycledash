@@ -69,6 +69,10 @@ npm install
 gulp dalliance
 ```
 
+To update the PEG.js generated grammar after modifying CQL, run `gulp peg`.
+
+`gulp prod`, as introduced earlier, can be used to update all of the above (BioDalliance, PEG.js grammar, etc.)
+
 #### Python
 
 If `USE_RELOADER` is True in your ENV.sh, then you'll get automatic
