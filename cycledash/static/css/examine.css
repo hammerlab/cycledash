@@ -282,11 +282,22 @@ text {
     }
 }
 
-/* Widget.Loading */
-.loading-initial-data .error {
-    color: red;
-    font-size: 1.2em;
+/* ExamineInformation */
+.examine-information {
+    max-width: 600px;
+    margin-top: 17px;
+}
+dt,dd { line-height: 1.4; }
+dd { margin-left: 140px; }
+dt {
     font-weight: 700;
+    float: left;
+    width: 120px;
+    clear: left;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* CQL Typeahead */

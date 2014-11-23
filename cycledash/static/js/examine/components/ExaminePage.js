@@ -10,7 +10,7 @@ var _ = require('underscore'),
     VCFTable = require('./VCFTable'),
     Karyogram = require('./Karyogram'),
     QueryBox = require('./QueryBox'),
-    LoadingStatus = require('./LoadingStatus');
+    ExamineInformation = require('./ExamineInformation');
 
 
 // The root component of the page.
@@ -18,8 +18,7 @@ var ExaminePage = React.createClass({
   propTypes: {
     recordStore: React.PropTypes.object.isRequired,
     recordActions: React.PropTypes.object.isRequired,
-    normalBamPath:  React.PropTypes.string,
-    tumorBamPath:  React.PropTypes.string,
+    run: React.PropTypes.object,
     igvHttpfsUrl: React.PropTypes.string.isRequired
   },
   getInitialState: function() {
@@ -69,15 +68,11 @@ var ExaminePage = React.createClass({
         <StatsSummary hasLoaded={state.hasLoaded}
                       stats={state.stats} />
         <div className="top-material">
-          <h1>Examining: <small>{props.vcfPath}</small></h1>
-          <LoadingStatus hasLoaded={state.hasLoaded}
-                         error={state.loadError}
-                         files={[props.vcfPath, props.truthVcfPath]} />
+          <ExamineInformation run={props.run}/>
         </div>
-        <BioDalliance vcfPath={props.vcfPath}
-                      truthVcfPath={props.truthVcfPath}
-                      normalBamPath={props.normalBamPath}
-                      tumorBamPath={props.tumorBamPath}
+        <BioDalliance vcfPath={props.run.uri}
+                      normalBamPath={props.run.normal_bam_uri}
+                      tumorBamPath={props.run.tumor_nam_uri}
                       igvHttpfsUrl={props.igvHttpfsUrl}
                       selectedRecord={state.selectedRecord}
                       handlePreviousRecord={this.handlePreviousRecord}
