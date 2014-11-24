@@ -111,6 +111,10 @@ function createRecordStore(vcfId, dispatcher) {
     var query = queryFrom(range, filters, sortBys, page, limit);
     setSearchStringToQuery(query);
 
+    // If we're not just appending records, reset the selected records (as the
+    // table is now invalidated).
+    if (!append) selectedRecord = null;
+
     $.when(deferredGenotypes(vcfId, query))
       .done(response => {
         if (append) {

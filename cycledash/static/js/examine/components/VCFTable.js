@@ -249,7 +249,7 @@ var VCFTableBody = React.createClass({
               <VCFRecord record={record}
                          columns={this.props.columns}
                          key={key}
-                         isSelected={sameRecord(selectedRecord, record)} />
+                         isSelected={selectedRecord === record} />
           );
         });
     return (
@@ -291,13 +291,5 @@ var VCFRecord = React.createClass({
     );
   }
 });
-
-// Returns true if a, b are the same. Compares contig, position, ref & alt.
-function sameRecord(a, b) {
-  var keys = ['contig', 'position', 'reference', 'alternates'],
-      a = _.pick(a, keys),
-      b = _.pick(b, keys);
-  return _.isEqual(a, b);
-}
 
 module.exports = VCFTable;

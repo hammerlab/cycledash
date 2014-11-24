@@ -32,7 +32,6 @@ var BioDalliance = React.createClass({
     tumorBaiChunks: CHUNKS_LOADING,
   }),
   render: function() {
-    console.log('PROPS:', this.props);
     var style = {};
     if (!this.props.selectedRecord ||
         this.state.normalBaiChunks == CHUNKS_LOADING ||
