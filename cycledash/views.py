@@ -2,6 +2,7 @@
 import collections
 import json
 
+from celery import chain
 from flask import (request, redirect, Response, render_template, jsonify,
                    url_for, abort)
 import requests
@@ -17,8 +18,8 @@ from cycledash.validations import (UpdateRunSchema, CreateRunSchema,
 import workers.concordance
 import workers.scorer
 import workers.indexer
-import workers.genotype_extractor
-
+from workers.genotype_extractor import extract as extract_genotype
+from workers.gene_annotator import annotate as annotate_genes
 
 WEBHDFS_ENDPOINT = app.config['WEBHDFS_URL'] + '/webhdfs/v1/'
 WEBHDFS_OPEN_OP = '?user.name={}&op=OPEN'.format(app.config['WEBHDFS_USER'])
@@ -52,8 +53,10 @@ def start_workers_for_run(run):
         index_bai(run['normal_path'])
     if run.get('tumor_path'):
         index_bai(run['tumor_path'])
-    workers.genotype_extractor.extractor.delay(json.dumps(run))
 
+    # Run the genotype extractor, and then run the gene annotator with its
+    # vcf_id set to the result of the extractor
+    chain(extract_genotype.s(json.dumps(run)), annotate_genes.s()).delay()
 
 @app.route('/runs', methods=['POST', 'GET'])
 def runs():

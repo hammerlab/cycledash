@@ -44,6 +44,10 @@ CREATE TABLE genotypes (
        alternates TEXT,
        filters TEXT,
        quality TEXT,
+
+       -- Cycledash-derived data
+       "annotations:gene_names" TEXT,
+
        -- Many of the below values taken from VCF4.2 spec examples
        -- some taken from existing VCFs.
        -- INFO columns
