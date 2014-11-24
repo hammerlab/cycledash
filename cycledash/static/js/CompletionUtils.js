@@ -3,7 +3,6 @@
  *
  * These are exported from a separate module to facilitate testing.
  *
- * @jsx React.DOM
  */
 'use strict';
 

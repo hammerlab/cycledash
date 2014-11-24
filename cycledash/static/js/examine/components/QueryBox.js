@@ -1,8 +1,6 @@
 /**
  * A CQL query box with autocomplete.
  * See grammars/querylanguage.pegjs for examples of queries this supports.
- *
- * @jsx React.DOM
  */
 'use strict';
 
