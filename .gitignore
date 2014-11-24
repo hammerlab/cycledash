@@ -1,7 +1,7 @@
 venv/
 .DS_STORE
 __pycache__
-ENV.sh
+/ENV.sh
 config.pyc
 *.pyc
 *.log
