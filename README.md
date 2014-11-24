@@ -48,8 +48,8 @@ CycleDash is a Python [Flask](http://flask.pocoo.org/) app with a
 to execute longer-running tasks such as importing VCFs into Postgres or
 annotating variants with gene names.
 
-More information about developing CycleDash can be found in the DEVELOP.md file
-in this repository.
+More information about developing CycleDash can be found in the
+[DEVELOP.md](/DEVELOP.md) file in this repository.
 
 
 ## Deploying CycleDash
