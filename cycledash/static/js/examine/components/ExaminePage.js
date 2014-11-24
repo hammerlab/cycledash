@@ -3,11 +3,9 @@
 var _ = require('underscore'),
     React = require('react'),
     idiogrammatik = require('idiogrammatik.js'),
-    AttributeCharts = require('./AttributeCharts'),
     BioDalliance = require('./BioDalliance'),
     StatsSummary = require('./StatsSummary'),
     VCFTable = require('./VCFTable'),
-    Karyogram = require('./Karyogram'),
     QueryBox = require('./QueryBox'),
     ExamineInformation = require('./ExamineInformation');
 

@@ -35,6 +35,7 @@
     "sinon": "^1.11.1",
     "typeahead.js": "^0.10.5",
     "uglifyify": "^2.5.0",
+    "vcf.js": "^0.2.6",
     "vinyl-source-stream": "^1.0.0",
     "watchify": "^1.0.2"
   },

@@ -4,7 +4,8 @@
  * @jsx
  */
 
-var $ = require('jquery');
+var $ = require('jquery'),
+    _ = require('underscore');
 
 
 /**
@@ -14,22 +15,19 @@ function findInComponent(selector, component) {
   return $(component.getDOMNode()).find(selector).toArray();
 }
 
-// Fake for jQuery's $.get() which returns a test VCF.
-function fakeGet(realPath) {
-  return function(path) {
-    if (!path.match(/^\/vcf/)) {
-      throw new Error("Yikes, surprising AJAX request! " + path);
-    }
 
-    // Return an already-resolved deferred with the data.
-    var data = require('fs').readFileSync(realPath, 'utf8');
-
-    return $.when([data]);
-  };
+function makeObj(list, keyValFn) {
+  return _.object(list.map(keyValFn));
 }
 
+function mapValues(o, fn) {
+  return makeObj(_.pairs(o), function([k, v]) {
+    return [k, fn(v, k)];
+  });
+}
 
 module.exports = {
   findInComponent,
-  fakeGet
+  makeObj,
+  mapValues
 };

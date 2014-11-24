@@ -243,7 +243,7 @@ var VCFTableBody = React.createClass({
   render: function() {
     var selectedRecord = this.props.selectedRecord,
         rows = this.props.records.map((record, idx) => {
-          var key = record.contig + record.position + record.reference + record.alternates;
+          var key = record.contig + record.position + record.reference + record.alternates + record.sample_name;
           return (
               <VCFRecord record={record}
                          columns={this.props.columns}
