@@ -35,12 +35,10 @@ function createRecordStore(vcfId, dispatcher) {
 
       stats = {totalRecords: 0, totalUnfilteredRecords: 0},
       selectedRecord = null,
-      selectedColumns = [],
 
       filters = [],
       sortBys = DEFAULT_SORT_BYS,
       range = ENTIRE_GENOME,
-      variantType = 'ALL', // TODO(ihodes): implement
 
       contigs = [],
       columns = {};
@@ -73,22 +71,9 @@ function createRecordStore(vcfId, dispatcher) {
       case ACTION_TYPES.REQUEST_PAGE:
         updateGenotypes({append: true});
         break;
-      case ACTION_TYPES.UPDATE_VARIANT_TYPE:
-        // TODO(ihodes): implement: variantType = action.variantType;
-        break;
-      case ACTION_TYPES.SELECT_COLUMN:
-        // TODO(ihodes): implement/todo (this is broken)
-        // var col = _.find(selectedColumns, c => _.isEqual(c.path, action.path));
-        // if (!col) {
-        //   selectedColumns.push({path: action.path,
-        //                         info: action.info,
-        //                         name: action.name});
-        // } else {
-        //   selectedColumns = _.without(selectedColumns, col);
-        // }
-        break;
       case ACTION_TYPES.SELECT_RECORD:
         selectedRecord = action.record;
+        notifyChange();
         break;
       case ACTION_TYPES.SET_QUERY:
         setQuery(action.query);
@@ -125,6 +110,10 @@ function createRecordStore(vcfId, dispatcher) {
 
     var query = queryFrom(range, filters, sortBys, page, limit);
     setSearchStringToQuery(query);
+
+    // If we're not just appending records, reset the selected records (as the
+    // table is now invalidated).
+    if (!append) selectedRecord = null;
 
     $.when(deferredGenotypes(vcfId, query))
       .done(response => {
@@ -267,10 +256,8 @@ function createRecordStore(vcfId, dispatcher) {
         stats,
         selectedRecord,
         filters,
-        selectedColumns,
         sortBys,
         range,
-        variantType,
         contigs,
         columns,
       };
@@ -289,91 +276,6 @@ function createRecordStore(vcfId, dispatcher) {
     },
     receiver: receiver
   };
-}
-
-// Returns true if the record is of given type.
-function isRecordOfType(record, variantType) {
-  switch (variantType) {
-    case 'ALL':
-      return true;
-    case 'SNV':
-      return record.isSnv();
-    case 'INDEL':
-      return record.isIndel();
-    case 'SV':
-      return record.isSv();
-    default:
-      throw new TypeError("variantType must be one of ALL, SNV, SV, INDEL, is '" +
-                          variantType + "'");
-  }
-}
-
-// Returns true is the record is within range.
-function isRecordWithinRange(record, range) {
-  var {start, end, chromosome} = range;
-
-  if (chromosome === types.ALL_CHROMOSOMES) {
-    return true;
-  } else if (record.CHROM !== chromosome) {
-    return false;
-  } else if (_.isNull(start) && _.isNull(end)) {
-    return true;
-  } else if (_.isNull(end)) {
-    return record.POS >= start;
-  } else if (_.isNull(start)) {
-    return record.POS <= end;
-  } else {
-    return record.POS >= start && record.POS <= end;
-  }
-}
-
-// Returns a list of predicate functions for a given list of filters.
-function filtersToPredicates(filters) {
-  return _.map(filters, filter => {
-    var filterVal = filter.filterValue,
-        path = filter.path;
-    return record => {
-      var val = utils.getIn(record, path);
-      if (_.contains(['<', '>', '='], filterVal[0])) {  // then do a numeric test
-        val = Number(val);
-        if (filterVal[0] === '>') {
-          return val > Number(filterVal.slice(1));
-        } else if (filterVal[0] === '>') {
-          return val < Number(filterVal.slice(1));
-        } else if (filterVal[0] === '=') {
-          return val == Number(filterVal.slice(1));
-        }
-      } else {  // treat it like a regexp
-        var re = new RegExp(filterVal);
-        return re.test(String(val));
-      }
-    };
-  });
-}
-
-// Return records which pass the given filters.
-function recordsPassingFilters(records, filters) {
-  var filterPreds = filtersToPredicates(filters),
-      predicate = _.compose(_.every, utils.juxt(filterPreds));
-  return _.filter(records, predicate);
-}
-
-// Return records within a given range.
-function recordsInRange(records, range) {
-  return _.filter(records, record => isRecordWithinRange(record, range));
-}
-
-// Return records of a given variant type.
-function recordsOfType(records, variantType) {
-  return _.filter(records, record => isRecordOfType(record, variantType));
-}
-
-// Return list of records adhering to givene range, filters, and variantType.
-function displayableRecords(records, range, variantType, filters) {
-  records = recordsInRange(records, range);
-  records = recordsOfType(records, variantType);
-  records = recordsPassingFilters(records, filters);
-  return records;
 }
 
 // Return deferred GET for the column spec for a given VCF.

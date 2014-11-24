@@ -67,12 +67,10 @@ var ExaminePage = React.createClass({
       <div className="examine-page">
         <StatsSummary hasLoaded={state.hasLoaded}
                       stats={state.stats} />
-        <div className="top-material">
-          <ExamineInformation run={props.run}/>
-        </div>
+        <ExamineInformation run={props.run}/>
         <BioDalliance vcfPath={props.run.uri}
                       normalBamPath={props.run.normal_bam_uri}
-                      tumorBamPath={props.run.tumor_nam_uri}
+                      tumorBamPath={props.run.tumor_bam_uri}
                       igvHttpfsUrl={props.igvHttpfsUrl}
                       selectedRecord={state.selectedRecord}
                       handlePreviousRecord={this.handlePreviousRecord}

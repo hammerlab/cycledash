@@ -8,10 +8,6 @@ body {
     background: #ffffff url("/static/img/subtle-dots.png") repeat right top;
 }
 
-.top-material {
-    overflow: hidden;  /* expand to include floats */
-}
-
 /* Karyogram */
 .karyogram {
     box-shadow: inset 0 0 10px #F0F0F0;
@@ -146,6 +142,9 @@ table {
 .vcf-table tr:nth-child(odd) {
     background: rgba(248, 249, 250, 0.5);
 }
+.vcf-table tr.selected {
+    background: rgb(254, 255, 207);
+}
 th .sort {
     cursor: pointer;
 }
@@ -174,10 +173,6 @@ td {
 }
 thead, tbody, table {
     width: 100%;
-}
-
-tr.selected {
-    background-color: lightblue;
 }
 
 /* AttributeCharts */

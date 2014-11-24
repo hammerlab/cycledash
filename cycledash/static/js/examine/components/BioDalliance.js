@@ -16,9 +16,7 @@ var BioDalliance = React.createClass({
     // Currently selected variant, or null for no selection.
     selectedRecord: React.PropTypes.object,
     vcfPath: React.PropTypes.string.isRequired,
-    vcfBytes: React.PropTypes.string,  // if available, otherwise fall back to vcfPath
     truthVcfPath: React.PropTypes.string,
-    truthVcfBytes: React.PropTypes.string,  // analogous to vcfBytes
     normalBamPath: React.PropTypes.string,
     tumorBamPath: React.PropTypes.string,
     // Event handlers
@@ -80,17 +78,13 @@ var BioDalliance = React.createClass({
       };
     })();
 
-    var vcfSource = (name, path, bytes) => {
+    var vcfSource = (name, path) => {
       var source = {
         name: name,
         tier_type: 'memstore',
         payload: 'vcf'
       };
-      if (bytes) {
-        source.blob = uniquelyNamedBlob(bytes);
-      } else {
-        source.uri = this.hdfsUrl(path);
-      }
+      source.uri = this.hdfsUrl(path);
       return source;
     };
 
@@ -109,10 +103,10 @@ var BioDalliance = React.createClass({
           twoBitURI: 'http://www.biodalliance.org/datasets/hg19.2bit',
           tier_type: 'sequence'
         },
-        vcfSource('Run VCF', this.props.vcfPath, this.props.vcfBytes)
+        vcfSource('Run VCF', this.props.vcfPath)
     ];
     if (this.props.truthVcfPath) {
-      sources.push(vcfSource('Truth VCF', this.props.truthVcfPath, this.props.truthVcfBytes));
+      sources.push(vcfSource('Truth VCF', this.props.truthVcfPath));
     }
 
     if (this.props.normalBamPath) {
@@ -151,7 +145,7 @@ var BioDalliance = React.createClass({
   },
   panToSelection: function() {
     var rec = this.props.selectedRecord;
-    this.browser.setLocation(rec.CHROM, rec.POS - 25, rec.POS + 25);
+    this.browser.setLocation(rec.contig, rec.position - 25, rec.position + 25);
   },
   update: function() {
     if (this.props.selectedRecord) {
@@ -162,7 +156,7 @@ var BioDalliance = React.createClass({
   fetchIndexChunks: function() {
     var propBamPathPairs = [['normalBaiChunks', this.props.normalBamPath],
                             ['tumorBaiChunks', this.props.tumorBamPath]];
-      
+
     propBamPathPairs.forEach(v => {
         var [propName, bamPath] = v;
         if (!bamPath) {
@@ -212,7 +206,7 @@ var BioDalliance = React.createClass({
         e.preventDefault();
         this.props.handleClose();
       }
-      
+
       if (isDallianceActive) return;
       if (e.which == 37 /* left arrow */) {
         this.handleLeft(e);
