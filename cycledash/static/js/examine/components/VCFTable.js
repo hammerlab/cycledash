@@ -12,8 +12,6 @@ var VCFTable = React.createClass({
   propTypes: {
     // c.f. vcfTools.deriveColumns for structure of object
     columns: React.PropTypes.object.isRequired,
-    // Subset of columns which are currently selected to be graphed.
-    selectedColumns: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     // Currently selected VCF record.
     selectedRecord: React.PropTypes.object,
     // List of contigs found in the VCF
@@ -44,7 +42,6 @@ var VCFTable = React.createClass({
     return (
       <table className='vcf-table' ref='vcfTable'>
         <VCFTableHeader columns={this.props.columns}
-                        selectedColumns={this.props.selectedColumns}
                         sortBys={this.props.sortBys}
                         handleSortByChange={this.props.handleSortByChange}
                         handleChartChange={this.props.handleChartChange}
@@ -61,7 +58,6 @@ var VCFTable = React.createClass({
 
 var VCFTableHeader = React.createClass({
   propTypes: {
-    selectedColumns: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     columns: React.PropTypes.object.isRequired,
     sortBys: React.PropTypes.array.isRequired,
     handleChartChange: React.PropTypes.func.isRequired,
@@ -95,14 +91,12 @@ var VCFTableHeader = React.createClass({
       );
       for (var columnName in columns) {
         var column = columns[columnName],
-            isSelected = _.any(this.props.selectedColumns, el => _.isEqual(el, column)),
             sortHandle = this.handleSortByChange(column.path.join(':'));
 
         columnHeaders.push(<ColumnHeader info={column.info}
                                          key={column.path.join(':')}
                                          column={column}
                                          sortBys={this.props.sortBys}
-                                         isSelected={isSelected}
                                          records={this.props.records}
                                          handleSortByChange={sortHandle}
                                          handleChartToggle={this.handleChartToggle(column)} />);
@@ -141,7 +135,6 @@ var ColumnHeader = React.createClass({
     column: React.PropTypes.object.isRequired,
     info: React.PropTypes.object,
     handleChartToggle: React.PropTypes.func.isRequired,
-    isSelected: React.PropTypes.bool.isRequired,
     handleSortByChange: React.PropTypes.func.isRequired,
     sortBys: React.PropTypes.array.isRequired,
     records: React.PropTypes.array.isRequired
@@ -158,8 +151,7 @@ var ColumnHeader = React.createClass({
       tooltip = <InfoColumnTooltip info={this.props.info} column={this.props.column} />;
     }
     var thClasses = React.addons.classSet({
-      'attr': true,
-      'selected': this.props.isSelected,
+      'attr': true
     });
 
     var order = null,
@@ -251,14 +243,13 @@ var VCFTableBody = React.createClass({
   },
   render: function() {
     var selectedRecord = this.props.selectedRecord,
-        selKey = selectedRecord ? selectedRecord.__KEY__ : null,
         rows = this.props.records.map((record, idx) => {
           var key = record.contig + record.position + record.reference + record.alternates;
           return (
               <VCFRecord record={record}
                          columns={this.props.columns}
                          key={key}
-                         isSelected={false && record.__KEY__ == selKey} />
+                         isSelected={sameRecord(selectedRecord, record)} />
           );
         });
     return (
@@ -301,5 +292,12 @@ var VCFRecord = React.createClass({
   }
 });
 
+// Returns true if a, b are the same. Compares contig, position, ref & alt.
+function sameRecord(a, b) {
+  var keys = ['contig', 'position', 'reference', 'alternates'],
+      a = _.pick(a, keys),
+      b = _.pick(b, keys);
+  return _.isEqual(a, b);
+}
 
 module.exports = VCFTable;

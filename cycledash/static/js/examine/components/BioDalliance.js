@@ -146,7 +146,7 @@ var BioDalliance = React.createClass({
   },
   panToSelection: function() {
     var rec = this.props.selectedRecord;
-    this.browser.setLocation(rec.CHROM, rec.POS - 25, rec.POS + 25);
+    this.browser.setLocation(rec.contig, rec.position - 25, rec.position + 25);
   },
   update: function() {
     if (this.props.selectedRecord) {
@@ -157,7 +157,7 @@ var BioDalliance = React.createClass({
   fetchIndexChunks: function() {
     var propBamPathPairs = [['normalBaiChunks', this.props.normalBamPath],
                             ['tumorBaiChunks', this.props.tumorBamPath]];
-      
+
     propBamPathPairs.forEach(v => {
         var [propName, bamPath] = v;
         if (!bamPath) {
@@ -207,7 +207,7 @@ var BioDalliance = React.createClass({
         e.preventDefault();
         this.props.handleClose();
       }
-      
+
       if (isDallianceActive) return;
       if (e.which == 37 /* left arrow */) {
         this.handleLeft(e);
