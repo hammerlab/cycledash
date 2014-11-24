@@ -21,4 +21,4 @@ voluptuous==0.8.5
 wsgiref==0.1.2
 dpxdt==0.1.5
 psycopg2==2.5.4
-
+pylint==1.4.0
