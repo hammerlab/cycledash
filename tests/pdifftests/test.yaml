@@ -34,16 +34,6 @@ tests:
         c.initMouseEvent('click', true, true, window);
         $('[data-attribute="sample:RD"] a').get(0).dispatchEvent(c);
 
-  - name: examine-charted
-    description: Examine page showing a chart of Normal Read Depth
-    url: http://localhost:5001/runs/1/examine
-    config:
-      <<: *std-config
-      injectJs: |
-        c = document.createEvent('MouseEvent');
-        c.initMouseEvent('click', true, true, window);
-        $('[data-attribute="sample:RD"] .chartable').get(0).dispatchEvent(c);
-
   - name: examine-tooltip
     description: Examine page showing a Normal Read Depth tooltip
     url: http://localhost:5001/runs/1/examine

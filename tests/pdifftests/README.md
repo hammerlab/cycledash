@@ -41,4 +41,4 @@ To export the new run to the CSV file, you generate a database dump:
 
 For database migrations, it may be easiest to just resubmit all the runs.
 
-[1]: https://github.com/hammerlab/cycledash/blob/master/README.md
+[1]: /README.md
