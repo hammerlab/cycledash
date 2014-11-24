@@ -1,131 +1,85 @@
 [![Build Status](https://travis-ci.org/hammerlab/cycledash.svg?branch=master)](https://travis-ci.org/hammerlab/cycledash) [![Coverage Status](https://img.shields.io/coveralls/hammerlab/cycledash/master.svg)](https://coveralls.io/r/hammerlab/cycledash?branch=master)
 
 
-## CycleDash
+# CycleDash
 
-CycleDash tracks variant caller runs and facilitates analyses on them. It
-provides a RESTful(ish) interface and faciliates the analysis of VCFs.
+CycleDash tracks runs of somatic variant callers on various (BAM) datasets and
+provides an interface with which to inspect, analyze, debug, and improve the
+resultant variant calls.
 
-### About
+The primary feature of CycleDash is its "Examine Page" (screenshot below), which
+allows users to quickly filter, order, and examine variants. A user can use a
+SQL-like syntax to filter down to variants based on attributes of the genotype
+(e.g. DP or GQ), their position in the genome (e.g. `X:1500000-3000000`), or
+other annotations added by CycleDash workers (e.g. the gene a variant falls in).
 
-For now, see `/` in the running webapp.
+We embed the [BioDalliance](http://www.biodalliance.org/) pileup viewer within
+this page, allowing users to explore the pileup at a variant's location.
 
-### Setting up CycleDash
-
-```bash
-virtualenv venv                    # Initialize a new virtual environment.
-source venv/bin/activate           # Activate your virtual environment.
-pip install -r requirements.txt    # Install requirements into virtualenv.
-make initenv                       # Initialize environment file.
-$EDITOR ENV.sh                     # Fill in values.
-./initialize_database.sh           # Create database tables
-```
-
-### Start CycleDash
-
-To start the application server:
-
-```bash
-gulp prod
-./run.sh
-```
-
-Start a worker to process the queue:
-
-```
-./worker.sh Bob # Or whatever you want to name your worker.
-                # Say, RosieTheRiveter.
-```
-
-You can start more workers with `./worker.sh <name>` etc. *with a different
-name*.
-
-### Development
+![Looking at a VCF on the "Examine Page"](http://cl.ly/image/3k3M321g0H1H/Screen%20Shot%202014-11-24%20at%2012.32.09%20PM.png)
 
 
-#### JavaScript
+## How We Use CycleDash
 
-You can make working with Javascript very easy with the following:
+At [Hammerlab](https://github.com/hammerlab) we're using CycleDash to help us
+improve our distributed somatic variant caller,
+[Guacamole](https://github.com/hammerlab/guacamole).
 
-```
-npm install             # Installs all packages in package.json.
-npm install gulp -g     # Make sure you have gulp installed.
-gulp                    # Compile the JS and start the automatic compiler
-                        # and live-reloader.
-```
+Our workflow is:
 
-To regenerate the `bundled.js` file without using the live reloader, run:
+1. [Ketrew](https://github.com/hammerlab/ketrew), our workflow engine, starts a
+   Guacamole job.
+2. When the job is complete, the resulting VCF and metadata is posted via a JSON
+   RESTful interface to CycleDash.
+3. CycleDash processes the VCFs and presents them in an easy-to-navigate
+   interface (found in the screenshot, above).
+4. If a validation VCF is posted with the main VCF, CycleDash calculates
+   statistics like precision and recall.
 
-```
-gulp build
-```
+CycleDash can also be used by researchers interested in quickly browsing VCFs
+for variants of interest.
 
-This will also minify the JS and not create a source map.
 
-To update BioDalliance, run:
+## Developing CycleDash
 
-```
-npm install
-gulp dalliance
-```
+CycleDash is a Python [Flask](http://flask.pocoo.org/) app with a
+[React.js](http://facebook.github.io/react/) frontend. We use
+[PostgreSQL](http://www.postgresql.org/) as our database, and use a worker queue
+to execute longer-running tasks such as importing VCFs into Postgres or
+annotating variants with gene names.
 
-Run `gulp peg` to update the PEG.js generated grammar after modifying CQL.
+More information about developing CycleDash can be found in the DEVELOP.md file
+in this repository.
 
-Run `gulp prod`, as introduced earlier, to update all of the above (BioDalliance, PEG.js grammar, etc.)
 
-#### Python
+## Deploying CycleDash
 
-If `USE_RELOADER` is True in your ENV.sh, then you'll get automatic
-code-reloading with the Flask server (and JS/CSS via Gulp).
+A barebones deploy of CycleDash might look like following the develop
+instructions for getting it up and running. There are better options, though.
 
-To test the workers locally, you'll need to install and run rabbitmq during
-development. For example, on Mac OS X, you can do this via:
+We use [unicornherder](https://github.com/gds-operations/unicornherder) with
+[gunicorn](http://gunicorn.org/) (so that many server processes may run at once)
+under [Upstart](http://upstart.ubuntu.com/) to keep things up and
+running. [nginx](http://nginx.org/) acts as a reverse proxy and serves (and
+manages cache headers for) our static assets.
 
-```bash
-brew install rabbitmq
-/usr/local/opt/rabbitmq/sbin/rabbitmq-server
-```
 
-### Config
+## Issues/Features/Bugs
 
-(Edit the `ENV.sh` file, generated by `make initenv`).
+We welcome bug reports and feature requests, and handle them through GitHub's
+issue tracker.
 
-Environment variables which must be exported--edit them in the ENV.sh file make
-made for you.
+Please search our [GitHub issues](https://github.com/hammerlab/cycledash/issues)
+before filing an issue. This project is under very active development.
 
-```
-export PORT=5000
-export DATABASE_URI=postgres:///cycledash'
-export CELERY_BACKEND='db+sqlite:///celery.db'
-export CELERY_BROKER='amqp://localhost'
-export WEBHDFS_USER=username
-export WEBHDFS_URL=http://example.com:5000
-export TYPEKIT_URL="yourtypekitURLwithfontsincluded"
-```
 
-### Database
-
-We use PostgreSQL as our datastore, with the schema described in `schema.sql`.
-
-In a psql session, you can load the schema with `\i schema.sql`, and you'll be good to go.
-
-On OS X, setting up and running psql might look like this:
-
-```
-brew install postgres
-postgres -D /usr/local/var/postgres
-createdb cycledash
-psql cycledash
-\i schema.sql
-```
-
-### API Usage
+## Basic JSON API
 
 The primary endpoint for posting data to from an external source is `/runs`.
 
-Additional information can be found on `/`, on the running webserver.
+Additional information can be found at `/`, on the running webserver.
 
-JSON should be posted to this URL with following fields:
+JSON should be POSTed to `/runs` with following fields:
 
 **Required**<br />
 `vcfPath` -- The path on HDFS where the VCF can be found. This should be immutable, as CycleDash expects to be able to find the VCF here at any time.<br />
@@ -139,43 +93,3 @@ JSON should be posted to this URL with following fields:
 `tumorPath` -- The path on HDFS of the tumor BAM on which the caller was run.<br />
 `normalPath` -- The path on HDFS of the normalBAM on which the caller was run.<br />
 `params` -- Params that the caller was run with, or other notes relevant to the run.<br />
-
-
-### Testing
-
-CycleDash uses [nosetests](https://nose.readthedocs.org/en/latest/) for Python tests, and [Mocha](http://mochajs.org/) for JavaScript testing.
-
-To run tests:
-
-```
-source ENV.sh  # make sure all our environment variables are around
-nosetests tests/python   # Run Python tests
-npm test   # Run JS tests
-```
-
-To run an individual JavaScript test, you can use:
-
-```
-./node_modules/.bin/mocha --require mocha-clean --compilers .:__tests__/js/preprocessor.js path/to/test.js [--grep <regex>]
-```
-
-#### Perceptual Diff Testing
-
-CycleDash uses dpxdt for perceptual diff testing. To update the reference screenshots:
-
-```
-dpxdt update tests/pdifftests
-```
-
-Running `git status` after this should indicate whether the screenshots have changed.
-
-To determine whether there are any pixels that have changed before/after, and to
-generate a perceptual diff that will make it clear where the changes are, use
-the following command:
-
-**Note**: you will need to have [imagemagick](http://www.imagemagick.org/) installed for the following command to
-succeed.
-
-```
-dpxdt test tests/pdifftests
-```
