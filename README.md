@@ -1,13 +1,15 @@
 [![Build Status](https://travis-ci.org/hammerlab/cycledash.svg?branch=master)](https://travis-ci.org/hammerlab/cycledash) [![Coverage Status](https://img.shields.io/coveralls/hammerlab/cycledash/master.svg)](https://coveralls.io/r/hammerlab/cycledash?branch=master)
 
 
+![Looking at a VCF on the "Examine Page"](http://cl.ly/image/3k3M321g0H1H/Screen%20Shot%202014-11-24%20at%2012.32.09%20PM.png)
+
 # CycleDash
 
 CycleDash tracks runs of somatic variant callers on various (BAM) datasets and
 provides an interface with which to inspect, analyze, debug, and improve the
 resultant variant calls.
 
-The primary feature of CycleDash is its "Examine Page" (screenshot below), which
+The primary feature of CycleDash is its "Examine Page" (screenshot above), which
 allows users to quickly filter, order, and examine variants. A user can use a
 SQL-like syntax to filter down to variants based on attributes of the genotype
 (e.g. DP or GQ), their position in the genome (e.g. `X:1500000-3000000`), or
@@ -15,8 +17,6 @@ other annotations added by CycleDash workers (e.g. the gene a variant falls in).
 
 We embed the [BioDalliance](http://www.biodalliance.org/) pileup viewer within
 this page, allowing users to explore the pileup at a variant's location.
-
-![Looking at a VCF on the "Examine Page"](http://cl.ly/image/3k3M321g0H1H/Screen%20Shot%202014-11-24%20at%2012.32.09%20PM.png)
 
 
 ## How We Use CycleDash
@@ -54,14 +54,16 @@ More information about developing CycleDash can be found in the
 
 ## Deploying CycleDash
 
-A barebones deploy of CycleDash might look like following the develop
-instructions for getting it up and running. There are better options, though.
+For a quick, barebones deployment, follow the [develop instructions](/DEVELOP.md).
 
-We use [unicornherder](https://github.com/gds-operations/unicornherder) with
-[gunicorn](http://gunicorn.org/) (so that many server processes may run at once)
-under [Upstart](http://upstart.ubuntu.com/) to keep things up and
-running. [nginx](http://nginx.org/) acts as a reverse proxy and serves (and
-manages cache headers for) our static assets.
+For a more robust deployment, we use:
+
+1. [gunicorn](http://gunicorn.org/) (so that many server processes may run at
+   once)
+2. [unicornherder](https://github.com/gds-operations/unicornherder)
+3. [Upstart](http://upstart.ubuntu.com/) to keep things up and running.
+4. [nginx](http://nginx.org/) acts as a reverse proxy and serves (and manages
+   cache headers for) our static assets.
 
 
 ## Issues/Features/Bugs
@@ -70,7 +72,7 @@ We welcome bug reports and feature requests, and handle them through GitHub's
 issue tracker.
 
 Please search our [GitHub issues](https://github.com/hammerlab/cycledash/issues)
-before filing an issue. This project is under very active development.
+before filing an issue.
 
 
 ## Basic JSON API

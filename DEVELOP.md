@@ -6,6 +6,7 @@ Dependencies:
 2. Postgres 9.3 (should work on 9.0+)
 3. [virtualenv](http://virtualenv.readthedocs.org/en/latest/) &
    [pip](https://pip.pypa.io/en/latest/quickstart.html)
+4. [RabbitMQ](http://www.rabbitmq.com/) for workers
 
 
 ### Setting up CycleDash
@@ -24,7 +25,8 @@ $EDITOR ENV.sh                     # Fill in values.
 
 We use PostgreSQL as our datastore, with the schema described in `schema.sql`.
 
-In a psql session, you can load the schema with `\i schema.sql`, and you'll be good to go.
+You can load the schema with `psql cycledash < schema.sql`, and you'll be good
+to go.
 
 On OS X, setting up and running psql might look like this:
 
@@ -33,7 +35,7 @@ brew install postgres
 postgres -D /usr/local/var/postgres
 createdb cycledash
 psql cycledash
-\i schema.sql
+psql cycledash < schema.sql
 ```
 
 
@@ -46,7 +48,7 @@ gulp prod
 ./run.sh
 ```
 
-Start a worker to process the queue:
+Start a worker to process the queue. Make sure RabbitMQ is up and running!
 
 ```
 ./worker.sh Bob # Or whatever you want to name your worker.
@@ -59,7 +61,7 @@ name*.
 
 ### JavaScript
 
-You can make working with Javascript very easy with the following:
+You can iterate more quickly on JavaScript with the following:
 
 ```
 npm install             # Installs all packages in package.json.
@@ -85,13 +87,14 @@ gulp dalliance
 
 Run `gulp peg` to update the PEG.js generated grammar after modifying CQL.
 
-Run `gulp prod`, as introduced earlier, to update all of the above (BioDalliance, PEG.js grammar, etc.)
+Run `gulp prod` to update all of the above (BioDalliance, PEG.js grammar, etc.)
 
 
 ### Python
 
 If `USE_RELOADER` is True in your ENV.sh, then you'll get automatic
-code-reloading with the Flask server (and JS/CSS via Gulp).
+code-reloading with the Flask server and JS/CSS reloading via livereload and
+gulp's livereload plugin.
 
 To test the workers locally, you'll need to install and run rabbitmq during
 development. For example, on Mac OS X, you can do this via:
