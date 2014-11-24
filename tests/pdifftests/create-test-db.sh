@@ -1,10 +1,7 @@
 #!/bin/bash
 # Creates a test database for use with dpxdt tests.
 #
-# If you'd like to update the CSV file which gets loaded into the DB, you can
-# run this script, use psql or cycledash to make your changes, and re-export
-# using:
-# pg_dump --data-only cycledash-dpxdt > tests/pdifftests/data.sql
+# See tests/pdifftests/README.md for details.
 
 set -o errexit
 
