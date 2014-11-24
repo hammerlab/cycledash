@@ -1,13 +1,16 @@
+import json
 import os
 import urlparse
 import uuid
+import tempfile
 
 import vcf as pyvcf
 import celery
-import config
+from sqlalchemy import create_engine, MetaData
 import pywebhdfs.webhdfs
 import pywebhdfs.errors
 
+import config
 
 CELERY_BACKEND = os.environ['CELERY_BACKEND']
 CELERY_BROKER = os.environ['CELERY_BROKER']
@@ -88,3 +91,50 @@ def load_vcf_from_hdfs(hdfs_vcf_path):
     header = '\n'.join(l for l in text.split('\n') if l.startswith('#'))
 
     return pyvcf.Reader(l for l in text.split('\n')), header
+
+
+def initialize_database(database_uri):
+    """Return engine, connection, metadata (reflected) for the given DB URI."""
+    engine = create_engine(database_uri)
+    connection = engine.connect()
+    metadata = MetaData(bind=connection)
+    metadata.reflect()
+    return engine, connection, metadata
+
+
+def temp_csv(mode, tmp_dir=None):
+    """Create a temporary csv file and return it. Don't delete on close.
+    Finally, do a chmod 644 on the file in any a different process owner needs
+    to read it.
+    """
+    # TODO(tavi) Address the fact that these files are not going to be deleted.
+    csvfile = tempfile.NamedTemporaryFile(mode=mode, delete=False, dir=tmp_dir)
+
+    # In case a different process owner, e.g. postgres, needs to read it.
+    os.chmod(csvfile.name, 0o644)
+    return csvfile
+
+
+def update_extant_columns(metadata, connection, vcf_id):
+    """Determine which columns actually exist in this VCF, and cache them
+    (as this is a time-consuming operation) in the vcfs table for later use.
+    """
+    extant_cols = json.dumps(extant_columns(metadata, connection, vcf_id))
+    vcfs = metadata.tables.get('vcfs')
+    vcfs.update().where(vcfs.c.id == vcf_id).values(
+        extant_columns=extant_cols).execute()
+
+
+def extant_columns(metadata, connection, vcf_id):
+    """Return list of column names which have values in this VCF."""
+    genotypes = metadata.tables.get('genotypes')
+    columns = (col.name for col in genotypes.columns
+    if col.name.startswith('info:') or
+    col.name.startswith('sample:') or
+    col.name.startswith('annotations:'))
+    query = 'SELECT '
+    query += ', '.join('max("{c}") as "{c}"'.format(c=col) for col in columns)
+    query += ' FROM genotypes WHERE vcf_id = ' + str(vcf_id)
+
+    maxed_columns = dict(connection.execute(query).fetchall()[0])
+    return [k for k, v in maxed_columns.iteritems() if v is not None]

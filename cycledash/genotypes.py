@@ -29,12 +29,13 @@ def spec(vcf_id):
                           name: 'attr1',
                           info: {type: 'Integer', description: 'This col. et'}},
             ...},
-    SAMPLE: {attrA:  ...}}
+    SAMPLE: {attrA: ...},
+    ANNOTATIONS: {attrA: ...}}
     """
     query = "SELECT vcf_header, extant_columns FROM vcfs WHERE id = %s"
     with db.engine.connect() as connection:
         res = dict(connection.execute(query, (vcf_id,)).fetchall()[0])
-        spec = _vcf_header_spec(res['vcf_header'], res['extant_columns'])
+        spec = _header_spec(res['vcf_header'], res['extant_columns'])
     return spec
 
 
@@ -299,8 +300,8 @@ def _calculate_true_false_pos_neg(true_positives,
     }
 
 
-def _vcf_header_spec(vcf_header_text, extant_cols):
-    """Return dict repr of a VCF header."""
+def _header_spec(vcf_header_text, extant_cols):
+    """Return dict representation of a CycleDash header."""
     reader = vcf.Reader(line for line in vcf_header_text.split('\n'))
     res = OrderedDict()
     for (supercolumn, attr) in [('info', 'infos'), ('sample', 'formats')]:
@@ -309,27 +310,41 @@ def _vcf_header_spec(vcf_header_text, extant_cols):
             column_name = supercolumn + ':' + val.id
             if column_name not in extant_cols:
                 continue
-            res[supercolumn.upper()][key] = {
-                'path': [supercolumn, val.id],
-                'columnName': column_name,
-                'name': val.id,
-                'info': {
-                    'type': val.type,
-                    'number': val.num,
-                    'description': val.desc
-                }
-            }
+            _add_column_to_spec(
+                spec=res,
+                column_name=column_name,
+                supercolumn=supercolumn,
+                subcolumn=key,
+                column_type=val.type,
+                num=val.num,
+                description=val.desc)
 
-    res['SAMPLE']['Sample Name'] = {
-        'path': ['sample_name'],
-        'columnName': 'sample_name',
-        'name': 'Sample Name',
-        'info': {
-            'type': 'String',
-            'number': 1,
-            'description': 'The name of the sample'
-        }
-    }
+    # Sample name is not a part of the SAMPLE: hierarchy, but we want to add it
+    # into that hierarchy for display purposes.
+    _add_column_to_spec(
+        spec=res,
+        column_name='sample_name',
+        supercolumn='SAMPLE',
+        subcolumn='Sample Name',
+        column_type='String',
+        num=1,
+        description='The name of the sample',
+        path=['sample_name']) # This path is not the default super -> sub column
+
+    # Add Cycledash-derived columns
+    column_name = 'annotations:gene_names'
+    if column_name in extant_cols:
+        supercolumn, subcolumn = column_name.split(':')
+        _add_column_to_spec(
+            spec=res,
+            column_name=column_name,
+            supercolumn=supercolumn,
+            subcolumn=subcolumn,
+            column_type='String',
+            num=1, # This number is not currently used
+            description=(
+                'Names of genes that overlap with this variant\'s '
+                'starting position, derived from Ensembl Release 75.'))
 
     # Remove empty supercolumns
     for key, val in res.iteritems():
@@ -337,3 +352,24 @@ def _vcf_header_spec(vcf_header_text, extant_cols):
             del res[key]
 
     return res
+
+
+def _add_column_to_spec(spec, column_name, supercolumn, subcolumn,
+        column_type, num, description, path=None):
+    """Add a column and associated attributes to the header specification.
+    A column includes both a supercolumn (e.g. "SAMPLE") and subcolumn (e.g.
+    "DP").
+    """
+    if supercolumn.upper() not in spec:
+        spec[supercolumn.upper()] = OrderedDict()
+
+    spec[supercolumn.upper()][subcolumn] = {
+        'path': path if path is not None else [supercolumn, subcolumn],
+        'columnName': column_name,
+        'name': subcolumn,
+        'info': {
+            'type': column_type,
+            'number': num,
+            'description': description
+        }
+    }

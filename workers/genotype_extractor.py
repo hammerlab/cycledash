@@ -6,17 +6,17 @@ Adds run metadata to the vcf table, then extracts genotypes from the VCF itself,
 adding them to the genotypes table. Finally, determines which columns in the vcf
 actually contain values, and stores a list of them in the vcf table.
 """
-import config
 import json
-from sqlalchemy import create_engine, MetaData
 
+import config
 from workers.shared import (load_vcf_from_hdfs, worker,
-                            DATABASE_URI, TEMPORARY_DIR)
+                            initialize_database, DATABASE_URI,
+                            TEMPORARY_DIR, update_extant_columns)
 from workers.relational_vcfs import insert_genotypes_with_copy
 
 
 @worker.task
-def extractor(run):
+def extract(run):
     """Extract the genotype and VCF metadata required to insert a VCF into the
     CycleDash database, and insert it.
     """
@@ -32,17 +32,17 @@ def extractor(run):
             print 'VCF already exists with URI {}'.format(run['vcf_path'])
             return False
 
-    insert_run(run, engine, connection, metadata)
+    vcf_id = insert_run(run, engine, connection, metadata)
 
     connection.close()
-    return True
+    return vcf_id
 
 
 def insert_run(run, engine, connection, metadata):
     """Insert the run into the database.
 
     This inserts both the run's VCF and the truth VCF, if it hasn't been
-    inserted, and their genotypes.
+    inserted, and their genotypes. Returns the VCF ID.
     """
     vcfs_table = metadata.tables.get('vcfs')
     vcf_uris = [(run['vcf_path'], False)]
@@ -70,37 +70,7 @@ def insert_run(run, engine, connection, metadata):
                                    default_values={'vcf_id': vcf_id},
                                    temporary_dir=TEMPORARY_DIR)
 
-        # Now we determine which columns actually exist in this VCF, and cache
-        # them (as this is a time-consuming operation) in the vcfs table for
-        # later use.
-        extant_cols = json.dumps(extant_columns(metadata, connection, vcf_id))
-        (vcfs_table.update()
-         .where(vcfs_table.c.id == vcf_id)
-         .values(extant_columns=extant_cols)
-         .execute())
-
-
-def initialize_database(database_uri):
-    """Return engine, connection, metadata (reflected) for the given DB URI."""
-    engine = create_engine(database_uri)
-    connection = engine.connect()
-    metadata = MetaData(bind=connection)
-    metadata.reflect()
-    return engine, connection, metadata
-
-
-def extant_columns(metadata, connection, vcf_id):
-    """Return list of column names which have values in this VCF."""
-    genotypes = metadata.tables.get('genotypes')
-    columns = (col.name for col in genotypes.columns
-               if col.name.startswith('info:') or
-               col.name.startswith('sample:'))
-    query = 'SELECT '
-    query += ', '.join('max("{c}") as "{c}"'.format(c=col) for col in columns)
-    query += ' FROM genotypes WHERE vcf_id = ' + str(vcf_id)
-
-    maxed_columns = dict(connection.execute(query).fetchall()[0])
-    return [k for k, v in maxed_columns.iteritems() if v is not None]
+    return vcf_id
 
 
 def get_vcf_id(con, uri):

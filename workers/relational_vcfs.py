@@ -3,9 +3,10 @@
 from collections import OrderedDict
 import csv
 import os
-import tempfile
 
 import sqlalchemy
+
+from workers.shared import temp_csv
 
 
 SAMPLE_PREFIX = 'sample:'
@@ -118,10 +119,8 @@ def vcf_to_csv(vcfdata, columns, filename, **kwargs):
     """
     tmp_dir = kwargs.get('temporary_dir', None)
     if filename is None:
-        csvfile = tempfile.NamedTemporaryFile(delete=False, dir=tmp_dir)
+        csvfile = temp_csv(mode='w', tmp_dir=tmp_dir)
         filename = csvfile.name
-        # In case a different process owner, e.g. postgres, needs to read it.
-        os.chmod(filename, 0o644)
     else:
         csvfile = open(filename, 'w')
     relations = records_to_relations(vcfdata, columns, **kwargs)
