@@ -8,10 +8,6 @@ body {
     background: #ffffff url("/static/img/subtle-dots.png") repeat right top;
 }
 
-.top-material {
-    overflow: hidden;  /* expand to include floats */
-}
-
 /* Karyogram */
 .karyogram {
     box-shadow: inset 0 0 10px #F0F0F0;
