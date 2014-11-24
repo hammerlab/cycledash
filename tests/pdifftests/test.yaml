@@ -1,12 +1,7 @@
 setup: |
     gulp prod
-    export PORT=5001
-    export DATABASE_URL='sqlite:///../tests/pdifftests/test.testdb'
-    export WEBHDFS_USER=testing
-    export WEBHDFS_URL='http://example.com:123456'
-    export IGV_HTTPFS_URL='http://example.com:123456'
-    export ALLOW_LOCAL_VCFS=true
-    python ./run.py
+    ./tests/pdifftests/create-test-db.sh
+    ./tests/pdifftests/start-cycledash.sh
 
 waitFor:
     url: http://localhost:5001/
@@ -25,34 +20,24 @@ aliases:
 tests:
   - name: examine
     description: Initial view of a fully-loaded Examine page.
-    url: http://localhost:5001/runs/4/examine
+    url: http://localhost:5001/runs/1/examine
     config:
       <<: *std-config
 
   - name: examine-sorted
     description: Examine page sorted by decreasing Normal Read Depth
-    url: http://localhost:5001/runs/4/examine
+    url: http://localhost:5001/runs/1/examine
     config:
       <<: *std-config
       injectJs: |
         c = document.createEvent('MouseEvent');
         c.initMouseEvent('click', true, true, window);
-        $('[data-attribute="NORMAL::RD"] a').get(0).dispatchEvent(c);
-
-  - name: examine-charted
-    description: Examine page showing a chart of Normal Read Depth
-    url: http://localhost:5001/runs/4/examine
-    config:
-      <<: *std-config
-      injectJs: |
-        c = document.createEvent('MouseEvent');
-        c.initMouseEvent('click', true, true, window);
-        $('[data-attribute="NORMAL::RD"] .chartable').get(0).dispatchEvent(c);
+        $('[data-attribute="sample:RD"] a').get(0).dispatchEvent(c);
 
   - name: examine-tooltip
     description: Examine page showing a Normal Read Depth tooltip
-    url: http://localhost:5001/runs/4/examine
+    url: http://localhost:5001/runs/1/examine
     config:
       <<: *std-config
       injectJs: |
-        $('[data-attribute="NORMAL::RD"] .tooltip').show();
+        $('[data-attribute="sample:RD"] .tooltip').show();
