@@ -1,6 +1,6 @@
 'use strict';
 
-var dataUtils = require('./data-utils'),
+var dataUtils = require('./DataUtils'),
     assert = require('assert'),
     fs = require('fs'),
     vcf = require('vcf.js'),

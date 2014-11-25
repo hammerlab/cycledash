@@ -80,13 +80,13 @@ function makeFakeServer(vcfPath) {
       records = getRecords(vcfData);
 
   var genotypesUrl = '/runs/1/genotypes';
-  var get = function(path) {
+  var get = function(path, callback) {
     if (path == '/runs/1/spec') {
-      return $.when([spec]);
+      callback([spec]);
     } else if (path == '/runs/1/contigs') {
-      return $.when([{contigs: contigs}]);
+      callback([{contigs: contigs}]);
     } else if (path.slice(0, genotypesUrl.length) == genotypesUrl) {
-      return $.when({
+      callback({
         records: records,
         stats: {
           totalRecords: records.length,

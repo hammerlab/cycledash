@@ -3,15 +3,14 @@
  */
 'use strict';
 
-var $ = require('jquery'),
-    _ = require('underscore');
+var _ = require('underscore');
 
 
 /**
  * Apply a CSS selector to a React tree. Returns an array of DOM nodes.
  */
 function findInComponent(selector, component) {
-  return $(component.getDOMNode()).find(selector).toArray();
+  return _.toArray(component.getDOMNode().querySelectorAll(selector));
 }
 
 

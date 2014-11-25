@@ -17,30 +17,22 @@ var ExaminePage = require('../../cycledash/static/js/examine/components/ExamineP
     Dispatcher = require('../../cycledash/static/js/examine/Dispatcher'),
     TestUtils = React.addons.TestUtils,
     Utils = require('./Utils'),
-    dataUtils = require('./data-utils'),
-    vcf = require('vcf.js'),
-    fs = require('fs'),
-    $ = require('jquery');
+    dataUtils = require('./DataUtils');
 
 
 describe('ExaminePage', function() {
   var fakeServer, records;
 
   before(function() {
+    global.XMLHttpRequest = function() {};
     fakeServer = dataUtils.makeFakeServer('tests/js/data/snv.vcf');
     records = fakeServer.records;
-    // TODO(danvk): look into using sinon's XHR mocking tools.
-    sinon.stub($, 'get', fakeServer);
-  });
-
-  after(function() {
-    $.get.restore();
   });
 
   it('should display and select records', function() {
     var dispatcher = new Dispatcher();
     var recordActions = RecordActions.getRecordActions(dispatcher);
-    var recordStore = createRecordStore(1, dispatcher);
+    var recordStore = createRecordStore(1, dispatcher, fakeServer);
     var run = {
       id: 1,
       caller_name: 'test',
@@ -53,6 +45,8 @@ describe('ExaminePage', function() {
                    recordActions={recordActions}
                    igvHttpfsUrl="" 
                    run={run} />);
+
+    assert.ok(examine.state.hasLoaded);
 
     // One row for each record x sample
     assert.equal(20, Utils.findInComponent('.vcf-table tbody tr', examine).length);
