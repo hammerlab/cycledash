@@ -1,3 +1,5 @@
+'use strict';
+
 var Utils = require('./Utils'),
     assert = require('assert');
 

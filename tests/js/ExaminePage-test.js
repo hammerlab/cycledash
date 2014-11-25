@@ -1,4 +1,5 @@
 // TODO: do some sorting and filtering.
+'use strict';
 
 require('./testdom')('<html><body></body></html>');
 var React = require('react/addons'),
@@ -10,8 +11,8 @@ global.reactModulesToStub = [
   'components/BioDalliance.js'
 ];
 
-var ExaminePage = require('../../cycledash/static/js/examine/components/ExaminePage');
-    RecordStore = require('../../cycledash/static/js/examine/RecordStore'),
+var ExaminePage = require('../../cycledash/static/js/examine/components/ExaminePage'),
+    createRecordStore = require('../../cycledash/static/js/examine/RecordStore'),
     RecordActions = require('../../cycledash/static/js/examine/RecordActions'),
     Dispatcher = require('../../cycledash/static/js/examine/Dispatcher'),
     TestUtils = React.addons.TestUtils,
@@ -39,7 +40,7 @@ describe('ExaminePage', function() {
   it('should display and select records', function() {
     var dispatcher = new Dispatcher();
     var recordActions = RecordActions.getRecordActions(dispatcher);
-    var recordStore = RecordStore(1, dispatcher);
+    var recordStore = createRecordStore(1, dispatcher);
     var run = {
       id: 1,
       caller_name: 'test',

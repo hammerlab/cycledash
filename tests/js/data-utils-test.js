@@ -1,3 +1,5 @@
+'use strict';
+
 var dataUtils = require('./data-utils'),
     assert = require('assert'),
     fs = require('fs'),

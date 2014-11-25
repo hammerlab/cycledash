@@ -1,7 +1,8 @@
 // Transform & instrument JS for Blanket coverage analysis.
 // based on https://github.com/alex-seville/blanket/blob/master/src/node-loaders/coffee-script.js
+'use strict';
 
-var fs = require('fs');
+var fs = require('fs'),
     glob = require('glob'),
     path = require('path'),
     transformer = require('./jsx-stub-transformer'),

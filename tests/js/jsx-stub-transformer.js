@@ -3,6 +3,7 @@
 // If globals.reactModulesToStub is defined, it should be an array of paths to
 // modules which you'd like to replace with single, empty React components. Any
 // path suffix will do.
+'use strict';
 
 var fs = require('fs');
 var ReactTools = require('react-tools');

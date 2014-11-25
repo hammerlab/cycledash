@@ -1,6 +1,7 @@
 /**
  * Utility functions for CycleDash Jest tests.
  */
+'use strict';
 
 var $ = require('jquery'),
     _ = require('underscore');
