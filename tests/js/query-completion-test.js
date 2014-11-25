@@ -6,16 +6,22 @@ var _ = require('underscore'),
     QueryCompletion = require('../../cycledash/static/js/QueryCompletion.js');
 
 describe('Query Completion', function() {
-  var columns = ['A', 'B', 'INFO.DP', 'sample:GQ'];
+  var defaultColumns = ['A', 'B', 'INFO.DP', 'sample:GQ'];
   var filterPrefix = QueryCompletion.filterPrefix;
 
   // Returns a list of possible complete queries.
-  function getCompletions(prefix) {
+  function getCompletions(prefix, columns) {
     return QueryCompletion.getCompletions(prefix, QueryLanguage.parse, columns);
   }
 
-  function assertCompletions(prefix, expectedCompletions) {
-    assert.deepEqual(getCompletions(prefix), expectedCompletions);
+  // Call either as:
+  // assertCompletions(prefix, expected completions)
+  // assertCompletions(prefix, columns, expected completions)
+  function assertCompletions(prefix, columns, expectedCompletions) {
+    if (arguments.length == 2) {
+      return assertCompletions(prefix, defaultColumns, columns);
+    }
+    assert.deepEqual(getCompletions(prefix, columns), expectedCompletions);
   }
 
   it('Should offer initial field completions', function() {
@@ -132,6 +138,17 @@ describe('Query Completion', function() {
     assertCompletions('order by q', ['order by sample:GQ']);
     assertCompletions('order by DP', ['order by INFO.DP']);
     assertCompletions('q', ['sample:GQ']);
+  });
+
+  // Regression test for https://github.com/hammerlab/cycledash/issues/297
+  it('Should complete names with underscores', function() {
+    assertCompletions('annotations:gen',
+                      ['annotations:gene_names'],  // columns
+                      ['annotations:gene_names']);  // completions
+
+    assertCompletions('annotations:gene_',
+                      ['annotations:gene_names'],  // columns
+                      ['annotations:gene_names']);  // completions
   });
 });
 
