@@ -17,12 +17,9 @@ describe('Query Completion', function() {
   // Call either as:
   // assertCompletions(prefix, expected completions)
   // assertCompletions(prefix, columns, expected completions)
-  function assertCompletions(prefix, opt_columns, expectedCompletions) {
-    var columns = defaultColumns;
-    if (expectedCompletions) {
-      columns = opt_columns;
-    } else {
-      expectedCompletions = opt_columns;
+  function assertCompletions(prefix, columns, expectedCompletions) {
+    if (arguments.length == 2) {
+      return assertCompletions(prefix, defaultColumns, columns);
     }
     assert.deepEqual(getCompletions(prefix, columns), expectedCompletions);
   }
