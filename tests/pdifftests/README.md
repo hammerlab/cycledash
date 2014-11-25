@@ -1,7 +1,7 @@
 Notes on working with dpxdt tests
 ---------------------------------
 
-There are some notes in [DEVELOP.md][1] about how to run the dpxdt tests to
+There are some notes in [DEVELOP.md](/DEVELOP.md) about how to run the dpxdt tests to
 check for changes. This document describes how to update and extend them.
 
 CycleDash requires a PostgreSQL database to run, and a rabbitmq workqueue to
