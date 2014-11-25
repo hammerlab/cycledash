@@ -10,7 +10,7 @@
 var _ = require('underscore');
 
 function isChar(letter) {
-  return !!letter.match(/[A-Za-z0-9.:-]/);
+  return !!letter.match(/[-A-Za-z0-9.:_]/);
 }
 
 // Tokenizes the string. Returns an array:
