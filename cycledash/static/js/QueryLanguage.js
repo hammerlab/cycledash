@@ -115,6 +115,10 @@ function maybeQuote(str) {
   }
 };
 
+/**
+ * Converts a parsed query back into a string.
+ * Inverse of parse(), modulo spacing, capitalization, etc.
+ */
 function toString(parsedQuery) {
   // filters, sortBy, range
   var filters = [];
@@ -148,7 +152,22 @@ function toString(parsedQuery) {
   return pieces.join(' ');
 }
 
+/**
+ * Are two parsed queries equivalent?
+ */
+function isEquivalent(query1, query2) {
+  // ordering matters for the sorts, but not the filters.
+  var [sortedQ1, sortedQ2] = [query1, query2].map((q) => {
+    var q = _.clone(q);
+    q.filters = _(q.filters).sortBy(JSON.stringify);
+    return q;
+  });
+
+  return toString(sortedQ1) == toString(sortedQ2);
+}
+
 module.exports = {
   parse,
-  toString
+  toString,
+  isEquivalent
 };

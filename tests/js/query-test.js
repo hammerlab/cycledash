@@ -174,4 +174,28 @@ describe('Query Language', function() {
       assertInverse(`X:123-456 AND A <= 0 ORDER BY B DESC, INFO.DP`);
     });
   });
+
+  it('should have a working isEquivalent', function() {
+    var columns = ['A', 'B', 'INFO.DP', 'annotations:gene_name'];
+    var parse = str => QueryLanguage.parse(str, columns);
+    var eq = QueryLanguage.isEquivalent;
+
+    assert.ok( eq({filters: [{columnName: 'A', type: '<', filterValue: '0'}]},
+                  {filters: [{columnName: 'A', type: '<', filterValue: '0'}]}));
+    assert.ok(!eq({filters: [{columnName: 'A', type: '>', filterValue: '0'}]},
+                  {filters: [{columnName: 'A', type: '<', filterValue: '0'}]}));
+
+    assert.ok( eq(parse('A > 0 AND B < 0'),
+                  parse('B < 0 AND A > 0')));
+    assert.ok( eq(parse('20: AND A > 0 AND B < 0'),
+                  parse('B < 0 AND A > 0 AND 20:')));
+    assert.ok(!eq(parse('A > 0 AND B < 0'),
+                  parse('B < 0 AND A > 1')));
+    assert.ok( eq(parse('ORDER BY A, B'),
+                  parse('order by A asc, B asc')));
+    assert.ok(!eq(parse('ORDER BY A, B'),
+                  parse('ORDER BY B, A')));
+    assert.ok(!eq(parse('ORDER BY A, B'),
+                  parse('ORDER BY A DESC, B')));
+  });
 });
