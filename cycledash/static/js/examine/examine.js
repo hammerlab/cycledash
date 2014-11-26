@@ -1,4 +1,3 @@
-/** @jsx React.DOM */
 "use strict";
 
 var React = require('react'),
@@ -12,8 +11,8 @@ window.renderExaminePage = function(el, run, igvHttpfsUrl) {
   var dispatcher = new Dispatcher();
   var recordActions = getRecordActions(dispatcher);
   var recordStore = createRecordStore(run.id, dispatcher);
-  React.renderComponent(<ExaminePage recordStore={recordStore}
-                                     recordActions={recordActions}
-                                     run={run}
-                                     igvHttpfsUrl={igvHttpfsUrl} />, el);
+  React.render(<ExaminePage recordStore={recordStore}
+                            recordActions={recordActions}
+                            run={run}
+                            igvHttpfsUrl={igvHttpfsUrl} />, el);
 };

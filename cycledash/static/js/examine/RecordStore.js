@@ -7,8 +7,7 @@
  *
  * Beware the mutable function-local state defined at the beginning of
  * RecordStore. This is what we want to hide from the outside world
- *
- * @jsx React.DOM */
+ */
 "use strict";
 
 var _ = require('underscore'),

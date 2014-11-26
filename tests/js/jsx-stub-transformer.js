@@ -24,18 +24,14 @@ function shouldStub(filename) {
   return false;
 }
 
-// Returns transformed JS if transformation was necessary, otherwise null.
+// Returns transformed JS.
 function transform(filename) {
   if (shouldStub(filename)) {
     return reactStub;
   }
 
   var content = fs.readFileSync(filename, 'utf8');
-  if (content.indexOf('@jsx') > 0) {
-    return ReactTools.transform(content, {harmony: true});
-  } else {
-    return null;
-  }
+  return ReactTools.transform(content, {harmony: true});
 }
 
 // Implements the node.js "compiler" API
