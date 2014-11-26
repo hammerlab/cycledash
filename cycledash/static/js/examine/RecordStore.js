@@ -223,8 +223,8 @@ function createRecordStore(vcfId, dispatcher, opt_dataSource) {
   $.when(deferredSpec(vcfId), deferredContigs(vcfId))
     .done((columnsResponse, contigsResponse) => {
       hasLoaded = true;
-      columns = columnsResponse[0].spec;
-      contigs = contigsResponse[0].contigs;
+      columns = columnsResponse.spec;
+      contigs = contigsResponse.contigs;
 
       var existingQuery = getQueryStringValue('query');
       if (existingQuery) {
