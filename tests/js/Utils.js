@@ -1,7 +1,5 @@
 /**
  * Utility functions for CycleDash Jest tests.
- *
- * @jsx
  */
 
 var $ = require('jquery'),
