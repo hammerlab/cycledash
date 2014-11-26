@@ -10,7 +10,6 @@
  * This completion engine fills in all possible values of each expression type
  * to build a set of possible completions. It then culls this set down to those
  * which parse correctly and are extensions of what the user has typed.
- *
  */
 'use strict';
 

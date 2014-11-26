@@ -2,7 +2,6 @@
  * Utility functions to help with query completion.
  *
  * These are exported from a separate module to facilitate testing.
- *
  */
 'use strict';
 
