@@ -233,7 +233,8 @@ function createRecordStore(vcfId, dispatcher) {
         }
       }
 
-      updateGenotypes({append: false});
+      // no need to debounce this update -- make it so now!
+      _updateGenotypes({append: false});
     });
 
   function notifyChange() {

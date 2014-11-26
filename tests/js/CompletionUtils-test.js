@@ -1,5 +1,3 @@
-/** @jsx React.DOM */
-
 var _ = require('underscore'),
     assert = require('assert'),
     CompletionUtils = require('../../cycledash/static/js/CompletionUtils.js');

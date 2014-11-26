@@ -1,5 +1,3 @@
-/** @jsx React.DOM */
-
 var _ = require('underscore'),
     assert = require('assert'),
     QueryLanguage = require('../../cycledash/static/js/QueryLanguage.js');
