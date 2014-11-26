@@ -1,4 +1,3 @@
-/** @jsx React.DOM */
 // TODO: do some sorting and filtering.
 
 require('./testdom')('<html><body></body></html>');

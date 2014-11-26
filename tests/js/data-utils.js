@@ -1,9 +1,8 @@
-/** @jsx React.DOM */
 'use strict';
 var _ = require('underscore'),
+    fs = require('fs'),
+    vcf = require('vcf.js'),
     Utils = require('./Utils');
-var fs = require('fs'),
-    vcf = require('vcf.js');
 
 function getSpec(vcfData) {
   var samples = {
@@ -95,7 +94,7 @@ function makeFakeServer(vcfPath) {
         }
       });
     } else {
-      throw 'Unexpected request';
+      throw new Error('Unexpected request');
     }
   };
 

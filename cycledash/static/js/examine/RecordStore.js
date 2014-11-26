@@ -233,7 +233,7 @@ function createRecordStore(vcfId, dispatcher) {
         }
       }
 
-      // no need to throttle this update -- make it so now!
+      // no need to debounce this update -- make it so now!
       _updateGenotypes({append: false});
     });
 
