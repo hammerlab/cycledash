@@ -32,14 +32,15 @@ function extractFlatColumnList(columns) {
 var QueryBox = React.createClass({
   propTypes: {
     handleQueryChange: React.PropTypes.func.isRequired,
-    columns: React.PropTypes.object.isRequired
+    columns: React.PropTypes.object.isRequired,
+    query: React.PropTypes.object  // parsed query
   },
   getInitialState: () => ({
     errorMessage: null  // null = no error
   }),
-  parseQuery: function(query) {
+  parseQuery: function(queryStr) {
     var columnNames = extractFlatColumnList(this.props.columns);
-    var parsedQuery = QueryLanguage.parse(query, columnNames);
+    var parsedQuery = QueryLanguage.parse(queryStr, columnNames);
     if (parsedQuery.error) {
       this.setState({errorMessage: parsedQuery.error});
     } else {
@@ -99,6 +100,8 @@ var QueryBox = React.createClass({
       'good': this.state.errorMessage === null,
       'bad': this.state.errorMessage !== null
     });
+    var value = this.props.query;
+    // TODO: don't change the text box if its contents parse to the same thing.
 
     return (
       <div className='query-container'>

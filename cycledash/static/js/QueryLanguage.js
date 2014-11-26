@@ -1,6 +1,7 @@
 'use strict';
 
 var parser = require('../lib/querylanguage.js'),
+    CompletionUtils = require('./CompletionUtils'),
     _ = require('underscore');
 
 
@@ -93,6 +94,61 @@ function parse(query, columnNames) {
   return dropFalsyValues({filters: filter, sortBy: sort, range: range});
 }
 
+// Returns a version of str which parses as a CQL value.
+// Helper for toString()
+function maybeQuote(str) {
+  if (_.every(str, CompletionUtils.isChar)) {
+    return str;  // no quoting necessary
+  }
+
+  // Use whichever quoting doesn't require escaping.
+  // If escaping is unavoidable, prefer single quotes.
+  var singleQuote = str.indexOf("'") >= 0,
+      doubleQuote = str.indexOf('"') >= 0;
+  if (!singleQuote) {
+    return `'${str}'`;
+  } else if (!doubleQuote) {
+    return `"${str}"`;
+  } else {
+    var escaped = str.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    return `'${escaped}'`;
+  }
+};
+
+function toString(parsedQuery) {
+  // filters, sortBy, range
+  var filters = [];
+  if (parsedQuery.range) {
+    var r = parsedQuery.range;
+    var range = '';
+    if (r.start || r.end) {
+      var start = r.start || '', end = r.end || '';
+      range = `${start}-${end}`;
+    }
+    filters.push(`${r.contig}:${range}`);
+  }
+
+  // e.g. {filters:[{type: '<', filterValue:'10', columnName:'A'}]}
+  if (parsedQuery.filters) {
+    filters = filters.concat(parsedQuery.filters.map(
+        f => `${f.columnName} ${f.type} ${maybeQuote(f.filterValue)}`));
+  }
+
+  // e.g. {sortBy: [{"columnName": "sample:DP", "order": "desc"}]}
+  var sortBy = '';
+  if (parsedQuery.sortBy) {
+    var sorts = parsedQuery.sortBy.map(
+      sort => sort.columnName + (sort.order.toLowerCase() == 'desc' ? ' DESC' : ''));
+    sortBy = 'ORDER BY ' + sorts.join(', ');
+  }
+
+  var pieces = [];
+  if (filters.length) pieces.push(filters.join(' AND '));
+  if (sortBy) pieces.push(sortBy);
+  return pieces.join(' ');
+}
+
 module.exports = {
-  parse
+  parse,
+  toString
 };

@@ -96,12 +96,12 @@ function createRecordStore(vcfId, dispatcher, opt_testDataSource) {
    */
   function _updateGenotypes({append}) {
     // Example query:
-    // var query = {"range": {"contig": 1, "start": 800000, "end": 2000000},
-    //              "sortBy": [{"columnName": "sample:DP", "order": "desc"},
-    //                         {"columnName": "position", "order": "desc"}],
-    //              "filters": [{"columnName": "sample:DP", "value": "<60"},
-    //                          {"columnName": "sample:DP", "value": ">50"},
-    //                          {"columnName": "reference", "value": "=G"}]};
+    // {"range": {"contig": 1, "start": 800000, "end": 2000000},
+    //  "sortBy": [{"columnName": "sample:DP", "order": "desc"},
+    //             {"columnName": "position", "order": "desc"}],
+    //  "filters": [{"columnName": "sample:DP", "filterValue": "60", type: ">"},
+    //              {"columnName": "sample:DP", "filterValue": "50", type: "<"},
+    //              {"columnName": "reference", "filterValue": "G", type: "="}]};
     //
     // If append == true, instead of replacing the records, append the new
     // records to our existing list.
@@ -264,6 +264,7 @@ function createRecordStore(vcfId, dispatcher, opt_testDataSource) {
 
   return {
     getState: function() {
+      var query = queryFrom(range, filters, sortBys, page, limit);
       return {
         hasLoaded,
         loadError,
@@ -275,6 +276,7 @@ function createRecordStore(vcfId, dispatcher, opt_testDataSource) {
         range,
         contigs,
         columns,
+        query
       };
     },
 
