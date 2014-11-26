@@ -25,6 +25,7 @@ var DEFAULT_SORT_BYS = [{columnName: 'contig', order: 'asc'},
 var ENTIRE_GENOME = {start: null, end: null, contig: types.ALL_CHROMOSOMES};
 
 
+// opt_dataSource is provided for testing. Its type is function(url, done_callback).
 function createRecordStore(vcfId, dispatcher, opt_dataSource) {
   // Initial state of the store. This is mutable. There be monsters.
   var hasLoaded = false,
