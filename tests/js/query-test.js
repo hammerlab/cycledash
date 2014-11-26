@@ -121,6 +121,7 @@ describe('Query Language', function() {
       assert.equal(toString({range: {contig: '20', end: 1234}}), '20:-1234');
       assert.equal(toString({range: {contig: '20', start: 1234, end:4567}}),
                    '20:1234-4567');
+      assert.equal(toString({range: {contig: null, start: null, end:null}}), '');
     });
 
     it('should serialize filters', function() {

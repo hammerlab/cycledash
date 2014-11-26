@@ -113,7 +113,7 @@ function maybeQuote(str) {
     var escaped = str.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     return `'${escaped}'`;
   }
-};
+}
 
 /**
  * Converts a parsed query back into a string.
@@ -122,7 +122,7 @@ function maybeQuote(str) {
 function toString(parsedQuery) {
   // filters, sortBy, range
   var filters = [];
-  if (parsedQuery.range) {
+  if (parsedQuery.range && parsedQuery.range.contig) {
     var r = parsedQuery.range;
     var range = '';
     if (r.start || r.end) {

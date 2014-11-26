@@ -26,7 +26,7 @@ function extractFlatColumnList(columns) {
   var samples = _.values(columns);
   var columnInfos = _.flatten(samples.map(_.values));
   var columnNames = _.pluck(columnInfos, 'columnName');
-  return ['reference', 'alternates'].concat(columnNames);
+  return ['reference', 'alternates', 'contig', 'position'].concat(columnNames);
 }
 
 var QueryBox = React.createClass({
@@ -40,7 +40,10 @@ var QueryBox = React.createClass({
   }),
   parseQuery: function(queryStr) {
     var columnNames = extractFlatColumnList(this.props.columns);
-    var parsedQuery = QueryLanguage.parse(queryStr, columnNames);
+    return QueryLanguage.parse(queryStr, columnNames);
+  },
+  parseAndUpdate: function(queryStr) {
+    var parsedQuery = this.parseQuery(queryStr);
     if (parsedQuery.error) {
       this.setState({errorMessage: parsedQuery.error});
     } else {
@@ -53,12 +56,18 @@ var QueryBox = React.createClass({
     if (_.isEmpty(prevProps.columns) && !_.isEmpty(this.props.columns)) {
       this.initQueryBox();
     }
+
+    if (prevProps.query != this.props.query && this.refs.input) {
+      this.setQueryBoxToQuery();
+    }
   },
   // Called when column names become available.
+  hasInited: false,
   initQueryBox: function() {
+    this.hasInited = true;
     var $input = $(this.refs.input.getDOMNode());
     var handleChange = (e) => {
-      this.parseQuery($input.val());
+      this.parseAndUpdate($input.val());
     };
     var completionSource = QueryCompletion.createTypeaheadSource(
         QueryLanguage.parse, extractFlatColumnList(this.props.columns));
@@ -94,14 +103,30 @@ var QueryBox = React.createClass({
   componentWillUnmount: function() {
     $(document).off('keydown.cqlbox');
   },
+  
+  // Update the CQL box to reflect this.props.query.
+  setQueryBoxToQuery: function() {
+    if (!this.refs.input || !this.hasInited) {
+      return;  // not defined yet the first time through
+    }
+    if (document.activeElement == this.refs.input.getDOMNode()) {
+      return;  // never change the text while the user is typing.
+    }
+    var textBoxQuery = this.parseQuery(this.refs.input.getDOMNode().value);
+
+    // don't change the text box if its contents parse to the same thing.
+    if (!QueryLanguage.isEquivalent(textBoxQuery, this.props.query)) {
+      var $input = $(this.refs.input.getDOMNode());
+      $input.typeahead('val', QueryLanguage.toString(this.props.query));
+    }
+  },
+
   render: function() {
     var statusClasses = React.addons.classSet({
       'query-status': true,
       'good': this.state.errorMessage === null,
       'bad': this.state.errorMessage !== null
     });
-    var value = this.props.query;
-    // TODO: don't change the text box if its contents parse to the same thing.
 
     return (
       <div className='query-container'>
