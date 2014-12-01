@@ -118,7 +118,7 @@ var VCFTableHeader = React.createClass({
         </tr>
         <tr>
           <th data-attribute='position'>
-            contig::position
+            contig:position
             <a className={sorterClasses} onClick={this.handleSortByChange('position')}></a>
           </th>
           <th className='ref'>REF</th><th className='arrow'>→</th><th className='alt'>ALT</th>
@@ -281,7 +281,7 @@ var VCFRecord = React.createClass({
     var record = this.props.record;
     return (
       <tr className={classes}>
-        <td title='contig:position' className='pos'>{record.contig}::{record.position}</td>
+        <td title='contig:position' className='pos'>{record.contig}:{record.position}</td>
         <td className='ref' title={record.reference}>{record.reference}</td>
         <td className='arrow'>→</td>
         <td className='alt' title={record.alternates}>{record.alternates}</td>
