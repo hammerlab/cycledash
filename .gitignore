@@ -2,7 +2,6 @@ venv/
 .DS_STORE
 __pycache__
 /ENV.sh
-config.pyc
 *.pyc
 *.log
 *.db
@@ -10,11 +9,6 @@ node_modules
 bundled.js
 .bin
 .bundled.js
-cycledash/static/lib/browserify/
 cycledash/static/lib/querylanguage.js
-cycledash/static/lib/react-tools/
-cycledash/static/lib/reactify/
-cycledash/static/lib/watchify/
-test/tests.bundled.js
 cycledash/static/dalliance/
 coverage.html
