@@ -36,7 +36,6 @@ var QueryBox = React.createClass({
     query: React.PropTypes.object  // parsed query
   },
   getInitialState: () => ({
-    hasInitialized: false,
     errorMessage: null  // null = no error
   }),
   parseQuery: function(queryStr) {
@@ -63,8 +62,9 @@ var QueryBox = React.createClass({
     }
   },
   // Called when column names become available.
+  hasInitialized: false,
   initQueryBox: function() {
-    this.setState({hasInitialized: true});
+    this.hasInitialized = true;
     var $input = $(this.refs.input.getDOMNode());
     var handleChange = (e) => {
       this.parseAndUpdate($input.val());
@@ -106,7 +106,7 @@ var QueryBox = React.createClass({
   
   // Update the CQL box to reflect this.props.query.
   setQueryBoxToQuery: function() {
-    if (!this.refs.input || !this.state.hasInitialized) {
+    if (!this.refs.input || !this.hasInitialized) {
       return;  // not defined yet the first time through
     }
     if (document.activeElement == this.refs.input.getDOMNode()) {
