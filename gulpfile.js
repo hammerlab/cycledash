@@ -10,10 +10,13 @@ var _ = require('underscore'),
 
 
 var PATHS = {
-  examineSrc: ['./cycledash/static/js/examine/examine.js'],  // the File being compiled.
-  examineDest: './cycledash/static/js/dist/',  // Where the compiled JS bundle will go.
-  examineJs: ['cycledash/static/js/*.js'],  // All of the JS files we want to watch for changes.
-  css: ['./cycledash/static/css/*.css'],  // The CSS we want to watch for changes.
+  src: [  // the files being compiled
+      './cycledash/static/js/examine/examine.js',
+      './cycledash/static/js/runs.js'
+  ],
+  dest: './cycledash/static/js/dist/',  // Where the compiled JS bundle will go
+  js: ['cycledash/static/js/*.js'],  // All of the JS files we want to watch for changes
+  css: ['./cycledash/static/css/*.css'],  // The CSS we want to watch for changes
   pegGrammar: './grammars/querylanguage.pegjs',
   polyfills: [
     './node_modules/es5-shim/es5-shim.min.js',
@@ -22,7 +25,7 @@ var PATHS = {
 };
 
 var REACT_OPTS = {es6: true},
-    BROWSERIFY_OPTS =  _.extend({entries: PATHS.examineSrc, debug: true}, watchify.args);
+    BROWSERIFY_OPTS =  _.extend({entries: PATHS.src, debug: true}, watchify.args);
 
 
 // Generates compiled JS bundle, automatically recompiling and reloading the
@@ -41,7 +44,7 @@ gulp.task('js', function() {
       .bundle()
       .on('error', function(e) { console.log(e.message); })
       .pipe(source('bundled.js'))
-      .pipe(gulp.dest(PATHS.examineDest))
+      .pipe(gulp.dest(PATHS.dest))
       .pipe(livereload({ auto: false })); // Because the 'watch' task has
                                           // already started a livereload server.
   }
@@ -58,7 +61,7 @@ gulp.task('css', function() {
 // Starts the livereload server and runs the 'js' and 'css' tasks, above.
 gulp.task('watch', function() {
   livereload.listen();
-  gulp.watch(PATHS.examineJs, ['js']);
+  gulp.watch(PATHS.js, ['js']);
   gulp.watch(PATHS.css, ['css']);
 });
 
@@ -74,14 +77,14 @@ gulp.task('prod', ['peg', 'build', 'dalliance']);
 // Minified, polyfilled, JSX & ES6, and browserified.
 gulp.task('build', function() {
   process.env.NODE_ENV = 'production';
-  var srcs = PATHS.polyfills.concat(PATHS.examineSrc);
+  var srcs = PATHS.polyfills.concat(PATHS.src);
   return browserify(srcs)
     .transform(REACT_OPTS, reactify)
     .transform({global: true}, uglifyify) // Global: true indicates that uglify
                                           // will minify all of the module code.
     .bundle()
     .pipe(source('bundled.js'))
-    .pipe(gulp.dest(PATHS.examineDest));
+    .pipe(gulp.dest(PATHS.dest));
 });
 
 // Copy over prebuilt Biodalliance files from node_modules.
