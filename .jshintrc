@@ -12,6 +12,7 @@
   "shadow": true,
   "browser": true,
   "node": true,
+  "mocha": true,
   "globals": {
     "d3": true,
     "_": true,

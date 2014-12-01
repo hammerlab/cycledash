@@ -25,7 +25,9 @@ var DEFAULT_SORT_BYS = [{columnName: 'contig', order: 'asc'},
 var ENTIRE_GENOME = {start: null, end: null, contig: types.ALL_CHROMOSOMES};
 
 
-function createRecordStore(vcfId, dispatcher) {
+// opt_testDataSource is provided for testing.
+// Its type is function(url, done_callback).
+function createRecordStore(vcfId, dispatcher, opt_testDataSource) {
   // Initial state of the store. This is mutable. There be monsters.
   var hasLoaded = false,
       loadError = null,
@@ -52,6 +54,8 @@ function createRecordStore(vcfId, dispatcher) {
 
   // Token identifying this store within the dispatcher.
   var dispatcherToken = null;
+
+  var dataSource = opt_testDataSource || networkDataSource;
 
   function receiver(action) {
     switch(action.actionType) {
@@ -220,8 +224,8 @@ function createRecordStore(vcfId, dispatcher) {
   $.when(deferredSpec(vcfId), deferredContigs(vcfId))
     .done((columnsResponse, contigsResponse) => {
       hasLoaded = true;
-      columns = columnsResponse[0].spec;
-      contigs = contigsResponse[0].contigs;
+      columns = columnsResponse.spec;
+      contigs = contigsResponse.contigs;
 
       var existingQuery = getQueryStringValue('query');
       if (existingQuery) {
@@ -241,10 +245,21 @@ function createRecordStore(vcfId, dispatcher) {
     _.each(listenerCallbacks, cb => { cb(); });
   }
 
-  function handleVcfParseError(vcfPath, e) {
-    console.error('Error while parsing VCFs: ', e);
-    loadError = 'Error while parsing VCF ' + vcfPath + ': ' + e;
-    notifyChange();
+  // Return deferred GET for the column spec for a given VCF.
+  function deferredSpec(vcfId) {
+    return callbackToPromise(dataSource, '/runs/' + vcfId + '/spec');
+  }
+
+  // Return deferred GET for the contigs in a given VCF.
+  function deferredContigs(vcfId) {
+    return callbackToPromise(dataSource, '/runs/' + vcfId + '/contigs');
+  }
+
+  // Return a deferred GET returning genotypes and stats.
+  function deferredGenotypes(vcfId, query) {
+    var queryString = encodeURIComponent(JSON.stringify(query));
+    return callbackToPromise(dataSource,
+                             '/runs/' + vcfId + '/genotypes?q=' + queryString);
   }
 
   return {
@@ -278,20 +293,17 @@ function createRecordStore(vcfId, dispatcher) {
   };
 }
 
-// Return deferred GET for the column spec for a given VCF.
-function deferredSpec(vcfId) {
-  return $.get('/runs/' + vcfId + '/spec');
+function networkDataSource(url, callback) {
+  return $.get(url).done(callback);
 }
 
-// Return deferred GET for the contigs in a given VCF.
-function deferredContigs(vcfId) {
-  return $.get('/runs/' + vcfId + '/contigs');
-}
-
-// Return a deferred GET returning genotypes and stats.
-function deferredGenotypes(vcfId, query) {
-  var queryString = encodeURIComponent(JSON.stringify(query));
-  return $.get('/runs/' + vcfId + '/genotypes?q=' + queryString);
+// Convert a callback to a jQuery-style promise
+function callbackToPromise(fn, param) {
+  var d = $.Deferred();
+  fn(param, function(response) {
+    d.resolve(response);
+  });
+  return d;
 }
 
 module.exports = createRecordStore;

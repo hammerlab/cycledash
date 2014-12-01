@@ -5,7 +5,10 @@ set -o errexit
 . ./ENV.sh
 nosetests tests/python
 
-npm test
+./scripts/run-js-tests.sh
+echo 'Running tests in reverse...'
+./scripts/run-js-tests.sh reversed
 
+echo 'Linting...'
 ./scripts/lint.sh
 ./scripts/travis-coverage.sh

@@ -1,8 +1,8 @@
 #!/bin/bash
 set -o errexit
 
-find cycledash/static/js -name '*.js' \
-  | grep -v /dist/ | grep -v 'bundled' \
+find cycledash/static/js tests -name '*.js' \
+  | grep -v /dist/ | grep -v 'bundled' | grep -v /playground/ \
   | xargs ./node_modules/.bin/jsxhint
 
 find . -name '*.py' \
