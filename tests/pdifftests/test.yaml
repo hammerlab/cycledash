@@ -5,7 +5,7 @@ setup: |
 
 waitFor:
     url: http://localhost:5001/
-    timeout_secs: 15
+    timeout_secs: 30
 
 aliases:
   - &std-config

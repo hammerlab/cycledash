@@ -43,7 +43,7 @@ describe('ExaminePage', function() {
     var examine = TestUtils.renderIntoDocument(
       <ExaminePage recordStore={recordStore}
                    recordActions={recordActions}
-                   igvHttpfsUrl="" 
+                   igvHttpfsUrl=""
                    run={run} />);
 
     assert.ok(examine.state.hasLoaded);
@@ -60,10 +60,10 @@ describe('ExaminePage', function() {
     assert.equal(null, selectedPos());
 
     examine.handleSelectRecord(records[0]);
-    assert.equal('20::61795', selectedPos());
+    assert.equal('20:61795', selectedPos());
 
     examine.handleSelectRecord(records[19]);
-    assert.equal('20::75254', selectedPos());
+    assert.equal('20:75254', selectedPos());
 
     examine.handleSelectRecord(null);
     assert.equal(null, selectedPos());
