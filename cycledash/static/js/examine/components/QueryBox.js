@@ -79,6 +79,19 @@ var QueryBox = React.createClass({
       // Would be nice to show a default set of suggestions, but there's no
       // typeahead.js support for this until v0.11.
       // See https://github.com/twitter/typeahead.js/pull/719
+
+    // Focus the CQL box when the user hits forward slash.
+    $(document).on('keydown.cqlbox', function(e) {
+      if (e.which == 191 &&  // forward slash
+          !e.shiftKey && !e.ctrlKey && !e.metaKey &&
+          document.activeElement == document.body) {
+        e.preventDefault();
+        $input.focus();
+      }
+    });
+  },
+  componentWillUnmount: function() {
+    $(document).off('keydown.cqlbox');
   },
   render: function() {
     var statusClasses = React.addons.classSet({
@@ -92,7 +105,7 @@ var QueryBox = React.createClass({
         <div ref='error' className='error-message'>{this.state.errorMessage}</div>
         <div className='typeahead-input'>
           <span ref='status' className={statusClasses}></span>
-          <input ref='input' className='query-input' type='text' placeholder='CQL Query' />
+          <input ref='input' className='query-input' type='text' />
         </div>
       </div>
     );
