@@ -94,8 +94,12 @@ function parse(query, columnNames) {
   return dropFalsyValues({filters: filter, sortBy: sort, range: range});
 }
 
-// Returns a version of str which parses as a CQL value.
-// Helper for toString()
+/**
+ * Returns a version of str which parses as a CQL value, surrounding it in
+ * quotes and escaping characters as necessary. This prefers ' to " unless it
+ * results in a longer string.
+ * Helper for toString()
+ */
 function maybeQuote(str) {
   if (_.every(str, CompletionUtils.isChar)) {
     return str;  // no quoting necessary
@@ -126,7 +130,8 @@ function toString(parsedQuery) {
     var r = parsedQuery.range;
     var range = '';
     if (r.start || r.end) {
-      var start = r.start || '', end = r.end || '';
+      var start = r.start || '',
+          end = r.end || '';
       range = `${start}-${end}`;
     }
     filters.push(`${r.contig}:${range}`);
@@ -153,13 +158,15 @@ function toString(parsedQuery) {
 }
 
 /**
- * Are two parsed queries equivalent?
+ * query{1,2} are parsed queries.
+ * Two queries are equivalent if they have the same range, order by and filters
+ * (modulo ordering).
  */
 function isEquivalent(query1, query2) {
   // ordering matters for the sorts, but not the filters.
   var [sortedQ1, sortedQ2] = [query1, query2].map((q) => {
     var q = _.clone(q);
-    q.filters = _(q.filters).sortBy(JSON.stringify);
+    q.filters = _.sortBy(q.filters, JSON.stringify);
     return q;
   });
 
