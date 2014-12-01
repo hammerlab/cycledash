@@ -82,9 +82,9 @@ function makeFakeServer(vcfPath) {
   var genotypesUrl = '/runs/1/genotypes';
   var get = function(path, callback) {
     if (path == '/runs/1/spec') {
-      callback([spec]);
+      callback(spec);
     } else if (path == '/runs/1/contigs') {
-      callback([{contigs: contigs}]);
+      callback({contigs: contigs});
     } else if (path.slice(0, genotypesUrl.length) == genotypesUrl) {
       callback({
         records: records,
