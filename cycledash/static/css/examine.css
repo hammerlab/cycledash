@@ -170,6 +170,7 @@ td, th {
 td {
     border: none;
     font-size: 13px;
+    white-space: nowrap;
 }
 thead, tbody, table {
     width: 100%;
