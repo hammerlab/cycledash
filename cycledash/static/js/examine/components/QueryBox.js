@@ -105,7 +105,7 @@ var QueryBox = React.createClass({
         <div ref='error' className='error-message'>{this.state.errorMessage}</div>
         <div className='typeahead-input'>
           <span ref='status' className={statusClasses}></span>
-          <input ref='input' className='query-input' type='text' placeholder='CQL Query' />
+          <input ref='input' className='query-input' type='text' />
         </div>
       </div>
     );
