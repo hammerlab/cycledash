@@ -57,7 +57,7 @@ var QueryBox = React.createClass({
       this.initQueryBox();
     }
 
-    if (prevProps.query != this.props.query && this.refs.input) {
+    if (prevProps.query != this.props.query) {
       this.setQueryBoxToQuery();
     }
   },
@@ -104,9 +104,6 @@ var QueryBox = React.createClass({
   
   // Update the CQL box to reflect this.props.query.
   setQueryBoxToQuery: function() {
-    if (!this.refs.input) {
-      return;  // not defined yet the first time through
-    }
     if (document.activeElement == this.refs.input.getDOMNode()) {
       return;  // never change the text while the user is typing.
     }
