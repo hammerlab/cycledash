@@ -13,5 +13,6 @@ echo 'Linting...'
 ./scripts/lint.sh
 
 if [ $CI ]; then
+  set +o errexit
   ./scripts/travis-coverage.sh
 fi
