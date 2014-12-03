@@ -231,7 +231,7 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
     }
   }
 
-  // no need to debounce this update -- make it so now!
+  // There's no need to debounce this update -- make it so now!
   _updateGenotypes({append: false});
 
   function notifyChange() {

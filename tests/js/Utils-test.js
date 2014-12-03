@@ -22,30 +22,32 @@ describe('Utils', function() {
   describe('stubReactMethod', function() {
     it('should stub a React class method, then restore it', function() {
       var TestUtils = React.addons.TestUtils;
-      var captured;
+      var captured = [];
       var RC = React.createClass({
         render: function() {
           this.method();
           return null;
         },
         method: function() {
-          captured = 'original';
+          captured.push('original');
         }
       });
 
-      var stubFn = function() { captured = 'stubbed'; };
+      var stubFn = function() { captured.push('stubbed'); };
 
       var el = React.createElement(RC, null);
       TestUtils.renderIntoDocument(el);
-      assert.equal('original', captured);
+      assert.deepEqual(['original'], captured);
 
       var stub = Utils.stubReactMethod(RC, 'method', stubFn);
+      captured = [];
       TestUtils.renderIntoDocument(el);
-      assert.equal('stubbed', captured);
+      assert.deepEqual(['stubbed'], captured);
 
       stub.restore();
+      captured = [];
       TestUtils.renderIntoDocument(el);
-      assert.equal('original', captured);
+      assert.deepEqual(['original'], captured);
     });
   });
 });

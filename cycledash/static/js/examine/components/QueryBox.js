@@ -113,8 +113,10 @@ var QueryBox = React.createClass({
     }
   },
 
-  // Set the visible query in the typeahead box to `str`.
-  // This is factored out for easy intercepting while testing.
+  /**
+   * Set the visible query in the typeahead box to `str`.
+   * This is factored out for easy intercepting while testing.
+   */
   setDisplayedQuery: function(str) {
     var $input = $(this.refs.input.getDOMNode());
     $input.typeahead('val', str);
