@@ -11,4 +11,7 @@ echo 'Running tests in reverse...'
 
 echo 'Linting...'
 ./scripts/lint.sh
-./scripts/travis-coverage.sh
+
+if [ $CI ]; then
+  ./scripts/travis-coverage.sh
+fi
