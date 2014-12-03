@@ -51,12 +51,10 @@ var QueryBox = React.createClass({
       this.props.handleQueryChange(parsedQuery);
     }
   },
+  componentDidMount: function(prevProps, prevState) {
+    this.initQueryBox();
+  },
   componentDidUpdate: function(prevProps, prevState) {
-    // Watch for the first update with a populated set of columns.
-    if (_.isEmpty(prevProps.columns) && !_.isEmpty(this.props.columns)) {
-      this.initQueryBox();
-    }
-
     if (prevProps.query != this.props.query) {
       this.setQueryBoxToQuery();
     }

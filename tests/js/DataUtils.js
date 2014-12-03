@@ -34,7 +34,7 @@ function getSpec(vcfData) {
 
   // TODO: add sample_name
 
-  return {spec: cols};
+  return cols;
 }
 
 function getContigs(vcfData) {
@@ -42,7 +42,7 @@ function getContigs(vcfData) {
 }
 
 function getRecords(vcfData) {
-  var spec = getSpec(vcfData).spec;
+  var spec = getSpec(vcfData);
   return _.flatten(vcfData.records.map((record) => {
     var baseProps = {
       contig: record.CHROM,
@@ -81,11 +81,7 @@ function makeFakeServer(vcfPath) {
 
   var genotypesUrl = '/runs/1/genotypes';
   var get = function(path, callback) {
-    if (path == '/runs/1/spec') {
-      callback(spec);
-    } else if (path == '/runs/1/contigs') {
-      callback({contigs: contigs});
-    } else if (path.slice(0, genotypesUrl.length) == genotypesUrl) {
+    if (path.slice(0, genotypesUrl.length) == genotypesUrl) {
       callback({
         records: records,
         stats: {
@@ -94,7 +90,7 @@ function makeFakeServer(vcfPath) {
         }
       });
     } else {
-      throw new Error('Unexpected request');
+      throw new Error('Unexpected request for ' + path);
     }
   };
 

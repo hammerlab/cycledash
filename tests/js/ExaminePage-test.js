@@ -38,16 +38,19 @@ describe('ExaminePage', function() {
   });
 
   it('should display and select records', function() {
-    var dispatcher = new Dispatcher();
-    var recordActions = RecordActions.getRecordActions(dispatcher);
-    var recordStore = createRecordStore(1, dispatcher, fakeServer);
     var run = {
       id: 1,
+      spec: fakeServer.spec,
+      contigs: fakeServer.contigs,
       caller_name: 'test',
       dataset_name: 'test',
       created_at: '',
       uri: '/tests/js/data/snv.vcf'
     };
+
+    var dispatcher = new Dispatcher();
+    var recordActions = RecordActions.getRecordActions(dispatcher);
+    var recordStore = createRecordStore(run, dispatcher, fakeServer);
     var examine = TestUtils.renderIntoDocument(
       <ExaminePage recordStore={recordStore}
                    recordActions={recordActions}
