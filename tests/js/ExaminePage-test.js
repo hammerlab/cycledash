@@ -48,6 +48,10 @@ describe('ExaminePage', function() {
 
     assert.ok(examine.state.hasLoaded);
 
+    // The default query should be filled into CQL box.
+    assert.equal('ORDER BY contig, position',
+                 Utils.findInComponent('.query-input')[0].value);
+
     // One row for each record x sample
     assert.equal(20, Utils.findInComponent('.vcf-table tbody tr', examine).length);
 
