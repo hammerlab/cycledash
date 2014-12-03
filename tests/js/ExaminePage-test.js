@@ -12,6 +12,7 @@ global.reactModulesToStub = [
 ];
 
 var ExaminePage = require('../../cycledash/static/js/examine/components/ExaminePage'),
+    QueryBox = require('../../cycledash/static/js/examine/components/QueryBox'),
     createRecordStore = require('../../cycledash/static/js/examine/RecordStore'),
     RecordActions = require('../../cycledash/static/js/examine/RecordActions'),
     Dispatcher = require('../../cycledash/static/js/examine/Dispatcher'),
@@ -21,12 +22,19 @@ var ExaminePage = require('../../cycledash/static/js/examine/components/ExamineP
 
 
 describe('ExaminePage', function() {
-  var fakeServer, records;
+  var fakeServer, records, displayedQuery, stub;
 
   before(function() {
     global.XMLHttpRequest = function() {};
     fakeServer = dataUtils.makeFakeServer('tests/js/data/snv.vcf');
     records = fakeServer.records;
+    stub = Utils.stubReactMethod(QueryBox, 'setDisplayedQuery', function(str) {
+      displayedQuery = str;
+    });
+  });
+
+  after(function() {
+    stub.restore();
   });
 
   it('should display and select records', function() {
@@ -49,8 +57,7 @@ describe('ExaminePage', function() {
     assert.ok(examine.state.hasLoaded);
 
     // The default query should be filled into CQL box.
-    assert.equal('ORDER BY contig, position',
-                 Utils.findInComponent('.query-input')[0].value);
+    assert.equal('ORDER BY contig, position', displayedQuery);
 
     // One row for each record x sample
     assert.equal(20, Utils.findInComponent('.vcf-table tbody tr', examine).length);

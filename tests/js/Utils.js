@@ -3,7 +3,8 @@
  */
 'use strict';
 
-var _ = require('underscore');
+var _ = require('underscore'),
+    sinon = require('sinon');
 
 
 /**
@@ -12,6 +13,15 @@ var _ = require('underscore');
 function findInComponent(selector, component) {
   return _.toArray(component.getDOMNode().querySelectorAll(selector));
 }
+
+
+/**
+ * Stub out a React class method using Sinon.
+ * Returns the Sinon stub. Don't forget to call .restore() on it!
+ */
+function stubReactMethod(ReactClass, method, fn) {
+  return sinon.stub(ReactClass.type.prototype.__reactAutoBindMap, method, fn);
+};
 
 
 function makeObj(list, keyValFn) {
@@ -27,5 +37,6 @@ function mapValues(o, fn) {
 module.exports = {
   findInComponent,
   makeObj,
-  mapValues
+  mapValues,
+  stubReactMethod
 };
