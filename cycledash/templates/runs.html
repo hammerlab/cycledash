@@ -2,133 +2,97 @@
 {%- from 'macros/nav.html' import nav -%}
 
 {% block head %}
-<style>
-form#submit {
-  margin: 0 auto 27px auto;
-  display: none;
-  max-width: 500px;
-}
-#show-submit {
-  position: absolute;
-  right: 7px;
-}
-.runs.table {
-  margin-top: 23px;
-}
-tr.run {
-  background: white;
-  cursor: pointer;
-}
-tr.run.selected {
-  font-weight: 500;
-}
-tr.run-info {
-  display: none;
-  background: rgb(247, 252, 253);
-  text-align: center;
-}
-tr.run-info ul {
-  text-align: left;
-}
-tr.run-info li {
-  list-style: none;
-}
-input.selector {
-  margin-right: 13px;
-}
-</style>
+<link rel="stylesheet" href="static/css/runs.css">
 {% endblock %}
 
 {% block body %}
 {{ nav("runs") }}
-<br/>
-<button id="show-submit" class="btn btn-default">Submit New Run</button>
-<form method="POST" action="/runs" role="form" id="submit">
-  <h2>Add a new run:<button type="button" class="close" aria-hidden="true">&times;</button></h3>
-  <div class="form-group">
-    <label>Variant Caller Name:</label>
-    <input class="form-control" type="text" name="variantCallerName"
-           placeholder="Guacamole::Somatic">
-  </div>
-  <div class="form-group">
-    <label>Git Revision Hash, or Caller Version:</label>
-    <input class="form-control" type="text" name="sha1"
-           placeholder="1a81044ef7">
-  </div>
-  <div class="form-group">
-    <label>Dataset Name:</label>
-    <input class="form-control" type="text" name="dataset"
-           placeholder="DREAM training chr20">
-  </div>
-  <div class="form-group">
-    <label>VCF Path:</label>
-    <input class="form-control" type="text" name="vcfPath"
-           placeholder="/data/somevcf.vcf">
-  </div>
-  <div class="form-group">
-    <label>Truth VCF Path:</label>
-    <input class="form-control" type="text" name="truthVcfPath"
-           placeholder="/data/true_somevcf.vcf">
-  </div>
-  <br/>
-  <h4>Optional <small>all paths should be HDFS paths to canonical data</small></h4>
-  <div class="form-group">
-    <label>Tumor BAM:</label>
-    <input class="form-control" type="text" name="tumorPath"
-           placeholder="/data/dream/tumor.chr20.bam">
-  </div>
-  <div class="form-group">
-    <label>Normal BAM:</label>
-    <input class="form-control" type="text" name="normalPath"
-           placeholder="/data/dream/normal.chr20.bam">
-  </div>
-  <div class="form-group">
-    <label>Notes, Config, Params:</label>
-    <textarea class="form-control" rows="3" name="params"
-              placeholder="command line parameters here"></textarea>
-  </div>
+<main>
+    <h2>Runs Directory <button id="show-submit" class="btn btn-default">Submit New Run</button></h2>
+    <form method="POST" action="/runs" role="form" id="submit">
+        <h2><button type="button" class="close" aria-hidden="true">&times;</button></h3>
+            <div class="form-group">
+                <label>Variant Caller Name:</label>
+                <input class="form-control" type="text" name="variantCallerName"
+                       placeholder="Guacamole::Somatic">
+            </div>
+            <div class="form-group">
+                <label>Dataset Name:</label>
+                <input class="form-control" type="text" name="dataset"
+                       placeholder="DREAM training chr20">
+            </div>
+            <div class="form-group">
+                <label>VCF Path:</label>
+                <input class="form-control" type="text" name="vcfPath"
+                       placeholder="/data/somevcf.vcf">
+            </div>
+            <div class="form-group">
+                <label>Truth VCF Path:</label>
+                <input class="form-control" type="text" name="truthVcfPath"
+                       placeholder="/data/true_somevcf.vcf">
+            </div>
+            <br/>
+            <h4>Optional <small>all paths should be HDFS paths to canonical data</small></h4>
+            <div class="form-group">
+                <label>Tumor BAM:</label>
+                <input class="form-control" type="text" name="tumorPath"
+                       placeholder="/data/dream/tumor.chr20.bam">
+            </div>
+            <div class="form-group">
+                <label>Normal BAM:</label>
+                <input class="form-control" type="text" name="normalPath"
+                       placeholder="/data/dream/normal.chr20.bam">
+            </div>
+            <div class="form-group">
+                <label>Notes, Config, Params:</label>
+                <textarea class="form-control" rows="3" name="params"
+                          placeholder="command line parameters here"></textarea>
+            </div>
 
-  <button type="submit" class="btn btn-success">Submit</button>
-</form>
+            <button type="submit" class="btn btn-success btn-block">Submit New Run</button>
+    </form>
 
-<table class="runs table">
-  <thead>
-    <tr>
-      <th></th>
-      <th>Caller Name</th>
-      <th>Dataset</th>
-      <th>Submitted On</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-{%- for run in runs %}
-    <tr class="run" data-runId="{{ run['id'] }}">
-      <td>
-        <a class="btn btn-default btn-xs" href="/runs/{{ run['id'] }}/examine">Examine</a>
-      </td>
-      <td>{{ run['caller_name'] }}</td>
-      <td>{{ run['dataset_name'] }}</td>
-      <td>{{ run['created_at'] }}</td>
-      <td>
-        {%- if run['validation_vcf'] %}<span class="label label-info">validation</span>{% endif -%}
-      </td>
-    </tr>
-    <tr class="run-info" data-runId="{{ run['id'] }}">
-      <td colspan=5>
-        <ul>
-          {% for name, key in run_kvs.iteritems() %}
-          {%- if run.get(key) %}
-          <li><strong>{{ name }}:</strong> {{ run[key] }}</li>
-          {% endif -%}
-          {% endfor %}
-        </ul>
-      </td>
-    </tr>
-{% endfor -%}
-  </tbody>
-</table>
-
+    <table class="runs table condenses table-hover">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Caller Name</th>
+                <th>Dataset</th>
+                <th>Submitted On</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {%- for run in runs %}
+            <tr class="run" data-runId="{{ run['id'] }}">
+                <td>
+                    <span class="run-id">{{ run['id'] }}</span>
+                    <a class="btn btn-default btn-xs" href="/runs/{{ run['id'] }}/examine">Examine</a>
+                </td>
+                <td>{{ run['caller_name'] }}</td>
+                <td>{{ run['dataset_name'] }}</td>
+                <td>{{ run['created_at'].strftime('%Y-%m-%d') }}</td>
+                <td>
+                    {%- if run['validation_vcf'] %}<span class="label label-info" title="Is a validation VCF">validation</span>{% endif -%}
+                    {%- if run['tumor_bam_uri'] %}<span class="label label-info" title="Has an associated tumor BAM">tumor</span>{% endif -%}
+                    {%- if run['normal_bam_uri'] %}<span class="label label-info" title="Has an associated normal BAM">normal</span>{% endif -%}
+                </td>
+            </tr>
+            <tr class="run-info" data-runId="{{ run['id'] }}">
+                <td colspan=5>
+                    <dl class="dl-horizontal">
+                        {% for name, key in run_kvs.iteritems() %}
+                        {%- if run.get(key) %}
+                        <dt>{{ name }}</dt> <dd>{{ run[key] }}</dd>
+                        {% endif -%}
+                        {% endfor %}
+                    </dl>
+                </td>
+            </tr>
+            {% endfor -%}
+        </tbody>
+    </table>
+<main>
 <script type="text/javascript" src="/static/js/dist/bundled.js"></script>
 <script>
 window.activateRunsUI();
