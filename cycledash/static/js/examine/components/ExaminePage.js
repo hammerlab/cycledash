@@ -74,6 +74,7 @@ var ExaminePage = React.createClass({
                       handleNextRecord={this.handleNextRecord}
                       handleClose={() => this.handleSelectRecord(null)} />
         <QueryBox columns={state.columns}
+                  query={state.query}
                   handleQueryChange={this.handleQueryChange} />
         <VCFTable ref="vcfTable"
                   hasLoaded={state.hasLoaded}

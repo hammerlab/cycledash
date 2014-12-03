@@ -153,17 +153,18 @@ var ColumnHeader = React.createClass({
       'attr': true
     });
 
-    var order = null,
+    var columnName = this.props.column.path.join(':'),
+        sortBy = _.findWhere(this.props.sortBys, {columnName}),
         sortingBy = false,
-        sortBy = this.props.sortBys[0];
+        order = null;
     if (sortBy) {
-      sortingBy = sortBy.columnName == this.props.column.path.join(':');
+      sortingBy = true;
       order = sortBy.order;
     }
     var aClasses = React.addons.classSet({
         'sorting-by': sortingBy,
-        'desc': order === 'desc',
-        'asc': order === 'asc',
+        'desc': sortingBy && order === 'desc',
+        'asc': sortingBy && order === 'asc',
         'sort': true
       });
 

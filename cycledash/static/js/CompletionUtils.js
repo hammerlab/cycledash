@@ -182,6 +182,7 @@ module.exports = {
   fuzzyMatch,
   fuzzyFilter,
   flatMap,
+  isChar,
   splitLastToken,
   tokenize
 };

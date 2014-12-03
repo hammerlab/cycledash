@@ -31,6 +31,11 @@ function transform(filename) {
     return reactStub;
   }
 
+  // Code in a distribution should never need to be transformed.
+  if (filename.indexOf('node_modules/') >= 0) {
+    return null;
+  }
+
   var content = fs.readFileSync(filename, 'utf8');
   return ReactTools.transform(content, {harmony: true});
 }
