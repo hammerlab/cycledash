@@ -74,7 +74,9 @@ var QueryBox = React.createClass({
         minLength: 0
       }, {
         name: 'my-dataset',
-        source: completionSource
+        source: function(q, callback) {
+          return completionSource(q, callback, $input.get(0).selectionStart);
+        }
       })
       .on('input typeahead:autocompleted', handleChange)
       .on('keydown', (e) => {

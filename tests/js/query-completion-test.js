@@ -10,8 +10,9 @@ describe('Query Completion', function() {
   var filterPrefix = QueryCompletion.filterPrefix;
 
   // Returns a list of possible complete queries.
-  function getCompletions(prefix, columns) {
-    return QueryCompletion.getCompletions(prefix, QueryLanguage.parse, columns);
+  function getCompletions(prefix, columns, position) {
+    return QueryCompletion.getCompletions(
+        prefix, QueryLanguage.parse, columns, position);
   }
 
   // Call either as:
@@ -149,6 +150,23 @@ describe('Query Completion', function() {
     assertCompletions('annotations:gene_',
                       ['annotations:gene_names'],  // columns
                       ['annotations:gene_names']);  // completions
+  });
+
+  it('Should complete at the start of the query', function() {
+    var assertPositionedCompletions = function(query, pos, expectedCompletions) {
+      assert.deepEqual(getCompletions(query, defaultColumns, pos),
+                       expectedCompletions);
+    };
+
+    assertPositionedCompletions('ORDER BY A', 0,
+                                ['A ORDER BY A',
+                                 'B ORDER BY A',
+                                 'INFO.DP ORDER BY A',
+                                 'sample:GQ ORDER BY A',
+                                 '20: ORDER BY A']);
+
+    assertPositionedCompletions('D ORDER BY A', 1,
+                                ['INFO.DP ORDER BY A']);
   });
 });
 

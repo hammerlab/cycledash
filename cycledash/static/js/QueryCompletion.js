@@ -73,8 +73,54 @@ function completionsForExpectation(expectation, columnNames, rejectedText) {
   throw "Shouldn't get here.";
 }
 
-// Workhorse function: given a query prefix, return a list of completions
-function getCompletions(query, parse, columnNames) {
+/**
+ * Generate completions when the cursor is not at the end of the query.
+ * The basic strategy is to remove the remaining text, generate completions and
+ * tack the remaining text back on, keeping queries which are valid.
+ */
+function getInternalCompletions(query, parse, columnNames, cursorPosition) {
+  var textBeforeCursor = query.slice(0, cursorPosition),
+      textAfterCursor = query.slice(cursorPosition),
+      completions = getTokenizedCompletions(textBeforeCursor, parse, columnNames);
+
+  // TODO(danvk): merge text at the end of completions and start of
+  //     textAfterCursor to get completions in situations like 'A > 0 |BY A'
+  var gluePrefix = function(newBeforeText) {
+    return newBeforeText + (textAfterCursor[0] == ' ' ? '' : ' ') + textAfterCursor;
+  };
+
+  var validCompletions = completions.filter(function({query, completion}) {
+    var parsedQuery = parse(gluePrefix(query), columnNames);
+    return !parsedQuery.hasOwnProperty('error');
+  });
+
+  return _.uniq(validCompletions.map(
+      function({query, completion}) { return gluePrefix(completion); }));
+}
+
+/**
+ * Workhorse function: given a query prefix, return a list of completions
+ * The cursor is assumed to be at the end of the string, unless specified.
+ */
+function getCompletions(query, parse, columnNames, opt_cursorPosition) {
+  if (opt_cursorPosition !== undefined && opt_cursorPosition < query.length) {
+    return getInternalCompletions(query, parse, columnNames, opt_cursorPosition);
+  }
+
+  var completions = getTokenizedCompletions(query, parse, columnNames);
+
+  // Only offer one token at a time.
+  completions = _.uniq(_.compact(_.pluck(completions, 'completion')));
+
+  return completions;
+}
+
+/**
+ * Internal function which returns structured completions.
+ * The output is [{query, completion}, ...] where query is the full query and
+ *   completion is a version of it with just one token added.
+ */
+function getTokenizedCompletions(query, parse, columnNames) {
   var completions = [];
 
   if (query === '') {
@@ -93,7 +139,7 @@ function getCompletions(query, parse, columnNames) {
       var expected = parsedQuery.original.expected;
       // If it expected whitespace, add it on and try again.
       if (expected.length == 1 && expected[0].description == 'required whitespace') {
-        return getCompletions(query + ' ', parse, columnNames);
+        return getTokenizedCompletions(query + ' ', parse, columnNames);
       }
 
       // Build out completions for each possibility
@@ -118,13 +164,10 @@ function getCompletions(query, parse, columnNames) {
   completions = fuzzyFilter(completions, query);
 
   // Filter down to completions which parse.
-  completions = _.filter(completions, function({query, oneToken}) {
+  completions = _.filter(completions, function({query, completion}) {
     var parsedQuery = parse(query, columnNames);
     return !parsedQuery.hasOwnProperty('error');
   });
-
-  // Only offer one token at a time.
-  completions = _.uniq(_.compact(_.pluck(completions, 'completion')));
 
   return completions;
 }
@@ -141,8 +184,9 @@ function getCompletions(query, parse, columnNames) {
  * 'ORDER BY ' -> callback([{value: 'ORDER BY A'}, {value: 'ORDER BY B'}])
  */
 function createTypeaheadSource(parse, columnNames) {
-  return function(query, callback) {
-    callback(getCompletions(query, parse, columnNames).map(v => ({value:v})));
+  return function(query, callback, opt_position) {
+    var completions = getCompletions(query, parse, columnNames, opt_position);
+    callback(completions.map(v => ({value:v})));
   };
 }
 

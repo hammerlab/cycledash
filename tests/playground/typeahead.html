@@ -142,7 +142,7 @@ $('#input').typeahead({
         name: 'my-dataset',
         source: function(q, callback) {
           checkSyntax(q);
-          mySource(q, callback);
+          mySource(q, callback, $('#input').get(0).selectionStart);
         }
       })
       .on('change', checkSyntax);
