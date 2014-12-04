@@ -103,7 +103,7 @@ function getInternalCompletions(query, parse, columnNames, cursorPosition) {
  * The cursor is assumed to be at the end of the string, unless specified.
  */
 function getCompletions(query, parse, columnNames, opt_cursorPosition) {
-  if (opt_cursorPosition !== undefined) {
+  if (opt_cursorPosition !== undefined && opt_cursorPosition < query.length) {
     return getInternalCompletions(query, parse, columnNames, opt_cursorPosition);
   }
 
