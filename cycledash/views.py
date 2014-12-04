@@ -25,9 +25,9 @@ RUN_ADDL_KVS = {'Tumor BAM': 'tumor_bam_uri',
                 'Notes': 'notes'}
 
 
-@app.route('/')
-def home():
-    return render_template('home.html')
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 
 def start_workers_for_run(run):
@@ -43,6 +43,7 @@ def start_workers_for_run(run):
     chain(extract_genotype.s(json.dumps(run)), annotate_genes.s()).delay()
 
 
+@app.route('/', methods=['POST', 'GET'])
 @app.route('/runs', methods=['POST', 'GET'])
 def runs():
     if request.method == 'POST':

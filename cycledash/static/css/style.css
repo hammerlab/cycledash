@@ -3,7 +3,7 @@ body {
     font-family: "freight-sans-pro", verdana, helvetica, sans-serif;
 }
 main { margin-top: 78px; }
-pre { font-family: "inconsolata", monospace; }
+pre, tt { font-family: "inconsolata", monospace; }
 table td { font-family: helvetica, arial, sans-serif; }
 section {
     width: 800px;
