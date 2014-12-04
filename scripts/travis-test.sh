@@ -15,4 +15,5 @@ echo 'Linting...'
 if [ $CI ]; then
   set +o errexit
   ./scripts/travis-coverage.sh
+  echo ''  # reset last exit code
 fi
