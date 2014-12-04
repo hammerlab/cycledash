@@ -242,6 +242,8 @@ def genotype_statistics(connection, query, vcf_id, truth_vcf_id,
     if not truth_vcf_id:
         return stats
 
+    parameters = {'vcf_id': vcf_id, 'truth_vcf_id': truth_vcf_id}
+
     true_pos_query = """
     SELECT count(*) FROM genotypes g
     INNER JOIN genotypes gt
@@ -253,22 +255,22 @@ def genotype_statistics(connection, query, vcf_id, truth_vcf_id,
      AND gt.vcf_id = %(truth_vcf_id)s
     """
     fns = [_range_sql, _filters_sql]
-    true_pos_query, _ = _generate_query(true_pos_query, {}, query, vcf_id, fns,
-                                        table='g')
-    true_pos_query, _ = _generate_query(true_pos_query, {}, query, vcf_id, fns,
-                                        table='gt')
+    true_pos_query, tp_params = _generate_query(
+        true_pos_query, parameters, query, vcf_id, fns, table='g')
+    true_pos_query, tp_params = _generate_query(
+        true_pos_query, tp_params, query, vcf_id, [_range_sql], table='gt')
 
     truth_records_query = """
     SELECT count(*) FROM genotypes
     WHERE vcf_id = %(truth_vcf_id)s
     """
-    parameters = {'vcf_id': vcf_id, 'truth_vcf_id': truth_vcf_id}
-    truth_records_query, parameters = _generate_query(truth_records_query,
-                                                      parameters, query,
-                                                      vcf_id, fns)
+    truth_records_query, tr_params = _generate_query(
+        truth_records_query, parameters, query, vcf_id, [_range_sql])
 
-    total_truth_records = connection.execute(truth_records_query, parameters).fetchall()[0][0]
-    true_positives = connection.execute(true_pos_query, parameters).fetchall()[0][0]
+    total_truth_records = connection.execute(
+        truth_records_query, tp_params).fetchall()[0][0]
+    true_positives = connection.execute(
+        true_pos_query, tr_params).fetchall()[0][0]
 
     stats.update(_calculate_true_false_pos_neg(true_positives,
                                                total_truth_records,
