@@ -21,8 +21,6 @@ var VCFTable = React.createClass({
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     // Attribute by which we are sorting
     sortBys: React.PropTypes.array.isRequired,
-    // Function which takes a chart attribute name and propagates the change up
-    handleChartChange: React.PropTypes.func.isRequired,
     handleSortByChange: React.PropTypes.func.isRequired,
     handleSelectRecord: React.PropTypes.func.isRequired,
     handleRequestPage: React.PropTypes.func.isRequired
@@ -43,7 +41,6 @@ var VCFTable = React.createClass({
         <VCFTableHeader columns={this.props.columns}
                         sortBys={this.props.sortBys}
                         handleSortByChange={this.props.handleSortByChange}
-                        handleChartChange={this.props.handleChartChange}
                         records={this.props.records} />
         <VCFTableBody records={this.props.records}
                       columns={this.props.columns}
@@ -59,14 +56,8 @@ var VCFTableHeader = React.createClass({
   propTypes: {
     columns: React.PropTypes.object.isRequired,
     sortBys: React.PropTypes.array.isRequired,
-    handleChartChange: React.PropTypes.func.isRequired,
     handleSortByChange: React.PropTypes.func.isRequired,
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
-  },
-  handleChartToggle: function(column) {
-    return e => {
-      this.props.handleChartChange(column);
-    };
   },
   handleSortByChange: function(columnName) {
     return (e) => {
@@ -97,8 +88,7 @@ var VCFTableHeader = React.createClass({
                                          column={column}
                                          sortBys={this.props.sortBys}
                                          records={this.props.records}
-                                         handleSortByChange={sortHandle}
-                                         handleChartToggle={this.handleChartToggle(column)} />);
+                                         handleSortByChange={sortHandle} />);
       }
     });
 
@@ -133,12 +123,11 @@ var ColumnHeader = React.createClass({
   propTypes: {
     column: React.PropTypes.object.isRequired,
     info: React.PropTypes.object,
-    handleChartToggle: React.PropTypes.func.isRequired,
     handleSortByChange: React.PropTypes.func.isRequired,
     sortBys: React.PropTypes.array.isRequired,
     records: React.PropTypes.array.isRequired
   },
-  isChartable: function() {
+  isSortable: function() {
     var props = this.props,
         hasValues = _.some(props.records, r =>
                            _.isFinite(r[props.column.columnName]));
@@ -149,9 +138,6 @@ var ColumnHeader = React.createClass({
     if (this.props.info) {
       tooltip = <InfoColumnTooltip info={this.props.info} column={this.props.column} />;
     }
-    var thClasses = React.addons.classSet({
-      'attr': true
-    });
 
     var columnName = this.props.column.path.join(':'),
         sortBy = _.findWhere(this.props.sortBys, {columnName}),
@@ -168,20 +154,15 @@ var ColumnHeader = React.createClass({
         'sort': true
       });
 
-    var chartToggle, sorter=null;
-    if (this.isChartable()) {
+    var sorter;
+    if (this.isSortable()) {
       sorter = <a className={aClasses} onClick={this.props.handleSortByChange}></a>;
-      chartToggle = (<span className='chartable'
-                           onClick={this.props.handleChartToggle}>
-                       {this.props.column.name}
-                     </span>);
-    } else {
-      chartToggle = <span>{this.props.column.name}</span>;
     }
+    var name = <span>{this.props.column.name}</span>;
 
     return (
-      <th className={thClasses} data-attribute={this.props.column.path.join(':')}>
-        {chartToggle}
+      <th data-attribute={this.props.column.path.join(':')}>
+        {name}
         {tooltip}
         {sorter}
       </th>

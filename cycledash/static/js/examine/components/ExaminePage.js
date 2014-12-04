@@ -32,9 +32,6 @@ var ExaminePage = React.createClass({
   handleRequestPage: function() {
     this.props.recordActions.requestPage();
   },
-  handleChartChange: function({columnName, info, name}) {
-    this.props.recordActions.selectColumn({columnName, info, name});
-  },
   handleSelectRecord: function(record) {
     this.props.recordActions.selectRecord(record);
     this.refs.vcfTable.scrollRecordToTop(record);
@@ -65,14 +62,6 @@ var ExaminePage = React.createClass({
         <StatsSummary hasLoaded={state.hasLoaded}
                       stats={state.stats} />
         <ExamineInformation run={props.run}/>
-        <BioDalliance vcfPath={props.run.uri}
-                      normalBamPath={props.run.normal_bam_uri}
-                      tumorBamPath={props.run.tumor_bam_uri}
-                      igvHttpfsUrl={props.igvHttpfsUrl}
-                      selectedRecord={state.selectedRecord}
-                      handlePreviousRecord={this.handlePreviousRecord}
-                      handleNextRecord={this.handleNextRecord}
-                      handleClose={() => this.handleSelectRecord(null)} />
         <QueryBox columns={state.columns}
                   query={state.query}
                   handleQueryChange={this.handleQueryChange} />
@@ -81,14 +70,20 @@ var ExaminePage = React.createClass({
                   records={state.records}
                   range={state.range}
                   columns={state.columns}
-                  selectedColumns={state.selectedColumns}
                   selectedRecord={state.selectedRecord}
                   contigs={state.contigs}
                   sortBys={state.sortBys}
                   handleSortByChange={this.handleSortByChange}
-                  handleChartChange={this.handleChartChange}
                   handleRequestPage={this.handleRequestPage}
                   handleSelectRecord={this.handleSelectRecord} />
+        <BioDalliance vcfPath={props.run.uri}
+                      normalBamPath={props.run.normal_bam_uri}
+                      tumorBamPath={props.run.tumor_bam_uri}
+                      igvHttpfsUrl={props.igvHttpfsUrl}
+                      selectedRecord={state.selectedRecord}
+                      handlePreviousRecord={this.handlePreviousRecord}
+                      handleNextRecord={this.handleNextRecord}
+                      handleClose={() => this.handleSelectRecord(null)} />
       </div>
      );
    }
