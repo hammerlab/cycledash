@@ -51,12 +51,3 @@ UpdateRunSchema = Schema({
     'recall': Coerce(float),
     'f1score': Coerce(float)
 })
-
-
-UpdateConcordanceSchema = Schema({
-    'concordance_json': All({
-        unicode: { Castable(int): int }
-    }, json.dumps),
-    'error': unicode,
-    'state': unicode
-})
