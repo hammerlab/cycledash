@@ -33,7 +33,9 @@ var QueryBox = React.createClass({
   propTypes: {
     handleQueryChange: React.PropTypes.func.isRequired,
     columns: React.PropTypes.object.isRequired,
-    query: React.PropTypes.object  // parsed query
+    query: React.PropTypes.object,  // parsed query
+    hasPendingRequest: React.PropTypes.bool,
+    loadError: React.PropTypes.string
   },
   getInitialState: () => ({
     errorMessage: null  // null = no error
@@ -132,6 +134,11 @@ var QueryBox = React.createClass({
       'loading': this.props.hasPendingRequest
     });
 
+    var errorMessage = null;
+    if (this.props.loadError) {
+      errorMessage = <div className="server-error">{this.props.loadError}</div>;
+    }
+
     return (
       <div className='query-container'>
         <div ref='error' className='error-message'>{this.state.errorMessage}</div>
@@ -139,6 +146,7 @@ var QueryBox = React.createClass({
           <span ref='status' className={statusClasses}></span>
           <input ref='input' className='query-input' type='text' />
         </div>
+        {errorMessage}
       </div>
     );
   },

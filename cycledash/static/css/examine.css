@@ -215,11 +215,13 @@ dt {
 }
 
 /* CQL Typeahead */
+.query-container {
+  margin-bottom: 20px;
+}
 .query-container * { box-sizing: border-box; }
 .typeahead-input {
   position: relative;
   padding-right: 350px;  /* matches width of Stats Table */
-  margin-bottom: 20px;
   /* reference, alternates */
 }
 .twitter-typeahead {
@@ -278,6 +280,9 @@ dt {
 }
 .query-status.loading:before {
   content: "";
+}
+.server-error {
+  color: red;
 }
 .tt-hint {
   color: gray;

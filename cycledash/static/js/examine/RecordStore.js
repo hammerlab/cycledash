@@ -119,7 +119,7 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
     currentPendingQuery = query;
     hasPendingRequest = true;
     notifyChange();  // notify of pending request
-    $.when(deferredGenotypes(vcfId, query))
+    deferredGenotypes(vcfId, query)
       .done(response => {
         if (!_.isEqual(currentPendingQuery, query)) {
           return;  // A subsequent request has superceded this one.
@@ -133,6 +133,14 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
         hasLoaded = true;
         hasPendingRequest = false;
         notifyChange();
+      })
+      .fail(function([jqXHR, errorMessage, errorDetails]) {
+        if (!_.isEqual(currentPendingQuery, query)) {
+          return;  // A subsequent request has superceded this one.
+        }
+        loadError = errorDetails;
+        hasPendingRequest = false;
+        notifyChange();
       });
   }
   var updateGenotypes =
@@ -142,6 +150,7 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
   function ignorePendingRequests() {
     hasPendingRequest = false;
     currentPendingQuery = null;
+    loadError = null;
   }
 
   // Returns a JS object query for sending to the backend.
@@ -258,8 +267,8 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
   };
 }
 
-function networkDataSource(url, callback) {
-  return $.get(url).done(callback);
+function networkDataSource(url, doneCallback, errCallback) {
+  return $.get(url).done(doneCallback).fail(errCallback);
 }
 
 // Convert a callback to a jQuery-style promise
@@ -267,6 +276,8 @@ function callbackToPromise(fn, param) {
   var d = $.Deferred();
   fn(param, function(response) {
     d.resolve(response);
+  }, function() {
+    d.reject.call(null, arguments);
   });
   return d;
 }
