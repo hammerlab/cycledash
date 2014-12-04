@@ -4,23 +4,13 @@ from voluptuous import (Schema, All, Required, Length, Range, truth, message,
                         Msg, Coerce)
 
 
-PathString = All(unicode, Length(min=1), Msg(truth(lambda s: s[0] == '/'),
-                                             'path must start with "/"'))
+def is_path(s):
+    return s[0] == '/' or s.startswith('file://')
 
 
-def Castable(t):
-    """Assert that a value must be type castable to the given type.
-
-    This is a validator function.
-    """
-    @message("value must be castable to " + str(t))
-    def _Castable(v):
-        try:
-            t(v)
-        except:
-            raise ValueError
-        return v
-    return _Castable(t)
+PathString = All(unicode,
+                 Length(min=1),
+                 Msg(truth(is_path), 'path must start with "/" or "file://"'))
 
 
 CreateRunSchema = Schema({

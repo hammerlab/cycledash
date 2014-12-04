@@ -42,3 +42,8 @@ td span.run-id {
   margin-right: 11px;
   font-size: 0.92em;
 }
+
+/* drag and drop file upload */
+.receiving-drag {
+  background: hotpink;
+}
