@@ -5,10 +5,7 @@ var ACTION_TYPES = {
   REQUEST_PAGE: 'REQUEST_PAGE',
   SELECT_RECORD: 'SELECT_RECORD',
   SET_QUERY: 'SET_QUERY',
-  SORT_BY: 'SORT_BY',
-  UPDATE_FILTER: 'UPDATE_FILTER',
-  UPDATE_RANGE: 'UPDATE_RANGE',
-  UPDATE_VARIANT_TYPE: 'UPDATE_VARIANT_TYPE',
+  SORT_BY: 'SORT_BY'
 };
 
 function getRecordActions(dispatcher) {
@@ -18,28 +15,6 @@ function getRecordActions(dispatcher) {
         actionType: ACTION_TYPES.SORT_BY,
         columnName,
         order
-      });
-    },
-    updateFilters: function({columnName, type, filterValue}) {
-      dispatcher.dispatch({
-        actionType: ACTION_TYPES.UPDATE_FILTER,
-        columnName,
-        type,
-        filterValue
-      });
-    },
-    updateRange: function({contig, start, end}) {
-      dispatcher.dispatch({
-        actionType: ACTION_TYPES.UPDATE_RANGE,
-        start,
-        end,
-        contig
-      });
-    },
-    updateVariantType: function(variantType) {
-      dispatcher.dispatch({
-        actionType: ACTION_TYPES.UPDATE_VARIANT_TYPE,
-        variantType
       });
     },
     setQuery: function(query) {

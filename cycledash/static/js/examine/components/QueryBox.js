@@ -128,7 +128,8 @@ var QueryBox = React.createClass({
     var statusClasses = React.addons.classSet({
       'query-status': true,
       'good': this.state.errorMessage === null,
-      'bad': this.state.errorMessage !== null
+      'bad': this.state.errorMessage !== null,
+      'loading': this.props.hasPendingRequest
     });
 
     return (

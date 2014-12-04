@@ -63,6 +63,7 @@ var ExaminePage = React.createClass({
                       stats={state.stats} />
         <ExamineInformation run={props.run}/>
         <QueryBox columns={state.columns}
+                  hasPendingRequest={state.hasPendingRequest}
                   query={state.query}
                   handleQueryChange={this.handleQueryChange} />
         <VCFTable ref="vcfTable"

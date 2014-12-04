@@ -30,6 +30,7 @@ var ENTIRE_GENOME = {start: null, end: null, contig: types.ALL_CHROMOSOMES};
 function createRecordStore(run, dispatcher, opt_testDataSource) {
   // Initial state of the store. This is mutable. There be monsters.
   var vcfId = run.id,
+      hasPendingRequest = false,
       hasLoaded = false,
       loadError = null,
 
@@ -58,18 +59,13 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
 
   var dataSource = opt_testDataSource || networkDataSource;
 
+  var currentPendingQuery = null;
+
   function receiver(action) {
     switch(action.actionType) {
       case ACTION_TYPES.SORT_BY:
         updateSortBys(action.columnName, action.order);
-        updateGenotypes({append: false});
-        break;
-      case ACTION_TYPES.UPDATE_FILTER:
-        updateFilters(action.columnName, action.filterValue, action.type);
-        updateGenotypes({append: false});
-        break;
-      case ACTION_TYPES.UPDATE_RANGE:
-        updateRange(action.contig, action.start, action.end);
+        ignorePendingRequests();
         updateGenotypes({append: false});
         break;
       case ACTION_TYPES.REQUEST_PAGE:
@@ -81,6 +77,7 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
         break;
       case ACTION_TYPES.SET_QUERY:
         setQuery(action.query);
+        ignorePendingRequests();
         updateGenotypes({append: false});
         break;
     }
@@ -119,22 +116,33 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
     // table is now invalidated).
     if (!append) selectedRecord = null;
 
+    currentPendingQuery = query;
+    hasPendingRequest = true;
+    notifyChange();  // notify of pending request
     $.when(deferredGenotypes(vcfId, query))
       .done(response => {
-        hasLoaded = true;
+        if (!_.isEqual(currentPendingQuery, query)) {
+          return;  // A subsequent request has superceded this one.
+        }
         if (append) {
-          // TODO: BUG: This can result in a out-of-order records, if a later
-          //            XHR returns before an earlier XHR.
           records = records.concat(response.records);
         } else {
           stats = response.stats;
           records = response.records;
         }
+        hasLoaded = true;
+        hasPendingRequest = false;
         notifyChange();
       });
   }
   var updateGenotypes =
       _.debounce(_.throttle(_updateGenotypes, 500 /* ms */), 500 /* ms */);
+
+  // Ignore all currently pending requests (presumably because there's a newer one).
+  function ignorePendingRequests() {
+    hasPendingRequest = false;
+    currentPendingQuery = null;
+  }
 
   // Returns a JS object query for sending to the backend.
   function queryFrom(range, filters, sortBy, page, limit) {
@@ -170,26 +178,6 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
   }
 
   /**
-   * Updates the filters by columnName and filterValue. Removes previous any
-   * previous filter which applies to the columnName, and then appends the new
-   * filter.
-   *
-   * NB: mutates store state!
-   */
-  function updateFilters(columnName, filterValue, type) {
-    // TODO(ihodes): be careful with how we remove filters: we could have two+
-    //               filters applied to a given columnName, e.g. selection a
-    //               range of interesting sample:DP
-    var filter = _.find(filters, f => _.isEqual(columnName, f.columnName));
-    if (filter) {
-      filters = _.without(filters, filter);
-    }
-    if (filterValue.length > 0) {
-      filters.push({columnName, filterValue, type});
-    }
-  }
-
-  /**
    * Updates the sortBys by columnName and order.
    *
    * NB: mutates store state!
@@ -198,15 +186,6 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
     // Right now, we just sort by one column (this will change on CQL
     // integration).
     sortBys = [{columnName, order}];
-  }
-
-  /**
-   * Updates the range.
-   *
-   * NB: mutates store state!
-   */
-  function updateRange(contig, start, end) {
-    range = {contig, start, end};
   }
 
   /**
@@ -250,6 +229,7 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
       var query = queryFrom(range, filters, sortBys, page, limit);
       return {
         hasLoaded,
+        hasPendingRequest,
         loadError,
         records,
         stats,
