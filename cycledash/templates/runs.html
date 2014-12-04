@@ -71,7 +71,7 @@
         </td>
         <td>{{ run['caller_name'] }}</td>
         <td>{{ run['dataset_name'] }}</td>
-        <td>{{ run['created_at'].strftime('%Y-%m-%d') }}</td>
+        <td title="{{ run['created_at'] }}">{{ run['created_at'].strftime('%Y-%m-%d') }}</td>
         <td>
           {%- if run['validation_vcf'] %}<span class="label label-info" title="Is a validation VCF">validation</span>{% endif -%}
           {%- if run['tumor_bam_uri'] %}<span class="label label-info" title="Has an associated tumor BAM">tumor</span>{% endif -%}
