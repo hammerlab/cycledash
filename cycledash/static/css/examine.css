@@ -279,6 +279,10 @@ dt {
 .query-status.loading:before {
   content: "";
 }
+.server-error {
+  color: red;
+  font-size: large;
+}
 .tt-hint {
   color: gray;
 }
