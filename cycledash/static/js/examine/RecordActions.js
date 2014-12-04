@@ -3,7 +3,6 @@
 
 var ACTION_TYPES = {
   REQUEST_PAGE: 'REQUEST_PAGE',
-  SELECT_COLUMN: 'SELECT_COLUMN',
   SELECT_RECORD: 'SELECT_RECORD',
   SET_QUERY: 'SET_QUERY',
   SORT_BY: 'SORT_BY',
@@ -58,14 +57,6 @@ function getRecordActions(dispatcher) {
       dispatcher.dispatch({
         actionType: ACTION_TYPES.SELECT_RECORD,
         record
-      });
-    },
-    selectColumn: function({columnName, info, name}) {
-      dispatcher.dispatch({
-        actionType: ACTION_TYPES.SELECT_COLUMN,
-        columnName,
-        info,
-        name
       });
     }
   };

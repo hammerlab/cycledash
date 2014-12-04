@@ -4,43 +4,10 @@ h1 small {
   margin-left: 17px;
   color: #B0B0B0;
 }
-body {
-  background: #ffffff url("/static/img/subtle-dots.png") repeat right top;
-}
-
-/* Karyogram */
-.karyogram {
-  box-shadow: inset 0 0 10px #F0F0F0;
-  margin: 5px 0;
-  visibility: hidden;
-  overflow: hidden;
-}
-.karyogram.focused {
-  box-shadow: inset 0 0 50px #F0F0FF;
-}
-.karyogram.visible {
-  visibility: visible;
-}
 
 /* VCFTable */
 .vcf-table {
   padding-top: 20px;
-}
-.vcf-table input {
-  border: none;
-  padding: 11px;
-  background: #ddd;
-  color: #1f2f1f;
-  width: 45px;
-  margin-left: 3px;
-  font-size: 13px;
-  border-radius: 3px;
-}
-th#range input {
-  width: 100px;
-}
-th#range input:disabled {
-  display: none;
 }
 th {
   font-size: 19px;
@@ -66,16 +33,6 @@ th.ref, td.ref {
 th.alt, td.alt {
   padding-left: 0;
   text-align: left;
-}
-th.attr > span.chartable {
-  cursor: pointer;
-  border-bottom: 1px dashed #333;
-}
-th.attr.selected > span {
-  padding: 3px 11px;
-  box-shadow: inset 0 0 10px rgba(198, 212, 211, 0.69);
-  border: none;
-  color: #969696;
 }
 th.uber-column {
   border-left: 1px solid #bbb;
@@ -103,7 +60,7 @@ th.uber-column {
 .vcf-table .tooltip p strong {
   font-weight: bold;
 }
-.vcf-table th.attr span:hover + .tooltip {
+.vcf-table th span:hover + .tooltip {
   display: block;
 }
 .vcf-table .tooltip:after, .tooltip:before {
@@ -128,19 +85,11 @@ th.uber-column {
   border-width: 11px;
   margin-left: -11px;
 }
-
-select {
-  padding: 13px 11px;
-  width: 77px;
-  height: 31px;
-  border: none;
-  background: #dddddd;
-}
-table {
-  border-collapse: collapse;
-}
 .vcf-table tr:nth-child(odd) {
-  background: rgba(248, 249, 250, 0.5);
+  background: rgb(253, 253, 253);
+}
+.vcf-table tr:first-child {
+  background: none;
 }
 .vcf-table tr.selected {
   background: rgb(254, 255, 207);
@@ -157,9 +106,6 @@ th .sorting-by.asc:before {
 th .sorting-by.desc:before {
   content: ' ↓';
 }
-th.attr:hover {
-  font-weight: bold;
-}
 td.pos {
   font-family: "inconsolata", monospace;
 }
@@ -172,35 +118,9 @@ td {
   font-size: 13px;
   white-space: nowrap;
 }
-thead, tbody, table {
+table {
+  border-collapse: collapse;
   width: 100%;
-}
-
-/* AttributeCharts */
-.attr-chart h3 {
-  font-size: 28px;
-  margin-left: 17px;
-}
-path {
-  fill:none;
-  stroke: black;
-  stroke-width: 1px;
-}
-.bar rect {
-  fill: #384045;
-}
-text {
-  font-size: 11px;
-}
-.attr-chart  {
-  display: inline-block;
-  width: 450px;
-  height: 250px;
-  margin: 13px;
-}
-.attr-chart h4 {
-  font-size: 25px;
-  margin: 0 0 11px 11px;
 }
 
 /* StatsSummary */
@@ -246,7 +166,6 @@ text {
   text-decoration: none;
   margin-left: 5px;
 }
-
 #svgHolder {
   position: relative;
   bottom: 0;
@@ -267,7 +186,6 @@ text {
   max-height: 300px;
   min-height: 300px;
 }
-
 @media(max-height:1000px) {
   .variant-inspector {
     height: 600px;
@@ -361,16 +279,13 @@ dt {
 .error-message {
   display: none;
 }
-
 /* Styles from http://stackoverflow.com/a/20205623/388951 */
 .tt-query {
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
 }
-
 .tt-hint {
   color: #999
 }
-
 .tt-dropdown-menu {
   min-width: 422px;
   margin-top: 12px;
@@ -381,19 +296,16 @@ dt {
   border-radius: 8px;
   box-shadow: 0 5px 10px rgba(0,0,0,.2);
 }
-
 .tt-suggestion {
   padding: 3px 20px;
   font-size: 18px;
   line-height: 24px;
 }
-
 .tt-suggestion.tt-cursor {
   color: #fff;
   background-color: #0097cf;
 
 }
-
 .tt-suggestion p {
   margin: 0;
 }
