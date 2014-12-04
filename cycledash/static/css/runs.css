@@ -24,7 +24,6 @@ tr.run.selected {
 tr.run-info {
   display: none;
   background: rgb(247, 252, 253);
-  text-align: center;
 }
 tr.run-info ul {
   text-align: left;
