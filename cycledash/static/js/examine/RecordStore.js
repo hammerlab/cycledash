@@ -59,13 +59,13 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
 
   var dataSource = opt_testDataSource || networkDataSource;
 
-  var currentPendingRequest = null;
+  var currentPendingQuery = null;
 
   function receiver(action) {
     switch(action.actionType) {
       case ACTION_TYPES.SORT_BY:
         updateSortBys(action.columnName, action.order);
-        clearPendingRequests();
+        ignorePendingRequests();
         updateGenotypes({append: false});
         break;
       case ACTION_TYPES.REQUEST_PAGE:
@@ -77,7 +77,7 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
         break;
       case ACTION_TYPES.SET_QUERY:
         setQuery(action.query);
-        clearPendingRequests();
+        ignorePendingRequests();
         updateGenotypes({append: false});
         break;
     }
@@ -116,12 +116,12 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
     // table is now invalidated).
     if (!append) selectedRecord = null;
 
-    currentPendingRequest = query;
+    currentPendingQuery = query;
     hasPendingRequest = true;
     notifyChange();  // notify of pending request
     $.when(deferredGenotypes(vcfId, query))
       .done(response => {
-        if (!_.isEqual(currentPendingRequest, query)) {
+        if (!_.isEqual(currentPendingQuery, query)) {
           return;  // A subsequent request has superceded this one.
         }
         if (append) {
@@ -138,10 +138,10 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
   var updateGenotypes =
       _.debounce(_.throttle(_updateGenotypes, 500 /* ms */), 500 /* ms */);
 
-  // All pending requests are obsolete. Ignore them for purposes of the UI.
-  function clearPendingRequests() {
+  // Ignore all currently pending requests (presumably because there's a newer one).
+  function ignorePendingRequests() {
     hasPendingRequest = false;
-    currentPendingRequest = null;
+    currentPendingQuery = null;
   }
 
   // Returns a JS object query for sending to the backend.
