@@ -34,6 +34,8 @@ def extract(run):
 
     vcf_id = insert_run(run, engine, connection, metadata)
 
+    update_extant_columns(metadata, connection, vcf_id)
+
     connection.close()
     return vcf_id
 
