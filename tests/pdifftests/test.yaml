@@ -4,7 +4,7 @@ setup: |
     ./tests/pdifftests/start-cycledash.sh
 
 waitFor:
-    url: http://localhost:5001/
+    url: http://localhost:5001/about
     timeout_secs: 30
 
 aliases:
