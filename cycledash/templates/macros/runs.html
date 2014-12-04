@@ -1,27 +1,27 @@
 {% macro runs_table(runs, run_kvs) -%}
 <style>
-  tr.run {
-    background: white;
-    cursor: pointer;
-  }
-  tr.run.selected {
-    font-weight: 500;
-  }
-  tr.run-info {
-    display: none;
-    background: rgb(247, 252, 253);
-    text-align: center;
-  }
-  tr.run-info li {
-    list-style-type: none;
-    display: inline;
-  }
-  tr.run-info li:after {
-    content: ", ";
-  }
-  tr.run-info li:last-child:after {
-    content: " ";
-  }
+ tr.run {
+   background: white;
+   cursor: pointer;
+ }
+ tr.run.selected {
+   font-weight: 500;
+ }
+ tr.run-info {
+   display: none;
+   background: rgb(247, 252, 253);
+   text-align: center;
+ }
+ tr.run-info li {
+   list-style-type: none;
+   display: inline;
+ }
+ tr.run-info li:after {
+   content: ", ";
+ }
+ tr.run-info li:last-child:after {
+   content: " ";
+ }
 </style>
 
 <table class="runs table">
@@ -38,7 +38,7 @@
     </tr>
   </thead>
   <tbody>
-{%- for run in runs %}
+    {%- for run in runs %}
     <tr class="run">
       <td><a href="/runs/{{ run['id'] }}">{{ run['id'] }}</a></td>
       <td>{{ run['variantCallerName'] }}</td>
@@ -60,26 +60,26 @@
         </ul>
       </td>
     </tr>
-{% endfor -%}
+    {% endfor -%}
   </tbody>
 </table>
 
 <script>
-  d3.selectAll('tr.run')
-    .on('click', function(d, i) {
-      var selected = d3.select(this).attr('data-selected');
-      var $this = d3.select(this);
-      if (selected == 'true') {
-        $this.attr('data-selected', false)
-            .attr('class', 'run');
-        d3.select($this.node().nextElementSibling)
-            .style('display', 'none');
-        } else {
-          $this.attr('data-selected', true)
-              .attr('class', 'run selected');
-          d3.select($this.node().nextElementSibling)
-              .style('display', 'table-row');
-        }
-    });
+ d3.selectAll('tr.run')
+   .on('click', function(d, i) {
+       var selected = d3.select(this).attr('data-selected');
+       var $this = d3.select(this);
+       if (selected == 'true') {
+           $this.attr('data-selected', false)
+                .attr('class', 'run');
+           d3.select($this.node().nextElementSibling)
+             .style('display', 'none');
+       } else {
+           $this.attr('data-selected', true)
+                .attr('class', 'run selected');
+           d3.select($this.node().nextElementSibling)
+             .style('display', 'table-row');
+       }
+   });
 </script>
 {%- endmacro %}

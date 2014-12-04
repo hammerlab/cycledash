@@ -1,12 +1,12 @@
 body {
-    padding: 11px;
-    font-family: "freight-sans-pro", verdana, helvetica, sans-serif;
+  padding: 11px;
+  font-family: "freight-sans-pro", verdana, helvetica, sans-serif;
 }
 main { margin-top: 78px; }
 pre, tt { font-family: "inconsolata", monospace; }
 table td { font-family: helvetica, arial, sans-serif; }
 section {
-    width: 800px;
-    margin: auto;
+  width: 800px;
+  margin: auto;
 }
 img.cycle { float: right; }
