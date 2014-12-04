@@ -138,7 +138,7 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
         if (!_.isEqual(currentPendingQuery, query)) {
           return;  // A subsequent request has superceded this one.
         }
-        loadError = errorMessage + ': ' + errorDetails;
+        loadError = errorDetails;
         hasPendingRequest = false;
         notifyChange();
       });
