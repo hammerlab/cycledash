@@ -27,9 +27,10 @@ var ENTIRE_GENOME = {start: null, end: null, contig: types.ALL_CHROMOSOMES};
 
 // opt_testDataSource is provided for testing.
 // Its type is function(url, done_callback).
-function createRecordStore(vcfId, dispatcher, opt_testDataSource) {
+function createRecordStore(run, dispatcher, opt_testDataSource) {
   // Initial state of the store. This is mutable. There be monsters.
-  var hasLoaded = false,
+  var vcfId = run.id,
+      hasLoaded = false,
       loadError = null,
 
       records = [],
@@ -41,8 +42,8 @@ function createRecordStore(vcfId, dispatcher, opt_testDataSource) {
       sortBys = DEFAULT_SORT_BYS,
       range = ENTIRE_GENOME,
 
-      contigs = [],
-      columns = {};
+      contigs = run.contigs,
+      columns = run.spec;
 
   // State for paging the server for records. Page should be reset to 0 on most
   // operations.
@@ -120,6 +121,7 @@ function createRecordStore(vcfId, dispatcher, opt_testDataSource) {
 
     $.when(deferredGenotypes(vcfId, query))
       .done(response => {
+        hasLoaded = true;
         if (append) {
           // TODO: BUG: This can result in a out-of-order records, if a later
           //            XHR returns before an earlier XHR.
@@ -219,40 +221,21 @@ function createRecordStore(vcfId, dispatcher, opt_testDataSource) {
     range = query.range || ENTIRE_GENOME;
   }
 
-  // Initialize the RecordStore with basic information (columns, the contigs
-  // in the VCF), and request first records to display.
-  $.when(deferredSpec(vcfId), deferredContigs(vcfId))
-    .done((columnsResponse, contigsResponse) => {
-      hasLoaded = true;
-      columns = columnsResponse.spec;
-      contigs = contigsResponse.contigs;
+  var existingQuery = getQueryStringValue('query');
+  if (existingQuery) {
+    try {
+      var jsonQuery = JSON.parse(existingQuery);
+      setQuery(jsonQuery);
+    } catch (e) {
+      // query is invalid
+    }
+  }
 
-      var existingQuery = getQueryStringValue('query');
-      if (existingQuery) {
-        try {
-          var jsonQuery = JSON.parse(existingQuery);
-          setQuery(jsonQuery);
-        } catch (e) {
-          // query is invalid
-        }
-      }
-
-      // no need to debounce this update -- make it so now!
-      _updateGenotypes({append: false});
-    });
+  // There's no need to debounce this update -- make it so now!
+  _updateGenotypes({append: false});
 
   function notifyChange() {
     _.each(listenerCallbacks, cb => { cb(); });
-  }
-
-  // Return deferred GET for the column spec for a given VCF.
-  function deferredSpec(vcfId) {
-    return callbackToPromise(dataSource, '/runs/' + vcfId + '/spec');
-  }
-
-  // Return deferred GET for the contigs in a given VCF.
-  function deferredContigs(vcfId) {
-    return callbackToPromise(dataSource, '/runs/' + vcfId + '/contigs');
   }
 
   // Return a deferred GET returning genotypes and stats.

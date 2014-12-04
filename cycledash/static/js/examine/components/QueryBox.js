@@ -51,12 +51,10 @@ var QueryBox = React.createClass({
       this.props.handleQueryChange(parsedQuery);
     }
   },
+  componentDidMount: function(prevProps, prevState) {
+    this.initQueryBox();
+  },
   componentDidUpdate: function(prevProps, prevState) {
-    // Watch for the first update with a populated set of columns.
-    if (_.isEmpty(prevProps.columns) && !_.isEmpty(this.props.columns)) {
-      this.initQueryBox();
-    }
-
     if (prevProps.query != this.props.query) {
       this.setQueryBoxToQuery();
     }
@@ -111,9 +109,17 @@ var QueryBox = React.createClass({
 
     // don't change the text box if its contents parse to the same thing.
     if (!QueryLanguage.isEquivalent(textBoxQuery, this.props.query)) {
-      var $input = $(this.refs.input.getDOMNode());
-      $input.typeahead('val', QueryLanguage.toString(this.props.query));
+      this.setDisplayedQuery(QueryLanguage.toString(this.props.query));
     }
+  },
+
+  /**
+   * Set the visible query in the typeahead box to `str`.
+   * This is factored out for easy intercepting while testing.
+   */
+  setDisplayedQuery: function(str) {
+    var $input = $(this.refs.input.getDOMNode());
+    $input.typeahead('val', str);
   },
 
   render: function() {

@@ -6,7 +6,7 @@ var dataUtils = require('./DataUtils'),
     vcf = require('vcf.js'),
     _ = require('underscore');
 
-describe('test data', function() {
+describe('DataUtils', function() {
   var vcfData;
   before(function() {
     var parseVcf = vcf.parser();  // Note: the real deal, not a fake!
@@ -19,7 +19,7 @@ describe('test data', function() {
   });
 
   it('should generate a column spec', function() {
-    var spec = dataUtils.getSpec(vcfData).spec;
+    var spec = dataUtils.getSpec(vcfData);
     assert.deepEqual(['INFO', 'SAMPLE'], _.keys(spec));
     assert.deepEqual(['DP','SOMATIC','SS','SSC','GPV','SPV'], _.keys(spec.INFO));
     assert.deepEqual(['GT','GQ','DP','RD','AD','FREQ','DP4'], _.keys(spec.SAMPLE));

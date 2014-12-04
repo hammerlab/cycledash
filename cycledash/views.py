@@ -86,22 +86,15 @@ def genotypes(run_id):
     return jsonify(gt.get(run_id, json.loads(request.args.get('q'))))
 
 
-@app.route('/runs/<run_id>/spec')
-def examine_spec(run_id):
-    return jsonify({'spec': gt.spec(run_id)})
-
-
-@app.route('/runs/<run_id>/contigs')
-def contigs(run_id):
-    return jsonify({'contigs': gt.contigs(run_id)})
-
-
 @app.route('/runs/<run_id>/examine')
 def examine(run_id):
     with db.engine.connect() as con:
         select_vcf_sql = 'select * from vcfs where id = {};'.format(run_id)
         vcf = dict(con.execute(select_vcf_sql).fetchall()[0])
-    return render_template('examine.html', run=dict(vcf))
+    run = dict(vcf)
+    run['spec'] = gt.spec(run_id)
+    run['contigs'] = gt.contigs(run_id)
+    return render_template('examine.html', run=run)
 
 
 @app.route('/runs/<run_ids_key>/concordance', methods=['GET', 'PUT'])
