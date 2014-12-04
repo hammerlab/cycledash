@@ -273,6 +273,12 @@ dt {
   font-size: 1.5em;
   color: white;
 }
+.query-status.loading {
+  background: url(/static/img/loader.gif) no-repeat;
+}
+.query-status.loading:before {
+  content: "";
+}
 .tt-hint {
   color: gray;
 }
