@@ -1,6 +1,8 @@
 """Module containing helper methods for the app in general."""
 import re
 
+from flask import jsonify
+
 
 RE_CAMELCASE_1 = re.compile('((?!^)[A-Z](?=[a-z0-9][^A-Z])|(?<=[a-z])[A-Z])')
 RE_CAMELCASE_2 = re.compile('([a-z]+[0-9]+)([A-Z])')
@@ -63,3 +65,9 @@ def update_object(obj, update):
     for key, value in update.iteritems():
         obj.__setattr__(key, value)
     return obj
+
+
+def make_error_response(error, message):
+    response = jsonify({'error': error, 'message': message})
+    response.status_code = 400
+    return response

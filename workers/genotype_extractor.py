@@ -9,7 +9,7 @@ actually contain values, and stores a list of them in the vcf table.
 import json
 
 import config
-from workers.shared import (load_vcf_from_hdfs, worker,
+from workers.shared import (load_vcf, worker,
                             initialize_database, DATABASE_URI,
                             TEMPORARY_DIR, update_extant_columns)
 from workers.relational_vcfs import insert_genotypes_with_copy
@@ -54,7 +54,7 @@ def insert_run(run, engine, connection, metadata):
     for (uri, is_validation) in vcf_uris:
         if vcf_exists(connection, uri):
             continue
-        reader, header_text = load_vcf_from_hdfs(uri)
+        reader, header_text = load_vcf(uri)
         vcf = {
             'uri': uri,
             'dataset_name': run.get('dataset'),

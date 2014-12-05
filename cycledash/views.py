@@ -1,15 +1,17 @@
 """Defines all views for CycleDash."""
 import collections
 import json
+import os
 
 from celery import chain
 from flask import (request, redirect, Response, render_template, jsonify,
                    url_for, abort)
 import requests
+from werkzeug.utils import secure_filename
 
 from cycledash import app, db
 import cycledash.genotypes as gt
-from cycledash.helpers import prepare_request_data, update_object
+from cycledash.helpers import prepare_request_data, update_object, make_error_response
 from cycledash.validations import UpdateRunSchema, CreateRunSchema
 
 import workers.indexer
@@ -50,9 +52,7 @@ def runs():
         try:
             data = CreateRunSchema(prepare_request_data(request))
         except Exception as e:
-            response = jsonify({'error': 'Run validation', 'message': str(e)})
-            response.status_code = 400
-            return response
+            return make_error_response('Run validation', str(e))
         start_workers_for_run(data)
         return redirect(url_for('runs'))
     elif request.method == 'GET':
@@ -95,3 +95,20 @@ def hdfs_vcf(vcf_path):
         url = WEBHDFS_ENDPOINT + vcf_path + WEBHDFS_OPEN_OP
         vcf_text = requests.get(url).text
     return Response(vcf_text, mimetype='text/plain')
+
+
+# Write the user-uploaded file to a temporary directory and return the path to it.
+@app.route('/upload', methods=['POST'])
+def upload():
+    f = request.files['file']
+    if not f:
+        return make_error_response('Missing file', 'Must post a file to /upload')
+    if not f.filename.endswith('.vcf'):
+        return make_error_response('Invalid extension', 'File must end with .vcf')
+
+    dest_filename = secure_filename(f.filename)
+    tmp_dir = app.config['TEMPORARY_DIR']
+    dest_path = os.path.join(tmp_dir, dest_filename)
+    f.save(dest_path)
+    
+    return 'file://' + dest_path
