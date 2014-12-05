@@ -9,7 +9,8 @@ import requests
 
 from cycledash import app, db
 import cycledash.genotypes as gt
-from cycledash.helpers import prepare_request_data, update_object, make_error_response, get_secure_unique_filename
+from cycledash.helpers import prepare_request_data, update_object, \
+        make_error_response, get_secure_unique_filename
 from cycledash.validations import UpdateRunSchema, CreateRunSchema
 
 import workers.indexer
