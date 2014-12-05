@@ -192,12 +192,15 @@ def _filter_sql(filt, idx, table=''):
     arg = {name: value}
     query += {
         '=': ' = %({})s',
+        '!=': ' != %({})s',
         '<': '{cast} < %({})s',
         '>': '{cast} > %({})s',
         '>=': '{cast} >= %({})s',
         '<=': '{cast} <= %({})s',
         'RLIKE': ' ~* %({})s',
-        'LIKE': ' LIKE %({})s'
+        'LIKE': ' LIKE %({})s',
+        'NULL': ' IS NULL',
+        'NOTNULL': ' IS NOT NULL',
     }.get(op_name, '').format(name, cast=cast)
     return query, arg
 
