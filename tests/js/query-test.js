@@ -46,7 +46,7 @@ describe('Query Language', function() {
 
     it('should parse null checks', function() {
       expectParse('A IS NULL', {filters:[{type: 'NULL', columnName: 'A'}]});
-      expectParse('A IS NOT NULL', {filters:[{type: 'NOTNULL', columnName: 'A'}]});
+      expectParse('A IS NOT NULL', {filters:[{type: 'NOT NULL', columnName: 'A'}]});
       expectParse('A   IS  null', {filters:[{type: 'NULL', columnName: 'A'}]});
     });
 

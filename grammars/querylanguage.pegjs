@@ -61,7 +61,7 @@ op "op"
 
 nullcheck "nullcheck"
   = "IS"i req_ws "NULL"i { return "NULL"; }
-  / "IS"i req_ws "NOT"i req_ws "NULL"i { return "NOTNULL"; }
+  / "IS"i req_ws "NOT"i req_ws "NULL"i { return "NOT NULL"; }
 
 range "range"
   = contig:contig ":" range:range_range?

@@ -200,7 +200,7 @@ def _filter_sql(filt, idx, table=''):
         'RLIKE': ' ~* %({})s',
         'LIKE': ' LIKE %({})s',
         'NULL': ' IS NULL',
-        'NOTNULL': ' IS NOT NULL',
+        'NOT NULL': ' IS NOT NULL',
     }.get(op_name, '').format(name, cast=cast)
     return query, arg
 
