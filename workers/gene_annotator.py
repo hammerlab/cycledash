@@ -30,6 +30,9 @@ from workers.shared import (worker, DATABASE_URI, TEMPORARY_DIR,
 # TODO(tavi) Handle inconsistent states and retries.
 @worker.task
 def annotate(vcf_ids):
+    if vcf_ids == False:
+        return  # An error must have occurred earlier 
+
     for vcf_id in vcf_ids:
         _annotate_one(vcf_id)
 

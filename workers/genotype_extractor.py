@@ -20,7 +20,8 @@ def extract(run):
     """Extract the genotype and VCF metadata required to insert a VCF into the
     CycleDash database, and insert it.
 
-    Returns a list of IDs for the VCFs which were inserted.
+    Returns a list of IDs for the VCFs which were inserted, or False if an
+    error occurred.
     """
     run = json.loads(run)
     engine, connection, metadata = initialize_database(DATABASE_URI)
@@ -44,19 +45,33 @@ def insert_run(run, engine, connection, metadata):
     """Insert the run into the database.
 
     This inserts both the run's VCF and the truth VCF, if it hasn't been
-    inserted, and their genotypes. Returns the VCF ID.
+    inserted, and their genotypes. Returns the inserted VCF IDs, or False if an
+    error occurred.
     """
     vcfs_table = metadata.tables.get('vcfs')
-    vcf_uris = [(run['vcf_path'], False)]
+    vcfs = [{'uri': run['vcf_path'], 'is_validation': False}]
     if run.get('truth_vcf_path'):
-        vcf_uris.append((run['truth_vcf_path'], True))
+        vcfs.append({'uri': run['truth_vcf_path'], 'is_validation': True})
+
+    # Validate the contents of the VCFs before modifying the database.
+    vcfs = [v for v in vcfs if not vcf_exists(connection, v['uri'])]
+    for vcf in vcfs:
+        reader, header_text = load_vcf(vcf['uri'])
+        if vcf['is_validation'] and len(reader.samples) > 1:
+            print 'Validation VCFs may only have one sample. {} has {}'.format(
+                    vcf['uri'], reader.samples)
+            return False
+        vcf['reader'] = reader
+        vcf['header_text'] = header_text
+
 
     vcf_ids = []
+    for vcf in vcfs:
+        uri = vcf['uri']
+        is_validation = vcf['is_validation']
+        reader = vcf['reader']
+        header_text = vcf['header_text']
 
-    for (uri, is_validation) in vcf_uris:
-        if vcf_exists(connection, uri):
-            continue
-        reader, header_text = load_vcf(uri)
         vcf = {
             'uri': uri,
             'dataset_name': run.get('dataset'),
