@@ -39,6 +39,7 @@ filter_or_range
 
 filter "filter"
   = k:field ws op:op ws v:value { return {type: 'filter', field: k, op: op, filterValue: v} }
+  / k:field req_ws op:nullcheck { return {type: 'filter', field: k, op: op} }
 
 field "field"
   = chars:[0-9a-z.:_-]i+ { return chars.join(''); }
@@ -54,8 +55,13 @@ op "op"
   / ">="
   / ">"
   / "="
+  / "!="
   / "LIKE"i { return "LIKE"; }
   / "RLIKE"i { return "RLIKE"; }
+
+nullcheck "nullcheck"
+  = "IS"i req_ws "NULL"i { return "NULL"; }
+  / "IS"i req_ws "NOT"i req_ws "NULL"i { return "NOT NULL"; }
 
 range "range"
   = contig:contig ":" range:range_range?
