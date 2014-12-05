@@ -281,6 +281,17 @@ dt {
 .query-status.loading:before {
   content: "";
 }
+.cql-help {
+  position: absolute;
+  top: 50%;
+  margin-top: -10px;
+  right: 375px;  /* width of Stats Table + 25px */
+  width: 20px;
+  height: 20px;
+  background: url(/static/img/noun_61692.svg);
+  background-size: 20px 20px;
+  opacity: 0.55;
+}
 .server-error {
   color: red;
 }
