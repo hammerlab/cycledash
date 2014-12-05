@@ -2,6 +2,7 @@
 from collections import OrderedDict
 
 import vcf
+from plone.memoize import forever
 
 from cycledash import db
 
@@ -21,6 +22,7 @@ WHERE dataset_name = %(dataset_name)s
  ##### The below functions are exposed via the controllers in views.py. #######
 ##############################################################################
 
+@forever.memoize
 def spec(vcf_id):
     """Return a dict describing the layout of the columns to be displayed.
 
@@ -72,8 +74,9 @@ def get(vcf_id, query):
      page: 10,
      limit: 250
     }
-
     """
+    vcf_spec = spec(vcf_id)  # needed to know the types of columns
+    query = _annotate_query_with_types(query, vcf_spec)
     with db.engine.connect() as connection:
         parameters = {'vcf_id': vcf_id}
         fns = [_select_sql, _range_sql, _filters_sql, _sort_by_sql,
@@ -176,6 +179,7 @@ def _filter_sql(filt, idx, table=''):
     column = filt.get('columnName')
     value = filt.get('filterValue')
     op_name = filt.get('type')
+    sql_type = filt.get('sqlType')
     if table:
         table = table + '.'
     # TODO(ihodes): SQL injection.
@@ -183,34 +187,39 @@ def _filter_sql(filt, idx, table=''):
         query = '{}"{}"'.format(table, column)
     else:
         query = table + column
+    cast = '::{}'.format(sql_type) if sql_type else ''
     name = 'filter' + str(idx)
     arg = {name: value}
     query += {
         '=': ' = %({})s',
-        '<': '::INTEGER < %({})s',
-        '>': '::INTEGER > %({})s',
-        '>=': '::INTEGER >= %({})s',
-        '<=': '::INTEGER <= %({})s',
+        '<': '{cast} < %({})s',
+        '>': '{cast} > %({})s',
+        '>=': '{cast} >= %({})s',
+        '<=': '{cast} <= %({})s',
         'RLIKE': ' ~* %({})s',
         'LIKE': ' LIKE %({})s'
-    }.get(op_name, '').format(name)
+    }.get(op_name, '').format(name, cast=cast)
     return query, arg
 
 
 def _sort_by_sql(query, vcf_id, table=''):
-    sort_by = query.get('sortBy', [])
-    if not sort_by:
+    sort_bys = query.get('sortBy', [])
+    if not sort_bys:
         return '', {}
     sql = ' ORDER BY '
     orders = []
     if table:
         table += '.'
-    for spec in sort_by:
-        col_name = table + spec.get('columnName')
-        col_type = '::INTEGER ' if col_name != 'contig' else ' '
-        order = 'desc' if 'desc' == spec.get('order') else 'asc'
+    for sort_by in sort_bys:
+        col_name = table + sort_by.get('columnName')
+        cast = ''
+        if sort_by.get('sqlType'):
+            cast = '::{}'.format(sort_by.get('sqlType'))
+        elif col_name != 'contig':
+            cast = '::INTEGER'
+        order = 'desc' if 'desc' == sort_by.get('order') else 'asc'
         # TODO(ihodes): SQL injection.
-        orders.append('"{}"{} {}'.format(col_name, col_type, order))
+        orders.append('"{}"{} {}'.format(col_name, cast, order))
     sql += ', '.join(orders)
     return sql, {}
 
@@ -375,3 +384,30 @@ def _add_column_to_spec(spec, column_name, supercolumn, subcolumn,
             'description': description
         }
     }
+
+
+def _find_column(spec, column_name):
+    """Returns data for the column in the spec, or None."""
+    for _, columns in spec.iteritems():
+        for _, info in columns.iteritems():
+            if info['columnName'] == column_name:
+                return info
+    return None
+
+
+def _vcf_type_to_sql_type(vcfType):
+    """Converts a VCF type (e.g. "Float") to a SQL type (e.g. "FLOAT")."""
+    return {
+        'Float': 'FLOAT',
+        'Integer': 'INTEGER'
+    }.get(vcfType)
+
+
+def _annotate_query_with_types(query, vcf_spec):
+    """Adds a sqlType field to each filter and sortBy in query."""
+    operations = query.get('sortBy', []) + query.get('filters', [])
+    for op in operations:
+        info = _find_column(vcf_spec, op['columnName'])
+        if info:
+            op['sqlType'] = _vcf_type_to_sql_type(info['info']['type'])
+    return query
