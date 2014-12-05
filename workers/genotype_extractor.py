@@ -53,9 +53,8 @@ def insert_run(run, engine, connection, metadata):
     if run.get('truth_vcf_path'):
         vcfs.append({'uri': run['truth_vcf_path'], 'is_validation': True})
 
-    # do some validation involving the content of all the VCFs before modifying
-    # the database.
-    vcfs = filter(lambda v: not vcf_exists(connection, v['uri']), vcfs)
+    # Validate the contents of the VCFs before modifying the database.
+    vcfs = [v for v in vcfs if not vcf_exists(connection, v['uri'])]
     for vcf in vcfs:
         reader, header_text = load_vcf(vcf['uri'])
         if vcf['is_validation'] and len(reader.samples) > 1:
