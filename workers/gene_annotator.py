@@ -29,7 +29,12 @@ from workers.shared import (worker, DATABASE_URI, TEMPORARY_DIR,
 
 # TODO(tavi) Handle inconsistent states and retries.
 @worker.task
-def annotate(vcf_id):
+def annotate(vcf_ids):
+    for vcf_id in vcf_ids:
+        _annotate_one(vcf_id)
+
+
+def _annotate_one(vcf_id):
     _, connection, metadata = initialize_database(DATABASE_URI)
     with close_and_discard(connection):
         gene_names = get_gene_names(
