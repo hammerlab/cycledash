@@ -7,6 +7,7 @@ var _ = require('underscore'),
     StatsSummary = require('./StatsSummary'),
     VCFTable = require('./VCFTable'),
     QueryBox = require('./QueryBox'),
+    Downloads = require('./Downloads'),
     ExamineInformation = require('./ExamineInformation');
 
 
@@ -67,6 +68,7 @@ var ExaminePage = React.createClass({
                   loadError={state.loadError}
                   query={state.query}
                   handleQueryChange={this.handleQueryChange} />
+        <Downloads query={state.query} run_id={props.run.id} />
         <VCFTable ref="vcfTable"
                   hasLoaded={state.hasLoaded}
                   records={state.records}
