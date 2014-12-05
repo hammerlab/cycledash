@@ -20,6 +20,9 @@ describe('Query Language', function() {
     it('should parse simple filters', function() {
       expectParse('A < 10', {filters:[{type: '<', filterValue:'10', columnName:'A'}]});
       expectParse('B = ABC', {filters:[{type: '=', filterValue:'ABC', columnName:'B'}]});
+      expectParse('INFO:AF != 0.01', {
+        filters:[{type: '!=', filterValue:'0.01', columnName:'INFO:AF'}]
+      });
       expectParse('INFO.DP like "ABC"', {
         filters:[{type: 'LIKE', filterValue:'ABC', columnName:'INFO.DP'}]
       });
@@ -39,6 +42,12 @@ describe('Query Language', function() {
       expectParse('ORDER BY A', {sortBy:[{order:'asc', columnName: 'A'}]});
       expectParse('ORDER BY B DESC', {sortBy:[{order:'desc', columnName: 'B'}]});
       expectParse('ORDER BY INFO.DP ASC', {sortBy:[{order:'asc', columnName: 'INFO.DP'}]});
+    });
+
+    it('should parse null checks', function() {
+      expectParse('A IS NULL', {filters:[{type: 'NULL', columnName: 'A'}]});
+      expectParse('A IS NOT NULL', {filters:[{type: 'NOTNULL', columnName: 'A'}]});
+      expectParse('A   IS  null', {filters:[{type: 'NULL', columnName: 'A'}]});
     });
 
     it('should parse quoted filters with spaces', function() {
