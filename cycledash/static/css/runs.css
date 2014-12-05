@@ -45,5 +45,8 @@ td span.run-id {
 
 /* drag and drop file upload */
 .receiving-drag {
-  background: hotpink;
+  background: rgb(247, 252, 253);
+}
+.wanting-drag {
+  border: 1px dashed #777;
 }

@@ -82,12 +82,14 @@ def hdfs_to_local_path(hdfs_path):
     return filename
 
 
-def load_vcf_from_hdfs(hdfs_vcf_path):
-    """Return a vcf.Reader, header text for the given VCF residing on HDFS."""
+def load_vcf(vcf_path):
+    """Return a vcf.Reader, header text for the given VCF."""
     if config.ALLOW_LOCAL_VCFS and hdfs_vcf_path.startswith('/tests/'):
         text = open(hdfs_vcf_path[1:]).read()
     elif hdfs_vcf_path.startswith('file://'):
         text = open(hdfs_vcf_path[6:]).read()
+    elif hdfs_vfs_path.startswith('hdfs://'):
+        return load_vcf(hdfs_vcf_path[6:])
     else:
         text = get_contents_from_hdfs(hdfs_vcf_path)
     header = '\n'.join(l for l in text.split('\n') if l.startswith('#'))

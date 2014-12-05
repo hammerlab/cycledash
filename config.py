@@ -24,6 +24,6 @@ try:
 except subprocess.CalledProcessError:
     DEPLOYED_GIT_HASH = '<No hash: not in git repository>'
 
-TEMPORARY_DIR = os.environ.get('TEMPORARY_DIR', None)
+TEMPORARY_DIR = os.environ.get('TEMPORARY_DIR', '/tmp')
 
 del os

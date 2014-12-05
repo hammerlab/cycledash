@@ -107,7 +107,7 @@ def upload():
         return make_error_response('Invalid extension', 'File must end with .vcf')
 
     dest_filename = secure_filename(f.filename)
-    tmp_dir = app.config['TEMPORARY_DIR'] or '/tmp'
+    tmp_dir = app.config['TEMPORARY_DIR']
     dest_path = os.path.join(tmp_dir, dest_filename)
     f.save(dest_path)
     

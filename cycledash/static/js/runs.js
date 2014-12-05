@@ -76,17 +76,16 @@ window.activateRunsUI = function() {
       });
 
   d3.selectAll('.uploadable')
-      .on('dragover', function(e) {
-        d3.event.preventDefault();
+      .on('dragover', function() {
         d3.select(this).classed({'receiving-drag': true});
       })
       .on('dragleave', function() {
-        d3.event.preventDefault();
         d3.select(this).classed({'receiving-drag': false});
       })
       .on('drop', function() {
         d3.event.preventDefault();
         d3.select(this).classed({'receiving-drag': false});
+        d3.selectAll('.uploadable').classed({'wanting-drag': false});
         var files = d3.event.dataTransfer.files;
         if (files.length === 0) return;
         if (files.length > 1) {
@@ -95,4 +94,12 @@ window.activateRunsUI = function() {
         }
         upload(files[0], this);
       });
+
+  d3.select('main')
+    .on('dragover', function() {
+      d3.selectAll('.uploadable').classed({'wanting-drag': true});
+    })
+    .on('dragleave', function() {
+      d3.selectAll('.uploadable').classed({'wanting-drag': false});
+    });
 };
