@@ -34,6 +34,11 @@ var operators = [
   'RLIKE'
 ];
 
+var checks = [
+  'IS NULL',
+  'IS NOT NULL'
+];
+
 // Takes the cartesian product of its args (all lists) and joins them on ' '.
 function concatProductOf() {
   return cartesianProductOf.apply(null, arguments).map(p => p.join(' '));
@@ -45,7 +50,8 @@ function completionsForExpectation(expectation, columnNames, rejectedText) {
   switch (expectation.description) {
     case 'filter':
       // Return columns x operators x {0}
-      return concatProductOf(columnNames, operators, ['0']);
+      return concatProductOf(columnNames, operators, ['0'])
+          .concat(concatProductOf(columnNames, checks));
 
     case 'field':
       return columnNames;

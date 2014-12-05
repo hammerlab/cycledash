@@ -31,7 +31,7 @@ describe('Query Completion', function() {
 
   it('Should offer ops', function() {
     assertCompletions('A ',
-                     ['A <=', 'A <', 'A >=', 'A >', 'A =', 'A LIKE', 'A RLIKE']);
+                     ['A <=', 'A <', 'A >=', 'A >', 'A =', 'A LIKE', 'A RLIKE', 'A IS']);
   });
 
   it('Should offer initial suggestions', function() {
@@ -66,6 +66,16 @@ describe('Query Completion', function() {
     assertCompletions('ORDER BY INFO', ['ORDER BY INFO.DP']);
     assertCompletions('ORDER BY INFO.D', ['ORDER BY INFO.DP']);
     assertCompletions('ORDER BY INFO.DP', []);  // valid query
+  });
+
+  it('Should auto-complete null checks', function() {
+    assertCompletions('A IS', ['A IS NULL', 'A IS NOT']);
+    assertCompletions('A IS N', ['A IS NULL', 'A IS NOT']);
+    assertCompletions('A IS NU', ['A IS NULL']);
+    assertCompletions('A IS NO', ['A IS NOT']);
+    assertCompletions('A IS NOT', ['A IS NOT NULL']);
+    assertCompletions('A IS NOT ', ['A IS NOT NULL']);
+    assertCompletions('A IS NOT N', ['A IS NOT NULL']);
   });
 
   /*
@@ -124,7 +134,8 @@ describe('Query Completion', function() {
                       'A >',
                       'A =',
                       'A LIKE',
-                      'A RLIKE'
+                      'A RLIKE',
+                      'A IS'
                      ]);
 
     // Note: spacing a little odd here
