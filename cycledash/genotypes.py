@@ -408,6 +408,9 @@ def _annotate_query_with_types(query, vcf_spec):
     operations = query.get('sortBy', []) + query.get('filters', [])
     for op in operations:
         info = _find_column(vcf_spec, op['columnName'])
-        if info:
+        if not info: continue
+        try:
             op['sqlType'] = _vcf_type_to_sql_type(info['info']['type'])
+        except KeyError:
+            pass
     return query
