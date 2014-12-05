@@ -1,17 +1,15 @@
 """Defines all views for CycleDash."""
 import collections
 import json
-import os
 
 from celery import chain
 from flask import (request, redirect, Response, render_template, jsonify,
                    url_for, abort)
 import requests
-from werkzeug.utils import secure_filename
 
 from cycledash import app, db
 import cycledash.genotypes as gt
-from cycledash.helpers import prepare_request_data, update_object, make_error_response
+from cycledash.helpers import prepare_request_data, update_object, make_error_response, get_secure_unique_filename
 from cycledash.validations import UpdateRunSchema, CreateRunSchema
 
 import workers.indexer
@@ -106,9 +104,8 @@ def upload():
     if not f.filename.endswith('.vcf'):
         return make_error_response('Invalid extension', 'File must end with .vcf')
 
-    dest_filename = secure_filename(f.filename)
     tmp_dir = app.config['TEMPORARY_DIR']
-    dest_path = os.path.join(tmp_dir, dest_filename)
+    dest_path = get_secure_unique_filename(f.filename, tmp_dir)
     f.save(dest_path)
     
     return 'file://' + dest_path

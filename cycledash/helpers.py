@@ -1,7 +1,9 @@
 """Module containing helper methods for the app in general."""
+import os
 import re
 
 from flask import jsonify
+from werkzeug.utils import secure_filename
 
 
 RE_CAMELCASE_1 = re.compile('((?!^)[A-Z](?=[a-z0-9][^A-Z])|(?<=[a-z])[A-Z])')
@@ -71,3 +73,20 @@ def make_error_response(error, message):
     response = jsonify({'error': error, 'message': message})
     response.status_code = 400
     return response
+
+
+def get_secure_unique_filename(filename, tmp_dir):
+    """Returns a safe, absolute path to a non-existent file.
+
+    This is just like werkzeug.secure_filename, except that it will modify the
+    file name to ensure that the file it returns doesn't already exists.
+    """
+    # keep adding different digits to the file name until it doesn't exist.
+    count = 0
+    while True:
+        prefix = str(count) if count else ''
+        dest_filename = secure_filename(prefix + filename)
+        path = os.path.join(tmp_dir, dest_filename)
+        if not os.path.exists(path):
+            return path
+        count += 1
