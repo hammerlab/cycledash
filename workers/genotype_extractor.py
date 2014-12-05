@@ -19,6 +19,8 @@ from workers.relational_vcfs import insert_genotypes_with_copy
 def extract(run):
     """Extract the genotype and VCF metadata required to insert a VCF into the
     CycleDash database, and insert it.
+
+    Returns a list of IDs for the VCFs which were inserted.
     """
     run = json.loads(run)
     engine, connection, metadata = initialize_database(DATABASE_URI)
@@ -32,12 +34,10 @@ def extract(run):
             print 'VCF already exists with URI {}'.format(run['vcf_path'])
             return False
 
-    vcf_id = insert_run(run, engine, connection, metadata)
-
-    update_extant_columns(metadata, connection, vcf_id)
+    vcf_ids = insert_run(run, engine, connection, metadata)
 
     connection.close()
-    return vcf_id
+    return vcf_ids
 
 
 def insert_run(run, engine, connection, metadata):
@@ -50,6 +50,8 @@ def insert_run(run, engine, connection, metadata):
     vcf_uris = [(run['vcf_path'], False)]
     if run.get('truth_vcf_path'):
         vcf_uris.append((run['truth_vcf_path'], True))
+
+    vcf_ids = []
 
     for (uri, is_validation) in vcf_uris:
         if vcf_exists(connection, uri):
@@ -72,7 +74,10 @@ def insert_run(run, engine, connection, metadata):
                                    default_values={'vcf_id': vcf_id},
                                    temporary_dir=TEMPORARY_DIR)
 
-    return vcf_id
+        update_extant_columns(metadata, connection, vcf_id)
+        vcf_ids.append(vcf_id)
+
+    return vcf_ids
 
 
 def get_vcf_id(con, uri):
