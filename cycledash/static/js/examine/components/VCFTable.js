@@ -247,6 +247,13 @@ var VCFRecord = React.createClass({
     columns: React.PropTypes.object.isRequired,
     isSelected: React.PropTypes.bool.isRequired
   },
+  formatCell: function(column) {
+    var val = this.props.record[column.path.join(':')];
+    if (val === null) {
+      return '-';
+    }
+    return String(val);
+  },
   render: function() {
     var tds = [];
     _.each(this.props.columns, (columns, topLevelColumnName) => {
@@ -254,7 +261,7 @@ var VCFRecord = React.createClass({
         var column = columns[columnName];
         tds.push(
           <td key={column.path.join(':')} title={column.path.join('→')}>
-            {String(this.props.record[column.path.join(':')])}
+            {this.formatCell(column)}
           </td>
         );
       }
