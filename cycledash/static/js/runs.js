@@ -14,7 +14,7 @@ function upload(file, fileInputElement) {
       fileInputElement.value = path;
     })
     .on('error', function(error) {
-      console.log('error', error);
+      console.error(error);
       fileInputElement.value = extractError(error);
     })
     .on('progress', function() {

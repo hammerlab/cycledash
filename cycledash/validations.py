@@ -5,12 +5,13 @@ from voluptuous import (Schema, All, Required, Length, Range, truth, message,
 
 
 def is_path(s):
-    return s[0] == '/' or s.startswith('file://')
+    return s[0] == '/' or s.startswith('file://') or s.startswith('hdfs://')
 
 
 PathString = All(unicode,
                  Length(min=1),
-                 Msg(truth(is_path), 'path must start with "/" or "file://"'))
+                 Msg(truth(is_path),
+                     'path must start with "/", "file://" or "hdfs://"'))
 
 
 CreateRunSchema = Schema({
