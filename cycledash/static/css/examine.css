@@ -237,7 +237,8 @@ dt {
   border: 1px solid #B6B6B7;
   border-radius: 5px;
   outline: none;
-  padding-left: 37px;
+  padding-right: 27px;  /* 20px for .cql-help + padding */
+  padding-left: 37px;  /* 18px for .query-status + padding */
 }
 .query-container input {
   font-family: "inconsolatas", monospace !important;
