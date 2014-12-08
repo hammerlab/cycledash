@@ -63,3 +63,15 @@ tests:
         c = document.createEvent('MouseEvent');
         c.initMouseEvent('click', true, true, window);
         $('tr.run').get(0).dispatchEvent(c);
+
+  - name: validated-run
+    description: Examine page showing a run with associated validation data.
+    url: http://localhost:5001/runs/2/examine
+    config:
+      <<: *std-config
+
+  - name: validated-run-with-filter
+    description: Same as "validated-run", but with a filter applied.
+    url: http://localhost:5001/runs/2/examine?query=%7B%22range%22%3A%7B%22start%22%3Anull%2C%22end%22%3Anull%2C%22contig%22%3Anull%7D%2C%22filters%22%3A%5B%7B%22filterValue%22%3A%22G%22%2C%22columnName%22%3A%22reference%22%2C%22type%22%3A%22%3D%22%7D%5D%2C%22sortBy%22%3A%5B%7B%22columnName%22%3A%22contig%22%2C%22order%22%3A%22asc%22%7D%2C%7B%22columnName%22%3A%22position%22%2C%22order%22%3A%22asc%22%7D%5D%2C%22page%22%3A0%2C%22limit%22%3A250%7D
+    config:
+      <<: *std-config
