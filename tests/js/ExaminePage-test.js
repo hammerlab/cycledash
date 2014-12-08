@@ -26,7 +26,7 @@ describe('ExaminePage', function() {
 
   before(function() {
     global.XMLHttpRequest = function() {};
-    fakeServer = dataUtils.makeFakeServer('tests/js/data/snv.vcf');
+    fakeServer = dataUtils.makeFakeServer('tests/data/snv.vcf');
     records = fakeServer.records;
     stub = Utils.stubReactMethod(QueryBox, 'setDisplayedQuery', function(str) {
       displayedQuery = str;
@@ -45,7 +45,7 @@ describe('ExaminePage', function() {
       caller_name: 'test',
       dataset_name: 'test',
       created_at: '',
-      uri: '/tests/js/data/snv.vcf'
+      uri: '/tests/data/snv.vcf'
     };
 
     var dispatcher = new Dispatcher();
