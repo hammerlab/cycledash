@@ -11,7 +11,7 @@ describe('DataUtils', function() {
   before(function() {
     var parseVcf = vcf.parser();  // Note: the real deal, not a fake!
     vcfData = parseVcf(
-        fs.readFileSync('tests/js/data/snv.vcf', {encoding:'utf8'}));
+        fs.readFileSync('tests/data/snv.vcf', {encoding:'utf8'}));
   });
 
   it('should generate contigs', function() {

@@ -18,7 +18,7 @@ def test_underscorize():
 
 def test_vcf_to_csv():
     import vcf, csv
-    vcfreader = vcf.Reader(open('tests/js/data/snv.vcf'))
+    vcfreader = vcf.Reader(open('tests/data/snv.vcf'))
     columns = ['sample:DP', 'info:VAF', 'info:DP', 'something']
     filename = vcf_to_csv(vcfreader, columns, None,
                           default_values={'something': True})
