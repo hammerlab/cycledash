@@ -1,5 +1,6 @@
 """Expose API to Genotypes and VCFs."""
 from collections import OrderedDict
+import copy
 
 import vcf
 from plone.memoize import forever
@@ -41,6 +42,7 @@ def spec(vcf_id):
     return spec
 
 
+@forever.memoize
 def contigs(vcf_id):
     """Return a sorted list of contig names found in the given vcf."""
     query = """SELECT contig FROM genotypes WHERE vcf_id = %s
@@ -50,6 +52,18 @@ def contigs(vcf_id):
         contigs = connection.execute(query, (vcf_id,)).fetchall()
         contigs = [contig for (contig,) in contigs]
     return contigs
+
+
+@forever.memoize
+def samples(vcf_id):
+    """Return a sorted list of sample names found in the given vcf."""
+    query = """SELECT sample_name FROM genotypes WHERE vcf_id = %s
+    GROUP BY sample_name ORDER BY sample_name
+    """
+    with db.engine.connect() as connection:
+        samples = connection.execute(query, (vcf_id,)).fetchall()
+        samples = [sample for (sample,) in samples]
+    return samples
 
 
 def get(vcf_id, query):
@@ -245,6 +259,17 @@ def _generate_query(base_sql, base_params, query, vcf_id, sql_generator_function
     return base_sql, base_params
 
 
+def _filter_to_validation_fields(query):
+    """Returns a version of query with only validation-appropriate filters.
+
+    These are: reference, alternates and range filters."""
+    filtered_query = copy.deepcopy(query)
+    ok_fields = ['reference', 'alternates']
+    filtered_query['filters'] = [
+            f for f in query['filters'] if f.get('columnName') in ok_fields]
+    return filtered_query
+
+
 # TODO(ihodes): SQL injection, clean up, test for truth_vcf_id existence, etc.
 def genotype_statistics(connection, query, vcf_id, truth_vcf_id,
                         num_records, num_unfiltered_records):
@@ -269,20 +294,21 @@ def genotype_statistics(connection, query, vcf_id, truth_vcf_id,
     fns = [_range_sql, _filters_sql]
     true_pos_query, tp_params = _generate_query(
         true_pos_query, parameters, query, vcf_id, fns, table='g')
-    true_pos_query, tp_params = _generate_query(
-        true_pos_query, tp_params, query, vcf_id, [_range_sql], table='gt')
+    true_positives = connection.execute(
+        true_pos_query, tp_params).fetchall()[0][0]
 
+    # This query calculates the total number of truth records given a subset of
+    # the filters which makes sense to apply to a validation set.
     truth_records_query = """
     SELECT count(*) FROM genotypes
     WHERE vcf_id = %(truth_vcf_id)s
     """
+    truth_query = _filter_to_validation_fields(query)
     truth_records_query, tr_params = _generate_query(
-        truth_records_query, parameters, query, vcf_id, [_range_sql])
-
+        truth_records_query, parameters, truth_query, vcf_id, fns)
     total_truth_records = connection.execute(
-        truth_records_query, tp_params).fetchall()[0][0]
-    true_positives = connection.execute(
-        true_pos_query, tr_params).fetchall()[0][0]
+        truth_records_query, tr_params).fetchall()[0][0]
+    total_truth_records *= len(samples(vcf_id))  # adjust for multiple samples
 
     stats.update(_calculate_true_false_pos_neg(true_positives,
                                                total_truth_records,
