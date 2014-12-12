@@ -18,21 +18,23 @@ Steps:
 """
 from contextlib import contextmanager
 import csv
-from pyensembl import EnsemblRelease
-from sqlalchemy import select, update, Table, Column
+from sqlalchemy import select, Table, Column
 from sqlalchemy.types import Text, Integer
 
 from workers.shared import (worker, DATABASE_URI, TEMPORARY_DIR,
                             initialize_database, temp_csv,
                             update_extant_columns)
 
+import os
+if not os.environ.get('TRAVIS'):
+    from pyensembl import EnsemblRelease
+
 
 # TODO(tavi) Handle inconsistent states and retries.
 @worker.task
 def annotate(vcf_ids):
     if vcf_ids == False:
-        return  # An error must have occurred earlier 
-
+        return  # An error must have occurred earlier.
     for vcf_id in vcf_ids:
         _annotate_one(vcf_id)
 

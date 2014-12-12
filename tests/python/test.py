@@ -1,7 +1,7 @@
 import nose
 
 from cycledash.helpers import underscorize
-from workers.relational_vcfs import vcf_to_csv
+from common.relational_vcf import vcf_to_csv
 
 
 def test_underscorize():

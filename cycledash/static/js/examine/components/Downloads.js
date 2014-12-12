@@ -14,6 +14,6 @@ var Downloads = React.createClass({
         link = `/runs/${ this.props.run_id }/download?${ queryString }`;
     return <a className='download-vcf' href={ link }>Download VCF</a>;
   }
-})
+});
 
 module.exports = Downloads;
