@@ -1,16 +1,14 @@
 """Expose API to Genotypes and VCFs."""
 from collections import OrderedDict
-from contextlib import contextmanager
 import copy
 
-from sqlalchemy import (MetaData, select, func, types, cast, join,
-                        asc, desc, or_, and_,
+from sqlalchemy import (select, func, types, cast, join, asc, desc, and_,
                         Integer, Float, String)
-from sqlalchemy.sql import expression
 import vcf as pyvcf
 from plone.memoize import forever
 
 from cycledash import db
+from common.helpers import tables
 
 
   ##############################################################################
@@ -430,22 +428,3 @@ def _whitelist_query_filters(query, ok_fields=['reference', 'alternates']):
     query['filters'] = [f for f in query['filters']
                         if f.get('columnName') in ok_fields]
     return query
-
-
-@contextmanager
-def tables(db, *table_names):
-    """A context manager yielding a tuple of the database connection and
-    whichever tables were requested by name from the db.
-
-    Use:
-        with tables(db, 'vcfs', 'genotypes') as (con, vcfs, genotypes):
-            ...
-      Where vcfs and genotypes are tables in the provided db.
-    """
-    try:
-        connection = db.engine.connect()
-        metadata = MetaData(bind=connection)
-        metadata.reflect()
-        yield tuple([connection] + [metadata.tables[t] for t in table_names])
-    finally:
-        connection.close()

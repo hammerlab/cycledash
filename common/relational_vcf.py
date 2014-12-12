@@ -264,16 +264,17 @@ def _make_record_from_gt(genotype, info_fields, format_fields, samples):
 
 
 def genotypes_to_file(genotypes, header, extant_columns, fd):
-    """Write genotypes to a a VCF file.
+    """Write genotypes to a VCF file.
 
     Args:
         genotypes: a list of genotype relations from the database.
         extant_columns: a list of columns which have values for these genotypes.
         header: the text header of the original VCF file.
-        fd: an open file for writing to.
+        fd: an open file which will be written to.
     """
     template = vcf.Reader(l for l in header.split('\n'))
     records = genotypes_to_records(genotypes, template, extant_columns)
     writer = vcf.Writer(fd, template)
     for record in records:
         writer.write_record(record)
+    fd.seek(0, 0)
