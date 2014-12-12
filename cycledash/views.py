@@ -1,17 +1,19 @@
 """Defines all views for CycleDash."""
 import collections
 import json
-
 from celery import chain
 from flask import (request, redirect, Response, render_template, jsonify,
-                   url_for, abort)
+                   url_for, abort, send_file)
 import requests
+import tempfile
 
 from cycledash import app, db
 import cycledash.genotypes as gt
 from cycledash.helpers import prepare_request_data, update_object, \
         make_error_response, get_secure_unique_filename
 from cycledash.validations import UpdateRunSchema, CreateRunSchema
+
+from common.relational_vcf import genotypes_to_file
 
 import workers.indexer
 from workers.genotype_extractor import extract as extract_genotype
@@ -69,6 +71,22 @@ def runs():
 @app.route('/runs/<run_id>/genotypes')
 def genotypes(run_id):
     return jsonify(gt.get(run_id, json.loads(request.args.get('q'))))
+
+
+@app.route('/runs/<run_id>/download')
+def download_vcf(run_id):
+    vcf_info_q = 'select extant_columns, vcf_header from vcfs where id = {}'
+    query = json.loads(request.args.get('query'))
+    genotypes = gt.genotypes_for_records(run_id, query)
+    fd = tempfile.NamedTemporaryFile(mode='w+b', delete=False)
+    with db.engine.connect() as connection:
+        res = connection.execute(vcf_info_q.format(run_id))
+        extant_columns, header = res.fetchone()
+    extant_columns = json.loads(extant_columns)
+    genotypes_to_file(genotypes, header, extant_columns, fd)
+    fd.seek(0, 0)
+    return send_file(fd, as_attachment=True,
+                     attachment_filename='cycledash.vcf')
 
 
 @app.route('/runs/<run_id>/examine')

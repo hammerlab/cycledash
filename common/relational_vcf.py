@@ -212,8 +212,9 @@ def genotypes_to_records(genotypes, reader, extant_columns):
     records = []
     for (_, gts) in grouped_genotypes:
         samples = []
+        gts = list(gts)
+        gts = order(gts, sample_ordering, 'sample_name')
         for gt in gts:
-            gts = order(gts, key='sample_name', ordering=sample_ordering)
             data = CallData(*[vcf_fmt(gt['sample:' + d]) for d in format_fields])
             call = vcf.model._Call(None, gt['sample_name'], data)
             samples.append(call)
@@ -225,11 +226,11 @@ def genotypes_to_records(genotypes, reader, extant_columns):
 
 def order(lst, ordering, key=None):
     if key is None:
-        key = lambda x: x
+        lookup = lambda x: x
     elif isinstance(key, basestring):
-        key = lambda i: i[key]
-    order = {name: idx for idx, name in enumerate(ordering)}
-    lst.sort(key=lambda x: order[key(x)])
+        lookup = lambda x: x[key]
+    ordering = {name: idx for idx, name in enumerate(ordering)}
+    lst.sort(key=lambda x: ordering[lookup(x)])
     return lst
 
 
