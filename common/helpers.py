@@ -21,3 +21,31 @@ def tables(database, *table_names):
         yield tuple([connection] + [metadata.tables[t] for t in table_names])
     finally:
         connection.close()
+
+
+def order(lst, ordering, key=None):
+    """Sorts, in-place, and return lst sorted by ordering on key.
+
+    Args:
+        lst: a list to be sorted.
+        ordering: a list defining an ordering on the keys of lst.
+
+    Optional Args:
+        key: a string (name of attribute) or function which returns a value
+          which will be ordered. If None, identity is used as the key.
+
+    Use:
+        order([132, 99, 22], ordering=[99, 22, 44, 132])
+        # => [99, 22, 132]
+
+        order([{'thing': 'bathrobe'}, {'thing': 'toga'}],
+              ['toga', 'bathrobe'], key='thing')
+        # => [{'thing': 'toga'}, {'thing': 'bathrobe'}]
+    """
+    if key is None:
+        lookup = lambda x: x
+    elif isinstance(key, basestring):
+        lookup = lambda x: x[key]
+    ordering = {name: idx for idx, name in enumerate(ordering)}
+    lst.sort(key=lambda x: ordering[lookup(x)])
+    return lst

@@ -6,6 +6,8 @@ import itertools
 import sqlalchemy
 import vcf
 
+from common.helpers import order
+
 from workers.shared import temp_csv
 
 
@@ -169,22 +171,23 @@ def insert_genotypes_with_copy(vcfreader, engine, **kwargs):
     con.close()
 
 
-def vcf_fmt(val):
+def vcf_format(val):
     """Format a value as stored in the database to a value as stored in a VCF.
     """
     if val is None:
         return '.'
     try:
         return int(val)
-    except: pass
+    except ValueError: pass
     try:
         return float(val)
-    except: pass
+    except ValueError: pass
     vals = val.split(',')
     if len(vals) <= 1:
         return val
     else: # It's a list.
-        # Remove [ ... ] square brackets:
+        assert v[0] == '['
+        assert v[-1] == ']'
         return ','.join(v.strip() for v in vals)[1:-1]
 
 
@@ -210,31 +213,21 @@ def genotypes_to_records(genotypes, reader, extant_columns):
     grouped_genotypes = itertools.groupby(genotypes, _call_key)
     sample_ordering = reader.samples
     records = []
-    for (_, gts) in grouped_genotypes:
+    for _, gts in grouped_genotypes:
         samples = []
         gts = list(gts)
         gts = order(gts, sample_ordering, 'sample_name')
         for gt in gts:
-            data = CallData(*[vcf_fmt(gt['sample:' + d]) for d in format_fields])
+            data = CallData(*[vcf_format(gt['sample:' + d]) for d in format_fields])
             call = vcf.model._Call(None, gt['sample_name'], data)
             samples.append(call)
-            _gt = gt
-        record = _make_record_from_gt(_gt, info_fields, format_fields, samples)
+        record = _make_record_from_gt(gts[0], info_fields, format_fields, samples)
         records.append(record)
     return records
 
 
-def order(lst, ordering, key=None):
-    if key is None:
-        lookup = lambda x: x
-    elif isinstance(key, basestring):
-        lookup = lambda x: x[key]
-    ordering = {name: idx for idx, name in enumerate(ordering)}
-    lst.sort(key=lambda x: ordering[lookup(x)])
-    return lst
-
-
 def _fields_from_columns(columns):
+    # 7 == 'sample:', 5 == 'info:' -- we're stripping them off the column names.
     format_fields = [c[7:] for c in columns if c.startswith('sample:')]
     info_fields = [c[5:] for c in columns if c.startswith('info:')]
     return info_fields, format_fields
@@ -249,7 +242,7 @@ def _maybe_split(string, char):
 
 def _make_record_from_gt(genotype, info_fields, format_fields, samples):
     gt = genotype
-    info = {name: vcf_fmt(gt['info:' + name]) for name in info_fields}
+    info = {name: vcf_format(gt['info:' + name]) for name in info_fields}
     return vcf.model._Record(gt['contig'],                         # CHROM
                              gt['position'],                       # POS
                              gt['id'],                             # ID

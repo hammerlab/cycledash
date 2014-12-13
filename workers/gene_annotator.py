@@ -21,12 +21,13 @@ import csv
 from sqlalchemy import select, Table, Column
 from sqlalchemy.types import Text, Integer
 
+import config
+
 from workers.shared import (worker, DATABASE_URI, TEMPORARY_DIR,
                             initialize_database, temp_csv,
                             update_extant_columns)
 
-import os
-if not os.environ.get('TRAVIS'):
+if not config.TRAVIS:
     from pyensembl import EnsemblRelease
 
 

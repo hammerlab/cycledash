@@ -31,7 +31,7 @@ RUN_ADDL_KVS = {'Tumor BAM': 'tumor_bam_uri',
                 'VCF URI': 'uri',
                 'Notes': 'notes'}
 
-VCF_FILENAME = 'cycledash.vcf'
+VCF_FILENAME = 'cycledash-run-{}.vcf'
 
 
 @app.route('/about')
@@ -76,7 +76,8 @@ def download_vcf(run_id):
         (extant_columns, vcf_header) = con.execute(q).fetchone()
     extant_columns = json.loads(extant_columns)
     genotypes_to_file(genotypes, vcf_header, extant_columns, fd)
-    return send_file(fd, as_attachment=True, attachment_filename=VCF_FILENAME)
+    filename = VCF_FILENAME.format(run_id)
+    return send_file(fd, as_attachment=True, attachment_filename=filename)
 
 
 @app.route('/runs/<run_id>/examine')

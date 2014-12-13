@@ -26,4 +26,6 @@ except subprocess.CalledProcessError:
 
 TEMPORARY_DIR = os.environ.get('TEMPORARY_DIR', '/tmp')
 
+TRAVIS = os.environ.get('TRAVIS')
+
 del os
