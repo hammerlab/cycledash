@@ -133,9 +133,9 @@ def extant_columns(metadata, connection, vcf_id):
     """Return list of column names which have values in this VCF."""
     genotypes = metadata.tables.get('genotypes')
     columns = (col.name for col in genotypes.columns
-    if col.name.startswith('info:') or
-    col.name.startswith('sample:') or
-    col.name.startswith('annotations:'))
+               if col.name.startswith('info:') or
+               col.name.startswith('sample:') or
+               col.name.startswith('annotations:'))
     query = 'SELECT '
     query += ', '.join('max("{c}") as "{c}"'.format(c=col) for col in columns)
     query += ' FROM genotypes WHERE vcf_id = ' + str(vcf_id)

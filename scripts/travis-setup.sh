@@ -2,7 +2,7 @@
 # Install all deps & build everything for the Python & JS tests.
 set -o errexit
 
-pip install -r <(grep -v 'pysam\|dpxdt' requirements.txt)
+pip install -r <(grep -v 'pysam\|dpxdt\|pyensembl' requirements.txt)
 npm install
 make initenv
 

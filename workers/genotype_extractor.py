@@ -12,7 +12,7 @@ import config
 from workers.shared import (load_vcf, worker,
                             initialize_database, DATABASE_URI,
                             TEMPORARY_DIR, update_extant_columns)
-from workers.relational_vcfs import insert_genotypes_with_copy
+from common.relational_vcf import insert_genotypes_with_copy
 
 
 @worker.task

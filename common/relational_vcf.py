@@ -1,10 +1,12 @@
 """Convert VCF records into relations according to a SQL table.
 """
-from collections import OrderedDict
 import csv
-import os
+import itertools
 
 import sqlalchemy
+import vcf
+
+from common.helpers import order
 
 from workers.shared import temp_csv
 
@@ -167,3 +169,105 @@ def insert_genotypes_with_copy(vcfreader, engine, **kwargs):
     filename = vcf_to_csv(vcfreader, table_cols, None, **kwargs)
     insert_csv(filename, 'genotypes', engine)
     con.close()
+
+
+def vcf_format(val):
+    """Format a value as stored in the database to a value as stored in a VCF.
+    """
+    if val is None:
+        return '.'
+    try:
+        return int(val)
+    except ValueError: pass
+    try:
+        return float(val)
+    except ValueError: pass
+    vals = val.split(',')
+    if len(vals) <= 1:
+        return val
+    else: # It's a list.
+        assert val[0] == '['
+        assert val[-1] == ']'
+        return ','.join(v.strip() for v in vals)[1:-1]
+
+
+def _call_key(gt):
+    """Return a string key on the CHROM/POS/REF/ALT used for grouping."""
+    return '{}-{}-{}-{}'.format(gt['contig'], gt['position'],
+                                gt['reference'], gt['alternates'])
+
+
+def genotypes_to_records(genotypes, reader, extant_columns):
+    """Return a list of vcf.model._Record, converted from a list of genotype
+    relations, taken from the database.
+
+    This is used to write to a .vcf file with vcf.parser.Writer.
+
+    Args:
+        genotypes: a list of genotype relations from the database.
+        reader: a template vcf.Reader.
+        extant_columns: a list of columns which have values for these genotypes.
+    """
+    info_fields, format_fields = _fields_from_columns(extant_columns)
+    CallData = vcf.model.make_calldata_tuple(format_fields)
+    grouped_genotypes = itertools.groupby(genotypes, _call_key)
+    sample_ordering = reader.samples
+    records = []
+    for _, gts in grouped_genotypes:
+        samples = []
+        gts = list(gts)
+        gts = order(gts, sample_ordering, 'sample_name')
+        for gt in gts:
+            data = CallData(*[vcf_format(gt['sample:' + d]) for d in format_fields])
+            call = vcf.model._Call(None, gt['sample_name'], data)
+            samples.append(call)
+        record = _make_record_from_gt(gts[0], info_fields, format_fields, samples)
+        records.append(record)
+    return records
+
+
+def _fields_from_columns(columns):
+    # 7 == 'sample:', 5 == 'info:' -- we're stripping them off the column names.
+    format_fields = [c[7:] for c in columns if c.startswith('sample:')]
+    info_fields = [c[5:] for c in columns if c.startswith('info:')]
+    return info_fields, format_fields
+
+
+def _maybe_split(string, char):
+    if string:
+        return string.split(char)
+    else:
+        return None
+
+
+def _make_record_from_gt(genotype, info_fields, format_fields, samples):
+    gt = genotype
+    info = {name: vcf_format(gt['info:' + name]) for name in info_fields}
+    return vcf.model._Record(gt['contig'],                         # CHROM
+                             gt['position'],                       # POS
+                             gt['id'],                             # ID
+                             gt['reference'],                      # REF
+                             _maybe_split(gt['alternates'], ','),  # ALT
+                             gt['quality'],                        # QUAL
+                             _maybe_split(gt['filters'], ','),     # FILTER
+                             info,                                 # INFO
+                             ','.join(format_fields),              # FORMAT
+                             [0],                               # sample_indexes
+                             samples=samples)                   # samples/calls
+
+
+def genotypes_to_file(genotypes, header, extant_columns, fd):
+    """Write genotypes to a VCF file.
+
+    Args:
+        genotypes: a list of genotype relations from the database.
+        extant_columns: a list of columns which have values for these genotypes.
+        header: the text header of the original VCF file.
+        fd: an open file which will be written to.
+    """
+    template = vcf.Reader(l for l in header.split('\n'))
+    records = genotypes_to_records(genotypes, template, extant_columns)
+    writer = vcf.Writer(fd, template)
+    for record in records:
+        writer.write_record(record)
+    fd.seek(0, 0)

@@ -2,22 +2,14 @@
 from collections import OrderedDict
 import copy
 
-import vcf
+from sqlalchemy import (select, func, types, cast, join, asc, desc, and_,
+                        Integer, Float, String)
+import vcf as pyvcf
 from plone.memoize import forever
 
 from cycledash import db
+from common.helpers import tables
 
-
-VCF_BY_ID_QUERY = """SELECT *
-FROM vcfs
-WHERE id = %(vcf_id)s
-"""
-
-TRUTH_BY_DATASET_QUERY = """SELECT *
-FROM vcfs
-WHERE dataset_name = %(dataset_name)s
-  AND validation_vcf = true
-"""
 
   ##############################################################################
  ##### The below functions are exposed via the controllers in views.py. #######
@@ -35,23 +27,11 @@ def spec(vcf_id):
     SAMPLE: {attrA: ...},
     ANNOTATIONS: {attrA: ...}}
     """
-    query = "SELECT vcf_header, extant_columns FROM vcfs WHERE id = %s"
-    with db.engine.connect() as connection:
-        res = dict(connection.execute(query, (vcf_id,)).fetchall()[0])
-        spec = _header_spec(res['vcf_header'], res['extant_columns'])
-    return spec
-
-
-@forever.memoize
-def contigs(vcf_id):
-    """Return a sorted list of contig names found in the given vcf."""
-    query = """SELECT contig FROM genotypes WHERE vcf_id = %s
-    GROUP BY contig ORDER BY char_length(contig), contig
-    """
-    with db.engine.connect() as connection:
-        contigs = connection.execute(query, (vcf_id,)).fetchall()
-        contigs = [contig for (contig,) in contigs]
-    return contigs
+    with tables(db, 'vcfs') as (con, vcfs):
+        q = (select([vcfs.c.vcf_header, vcfs.c.extant_columns])
+                    .where(vcfs.c.id == vcf_id))
+        res = con.execute(q).fetchone()
+    return _header_spec(res['vcf_header'], res['extant_columns'])
 
 
 @forever.memoize
@@ -62,13 +42,24 @@ def samples(vcf_id):
     """
     with db.engine.connect() as connection:
         samples = connection.execute(query, (vcf_id,)).fetchall()
-        samples = [sample for (sample,) in samples]
-    return samples
+    return [sample for (sample,) in samples]
 
 
-def get(vcf_id, query):
-    """Return a genotypes in a vcf conforming to the given query, as well as a
-    dict of stats calculated on them.
+@forever.memoize
+def contigs(vcf_id):
+    """Return a sorted list of contig names found in the given vcf."""
+    with tables(db, 'genotypes') as (con, genotypes):
+        q = (select([genotypes.c.contig])
+             .where(genotypes.c.vcf_id == vcf_id)
+             .group_by(genotypes.c.contig)
+             .order_by(func.length(genotypes.c.contig), genotypes.c.contig))
+        results = con.execute(q).fetchall()
+    return [contig for (contig,) in results]
+
+
+def get(vcf_id, query, with_stats=True, truth_vcf_id=None):
+    """Return a list of genotypes in a vcf conforming to the given query, as
+    well as a dict of stats calculated on them.
 
     If a truth_vcf is associated with this VCF, stats include true/false,
     positive/negative stats, as well as precision, recall, and f1score. Stats
@@ -89,245 +80,231 @@ def get(vcf_id, query):
      limit: 250
     }
     """
-    vcf_spec = spec(vcf_id)  # needed to know the types of columns
-    query = _annotate_query_with_types(query, vcf_spec)
-    with db.engine.connect() as connection:
-        parameters = {'vcf_id': vcf_id}
-        fns = [_select_sql, _range_sql, _filters_sql, _sort_by_sql,
-               _limit_offset_sql]
-        combined_sql, parameters = _generate_query('', parameters, query,
-                                                   vcf_id, fns)
-        genotypes = connection.execute(combined_sql, parameters)
-        genotypes = [dict(gt) for gt in genotypes.fetchall()]
-    # TODO(ihodes): We try to guess it later; should give users a chance to
-    #               specify it (or multiple validations) in UI.
-    truth_vcf_id = None
-    stats = calculate_stats(vcf_id, truth_vcf_id, query)
+    query = _annotate_query_with_types(query, spec(vcf_id))
+    with tables(db, 'genotypes') as (con, genotypes):
+        q = select([genotypes]).where(genotypes.c.vcf_id == vcf_id)
+        q = _add_range(q, genotypes, query.get('range'))
+        q = _add_filters(q, genotypes, query.get('filters'))
+        q = _add_orderings(q, genotypes, query.get('sortBy'))
+        q = _add_paging(q, genotypes, query.get('limit'), query.get('page'))
+        q = q.order_by(asc(func.length(genotypes.c.contig)),
+                       asc(genotypes.c.contig),
+                       asc(genotypes.c.position))
+        genotypes = [dict(g) for g in con.execute(q).fetchall()]
+    stats = calculate_stats(vcf_id, truth_vcf_id, query) if with_stats else {}
     return {'records': genotypes, 'stats': stats}
 
 
+@forever.memoize
 def calculate_stats(vcf_id, truth_vcf_id, query):
     """Return stats for genotypes in vcf and truth_vcf (if not None) conforming
     to query.
+
+    Args:
+       vcf_id: the vcf being examined.
+       truth_vcf_id: the truth_vcf being validated against.
+       count: the number of records being shown, given filters and range.
     """
-    with db.engine.connect() as connection:
-        parameters = {'vcf_id': vcf_id}
-        count_query = "SELECT count(*) FROM genotypes WHERE vcf_id = %(vcf_id)s"
-        record_query = count_query
-        generated = (f(query, vcf_id) for f in [_range_sql, _filters_sql])
-        for sql, arg in generated:
-            parameters.update(arg)
-            record_query += '\n' + sql
-        count = connection.execute(record_query, parameters).fetchall()[0][0]
-        total_count = connection.execute(count_query, parameters).fetchall()[0][0]
+    with tables(db, 'genotypes', 'vcfs') as (con, genotypes, vcfs):
+        # The number of records being displayed:
+        count_q = select([func.count()]).where(genotypes.c.vcf_id == vcf_id)
+        count_q = _add_filters(count_q, genotypes, query.get('filters'))
+        count_q = _add_range(count_q, genotypes, query.get('range'))
+        (count,) = con.execute(count_q).fetchone()
 
-        # Try to guess truth_vcf_id if it's None.
+        # The total number of records in VCF:
+        total_count_q = select([func.count()]).where(
+            genotypes.c.vcf_id == vcf_id)
+        (total_count,) = con.execute(total_count_q).fetchone()
+
+        vcf = con.execute(select([vcfs]).where(vcfs.c.id == vcf_id)).fetchone()
+
         if truth_vcf_id is None:
-            vcf = connection.execute(VCF_BY_ID_QUERY, vcf_id=vcf_id).first()
-            truth_rel = connection.execute(TRUTH_BY_DATASET_QUERY,
-                                           dataset_name=vcf['dataset_name']).first()
-            if truth_rel:
-                truth_vcf_id = truth_rel.id
+            truth_vcf_id = derive_truth_vcf_id(vcf['dataset_name'])
+    return genotype_statistics(query, vcf_id, truth_vcf_id, count, total_count)
 
-        stats = genotype_statistics(connection, query, vcf_id, truth_vcf_id,
-                                    count, total_count)
+
+def genotype_statistics(query, vcf_id, truth_vcf_id, count, total_count):
+    """Return precision, recall, f1score, and count statistics for the given
+    query on vcf, validated against truth_vcf.
+    """
+    stats = {'totalRecords': count, 'totalUnfilteredRecords': total_count}
+
+    if not truth_vcf_id:
+        return stats
+
+    with tables(db, 'genotypes') as (con, genotypes):
+        g, gt = genotypes.alias(), genotypes.alias()
+        joined_q = join(g, gt, and_(g.c.contig == gt.c.contig,
+                                    g.c.position == gt.c.position,
+                                    g.c.reference == gt.c.reference,
+                                    g.c.alternates == gt.c.alternates))
+        true_pos_q = select([func.count()]).select_from(joined_q).where(
+            and_(g.c.vcf_id == vcf_id, gt.c.vcf_id == truth_vcf_id))
+        true_pos_q = _add_filters(true_pos_q, g, query.get('filters'))
+        true_pos_q = _add_range(true_pos_q, g, query.get('range'))
+        true_pos_q = _add_filters(true_pos_q, gt, query.get('filters'))
+        true_pos_q = _add_range(true_pos_q, gt, query.get('range'))
+        (true_positives,) = con.execute(true_pos_q).fetchone()
+
+        # This query calculates the total number of truth records given a subset
+        # of the filters which makes sense to apply to a validation set.
+        query = _whitelist_query_filters(query)
+        total_truth_q = select(
+            [func.count()]).select_from(g).where(g.c.vcf_id == truth_vcf_id)
+        total_truth_q = _add_filters(total_truth_q, g, query.get('filters'))
+        total_truth_q = _add_range(total_truth_q, g, query.get('range'))
+        (total_truth,) = con.execute(total_truth_q).fetchone()
+        total_truth *= len(samples(vcf_id))
+
+    stats.update(_true_false_pos_neg(true_positives, total_truth, count))
     return stats
 
 
-   #############################################################################
-  #### The below functions are helpers used to generate SQL for the above. ####
- ####    - All functions below return (sql_string, param_dict).           ####
-#############################################################################
+def genotypes_for_records(vcf_id, query):
+    """Return all genotypes which would appear on a row in a VCF (determined by
+    CHROM/POS/REF/ALT) if just one genotype on that row passes the selections in
+    `query'.
 
-def _select_sql(query, vcf_id, table=''):
-    # 'table' isn't used here -- just conforms to other _X_sql fn's signatures.
-    sql = "SELECT * FROM genotypes WHERE vcf_id = %(vcf_id)s"
-    args = {'vcf_id': vcf_id}
-    return sql, args
+    This is used to generate the list of genotypes to be transformed into
+    vcf.model._Records and then written to a VCF file.
+    """
+    query = _annotate_query_with_types(query, spec(vcf_id))
+    with tables(db, 'genotypes') as (con, gt):
+        keyfunc = func.concat(
+            gt.c.contig, ':', cast(gt.c.position, types.Unicode), '::',
+            gt.c.reference, '->', gt.c.alternates)
+        filtered_gts_q = select([keyfunc]).where(gt.c.vcf_id == vcf_id)
+        filtered_gts_q = _add_filters(filtered_gts_q, gt, query.get('filters'))
+        filtered_gts_q = _add_range(filtered_gts_q, gt, query.get('range'))
+        filtered_gts_q = filtered_gts_q.cte('filtered_gts')
+
+        records_q = select([gt]).where(
+            keyfunc.in_(select([filtered_gts_q]))).where(gt.c.vcf_id == vcf_id)
+        records_q = records_q.order_by(asc(func.length(gt.c.contig)),
+                                       asc(gt.c.contig),
+                                       asc(gt.c.position),
+                                       asc(gt.c.reference),
+                                       asc(gt.c.alternates),
+                                       asc(gt.c.sample_name))
+        genotypes = [dict(g) for g in con.execute(records_q).fetchall()]
+    return genotypes
 
 
-def _limit_offset_sql(query, vcf_id, table=''):
-    # 'table' isn't used here -- just conforms to other _X_sql fn's signatures.
-    limit = query.get('limit')
-    offset = int(query.get('page')) * int(query.get('limit'))
-    args = {'limit': limit, 'offset': offset}
-    sql = " LIMIT %(limit)s OFFSET %(offset)s"
-    return sql, args
+   ############################################################################
+  ### The below functions are helpers used to generate a SQLAlchemy select  ##
+ ## object.                                                                ##
+############################################################################
+
+def _add_orderings(sql_query, table, sort_by):
+    """
+    Args:
+      sort_by: a list of
+        {order: asc | desc, columnName: name, sqlTyle: float | integer}
+    """
+    for sort_spec in sort_by:
+        column_name = sort_spec['columnName']
+        column_type = sort_spec.get('columnType', 'integer')
+        order = sort_spec.get('order', 'asc')
+        sql_query = _add_ordering(sql_query, table,
+                                  column_type, column_name, order)
+    return sql_query
 
 
-def _range_sql(query, vcf_id, table=''):
-    record_range = query.get('range', {})
-    args = {}
-    sql = ''
-    contig = record_range.get('contig')
-    if table:
-        table = table + '.'
+def _add_ordering(sql_query, table, column_type, column_name, order):
+    # Special case for this column, which sorts contigs correctly:
+    if column_name == 'contig':
+        contig_len_col = func.length(table.c.contig)
+        contig_col = table.c.contig
+        if order == 'desc':
+            contig_len_col = desc(contig_len_col)
+            contig_col = desc(contig_col)
+        return sql_query.order_by(contig_len_col, contig_col)
+    sqla_type = vcf_type_to_sqla_type(column_type)
+    column = cast(table.c[column_name], type_=sqla_type)
+    column = {'asc': asc(column), 'desc': desc(column)}.get(order)
+    return sql_query.order_by(column)
+
+
+def _add_paging(sql_query, table, limit, page):
+    if limit:
+        limit = int(limit)
+        page = int(page)
+        offset = limit * page
+        sql_query = sql_query.limit(limit).offset(offset)
+    return sql_query
+
+
+def _add_filters(sql_query, table, filters):
+    for filt in filters:
+        column_name = filt.get('columnName')
+        column_type = filt.get('columnType')
+        value = filt.get('filterValue')
+        op_name = filt.get('type')
+        sql_query = _add_filter(
+            sql_query, table, column_name, column_type, value, op_name)
+    return sql_query
+
+
+def _add_filter(sql_query, table, column_name, column_type, value, op_name):
+    sqla_type = vcf_type_to_sqla_type(column_type)
+    column = cast(table.c[column_name], sqla_type)
+    return {
+        '=': sql_query.where(table.c[column_name] == value),
+        '<': sql_query.where(column < value),
+        '>': sql_query.where(column > value),
+        '>=': sql_query.where(column >= value),
+        '<=': sql_query.where(column <= value),
+        'NULL': sql_query.where(column != None),
+        'NOT NULL': sql_query.where(column == None),
+        'LIKE': sql_query.where(table.c[column_name].like(value)),
+        'RLIKE': sql_query.where(table.c[column_name].op('~*')(value))
+    }.get(op_name)
+
+
+def _add_range(sql_query, table, rangeq):
+    rangeq = rangeq or {}
+    contig = rangeq.get('contig')
+    start = rangeq.get('start')
+    end = rangeq.get('end')
     if contig:
-        args['contig'] = contig
-        sql += " AND {}contig = %(contig)s".format(table)
-        start = record_range.get('start')
-        end = record_range.get('end')
-        if start:
-            args['start'] = start
-            sql += ' AND {}position >= %(start)s'.format(table)
-        if end:
-            args['end'] = end
-            sql += ' AND {}position < %(end)s'.format(table)
-    return sql, args
+        sql_query = sql_query.where(table.c.contig == contig)
+    if start:
+        sql_query = sql_query.where(table.c.position >= start)
+    if end:
+        sql_query = sql_query.where(table.c.position < end)
+    return sql_query
 
 
-def _filters_sql(query, vcf_id, table=''):
-    filters = query.get('filters', [])
-    if not filters:
-        return '', {}
-    combined_sql = ' '
-    args = {}
-    for idx, filt in enumerate(filters):
-        sql, arg = _filter_sql(filt, idx, table)
-        args.update(arg)
-        combined_sql += ' AND ' + sql
-    return combined_sql, args
+def vcf_type_to_sqla_type(column_type='integer'):
+    column_type = column_type.lower()
+    return {'integer': Integer, 'float': Float}.get(column_type, String)
 
 
-def _filter_sql(filt, idx, table=''):
-    column = filt.get('columnName')
-    value = filt.get('filterValue')
-    op_name = filt.get('type')
-    sql_type = filt.get('sqlType')
-    if table:
-        table = table + '.'
-    # TODO(ihodes): SQL injection.
-    if ':' in column:
-        query = '{}"{}"'.format(table, column)
-    else:
-        query = table + column
-    cast = '::{}'.format(sql_type) if sql_type else ''
-    name = 'filter' + str(idx)
-    arg = {name: value}
-    query += {
-        '=': ' = %({})s',
-        '!=': ' != %({})s',
-        '<': '{cast} < %({})s',
-        '>': '{cast} > %({})s',
-        '>=': '{cast} >= %({})s',
-        '<=': '{cast} <= %({})s',
-        'RLIKE': ' ~* %({})s',
-        'LIKE': ' LIKE %({})s',
-        'NULL': ' IS NULL',
-        'NOT NULL': ' IS NOT NULL',
-    }.get(op_name, '').format(name, cast=cast)
-    return query, arg
-
-
-def _sort_by_sql(query, vcf_id, table=''):
-    sort_bys = query.get('sortBy', [])
-    if not sort_bys:
-        return '', {}
-    sql = ' ORDER BY '
-    orders = []
-    if table:
-        table += '.'
-    for sort_by in sort_bys:
-        col_name = table + sort_by.get('columnName')
-        cast = ''
-        if sort_by.get('sqlType'):
-            cast = '::{}'.format(sort_by.get('sqlType'))
-        elif col_name != 'contig':
-            cast = '::INTEGER'
-        order = 'desc' if 'desc' == sort_by.get('order') else 'asc'
-        # TODO(ihodes): SQL injection.
-        orders.append('"{}"{} {}'.format(col_name, cast, order))
-    sql += ', '.join(orders)
-    return sql, {}
+def derive_truth_vcf_id(dataset_name):
+    with tables(db, 'vcfs') as (con, vcfs):
+        truth_vcf_q = (select([vcfs.c.id])
+                       .where(vcfs.c.validation_vcf == True)
+                       .where(vcfs.c.dataset_name == dataset_name))
+        truth_vcf_rel = con.execute(truth_vcf_q).fetchone()
+        if truth_vcf_rel:
+            return truth_vcf_rel.id
 
 
   ######################
  ### Helper methods: ##
 ######################
 
-def _generate_query(base_sql, base_params, query, vcf_id, sql_generator_functions,
-                    table=''):
-    """Return (sql_string, params) by applying the sql_generator_functions to
-    query, vcf_id, and tabnle_prefix, concatenating their results to base_sql,
-    and adding their params to base_params.
-    """
-    gen = (f(query, vcf_id, table=table)
-           for f in sql_generator_functions)
-    for sql, arg in gen:
-        base_params.update(arg)
-        base_sql += '\n' + sql
-    return base_sql, base_params
-
-
-def _filter_to_validation_fields(query):
-    """Returns a version of query with only validation-appropriate filters.
-
-    These are: reference, alternates and range filters."""
-    filtered_query = copy.deepcopy(query)
-    ok_fields = ['reference', 'alternates']
-    filtered_query['filters'] = [
-            f for f in query['filters'] if f.get('columnName') in ok_fields]
-    return filtered_query
-
-
-# TODO(ihodes): SQL injection, clean up, test for truth_vcf_id existence, etc.
-def genotype_statistics(connection, query, vcf_id, truth_vcf_id,
-                        num_records, num_unfiltered_records):
-    stats = {'totalRecords': num_records,
-             'totalUnfilteredRecords': num_unfiltered_records}
-
-    if not truth_vcf_id:
-        return stats
-
-    parameters = {'vcf_id': vcf_id, 'truth_vcf_id': truth_vcf_id}
-
-    true_pos_query = """
-    SELECT count(*) FROM genotypes g
-    INNER JOIN genotypes gt
-    ON g.contig = gt.contig
-     AND g.position = gt.position
-     AND g.reference = gt.reference
-     AND g.alternates = gt.alternates
-    WHERE g.vcf_id = %(vcf_id)s
-     AND gt.vcf_id = %(truth_vcf_id)s
-    """
-    fns = [_range_sql, _filters_sql]
-    true_pos_query, tp_params = _generate_query(
-        true_pos_query, parameters, query, vcf_id, fns, table='g')
-    true_positives = connection.execute(
-        true_pos_query, tp_params).fetchall()[0][0]
-
-    # This query calculates the total number of truth records given a subset of
-    # the filters which makes sense to apply to a validation set.
-    truth_records_query = """
-    SELECT count(*) FROM genotypes
-    WHERE vcf_id = %(truth_vcf_id)s
-    """
-    truth_query = _filter_to_validation_fields(query)
-    truth_records_query, tr_params = _generate_query(
-        truth_records_query, parameters, truth_query, vcf_id, fns)
-    total_truth_records = connection.execute(
-        truth_records_query, tr_params).fetchall()[0][0]
-    total_truth_records *= len(samples(vcf_id))  # adjust for multiple samples
-
-    stats.update(_calculate_true_false_pos_neg(true_positives,
-                                               total_truth_records,
-                                               num_records))
-    return stats
-
-
-def _calculate_true_false_pos_neg(true_positives,
-                                  total_truth_records,
-                                  total_records):
+def _true_false_pos_neg(true_positives, total_truth_records, total_records):
     false_negatives = total_truth_records - true_positives
     false_positives = total_records - true_positives
 
-    denom = (true_positives + false_positives)
-    precision = (float(true_positives) / denom) if denom > 0 else 0
-    denom = (true_positives + false_negatives)
-    recall = (float(true_positives) / denom) if denom > 0 else 0
-    denom = precision + recall
-    f1score = (2 * (precision * recall) / denom) if denom > 0 else 0
+    def safe_div(numerator, denom):
+        return float(numerator) / denom if denom > 0 else 0
+
+    precision = safe_div(true_positives, true_positives + false_positives)
+    recall = safe_div(true_positives, true_positives + false_negatives)
+    f1score = safe_div(2 * (precision * recall), precision + recall)
 
     return {
         'truePositives': true_positives,
@@ -342,7 +319,7 @@ def _calculate_true_false_pos_neg(true_positives,
 
 def _header_spec(vcf_header_text, extant_cols):
     """Return dict representation of a CycleDash header."""
-    reader = vcf.Reader(line for line in vcf_header_text.split('\n'))
+    reader = pyvcf.Reader(line for line in vcf_header_text.split('\n'))
     res = OrderedDict()
     for (supercolumn, attr) in [('info', 'infos'), ('sample', 'formats')]:
         res[supercolumn.upper()] = OrderedDict()
@@ -395,7 +372,7 @@ def _header_spec(vcf_header_text, extant_cols):
 
 
 def _add_column_to_spec(spec, column_name, supercolumn, subcolumn,
-        column_type, num, description, path=None):
+                        column_type, num, description, path=None):
     """Add a column and associated attributes to the header specification.
     A column includes both a supercolumn (e.g. "SAMPLE") and subcolumn (e.g.
     "DP").
@@ -417,29 +394,31 @@ def _add_column_to_spec(spec, column_name, supercolumn, subcolumn,
 
 def _find_column(spec, column_name):
     """Returns data for the column in the spec, or None."""
-    for _, columns in spec.iteritems():
-        for _, info in columns.iteritems():
+    for columns in spec.itervalues():
+        for info in columns.itervalues():
             if info['columnName'] == column_name:
                 return info
     return None
 
 
-def _vcf_type_to_sql_type(vcfType):
-    """Converts a VCF type (e.g. "Float") to a SQL type (e.g. "FLOAT")."""
-    return {
-        'Float': 'FLOAT',
-        'Integer': 'INTEGER'
-    }.get(vcfType)
-
-
 def _annotate_query_with_types(query, vcf_spec):
-    """Adds a sqlType field to each filter and sortBy in query."""
+    """Adds a columnType field to each filter and sortBy in query."""
     operations = query.get('sortBy', []) + query.get('filters', [])
-    for op in operations:
-        info = _find_column(vcf_spec, op['columnName'])
-        if not info: continue
-        try:
-            op['sqlType'] = _vcf_type_to_sql_type(info['info']['type'])
-        except KeyError:
-            pass
+    for operation in operations:
+        info = _find_column(vcf_spec, operation['columnName'])
+        if not info:
+            operation['columnType'] = 'string'
+            continue
+        column_type = info.get('info', {}).get('type', 'string').lower()
+        operation['columnType'] = column_type
+    return query
+
+
+def _whitelist_query_filters(query, ok_fields=['reference', 'alternates']):
+    """Returns query with only validation-appropriate filters.
+
+    These are, by default: ['reference', 'alternates']"""
+    query = copy.deepcopy(query)
+    query['filters'] = [f for f in query['filters']
+                        if f.get('columnName') in ok_fields]
     return query
