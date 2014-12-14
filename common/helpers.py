@@ -28,7 +28,8 @@ def order(lst, ordering, key=None):
 
     Args:
         lst: a list to be sorted.
-        ordering: a list defining an ordering on the keys of lst.
+        ordering: a list defining an ordering on lst. All values/keyed values in
+          lst must be in ordering.
 
     Optional Args:
         key: a string (name of attribute) or function which returns a value
@@ -46,6 +47,8 @@ def order(lst, ordering, key=None):
         lookup = lambda x: x
     elif isinstance(key, basestring):
         lookup = lambda x: x[key]
+    else: # the key is a function
+        lookup = key
     ordering = {name: idx for idx, name in enumerate(ordering)}
     lst.sort(key=lambda x: ordering[lookup(x)])
     return lst

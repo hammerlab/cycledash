@@ -186,8 +186,8 @@ def vcf_format(val):
     if len(vals) <= 1:
         return val
     else: # It's a list.
-        assert v[0] == '['
-        assert v[-1] == ']'
+        assert val[0] == '['
+        assert val[-1] == ']'
         return ','.join(v.strip() for v in vals)[1:-1]
 
 

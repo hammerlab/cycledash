@@ -28,9 +28,8 @@ def spec(vcf_id):
     ANNOTATIONS: {attrA: ...}}
     """
     with tables(db, 'vcfs') as (con, vcfs):
-        q = select(
-            [vcfs.c.vcf_header, vcfs.c.extant_columns]
-        ).where(vcfs.c.id == vcf_id)
+        q = (select([vcfs.c.vcf_header, vcfs.c.extant_columns])
+                    .where(vcfs.c.id == vcf_id))
         res = con.execute(q).fetchone()
     return _header_spec(res['vcf_header'], res['extant_columns'])
 
@@ -50,13 +49,10 @@ def samples(vcf_id):
 def contigs(vcf_id):
     """Return a sorted list of contig names found in the given vcf."""
     with tables(db, 'genotypes') as (con, genotypes):
-        q = select(
-            [genotypes.c.contig]
-        ).where(
-            genotypes.c.vcf_id == vcf_id
-        ).group_by(
-            genotypes.c.contig
-        ).order_by(func.length(genotypes.c.contig), genotypes.c.contig)
+        q = (select([genotypes.c.contig])
+             .where(genotypes.c.vcf_id == vcf_id)
+             .group_by(genotypes.c.contig)
+             .order_by(func.length(genotypes.c.contig), genotypes.c.contig))
         results = con.execute(q).fetchall()
     return [contig for (contig,) in results]
 
@@ -287,11 +283,9 @@ def vcf_type_to_sqla_type(column_type='integer'):
 
 def derive_truth_vcf_id(dataset_name):
     with tables(db, 'vcfs') as (con, vcfs):
-        truth_vcf_q = select(
-            [vcfs.c.id]
-        ).where(
-            vcfs.c.validation_vcf == True
-        ).where(vcfs.c.dataset_name == dataset_name)
+        truth_vcf_q = (select([vcfs.c.id])
+                       .where(vcfs.c.validation_vcf == True)
+                       .where(vcfs.c.dataset_name == dataset_name))
         truth_vcf_rel = con.execute(truth_vcf_q).fetchone()
         if truth_vcf_rel:
             return truth_vcf_rel.id

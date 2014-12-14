@@ -10,7 +10,7 @@ var Downloads = React.createClass({
     query: React.PropTypes.object
   },
   render: function() {
-    var jsonQuery = JSON.stringify(this.props.query),
+    var jsonQuery = encodeURIComponent(JSON.stringify(this.props.query)),
         link = `/runs/${this.props.run_id}/download?query=${jsonQuery}`;
     return <a className='download-vcf' href={link}>Download VCF</a>;
   }
