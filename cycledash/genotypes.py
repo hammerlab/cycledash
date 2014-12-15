@@ -120,13 +120,12 @@ def get(vcf_id, query, with_stats=True, truth_vcf_id=None):
 
 @forever.memoize
 def calculate_stats(vcf_id, truth_vcf_id, query):
-    """Return stats for genotypes in vcf and truth_vcf (if not None) conforming
-    to query.
+    """Return stats for genotypes in vcf and truth_vcf conforming to query.
 
     Args:
        vcf_id: the vcf being examined.
        truth_vcf_id: the truth_vcf being validated against.
-       count: the number of records being shown, given filters and range.
+       query: the query object.
     """
     with tables(db, 'genotypes') as (con, genotypes):
         # The number of records being displayed:
@@ -271,6 +270,7 @@ def _add_filter(sql_query, table, column_name, column_type, value, op_name):
         col = cast(table.c[column_name], sqla_type)
     return {
         '=': sql_query.where(col == value),
+        '!=': sql_query.where(col != value),
         '<': sql_query.where(col < value),
         '>': sql_query.where(col > value),
         '>=': sql_query.where(col >= value),
@@ -453,5 +453,5 @@ def _get_vcf_by_id(vcf_id):
 def _list_string_to_list(string):
     """Convert a string-serialized Python list to a list.
 
-    e.g. '[1, 2, 3]' #=> [1, 2, 3]"""
+    e.g. '[1, 2, 3]' #=> ['1', '2', '3']"""
     return string[1:-1].split(',')
