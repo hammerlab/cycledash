@@ -91,7 +91,8 @@ var VCFTableHeader = React.createClass({
     var uberColumns = [];
     var columnHeaders = [];
     var leftSideTableHeaders = [
-      <th key='has-comment' />,
+      <th key='has-comment' />
+      <th className='true-positive' />
       <th key='contig-position' data-attribute='position'>
         contig:position
         <a className={sorterClasses}
@@ -304,14 +305,14 @@ var VCFRecord = React.createClass({
   },
   formatCell: function(column) {
     var val = this.props.record[column.path.join(':')];
-    if (val === null) {
-      return '-';
-    }
-    return String(val);
+    return val === null ? '-' : String(val);
   },
   render: function() {
     var tds = [
       <td key='has-comment'>{_.has(this.props.record, 'comment') ? '✉︎' : ''}</td>,
+      <td title="This record is a true positive.">
+        {this.props.record['tag:true-positive'] ? '✓' : ''}
+      </td>
       <td key='contig-position'
           title='contig:position'
           className='pos'>
@@ -335,8 +336,8 @@ var VCFRecord = React.createClass({
         );
       }
     });
-    var classes = React.addons.classSet({selected: this.props.isSelected});
-    var record = this.props.record;
+    var classes = React.addons.classSet({selected: this.props.isSelected}),
+        record = this.props.record;
     return (
       <tr className={classes} onClick={this.handleClick}>
         {tds}

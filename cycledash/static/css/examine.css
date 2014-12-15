@@ -37,6 +37,9 @@ th.ref, td.ref, th.alt, td.alt {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+th.true-positive {
+  width: 5px;
+}
 th.ref, td.ref {
   padding-right: 0;
   text-align: right;
