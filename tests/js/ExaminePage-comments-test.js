@@ -38,7 +38,7 @@ describe('ExaminePage Comments', function() {
 
   function renderExamine(failingPaths) {
     fakeServer = commentUtils.makeFakeCommentServer(
-      'tests/js/data/snv.vcf', 'tests/js/data/comment-db.json', failingPaths);
+      'tests/data/snv.vcf', 'tests/data/comment-db.json', failingPaths);
     commentDatabase = fakeServer.commentDatabase;
 
     var run = {
