@@ -9,6 +9,7 @@
     "idiogrammatik.js": "^1.1.2",
     "jquery": "^2.1.1",
     "jquery-mousewheel": "^3.1.12",
+    "marked": "^0.3.2",
     "react": "^0.12.1",
     "underscore": "^1.7.0"
   },

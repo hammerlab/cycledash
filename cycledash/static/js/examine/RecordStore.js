@@ -26,7 +26,7 @@ var ENTIRE_GENOME = {start: null, end: null, contig: types.ALL_CHROMOSOMES};
 
 
 // opt_testDataSource is provided for testing.
-// Its type is function(url, done_callback).
+// Its type is function(url, type, data, done_callback, err_callback).
 function createRecordStore(run, dispatcher, opt_testDataSource) {
   // Initial state of the store. This is mutable. There be monsters.
   var vcfId = run.id,
@@ -38,6 +38,7 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
 
       stats = {totalRecords: 0, totalUnfilteredRecords: 0},
       selectedRecord = null,
+      isViewerOpen = false,
 
       filters = [],
       sortBys = DEFAULT_SORT_BYS,
@@ -45,6 +46,13 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
 
       contigs = run.contigs,
       columns = run.spec;
+
+  // Internal to RecordStore, this is a map from record key (contig +
+  // position + ...) to the record's index in records.
+  var keyToRecordIndex = {};
+
+  // Internal to RecordStore, this is a map from comment key to comment.
+  var commentMap = {};
 
   // State for paging the server for records. Page should be reset to 0 on most
   // operations.
@@ -75,13 +83,23 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
         selectedRecord = action.record;
         notifyChange();
         break;
+      case ACTION_TYPES.SET_VIEWER_OPEN:
+        isViewerOpen = action.isOpen;
+        notifyChange();
+        break;
       case ACTION_TYPES.SET_QUERY:
         setQuery(action.query);
         ignorePendingRequests();
         updateGenotypes({append: false});
         break;
+      case ACTION_TYPES.SET_COMMENT:
+        setComment(action.comment);
+        break;
+      case ACTION_TYPES.DELETE_COMMENT:
+        deleteComment(action.comment);
+        break;
     }
-    // Required: lets the dispatcher to know that the Store is done processing.
+    // Required: lets the dispatcher know that the Store is done processing.
     return true;
   }
   if (dispatcher) dispatcherToken = dispatcher.register(receiver);
@@ -114,7 +132,10 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
 
     // If we're not just appending records, reset the selected records (as the
     // table is now invalidated).
-    if (!append) selectedRecord = null;
+    if (!append) {
+      selectedRecord = null;
+      isViewerOpen = false;
+    }
 
     currentPendingQuery = query;
     hasPendingRequest = true;
@@ -125,13 +146,16 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
           return;  // A subsequent request has superceded this one.
         }
         if (append) {
+          _.extend(keyToRecordIndex, getKeyToRecordIndex(response.records, records.length));
           records = records.concat(response.records);
         } else {
           stats = response.stats;
+          keyToRecordIndex = getKeyToRecordIndex(response.records, 0);
           records = response.records;
         }
         hasLoaded = true;
         hasPendingRequest = false;
+        updateCommentsInParentRecords(records, keyToRecordIndex);
         notifyChange();
       })
       .fail(function([jqXHR, errorMessage, errorDetails]) {
@@ -151,6 +175,166 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
     hasPendingRequest = false;
     currentPendingQuery = null;
     loadError = null;
+  }
+
+  function getRowKey(commentOrRecord) {
+    return commentOrRecord.contig +
+           commentOrRecord.position +
+           commentOrRecord.reference +
+           commentOrRecord.alternates +
+           commentOrRecord.sample_name;
+  }
+
+  // Given a list of records, return a map from record key to record index, where
+  // the index is added to increment.
+  function getKeyToRecordIndex(records, increment) {
+    return _.object(_.map(records, (record, idx) => {
+      var key = getRowKey(record);
+      var value = idx + increment;
+      return [key, value];
+    }));
+  }
+
+  // Update all records with their associated comments from commentMap.
+  function updateCommentsInParentRecords(records, keyToRecordIndex) {
+    _.each(commentMap, (comment, key) => {
+      // Not all comments map to record indices. Namely, comments that
+      // correspond to records that have not yet loaded.
+      if (_.has(keyToRecordIndex, key)) {
+        updateCommentInParentRecord(comment, false, records, keyToRecordIndex);
+      }
+    });
+  }
+
+  // Given a comment, put the comment into the right record (or delete it from
+  // that record).
+  function updateCommentInParentRecord(comment, isDelete, records,
+                                       keyToRecordIndex) {
+    var idx = keyToRecordIndex[getRowKey(comment)];
+    if (isDelete) {
+      delete records[idx].comment;
+    } else {
+      records[idx].comment = comment;
+    }
+  }
+
+  // Given a comment, place it into commentMap (keyed by its row key), update its
+  // parent record and notify callers. Returns the old comment being changed.
+  function updateCommentAndNotify(comment, isDelete) {
+    var isDelete = !_.isUndefined(isDelete) ? isDelete : false;
+    var key = getRowKey(comment);
+
+    // Keep the old comment around, in case we want to revert a change.
+    var oldComment = commentMap[key];
+
+    if (isDelete) {
+      delete commentMap[key];
+    } else {
+      // Put this comment in the ID => comment map.
+      commentMap[key] = comment;
+    }
+
+    updateCommentInParentRecord(comment, isDelete, records, keyToRecordIndex);
+    notifyChange();
+    return oldComment;
+  }
+
+  function deferredComments(vcfId) {
+    return callbackToPromise(
+      dataSource,
+      '/runs/' + vcfId + '/comments',
+      'GET'
+    );
+  }
+
+  function getComments() {
+    $.when(deferredComments(vcfId))
+      .done(response => {
+        commentMap = response.comments;
+
+        updateCommentsInParentRecords(records, keyToRecordIndex);
+        notifyChange();
+      });
+  }
+
+  function deferredCommentDelete(vcfId, comment) {
+    return callbackToPromise(
+      dataSource,
+      '/runs/' + vcfId + '/comments/' + comment.id,
+      'DELETE',
+      {'last_modified_us': comment.last_modified_us}
+    );
+  }
+
+  function deleteComment(comment) {
+    // If a comment has no ID (e.g. it was created optimistically, and has not
+    // yet been granted an ID from an HTTP response), deleting it from the server
+    // has no meaning.
+    if (!_.has(comment, 'id')) {
+      return;
+    }
+
+    var oldComment = updateCommentAndNotify(comment, true);
+    $.when(deferredCommentDelete(vcfId, comment))
+      .fail(() => {
+        // Undo the delete if it was a failure.
+        updateCommentAndNotify(oldComment);
+      });
+  }
+
+  function deferredCommentUpdate(vcfId, comment) {
+    return callbackToPromise(
+      dataSource,
+      '/runs/' + vcfId + '/comments/' + comment.id,
+      'PUT',
+      {'comment_text': comment.comment_text,
+       'last_modified_us': comment.last_modified_us}
+    );
+  }
+
+  function deferredCommentCreate(vcfId, comment) {
+    return callbackToPromise(
+      dataSource,
+      '/runs/' + vcfId + '/comments',
+      'POST',
+      comment
+    );
+  }
+
+  function setComment(comment) {
+    // Update a comment.
+    // TODO(tavi) Notify on saving vs. saved, and don't simply undo the user's
+    // changes without any warning.
+    if (_.has(comment, 'id')) {
+      var oldComment = updateCommentAndNotify(comment);
+      $.when(deferredCommentUpdate(vcfId, comment))
+        .done(response => {
+          // Set this comment's last_modified_us timestamp after the update.
+          comment.last_modified_us = response.last_modified_us;
+          updateCommentAndNotify(comment);
+        })
+        .fail(() => {
+          // Undo the update if it was a failure.
+          updateCommentAndNotify(oldComment);
+
+          // TODO(tavi) If it was a failure due to clobbering, get the latest
+          // comment data and inform the user (rather than a simple local undo).
+        });
+    } else {
+      // Otherwise, create an optimistic comment.
+      updateCommentAndNotify(comment, false);
+      $.when(deferredCommentCreate(vcfId, comment))
+        .done(response => {
+          // Give this comment an ID, based on what was inserted.
+          comment.id = response.comment_id;
+          comment.last_modified_us = response.last_modified_us;
+          updateCommentAndNotify(comment);
+        })
+        .fail(() => {
+          // Undo (delete) the optimistic comment if the create was a failure.
+          updateCommentAndNotify(comment, true);
+        });
+    }
   }
 
   // Returns a JS object query for sending to the backend.
@@ -221,6 +405,7 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
 
   // There's no need to debounce this update -- make it so now!
   _updateGenotypes({append: false});
+  getComments();
 
   function notifyChange() {
     _.each(listenerCallbacks, cb => { cb(); });
@@ -229,8 +414,11 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
   // Return a deferred GET returning genotypes and stats.
   function deferredGenotypes(vcfId, query) {
     var queryString = encodeURIComponent(JSON.stringify(query));
-    return callbackToPromise(dataSource,
-                             '/runs/' + vcfId + '/genotypes?q=' + queryString);
+    return callbackToPromise(
+      dataSource,
+      '/runs/' + vcfId + '/genotypes?q=' + queryString,
+      'GET'
+    );
   }
 
   return {
@@ -243,6 +431,7 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
         records,
         stats,
         selectedRecord,
+        isViewerOpen,
         filters,
         sortBys,
         range,
@@ -267,14 +456,20 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
   };
 }
 
-function networkDataSource(url, doneCallback, errCallback) {
-  return $.get(url).done(doneCallback).fail(errCallback);
+function networkDataSource(url, type, data, doneCallback, errCallback) {
+  var params = {url: url, type: type};
+  if (_.isObject(data)) {
+    params.data = data;
+  }
+
+  return $.ajax(params).done(doneCallback).fail(errCallback);
 }
 
-// Convert a callback to a jQuery-style promise
-function callbackToPromise(fn, param) {
+// Convert a data source callback to a jQuery-style promise
+function callbackToPromise(fn, url, type, data) {
+  var data = !_.isUndefined(data) ? data : null;
   var d = $.Deferred();
-  fn(param, function(response) {
+  fn(url, type, data, function(response) {
     d.resolve(response);
   }, function() {
     d.reject.call(null, arguments);

@@ -66,11 +66,10 @@ function getRecords(vcfData) {
 }
 
 /**
- * Fake for jQuery's $.get() which responds to requests for these URLs using
+ * Fake for jQuery's $.ajax() which responds to requests for these URLs using
  * data from a VCF file on local disk:
- *  - /runs/1/contigs
- *  - /runs/1/spec
  *  - /runs/1/genotypes
+ *  - /runs/1/comments (noop: see CommentUtils.js for an actual response)
  */
 function makeFakeServer(vcfPath) {
   var parseVcf = vcf.parser(),
@@ -80,8 +79,9 @@ function makeFakeServer(vcfPath) {
       records = getRecords(vcfData);
 
   var genotypesUrl = '/runs/1/genotypes';
-  var get = function(path, callback) {
-    if (path.slice(0, genotypesUrl.length) == genotypesUrl) {
+  var commentsUrl = '/runs/1/comments';
+  var ajax = function(path, type, data, callback, failCallback) {
+    if (path.slice(0, genotypesUrl.length) === genotypesUrl) {
       callback({
         records: records,
         stats: {
@@ -89,15 +89,17 @@ function makeFakeServer(vcfPath) {
           totalUnfilteredRecords: records.length
         }
       });
+    } else if (path.slice(0, commentsUrl.length) === commentsUrl) {
+      // We are not currently testing comments.
     } else {
       throw new Error('Unexpected request for ' + path);
     }
   };
 
   // Include references to the underlying data in case it's helpful.
-  _.extend(get, {spec, contigs, records});
+  _.extend(ajax, {spec, contigs, records});
 
-  return get;
+  return ajax;
 }
 
 module.exports = {

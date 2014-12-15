@@ -48,6 +48,27 @@ tests:
     config:
       <<: *std-config
 
+  - name: examine-comments-view
+    description: Examine page showing a comment in view mode.
+    url: http://localhost:5001/runs/1/examine
+    config:
+      <<: *std-config
+      injectJs: |
+        c = document.createEvent('MouseEvent');
+        c.initMouseEvent('click', true, true, window);
+        $('[class="vcf-table"]').find('tbody').find('tr:first').get(0).dispatchEvent(c)
+
+  - name: examine-comments-edit
+    description: Examine page showing a comment in edit mode.
+    url: http://localhost:5001/runs/1/examine
+    config:
+      <<: *std-config
+      injectJs: |
+        c = document.createEvent('MouseEvent');
+        c.initMouseEvent('click', true, true, window);
+        $('[class="vcf-table"]').find('tbody').find('tr:first').get(0).dispatchEvent(c)
+        $('[class="variant-info"]').find('button:contains("Edit")').get(0).dispatchEvent(c)
+
   - name: runs
     description: Initial view of the runs page
     url: http://localhost:5001/

@@ -35,7 +35,13 @@ var ExaminePage = React.createClass({
   },
   handleSelectRecord: function(record) {
     this.props.recordActions.selectRecord(record);
+  },
+  handleOpenViewer: function(record) {
+    this.props.recordActions.setViewerOpen(true);
     this.refs.vcfTable.scrollRecordToTop(record);
+  },
+  handleCloseViewer: function() {
+    this.props.recordActions.setViewerOpen(false);
   },
   handleNextRecord: function() {
     this.moveSelectionInDirection(+1);
@@ -55,6 +61,12 @@ var ExaminePage = React.createClass({
   },
   handleQueryChange: function(parsedQuery) {
     this.props.recordActions.setQuery(parsedQuery);
+  },
+  handleSetComment: function(comment) {
+    this.props.recordActions.setComment(comment);
+  },
+  handleDeleteComment: function(comment) {
+    this.props.recordActions.deleteComment(comment);
   },
   render: function() {
     var state = this.state, props = this.props;
@@ -79,15 +91,19 @@ var ExaminePage = React.createClass({
                   sortBys={state.sortBys}
                   handleSortByChange={this.handleSortByChange}
                   handleRequestPage={this.handleRequestPage}
-                  handleSelectRecord={this.handleSelectRecord} />
+                  handleSelectRecord={this.handleSelectRecord}
+                  handleOpenViewer={this.handleOpenViewer}
+                  handleSetComment={this.handleSetComment}
+                  handleDeleteComment={this.handleDeleteComment} />
         <BioDalliance vcfPath={props.run.uri}
                       normalBamPath={props.run.normal_bam_uri}
                       tumorBamPath={props.run.tumor_bam_uri}
                       igvHttpfsUrl={props.igvHttpfsUrl}
                       selectedRecord={state.selectedRecord}
+                      isOpen={state.isViewerOpen}
                       handlePreviousRecord={this.handlePreviousRecord}
                       handleNextRecord={this.handleNextRecord}
-                      handleClose={() => this.handleSelectRecord(null)} />
+                      handleClose={this.handleCloseViewer} />
       </div>
      );
    }

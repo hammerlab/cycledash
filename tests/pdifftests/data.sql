@@ -12,14 +12,6 @@ SET client_min_messages = warning;
 SET search_path = public, pg_catalog;
 
 --
--- Data for Name: data_annotations; Type: TABLE DATA; Schema: public; Owner: danvk
---
-
-COPY data_annotations (dataset_name, annotation, type, contig, "position:start", "position:end") FROM stdin;
-\.
-
-
---
 -- Data for Name: vcfs; Type: TABLE DATA; Schema: public; Owner: danvk
 --
 
@@ -28,6 +20,7 @@ COPY vcfs (id, created_at, caller_name, dataset_name, tumor_bam_uri, normal_bam_
 2	2014-12-08 15:26:11.219715	testing	one-sample	\N	\N	f	\N	/tests/data/one-sample.vcf	##fileformat=VCFv4.1\n##source=VarScan2\n##INFO=<ID=DP,Number=1,Type=Integer,Description="Total depth of quality bases">\n##INFO=<ID=SOMATIC,Number=0,Type=Flag,Description="Indicates if record is a somatic mutation">\n##INFO=<ID=SS,Number=1,Type=String,Description="Somatic status of variant (0=Reference,1=Germline,2=Somatic,3=LOH, or 5=Unknown)">\n##INFO=<ID=SSC,Number=1,Type=String,Description="Somatic score in Phred scale (0-255) derived from somatic p-value">\n##INFO=<ID=GPV,Number=1,Type=Float,Description="Fisher's Exact Test P-value of tumor+normal versus no variant for Germline calls">\n##INFO=<ID=SPV,Number=1,Type=Float,Description="Fisher's Exact Test P-value of tumor versus normal for Somatic/LOH calls">\n##FILTER=<ID=str10,Description="Less than 10% or more than 90% of variant supporting reads on one strand">\n##FILTER=<ID=indelError,Description="Likely artifact due to indel reads at this position">\n##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">\n##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality">\n##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">\n##FORMAT=<ID=RD,Number=1,Type=Integer,Description="Depth of reference-supporting bases (reads1)">\n##FORMAT=<ID=AD,Number=1,Type=Integer,Description="Depth of variant-supporting bases (reads2)">\n##FORMAT=<ID=FREQ,Number=1,Type=String,Description="Variant allele frequency">\n##FORMAT=<ID=DP4,Number=1,Type=String,Description="Strand read counts: ref/fwd, ref/rev, var/fwd, var/rev">\n#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tNORMAL	["annotations:gene_names", "sample:GT", "sample:RD", "sample:FREQ", "info:SSC", "sample:DP", "sample:DP4", "info:DP", "info:SS", "info:GPV", "sample:AD", "info:SPV"]	\N	\N	\N
 3	2014-12-08 15:26:11.308272	testing	one-sample	\N	\N	t	\N	/tests/data/validation.vcf	##fileformat=VCFv4.1\n##source=VarScan2\n##INFO=<ID=DP,Number=1,Type=Integer,Description="Total depth of quality bases">\n##INFO=<ID=SOMATIC,Number=0,Type=Flag,Description="Indicates if record is a somatic mutation">\n##INFO=<ID=SS,Number=1,Type=String,Description="Somatic status of variant (0=Reference,1=Germline,2=Somatic,3=LOH, or 5=Unknown)">\n##INFO=<ID=SSC,Number=1,Type=String,Description="Somatic score in Phred scale (0-255) derived from somatic p-value">\n##INFO=<ID=GPV,Number=1,Type=Float,Description="Fisher's Exact Test P-value of tumor+normal versus no variant for Germline calls">\n##INFO=<ID=SPV,Number=1,Type=Float,Description="Fisher's Exact Test P-value of tumor versus normal for Somatic/LOH calls">\n##FILTER=<ID=str10,Description="Less than 10% or more than 90% of variant supporting reads on one strand">\n##FILTER=<ID=indelError,Description="Likely artifact due to indel reads at this position">\n##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">\n##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality">\n##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">\n##FORMAT=<ID=RD,Number=1,Type=Integer,Description="Depth of reference-supporting bases (reads1)">\n##FORMAT=<ID=AD,Number=1,Type=Integer,Description="Depth of variant-supporting bases (reads2)">\n##FORMAT=<ID=FREQ,Number=1,Type=String,Description="Variant allele frequency">\n##FORMAT=<ID=DP4,Number=1,Type=String,Description="Strand read counts: ref/fwd, ref/rev, var/fwd, var/rev">\n#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tNORMAL	["sample:GT", "sample:RD", "sample:FREQ", "info:SSC", "sample:DP", "sample:DP4", "info:DP", "info:SS", "info:GPV", "sample:AD", "info:SPV"]	\N	\N	\N
 \.
+
 
 
 --
@@ -77,13 +70,21 @@ COPY genotypes (vcf_id, sample_name, contig, "position", id, reference, alternat
 3	NORMAL	Y	75254	\N	C	A	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	74	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0/1	34	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	9	7.9203e-12	0.11567	22	11	33.33%	13,9,5,6	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 \.
 
-
 --
--- Data for Name: vcf_annotations; Type: TABLE DATA; Schema: public; Owner: danvk
+-- Data for Name: user_comments; Type: TABLE DATA; Schema: public; Owner: tavi
 --
 
-COPY vcf_annotations (vcf_id, annotation, type, contig, "position:start", "position:end") FROM stdin;
+COPY user_comments (id, vcf_id, sample_name, contig, "position", reference, alternates, comment_text, last_modified_us) FROM stdin;
+2	1	NORMAL	20	61795	G	T	I am a comment on the first row.	2014-12-11 20:24:19.358486
+3	1	TUMOR	20	62731	C	A	I am a comment on the fourth row.	2014-12-11 20:24:32.166613
 \.
+
+
+--
+-- Name: user_comments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tavi
+--
+
+SELECT pg_catalog.setval('user_comments_id_seq', 3, true);
 
 
 --

@@ -5,6 +5,17 @@ h1 small {
   color: #B0B0B0;
 }
 
+/* Override some Bootstrap defaults */
+a, a:hover {
+  color: #000;
+  text-decoration: none;
+}
+body {
+  font-size: 16px;
+  line-height: 1;
+  margin: 8px;
+}
+
 /* VCFTable */
 .vcf-table {
   padding-top: 20px;
@@ -51,10 +62,15 @@ th.uber-column {
   font-size: 12px;
   font-color: #3d3d3d;
   z-index: 1000;
+  opacity: 100; /* This is needed to override Bootstrap. */
+  line-height: 1; /* This is needed to override Bootstrap. */
+  font-size: 12px; /* This is needed to override Bootstrap. */
 }
 .vcf-table .tooltip p {
   font-weight: 500;
   text-align: left;
+  margin-top: 12px; /* This is needed to override Bootstrap. */
+  margin-bottom: 12px; /* This is needed to override Bootstrap. */
   padding: 2px 13px;
 }
 .vcf-table .tooltip p strong {
@@ -84,6 +100,50 @@ th.uber-column {
   border-bottom-color: #B6B6B7;
   border-width: 11px;
   margin-left: -11px;
+}
+.vcf-table .variant-info {
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  padding: 8px;
+  background: rgb(247, 252, 253);
+  text-align: left;
+}
+.vcf-table .comment-container {
+  width: 600px;
+}
+.vcf-table .comment-header {
+  width: 600px;
+  text-align: right;
+}
+.vcf-table .comment-text {
+  width: 100%;
+  min-height: 70px;
+  height: auto;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+.vcf-table .comment-text p, ul, li, pre {
+  margin: 0px;
+}
+.vcf-table .comment-text ul {
+  line-height: 1.1;
+}
+.vcf-table .comment-textarea {
+  width: 600px;
+  height: 100px;
+}
+.vcf-table .comment-button {
+  margin: 6px 0px 6px 6px;
+}
+.vcf-table .edit-buttons {
+  width: 600px;
+  text-align: right;
+}
+.vcf-table .dalliance-button {
+  width: 600px;
+  margin-bottom: 4px;
 }
 .vcf-table tr:nth-child(odd) {
   background: rgb(253, 253, 253);
@@ -136,8 +196,10 @@ table {
   padding: 13px 0px;
 }
 #stats-container .precision-recall .label {
+  display: table-cell; /* This is needed to override Bootstrap. */
   font-weight: bold;
   font-size: 14px;
+  color: #000; /* This is needed to override Bootstrap. */
 }
 #stats-container .total-records {
   text-align: center;
@@ -249,6 +311,7 @@ dt {
   width: 18px;
   height: 18px;
   z-index: 1;
+  line-height: 1.43;
 }
 .query-status.good {
   background: rgb(125, 236, 182);

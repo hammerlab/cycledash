@@ -7,13 +7,17 @@ import tempfile
 from celery import chain
 from flask import (request, redirect, Response, render_template, jsonify,
                    url_for, send_file)
-import sqlalchemy as sql
+import requests
+from sqlalchemy import exc, MetaData, Table, select, desc
 
 from cycledash import app, db
 import cycledash.genotypes as gt
-from cycledash.helpers import (prepare_request_data, make_error_response,
-                               get_secure_unique_filename)
-from cycledash.validations import CreateRunSchema
+from cycledash.helpers import (prepare_request_data, error_response,
+                               success_response, get_secure_unique_filename,
+                               update_object)
+from cycledash.comments import (create_comment, get_comments, delete_comment,
+                                update_comment)
+from cycledash.validations import UpdateRunSchema, CreateRunSchema
 
 from common.relational_vcf import genotypes_to_file
 from common.helpers import tables
@@ -46,12 +50,12 @@ def runs():
         try:
             data = CreateRunSchema(prepare_request_data(request))
         except Exception as e:
-            return make_error_response('Run validation', str(e))
+            return error_response('Run validation', str(e))
         start_workers_for_run(data)
         return redirect(url_for('runs'))
     elif request.method == 'GET':
         with tables(db, 'vcfs') as (con, vcfs):
-            q = sql.select(vcfs.c).order_by(sql.desc(vcfs.c.id))
+            q = select(vcfs.c).order_by(desc(vcfs.c.id))
             vcfs = [dict(v) for v in con.execute(q).fetchall()]
         if 'text/html' in request.accept_mimetypes:
             return render_template('runs.html', runs=vcfs, run_kvs=RUN_ADDL_KVS)
@@ -70,7 +74,7 @@ def download_vcf(run_id):
     genotypes = gt.genotypes_for_records(run_id, query)
     fd = tempfile.NamedTemporaryFile(mode='w+b')
     with tables(db, 'vcfs') as (con, vcfs):
-        q = sql.select(
+        q = select(
             [vcfs.c.extant_columns, vcfs.c.vcf_header]
         ).where(vcfs.c.id == run_id)
         (extant_columns, vcf_header) = con.execute(q).fetchone()
@@ -80,10 +84,26 @@ def download_vcf(run_id):
     return send_file(fd, as_attachment=True, attachment_filename=filename)
 
 
+@app.route('/runs/<vcf_id>/comments', methods=['GET', 'POST'])
+def comments(vcf_id):
+    if request.method == 'POST':
+        return create_comment(vcf_id)
+    elif request.method == 'GET':
+        return get_comments(vcf_id)
+
+
+@app.route('/runs/<vcf_id>/comments/<comment_id>', methods=['PUT', 'DELETE'])
+def comment(vcf_id, comment_id):
+    if request.method == 'PUT':
+        return update_comment(comment_id)
+    elif request.method == 'DELETE':
+        return delete_comment(comment_id)
+
+
 @app.route('/runs/<run_id>/examine')
 def examine(run_id):
     with tables(db, 'vcfs') as (con, vcfs):
-        q = sql.select(vcfs.c).where(vcfs.c.id == run_id)
+        q = select(vcfs.c).where(vcfs.c.id == run_id)
         run = dict(con.execute(q).fetchone())
     run['spec'] = gt.spec(run_id)
     run['contigs'] = gt.contigs(run_id)
@@ -111,9 +131,9 @@ def upload():
     """
     f = request.files['file']
     if not f:
-        return make_error_response('Missing file', 'Must post a file to /upload')
+        return error_response('Missing file', 'Must post a file to /upload')
     if not f.filename.endswith('.vcf'):
-        return make_error_response('Invalid extension', 'File must end with .vcf')
+        return error_response('Invalid extension', 'File must end with .vcf')
 
     tmp_dir = app.config['TEMPORARY_DIR']
     dest_path = get_secure_unique_filename(f.filename, tmp_dir)
