@@ -262,7 +262,7 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
       dataSource,
       '/runs/' + vcfId + '/comments/' + comment.id,
       'DELETE',
-      {'last_modified_us': comment.last_modified_us}
+      {'last_modified_timestamp': comment.last_modified_timestamp}
     );
   }
 
@@ -288,7 +288,7 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
       '/runs/' + vcfId + '/comments/' + comment.id,
       'PUT',
       {'comment_text': comment.comment_text,
-       'last_modified_us': comment.last_modified_us}
+       'last_modified_timestamp': comment.last_modified_timestamp}
     );
   }
 
@@ -309,8 +309,8 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
       var oldComment = updateCommentAndNotify(comment);
       $.when(deferredCommentUpdate(vcfId, comment))
         .done(response => {
-          // Set this comment's last_modified_us timestamp after the update.
-          comment.last_modified_us = response.last_modified_us;
+          // Set this comment's last_modified_timestamp timestamp after the update.
+          comment.last_modified_timestamp = response.last_modified_timestamp;
           updateCommentAndNotify(comment);
         })
         .fail(() => {
@@ -326,8 +326,8 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
       $.when(deferredCommentCreate(vcfId, comment))
         .done(response => {
           // Give this comment an ID, based on what was inserted.
-          comment.id = response.comment_id;
-          comment.last_modified_us = response.last_modified_us;
+          comment.id = response.id;
+          comment.last_modified_timestamp = response.last_modified_timestamp;
           updateCommentAndNotify(comment);
         })
         .fail(() => {

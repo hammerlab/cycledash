@@ -7,9 +7,11 @@ var _ = require('underscore'),
     marked = require('marked'),
     utils = require('../utils');
 
-// Use markdown for comments, and set appropriate flags to:
-// - Sanitize HTML
-// - Use GitHub-flavored markdown
+/**
+ * Use markdown for comments, and set appropriate flags to:
+ * - Sanitize HTML
+ * - Use GitHub-flavored markdown
+ */
 marked.setOptions({
   renderer: new marked.Renderer(),
   gfm: true,
@@ -215,8 +217,10 @@ var InfoColumnTooltip = React.createClass({
   }
 });
 
-// As an optimization, this component only displays rows as they get close to
-// the screen. The number of rows shown only increases over time.
+/**
+ * As an optimization, this component only displays rows as they get close to
+ * the screen. The number of rows shown only increases over time.
+ */
 var VCFTableBody = React.createClass({
   propTypes: {
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
@@ -341,9 +345,11 @@ var VCFRecord = React.createClass({
   }
 });
 
-// The VCFCommentBox box handles all functionality that requires the record and
-// comment objects, including opening the Dalliance viewer. All child elements
-// only require the comment text.
+/**
+ * The VCFCommentBox box handles all functionality that requires the record and
+ * comment objects, including opening the Dalliance viewer. All child elements
+ * only require the comment text.
+ */
 var VCFCommentBox = React.createClass({
   propTypes: {
     record: React.PropTypes.object.isRequired,
@@ -403,8 +409,10 @@ var VCFCommentBox = React.createClass({
   }
 });
 
-// The VCFComment record handles state (saved text value and edit mode) for
-// user comments.
+/**
+ * The VCFComment record handles state (saved comment text and edit mode) for
+ * user comments.
+ */
 var VCFComment = React.createClass({
   propTypes: {
     commentText: React.PropTypes.string.isRequired,
@@ -412,23 +420,23 @@ var VCFComment = React.createClass({
     handleSave: React.PropTypes.func.isRequired
   },
   getInitialState: function() {
-    return {value: this.props.commentText, isEdit: false};
+    return {commentText: this.props.commentText, isEdit: false};
   },
-  setValueState: function(value) {
-    // If passed no value, setValueState resets the value.
-    if (_.isUndefined(value)) {
-      this.setState({value: this.props.commentText});
+  setCommentTextState: function(commentText) {
+    // If passed no value, setCommentTextState resets the commentText.
+    if (_.isUndefined(commentText)) {
+      this.setState({commentText: this.props.commentText});
       return;
     }
 
-    this.setState({value: value});
+    this.setState({commentText: commentText});
   },
   setEditState: function(isEdit) {
     this.setState({isEdit: isEdit});
   },
   componentDidUpdate: function(prevProps, prevState) {
     if (prevProps.commentText !== this.props.commentText) {
-      this.setState({value: this.props.commentText});
+      this.setCommentTextState();
     }
   },
   render: function() {
@@ -436,7 +444,7 @@ var VCFComment = React.createClass({
     var commentElement = this.state.isEdit ?
       <VCFCommentEditor commentText={this.props.commentText}
                         placeHolder={placeHolder}
-                        setValueState={this.setValueState}
+                        setCommentTextState={this.setCommentTextState}
                         setEditState={this.setEditState}
                         handleSave={this.props.handleSave} /> :
       <VCFCommentViewer commentText={this.props.commentText}
@@ -491,13 +499,15 @@ var VCFCommentViewer = React.createClass({
   }
 });
 
-// VCFCommentEditor represents the active editing of a comment, and it has a
-// separate state variable for updated text that is not yet saved.
+/**
+ * VCFCommentEditor represents the active editing of a comment, and it has a
+ * separate state variable for updated text that is not yet saved.
+ */
 var VCFCommentEditor = React.createClass({
   propTypes: {
     commentText: React.PropTypes.string,
     placeHolder: React.PropTypes.string.isRequired,
-    setValueState: React.PropTypes.func.isRequired,
+    setCommentTextState: React.PropTypes.func.isRequired,
     setEditState: React.PropTypes.func.isRequired,
     handleSave: React.PropTypes.func.isRequired
   },
@@ -508,13 +518,13 @@ var VCFCommentEditor = React.createClass({
     if (newCommentText !== '' &&
         newCommentText !== this.props.commentText) {
       this.props.handleSave(newCommentText);
-      this.props.setValueState(newCommentText);
+      this.props.setCommentTextState(newCommentText);
       this.props.setEditState(false);
       return;
     }
 
-    // Reset the value and edit mode, if not already reset.
-    this.props.setValueState();
+    // Reset the comment text and edit mode, if not already reset.
+    this.props.setCommentTextState();
     this.props.setEditState(false);
 
     // TODO(tavi) Alert the user to the fact their update (e.g. '') was not
@@ -523,7 +533,7 @@ var VCFCommentEditor = React.createClass({
   handleCancelConfirm: function(event) {
     var result = window.confirm("Are you sure you want to cancel this edit?");
     if (result) {
-      this.props.setValueState();
+      this.props.setCommentTextState();
       this.props.setEditState(false);
     }
   },

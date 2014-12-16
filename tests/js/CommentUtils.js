@@ -31,25 +31,23 @@ function makeFakeCommentServer(vcfPath, commentDatabaseJSONPath, failingPaths) {
         callback(commentResponse);
       } else if (type === 'POST') {
         var newCommentId = getMaxAttribute(commentDatabase, 'id') + 1,
-            newLastModifiedUs = getMaxAttribute(
-              commentDatabase, 'last_modified_us') + 1;
+            newLastModified = 1; // We are not currently testing last_modified.
         commentDatabase[newCommentId] = _.extend({}, data, {
           vcf_id: 1,
           id: newCommentId,
-          last_modified_us: newLastModifiedUs
+          last_modified: newLastModified
         });
         callback({
-          comment_id: newCommentId,
-          last_modified_us: newLastModifiedUs
+          id: newCommentId,
+          last_modified_timestamp: newLastModified
         });
       } else if (type === 'PUT') {
         var id = getCommentIdFromPath(path);
-        var newLastModifiedUs = getMaxAttribute(
-          commentDatabase, 'last_modified_us') + 1;
+        var newLastModified = 1; // We are not currently testing last_modified.
         commentDatabase[id].comment_text = data.comment_text;
-        commentDatabase[id].last_modified_us = newLastModifiedUs;
+        commentDatabase[id].last_modified = newLastModified;
         callback({
-          last_modified_us: newLastModifiedUs
+          last_modified_timestamp: newLastModified
         });
       } else if (type === 'DELETE') {
         var commentId = getCommentIdFromPath(path);

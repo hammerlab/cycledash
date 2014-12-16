@@ -25,7 +25,7 @@ CREATE TABLE user_comments (
        reference TEXT,
        alternates TEXT,
        comment_text TEXT NOT NULL,
-       last_modified_us TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+       last_modified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE genotypes (
