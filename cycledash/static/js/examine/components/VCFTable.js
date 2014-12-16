@@ -91,8 +91,8 @@ var VCFTableHeader = React.createClass({
     var uberColumns = [];
     var columnHeaders = [];
     var leftSideTableHeaders = [
-      <th key='has-comment' />
-      <th className='true-positive' />
+      <th className='has-comment tag' key='has-comment' />,
+      <th className='true-positive tag' key='true-positive' />,
       <th key='contig-position' data-attribute='position'>
         contig:position
         <a className={sorterClasses}
@@ -308,11 +308,13 @@ var VCFRecord = React.createClass({
     return val === null ? '-' : String(val);
   },
   render: function() {
+    var commentClasses = React.addons.classSet(
+      {'has-comment': _.has(this.props.record, 'comment')});
     var tds = [
-      <td key='has-comment'>{_.has(this.props.record, 'comment') ? '✉︎' : ''}</td>,
+      <td className={commentClasses} key='has-comment'></td>,
       <td title="This record is a true positive.">
         {this.props.record['tag:true-positive'] ? '✓' : ''}
-      </td>
+      </td>,
       <td key='contig-position'
           title='contig:position'
           className='pos'>
@@ -336,10 +338,10 @@ var VCFRecord = React.createClass({
         );
       }
     });
-    var classes = React.addons.classSet({selected: this.props.isSelected}),
+    var recordClasses = React.addons.classSet({selected: this.props.isSelected}),
         record = this.props.record;
     return (
-      <tr className={classes} onClick={this.handleClick}>
+      <tr className={recordClasses} onClick={this.handleClick}>
         {tds}
       </tr>
     );
@@ -393,17 +395,11 @@ var VCFCommentBox = React.createClass({
     return (
       <tr>
         <td colSpan={10000} className='variant-info'>
-          <div>
-            <div>
-              <button className='btn btn-default dalliance-button btn-info'
-                      onClick={() => {this.props.handleOpenViewer(this.props.record);}}>
-                Open Biodalliance
-              </button>
-            </div>
-            <VCFComment commentText={commentText}
-                        handleDelete={this.handleDelete}
-                        handleSave={this.handleSave} />
-          </div>
+          <VCFComment record={this.props.record}
+                      commentText={commentText}
+                      handleOpenViewer={this.props.handleOpenViewer}
+                      handleDelete={this.handleDelete}
+                      handleSave={this.handleSave} />
         </td>
       </tr>
     );
@@ -416,7 +412,9 @@ var VCFCommentBox = React.createClass({
  */
 var VCFComment = React.createClass({
   propTypes: {
+    record: React.PropTypes.object.isRequired,
     commentText: React.PropTypes.string.isRequired,
+    handleOpenViewer: React.PropTypes.func.isRequired,
     handleDelete: React.PropTypes.func.isRequired,
     handleSave: React.PropTypes.func.isRequired
   },
@@ -450,11 +448,16 @@ var VCFComment = React.createClass({
                         handleSave={this.props.handleSave} /> :
       <VCFCommentViewer commentText={this.props.commentText}
                         placeHolder={placeHolder} />;
+    var commentHeader;
+    if (!this.state.isEdit) {
+      commentHeader = <VCFCommentHeader handleEdit={() => {this.setEditState(true);}}
+                                        handleOpenViewer={this.props.handleOpenViewer}
+                                        handleDelete={this.props.handleDelete} />
+    }
     return (
       <div className='comment-container'>
-        <VCFCommentHeader handleEdit={() => {this.setEditState(true);}}
-                          handleDelete={this.props.handleDelete} />
         {commentElement}
+        {commentHeader}
       </div>
     );
   }
@@ -462,19 +465,25 @@ var VCFComment = React.createClass({
 
 var VCFCommentHeader = React.createClass({
   propTypes: {
+    record: React.PropTypes.object.isRequired,
+    handleOpenViewer: React.PropTypes.func.isRequired,
     handleEdit: React.PropTypes.func.isRequired,
     handleDelete: React.PropTypes.func.isRequired
   },
   render: function() {
     return (
       <div className='comment-header'>
-        <button className='btn btn-default btn-xs comment-button'
-                onClick={this.props.handleEdit}>
-          Edit
-        </button>
+        <a className='dalliance-open'
+           onClick={() => {this.props.handleOpenViewer(this.props.record);}}>
+          Open Pileup Viewer
+        </a>
         <button className='btn btn-default btn-xs comment-button btn-danger'
                 onClick={this.props.handleDelete}>
           Delete
+        </button>
+        <button className='btn btn-default btn-xs comment-button'
+                onClick={this.props.handleEdit}>
+          Edit
         </button>
       </div>
     );
@@ -553,11 +562,11 @@ var VCFCommentEditor = React.createClass({
                   onChange={this.handleChange}
                   ref='textArea' />
         <div className='edit-buttons'>
-          <button className='btn btn-default comment-button btn-danger'
+          <button className='btn btn-xs comment-button btn-default'
                   onClick={this.handleCancelConfirm}>
             Cancel
           </button>
-          <button className='btn btn-default comment-button btn-success'
+          <button className='btn btn-xs comment-button btn-success'
                   onClick={this.handleSaveText}>
             Save
           </button>
