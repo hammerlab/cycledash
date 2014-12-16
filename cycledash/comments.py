@@ -2,8 +2,9 @@
 from datetime import datetime
 from flask import jsonify, request
 from functools import wraps, partial
-from sqlalchemy import exc, MetaData, Table, select
+from sqlalchemy import exc, select
 
+from common.helpers import tables
 from cycledash import db
 from cycledash.helpers import (prepare_request_data, success_response,
                                error_response)
@@ -19,10 +20,8 @@ def user_comments_db(func=None, use_transaction=False):
         return partial(user_comments_db, use_transaction=use_transaction)
     @wraps(func)
     def wrapper(*args, **kwargs):
-        with db.engine.connect() as conn:
+        with tables(db, 'user_comments') as (conn, user_comments):
             use_transaction = True
-            metadata = MetaData(bind=conn)
-            user_comments = Table('user_comments', metadata, autoload=True)
             data = prepare_request_data(request)
             transaction = conn.begin() if use_transaction else None
             try:
@@ -202,7 +201,8 @@ def stale_error_response():
 
 
 def get_last_modified_timestamp(comment_id, conn, user_comments):
-    """Retrieve the last modified UNIX timestamp for this comment ID."""
+    """Retrieve the last modified UNIX timestamp for this comment ID, or
+    None if it cannot be retrieved for whatever reason."""
     stmt = select([user_comments.c.last_modified_us]).where(
         user_comments.c.id == comment_id)
     try:
@@ -211,7 +211,6 @@ def get_last_modified_timestamp(comment_id, conn, user_comments):
             return get_epoch_microseconds(result.fetchone()[0])
     except exc.SQLAlchemyError:
         return None
-    return None
 
 
 def get_epoch_microseconds(dt):

@@ -47,11 +47,12 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
       contigs = run.contigs,
       columns = run.spec;
 
-  // Internal to RecordStore, this is a map from record key (contig +
+  // Internal to RecordStore, this is a map from row key (contig +
   // position + ...) to the record's index in records.
   var keyToRecordIndex = {};
 
-  // Internal to RecordStore, this is a map from comment key to comment.
+  // Internal to RecordStore, this is a map from row key (contig +
+  // position + ...) to comment.
   var commentMap = {};
 
   // State for paging the server for records. Page should be reset to 0 on most
@@ -146,16 +147,17 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
           return;  // A subsequent request has superceded this one.
         }
         if (append) {
-          _.extend(keyToRecordIndex, getKeyToRecordIndex(response.records, records.length));
+          _.extend(keyToRecordIndex,
+                   generateKeyToRecordIndex(response.records, records.length));
           records = records.concat(response.records);
         } else {
           stats = response.stats;
-          keyToRecordIndex = getKeyToRecordIndex(response.records, 0);
+          keyToRecordIndex = generateKeyToRecordIndex(response.records, 0);
           records = response.records;
         }
         hasLoaded = true;
         hasPendingRequest = false;
-        updateCommentsInParentRecords(records, keyToRecordIndex);
+        updateCommentsInParentRecords(records);
         notifyChange();
       })
       .fail(function([jqXHR, errorMessage, errorDetails]) {
@@ -187,29 +189,27 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
 
   // Given a list of records, return a map from record key to record index, where
   // the index is added to increment.
-  function getKeyToRecordIndex(records, increment) {
-    return _.object(_.map(records, (record, idx) => {
-      var key = getRowKey(record);
-      var value = idx + increment;
-      return [key, value];
-    }));
+  function generateKeyToRecordIndex(records, increment) {
+    return _.reduce(records, (keyMap, record, idx) => {
+      keyMap[getRowKey(record)] = idx + increment;
+      return keyMap;
+    }, {});
   }
 
   // Update all records with their associated comments from commentMap.
-  function updateCommentsInParentRecords(records, keyToRecordIndex) {
+  function updateCommentsInParentRecords(records) {
     _.each(commentMap, (comment, key) => {
       // Not all comments map to record indices. Namely, comments that
       // correspond to records that have not yet loaded.
       if (_.has(keyToRecordIndex, key)) {
-        updateCommentInParentRecord(comment, false, records, keyToRecordIndex);
+        updateCommentInParentRecord(comment, false, records);
       }
     });
   }
 
   // Given a comment, put the comment into the right record (or delete it from
   // that record).
-  function updateCommentInParentRecord(comment, isDelete, records,
-                                       keyToRecordIndex) {
+  function updateCommentInParentRecord(comment, isDelete, records) {
     var idx = keyToRecordIndex[getRowKey(comment)];
     if (isDelete) {
       delete records[idx].comment;
@@ -234,7 +234,7 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
       commentMap[key] = comment;
     }
 
-    updateCommentInParentRecord(comment, isDelete, records, keyToRecordIndex);
+    updateCommentInParentRecord(comment, isDelete, records);
     notifyChange();
     return oldComment;
   }
@@ -252,7 +252,7 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
       .done(response => {
         commentMap = response.comments;
 
-        updateCommentsInParentRecords(records, keyToRecordIndex);
+        updateCommentsInParentRecords(records);
         notifyChange();
       });
   }

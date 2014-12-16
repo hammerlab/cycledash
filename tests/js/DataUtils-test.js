@@ -1,6 +1,6 @@
 'use strict';
 
-var dataUtils = require('./DataUtils'),
+var DataUtils = require('./DataUtils'),
     assert = require('assert'),
     fs = require('fs'),
     vcf = require('vcf.js'),
@@ -15,11 +15,11 @@ describe('DataUtils', function() {
   });
 
   it('should generate contigs', function() {
-    assert.deepEqual(['20'], dataUtils.getContigs(vcfData));
+    assert.deepEqual(['20'], DataUtils.getContigs(vcfData));
   });
 
   it('should generate a column spec', function() {
-    var spec = dataUtils.getSpec(vcfData);
+    var spec = DataUtils.getSpec(vcfData);
     assert.deepEqual(['INFO', 'SAMPLE'], _.keys(spec));
     assert.deepEqual(['DP','SOMATIC','SS','SSC','GPV','SPV'], _.keys(spec.INFO));
     assert.deepEqual(['GT','GQ','DP','RD','AD','FREQ','DP4'], _.keys(spec.SAMPLE));
@@ -36,7 +36,7 @@ describe('DataUtils', function() {
   });
 
   it('should generate a record', function() {
-    var records = dataUtils.getRecords(vcfData);
+    var records = DataUtils.getRecords(vcfData);
     assert.equal(20, records.length);  // 10 records x 2 samples/record
     assert.deepEqual({
       contig: '20',

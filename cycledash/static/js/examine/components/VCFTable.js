@@ -7,6 +7,14 @@ var _ = require('underscore'),
     marked = require('marked'),
     utils = require('../utils');
 
+// Use markdown for comments, and set appropriate flags to:
+// - Sanitize HTML
+// - Use GitHub-flavored markdown
+marked.setOptions({
+  renderer: new marked.Renderer(),
+  gfm: true,
+  sanitize: true
+});
 
 var VCFTable = React.createClass({
   propTypes: {
@@ -80,7 +88,7 @@ var VCFTableHeader = React.createClass({
   render: function() {
     var uberColumns = [];
     var columnHeaders = [];
-    var initialThElements = [
+    var leftSideTableHeaders = [
       <th key='has-comment' />,
       <th key='contig-position' data-attribute='position'>
         contig:position
@@ -125,11 +133,11 @@ var VCFTableHeader = React.createClass({
     return (
       <thead>
         <tr>
-          <th colSpan={initialThElements.length} />
+          <th colSpan={leftSideTableHeaders.length} />
           {uberColumns}
         </tr>
         <tr>
-          {initialThElements}
+          {leftSideTableHeaders}
           {columnHeaders}
         </tr>
       </thead>
@@ -247,7 +255,6 @@ var VCFTableBody = React.createClass({
           var commentKey = key + 'comment';
           var elements = [
             <VCFRecord record={record}
-                       hasComment={_.has(record, 'comment')}
                        columns={this.props.columns}
                        key={key}
                        isSelected={selectedRecord === record}
@@ -279,12 +286,11 @@ var VCFTableBody = React.createClass({
 var VCFRecord = React.createClass({
   propTypes: {
     record: React.PropTypes.object.isRequired,
-    hasComment: React.PropTypes.bool.isRequired,
     columns: React.PropTypes.object.isRequired,
     isSelected: React.PropTypes.bool.isRequired,
     handleSelectRecord: React.PropTypes.func.isRequired
   },
-  onClick: function() {
+  handleClick: function() {
     // If the same record is selected, treat that as a deselect toggle.
     if (this.props.isSelected) {
       this.props.handleSelectRecord(null);
@@ -301,7 +307,7 @@ var VCFRecord = React.createClass({
   },
   render: function() {
     var tds = [
-      <td key='has-comment'>{this.props.hasComment ? '✉︎' : ''}</td>,
+      <td key='has-comment'>{_.has(this.props.record, 'comment') ? '✉︎' : ''}</td>,
       <td key='contig-position'
           title='contig:position'
           className='pos'>
@@ -328,7 +334,7 @@ var VCFRecord = React.createClass({
     var classes = React.addons.classSet({selected: this.props.isSelected});
     var record = this.props.record;
     return (
-      <tr className={classes} onClick={this.onClick}>
+      <tr className={classes} onClick={this.handleClick}>
         {tds}
       </tr>
     );
@@ -349,7 +355,7 @@ var VCFCommentBox = React.createClass({
     var newComment;
 
     // If an old comment is provided, we clone it.
-    if (!_.isUndefined(this.props.record.comment)) {
+    if (this.props.record.comment) {
       newComment = _.clone(this.props.record.comment);
       newComment.comment_text = commentText;
     } else {
@@ -375,8 +381,8 @@ var VCFCommentBox = React.createClass({
     }
   },
   render: function() {
-    var commentText = !_.isUndefined(this.props.record.comment) ?
-      this.props.record.comment.comment_text : '';
+    var commentText = this.props.record.comment ?
+        this.props.record.comment.comment_text : '';
     return (
       <tr>
         <td colSpan={10000} className='variant-info'>
@@ -397,7 +403,8 @@ var VCFCommentBox = React.createClass({
   }
 });
 
-// The VCFComment record handles all state for user comments.
+// The VCFComment record handles state (saved text value and edit mode) for
+// user comments.
 var VCFComment = React.createClass({
   propTypes: {
     commentText: React.PropTypes.string.isRequired,
@@ -416,9 +423,6 @@ var VCFComment = React.createClass({
 
     this.setState({value: value});
   },
-  getValueState: function() {
-    return this.state.value;
-  },
   setEditState: function(isEdit) {
     this.setState({isEdit: isEdit});
   },
@@ -432,7 +436,6 @@ var VCFComment = React.createClass({
     var commentElement = this.state.isEdit ?
       <VCFCommentEditor commentText={this.props.commentText}
                         placeHolder={placeHolder}
-                        getValueState={this.getValueState}
                         setValueState={this.setValueState}
                         setEditState={this.setEditState}
                         handleSave={this.props.handleSave} /> :
@@ -478,7 +481,8 @@ var VCFCommentViewer = React.createClass({
     // Warning: by using this dangerouslySetInnerHTML feature, we're relying
     // on marked to be secure.
     var plainText = this.props.commentText !== '' ?
-      this.props.commentText : this.props.placeHolder;
+        this.props.commentText : this.props.placeHolder;
+
     var markedDownText = marked(plainText);
     return (
       <div className='form-control comment-text'
@@ -487,26 +491,26 @@ var VCFCommentViewer = React.createClass({
   }
 });
 
+// VCFCommentEditor represents the active editing of a comment, and it has a
+// separate state variable for updated text that is not yet saved.
 var VCFCommentEditor = React.createClass({
   propTypes: {
     commentText: React.PropTypes.string,
     placeHolder: React.PropTypes.string.isRequired,
-    getValueState: React.PropTypes.func.isRequired,
     setValueState: React.PropTypes.func.isRequired,
     setEditState: React.PropTypes.func.isRequired,
     handleSave: React.PropTypes.func.isRequired
   },
   handleSaveText: function() {
-    var commentText = this.refs.textArea.getDOMNode().value.trim();
-    if (commentText !== '') {
-      // Create a new comment if none existed, or update the comment if it
-      // changed (creating a new comment object in both cases).
-      if (this.props.commentText !== commentText) {
-        this.props.handleSave(commentText);
-        this.props.setValueState(commentText);
-        this.props.setEditState(false);
-        return;
-      }
+    // Create a new comment if none existed, or update the comment if it
+    // changed (creating a new comment object in both cases).
+    var newCommentText = this.state.newCommentText;
+    if (newCommentText !== '' &&
+        newCommentText !== this.props.commentText) {
+      this.props.handleSave(newCommentText);
+      this.props.setValueState(newCommentText);
+      this.props.setEditState(false);
+      return;
     }
 
     // Reset the value and edit mode, if not already reset.
@@ -523,14 +527,17 @@ var VCFCommentEditor = React.createClass({
       this.props.setEditState(false);
     }
   },
+  getInitialState: function() {
+    return {newCommentText: this.props.commentText};
+  },
   handleChange: function(event) {
-    this.props.setValueState(event.target.value);
+    this.setState({newCommentText: event.target.value});
   },
   render: function() {
     return (
       <div>
         <textarea className='form-control comment-textarea'
-                  value={this.props.getValueState()}
+                  defaultValue={this.props.commentText}
                   placeholder={this.props.placeHolder}
                   onChange={this.handleChange}
                   ref='textArea' />

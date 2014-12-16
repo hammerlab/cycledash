@@ -18,15 +18,18 @@ var ExaminePage = require('../../cycledash/static/js/examine/components/ExamineP
     Dispatcher = require('../../cycledash/static/js/examine/Dispatcher'),
     TestUtils = React.addons.TestUtils,
     Utils = require('./Utils'),
-    dataUtils = require('./DataUtils');
+    DataUtils = require('./DataUtils');
 
 
 describe('ExaminePage', function() {
+  // This is a rather slow suite, so give it a heftier 5s timeout.
+  this.timeout(5000);
+
   var fakeServer, records, displayedQuery, stub;
 
   before(function() {
     global.XMLHttpRequest = function() {};
-    fakeServer = dataUtils.makeFakeServer('tests/data/snv.vcf');
+    fakeServer = DataUtils.makeFakeServer('tests/data/snv.vcf', _.noop);
     records = fakeServer.records;
     stub = Utils.stubReactMethod(QueryBox, 'setDisplayedQuery', function(str) {
       displayedQuery = str;

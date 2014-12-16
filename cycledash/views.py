@@ -8,7 +8,7 @@ from celery import chain
 from flask import (request, redirect, Response, render_template, jsonify,
                    url_for, send_file)
 import requests
-from sqlalchemy import exc, MetaData, Table, select, desc
+from sqlalchemy import select, desc
 
 from cycledash import app, db
 import cycledash.genotypes as gt

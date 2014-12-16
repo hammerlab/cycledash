@@ -56,7 +56,7 @@ tests:
       injectJs: |
         c = document.createEvent('MouseEvent');
         c.initMouseEvent('click', true, true, window);
-        $('[class="vcf-table"]').find('tbody').find('tr:first').get(0).dispatchEvent(c)
+        $('.vcf-table').find('tbody').find('tr:first').get(0).dispatchEvent(c)
 
   - name: examine-comments-edit
     description: Examine page showing a comment in edit mode.
