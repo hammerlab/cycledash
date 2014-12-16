@@ -28,6 +28,6 @@ def index(hdfs_bam_path):
     index_json_str = json.dumps(index_json)
 
     try:
-        put_new_file_to_hdfs(bai_json_path, index_json)
+        put_new_file_to_hdfs(bai_json_path, index_json_str)
     except HdfsFileAlreadyExistsError:
         pass  # we lost the race! (e.g. two runs were submitted simultaneously)

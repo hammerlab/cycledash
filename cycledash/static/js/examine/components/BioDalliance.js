@@ -167,7 +167,10 @@ var BioDalliance = React.createClass({
         $.getJSON(this.hdfsUrl(chunkPath))
           .done((chunks) => {
             this.setState(_.object([propName], [chunks]));
-          }).fail((jqXHR, textStatus) => {
+          }).fail((jqXHR, error, textStatus) => {
+            if (textStatus != 'Not Found') {
+              console.warn('Invalid bai.json file', chunkPath, error, textStatus);
+            }
             this.setState(_.object([propName], [CHUNKS_NOT_AVAILABLE]));
           });
       });
