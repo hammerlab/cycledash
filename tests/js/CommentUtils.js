@@ -22,7 +22,7 @@ function makeFakeCommentServer(vcfPath, commentDatabaseJSONPath, failingPaths) {
   var commentDatabase = JSON.parse(
       fs.readFileSync(commentDatabaseJSONPath, {encoding:'utf8'}));
 
-  var commentsResponse = function(path, type, data, callback, failCallback) {
+  var handleCommentPath = function(path, type, data, callback, failCallback) {
     if (isFailingPath(type, path, failingPaths)) {
       failCallback();
     } else {
@@ -58,7 +58,7 @@ function makeFakeCommentServer(vcfPath, commentDatabaseJSONPath, failingPaths) {
     }
   };
 
-  var fakeServer = DataUtils.makeFakeServer(vcfPath, commentsResponse);
+  var fakeServer = DataUtils.makeFakeServer(vcfPath, handleCommentPath);
 
   // Include references to the underlying data in case it's helpful.
   return _.extend(fakeServer, {commentDatabase});

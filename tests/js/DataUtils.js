@@ -71,7 +71,7 @@ function getRecords(vcfData) {
  *  - /runs/1/genotypes
  *  - /runs/1/comments
  */
-function makeFakeServer(vcfPath, commentsResponse) {
+function makeFakeServer(vcfPath, handleCommentPath) {
   var parseVcf = vcf.parser(),
       vcfData = parseVcf(fs.readFileSync(vcfPath, {encoding:'utf8'})),
       spec = getSpec(vcfData),
@@ -90,7 +90,7 @@ function makeFakeServer(vcfPath, commentsResponse) {
         }
       });
     } else if (path.slice(0, COMMENTS_URL.length) === COMMENTS_URL) {
-      commentsResponse(path, type, data, callback, failCallback);
+      handleCommentPath(path, type, data, callback, failCallback);
     } else {
       throw new Error('Unexpected request for ' + path);
     }
