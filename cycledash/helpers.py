@@ -69,12 +69,6 @@ def update_object(obj, update):
     return obj
 
 
-def make_error_response(error, message):
-    response = jsonify({'error': error, 'message': message})
-    response.status_code = 400
-    return response
-
-
 def get_secure_unique_filename(filename, tmp_dir):
     """Returns a safe, absolute path to a non-existent file.
 
@@ -90,3 +84,14 @@ def get_secure_unique_filename(filename, tmp_dir):
         if not os.path.exists(path):
             return path
         count += 1
+
+
+def success_response():
+    response = jsonify({'success': True})
+    return response
+
+
+def error_response(error, message):
+    response = jsonify({'error': error, 'message': message})
+    response.status_code = 400
+    return response

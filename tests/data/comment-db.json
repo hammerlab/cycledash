@@ -1,0 +1,35 @@
+{
+  "0": {
+    "alternates": "T",
+    "comment_text": "First",
+    "contig": "20",
+    "id": 0,
+    "last_modified": 1418757695101313,
+    "position": 61795,
+    "reference": "G",
+    "sample_name": "NORMAL",
+    "vcf_id": 1
+  },
+  "17": {
+    "alternates": "A",
+    "comment_text": "Second",
+    "contig": "20",
+    "id": 17,
+    "last_modified": 1418764556923924,
+    "position": 62731,
+    "reference": "C",
+    "sample_name": "NORMAL",
+    "vcf_id": 1
+  },
+  "42": {
+    "alternates": "A",
+    "comment_text": "Third",
+    "contig": "20",
+    "id": 42,
+    "last_modified": 1418757439167107,
+    "position": 65900,
+    "reference": "G",
+    "sample_name": "TUMOR",
+    "vcf_id": 1
+  }
+}

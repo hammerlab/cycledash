@@ -12,6 +12,7 @@ var CHUNKS_LOADING = 'loading',
 
 var BioDalliance = React.createClass({
   propTypes: {
+    isOpen: React.PropTypes.bool,
     // Currently selected variant, or null for no selection.
     selectedRecord: React.PropTypes.object,
     vcfPath: React.PropTypes.string.isRequired,
@@ -32,7 +33,8 @@ var BioDalliance = React.createClass({
   }),
   render: function() {
     var style = {};
-    if (!this.props.selectedRecord ||
+    if (!this.props.isOpen ||
+        !this.props.selectedRecord ||
         this.state.normalBaiChunks == CHUNKS_LOADING ||
         this.state.tumorBaiChunks == CHUNKS_LOADING) {
       style = {display: 'none'};
@@ -147,7 +149,7 @@ var BioDalliance = React.createClass({
     this.browser.setLocation(rec.contig, rec.position - 25, rec.position + 25);
   },
   update: function() {
-    if (this.props.selectedRecord) {
+    if (this.props.isOpen && this.props.selectedRecord) {
       this.lazilyCreateDalliance();
       this.panToSelection();
     }
@@ -201,7 +203,7 @@ var BioDalliance = React.createClass({
     // key presses before BioDalliance, which will capture them. We only want
     // to bypass the usual event bubbling system for ESC, not for arrow keys.
     window.addEventListener('keydown', (e) => {
-      if (!this.props.selectedRecord) return;
+      if (!this.props.isOpen || !this.props.selectedRecord) return;
       var isDallianceActive = $(document.activeElement).is('.dalliance');
 
       if (e.which == 27 /* esc */) {
@@ -224,7 +226,8 @@ var BioDalliance = React.createClass({
     $(this.props.inspector.getDOMNode()).off('mousewheel.biodalliance');
   },
   shouldComponentUpdate: function(nextProps, nextState) {
-    return (nextProps.selectedRecord != this.props.selectedRecord);
+    return ((nextProps.isOpen != this.props.isOpen) ||
+            (nextProps.selectedRecord != this.props.selectedRecord));
   },
 });
 

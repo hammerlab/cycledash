@@ -12,15 +12,7 @@ SET client_min_messages = warning;
 SET search_path = public, pg_catalog;
 
 --
--- Data for Name: data_annotations; Type: TABLE DATA; Schema: public; Owner: danvk
---
-
-COPY data_annotations (dataset_name, annotation, type, contig, "position:start", "position:end") FROM stdin;
-\.
-
-
---
--- Data for Name: vcfs; Type: TABLE DATA; Schema: public; Owner: danvk
+-- Data for Name: vcfs; Type: TABLE DATA; Schema: public; Owner: tavi
 --
 
 COPY vcfs (id, created_at, caller_name, dataset_name, tumor_bam_uri, normal_bam_uri, validation_vcf, notes, uri, vcf_header, extant_columns, "precision", recall, f1score) FROM stdin;
@@ -31,7 +23,7 @@ COPY vcfs (id, created_at, caller_name, dataset_name, tumor_bam_uri, normal_bam_
 
 
 --
--- Data for Name: genotypes; Type: TABLE DATA; Schema: public; Owner: danvk
+-- Data for Name: genotypes; Type: TABLE DATA; Schema: public; Owner: tavi
 --
 
 COPY genotypes (vcf_id, sample_name, contig, "position", id, reference, alternates, filters, quality, "annotations:gene_names", "info:AA", "info:AC", "info:AF", "info:AN", "info:BQ", "info:CIGAR", "info:DB", "info:DP", "info:H2", "info:H3", "info:MQ", "info:MQ0", "info:NS", "info:SB", "info:SOMATIC", "info:VALIDATED", "info:1000G", "info:IMPRECISE", "info:NOVEL", "info:END", "info:SVTYPE", "info:SVLEN", "info:CIPOS", "info:CIEND", "info:MEINFO", "info:METRANS", "info:DGVID", "info:DBVARID", "info:DBRIP", "info:MATEID", "info:PARID", "info:EVENT", "info:CILEN", "info:DPADJ", "info:CN", "info:CNADJ", "info:CICN", "info:CICNADJ", "sample:GT", "sample:DP", "sample:FT", "sample:GL", "sample:GLE", "sample:PL", "sample:GP", "sample:GQ", "sample:HQ", "sample:PS", "sample:PQ", "sample:EC", "sample:MQ", "sample:CN", "sample:CNQ", "sample:CNL", "sample:NQ", "sample:HAP", "sample:AHAP", "info:STR", "info:CIPOS95", "info:EVTYPE", "info:PSUP", "info:PRIN", "info:SRSUP", "info:SUP", "sample:PE", "sample:SR", "sample:SUP", "info:QSS", "info:QSS_NT", "info:SGT", "info:TQSS", "info:TQSS_NT", "sample:FDP", "sample:SDP", "sample:SUBDP", "sample:AU", "sample:CU", "sample:GU", "sample:TU", "info:SS", "info:SSC", "info:GPV", "info:SPV", "sample:RD", "sample:AD", "sample:FREQ", "sample:DP4", "sample:IGT", "sample:BCOUNT", "sample:JGQ", "sample:VAQ", "sample:AMQ", "info:NDP", "info:NAC", "info:DDP", "info:DAC", "sample:FA", "info:ABQ", "info:AMQ", "info:AGQ", "sample:ABQ", "sample:AGQ", "info:VAF", "info:DPR") FROM stdin;
@@ -79,15 +71,24 @@ COPY genotypes (vcf_id, sample_name, contig, "position", id, reference, alternat
 
 
 --
--- Data for Name: vcf_annotations; Type: TABLE DATA; Schema: public; Owner: danvk
+-- Data for Name: user_comments; Type: TABLE DATA; Schema: public; Owner: tavi
 --
 
-COPY vcf_annotations (vcf_id, annotation, type, contig, "position:start", "position:end") FROM stdin;
+COPY user_comments (id, vcf_id, sample_name, contig, "position", reference, alternates, comment_text, last_modified) FROM stdin;
+2	1	NORMAL	20	61795	G	T	I am a comment on the first row.	2014-12-11 20:24:19.358486
+3	1	TUMOR	20	62731	C	A	I am a comment on the fourth row.	2014-12-11 20:24:32.166613
 \.
 
 
 --
--- Name: vcfs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: danvk
+-- Name: user_comments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tavi
+--
+
+SELECT pg_catalog.setval('user_comments_id_seq', 3, true);
+
+
+--
+-- Name: vcfs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tavi
 --
 
 SELECT pg_catalog.setval('vcfs_id_seq', 3, true);

@@ -16,22 +16,16 @@ CREATE TABLE vcfs (
        f1score NUMERIC
 );
 
-CREATE TABLE vcf_annotations (
+CREATE TABLE user_comments (
+       id BIGSERIAL PRIMARY KEY,
        vcf_id BIGINT REFERENCES vcfs ON DELETE CASCADE NOT NULL,
-       annotation TEXT NOT NULL,
-       type TEXT NOT NULL,
-       "contig" TEXT,
-       "position:start" INTEGER,
-       "position:end" INTEGER
-);
-
-CREATE TABLE data_annotations (
-       dataset_name TEXT, -- The denormalized foreign key of a dataset, stored in the vcfs table.
-       annotation TEXT NOT NULL,
-       type TEXT NOT NULL,
-       "contig" TEXT,
-       "position:start" INTEGER,
-       "position:end" INTEGER
+       sample_name TEXT,
+       contig TEXT,
+       position INTEGER,
+       reference TEXT,
+       alternates TEXT,
+       comment_text TEXT NOT NULL,
+       last_modified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE genotypes (
