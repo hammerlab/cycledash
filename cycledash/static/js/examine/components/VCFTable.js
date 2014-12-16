@@ -45,7 +45,7 @@ var VCFTable = React.createClass({
     if (idx >= 0) {
       var row = $(this.refs.vcfTable.getDOMNode()).find('tr').get(idx);
       $('html,body').animate({
-        scrollTop: $(row).offset().top
+        scrollTop: $(row).offset().top - 70
       }, 250 /* ms */);
     }
   },

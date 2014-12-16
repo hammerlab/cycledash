@@ -1,4 +1,9 @@
-"""Defines all views for CycleDash."""
+# pylint: disable=no-value-for-parameter
+"""Defines all views for CycleDash.
+
+We disable the pylint no-value-for-parameter check here, as the user_comments_db
+decorator (used implicitely, here) makes pylint unhappy.
+"""
 import collections
 import json
 import requests

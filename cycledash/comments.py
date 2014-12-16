@@ -1,9 +1,4 @@
-# pylint: disable=undefined-variable
-"""API for user comments.
-
-We disable the pylint undefined-variable check here, as the user_comments_db
-decorator makes pylint unhappy.
-"""
+"""API for user comments."""
 from datetime import datetime
 from flask import jsonify, request
 from functools import wraps, partial
