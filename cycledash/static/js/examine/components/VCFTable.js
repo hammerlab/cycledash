@@ -450,9 +450,12 @@ var VCFComment = React.createClass({
                         placeHolder={placeHolder} />;
     var commentHeader;
     if (!this.state.isEdit) {
-      commentHeader = <VCFCommentHeader handleEdit={() => {this.setEditState(true);}}
-                                        handleOpenViewer={this.props.handleOpenViewer}
-                                        handleDelete={this.props.handleDelete} />
+      commentHeader = (
+          <VCFCommentHeader handleEdit={() => {this.setEditState(true);}}
+                            record={this.props.record}
+                            handleOpenViewer={this.props.handleOpenViewer}
+                            handleDelete={this.props.handleDelete} />
+      );
     }
     return (
       <div className='comment-container'>

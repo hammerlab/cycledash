@@ -18,6 +18,9 @@ aliases:
         }
 
 tests:
+  # We use setTimeout(..., 250) to give the page a chance to finish its
+  # XHR. Ideally, we could wait on an element to show up, instead of hackily
+  # waiting 250ms.
   - name: examine
     description: Initial view of a fully-loaded Examine page.
     url: http://localhost:5001/runs/1/examine
@@ -40,7 +43,9 @@ tests:
     config:
       <<: *std-config
       injectJs: |
-        $('[data-attribute="sample:RD"] .tooltip').show();
+        setTimeout(function() {
+          $('[data-attribute="sample:RD"] .tooltip').show();
+        }, 250);
 
   - name: examine-filter
     description: Examine page showing a filtered view
@@ -54,9 +59,11 @@ tests:
     config:
       <<: *std-config
       injectJs: |
-        c = document.createEvent('MouseEvent');
-        c.initMouseEvent('click', true, true, window);
-        $('.vcf-table').find('tbody').find('tr:first').get(0).dispatchEvent(c)
+        setTimeout(function() {
+          c = document.createEvent('MouseEvent');
+          c.initMouseEvent('click', true, true, window);
+          $('.vcf-table').find('tbody').find('tr:first').get(0).dispatchEvent(c)
+        }, 250);
 
   - name: examine-comments-edit
     description: Examine page showing a comment in edit mode.
@@ -64,10 +71,12 @@ tests:
     config:
       <<: *std-config
       injectJs: |
-        c = document.createEvent('MouseEvent');
-        c.initMouseEvent('click', true, true, window);
-        $('[class="vcf-table"]').find('tbody').find('tr:first').get(0).dispatchEvent(c)
-        $('[class="variant-info"]').find('button:contains("Edit")').get(0).dispatchEvent(c)
+        setTimeout(function() {
+          c = document.createEvent('MouseEvent');
+          c.initMouseEvent('click', true, true, window);
+          $('[class="vcf-table"]').find('tbody').find('tr:first').get(0).dispatchEvent(c)
+          $('[class="variant-info"]').find('button:contains("Edit")').get(0).dispatchEvent(c)
+        }, 250);
 
   - name: runs
     description: Initial view of the runs page
@@ -81,9 +90,11 @@ tests:
     config:
       <<: *std-config
       injectJs: |
-        c = document.createEvent('MouseEvent');
-        c.initMouseEvent('click', true, true, window);
-        $('tr.run').get(0).dispatchEvent(c);
+        setTimeout(function() {
+          c = document.createEvent('MouseEvent');
+          c.initMouseEvent('click', true, true, window);
+          $('tr.run').get(0).dispatchEvent(c);
+        }, 250);
 
   - name: validated-run
     description: Examine page showing a run with associated validation data.

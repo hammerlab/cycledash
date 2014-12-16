@@ -32,8 +32,7 @@ def spec(vcf_id):
         q = (select([vcfs.c.vcf_header, vcfs.c.extant_columns])
                     .where(vcfs.c.id == vcf_id))
         res = con.execute(q).fetchone()
-    extant_columns = _list_string_to_list(res['extant_columns'])
-    return _header_spec(res['vcf_header'], extant_columns)
+    return _header_spec(res['vcf_header'], res['extant_columns'])
 
 
 @forever.memoize
@@ -160,13 +159,14 @@ def genotype_statistics(query, vcf_id, truth_vcf_id, count, total_count):
             and_(g.c.vcf_id == vcf_id, gt.c.vcf_id == truth_vcf_id))
         true_pos_q = _add_filters(true_pos_q, g, query.get('filters'))
         true_pos_q = _add_range(true_pos_q, g, query.get('range'))
+
+        query = _whitelist_query_filters(query)
         true_pos_q = _add_filters(true_pos_q, gt, query.get('filters'))
         true_pos_q = _add_range(true_pos_q, gt, query.get('range'))
         (true_positives,) = con.execute(true_pos_q).fetchone()
 
         # This calculates the total number of truth records given a subset of
         # the filters which makes sense to apply to a validation set.
-        query = _whitelist_query_filters(query)
         total_truth_q = select(
             [func.count()]).select_from(g).where(g.c.vcf_id == truth_vcf_id)
         total_truth_q = _add_filters(total_truth_q, g, query.get('filters'))
@@ -266,7 +266,7 @@ def _add_filters(sql_query, table, filters):
 def _add_filter(sql_query, table, column_name, column_type, value, op_name):
     sqla_type = vcf_type_to_sqla_type(column_type)
     col = column(column_name)
-    if table.c.get(column_name):
+    if table.c.get(column_name) is not None:
         col = cast(table.c[column_name], sqla_type)
     return {
         '=': sql_query.where(col == value),
@@ -448,10 +448,3 @@ def _get_vcf_by_id(vcf_id):
     with tables(db, 'vcfs') as (con, vcfs):
         vcf = con.execute(select([vcfs]).where(vcfs.c.id == vcf_id)).fetchone()
     return dict(vcf)
-
-
-def _list_string_to_list(string):
-    """Convert a string-serialized Python list to a list.
-
-    e.g. '[1, 2, 3]' #=> ['1', '2', '3']"""
-    return string[1:-1].split(',')
