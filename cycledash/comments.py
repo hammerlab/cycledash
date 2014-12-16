@@ -7,7 +7,6 @@ decorator makes pylint unhappy.
 from datetime import datetime
 from flask import jsonify, request
 from functools import wraps, partial
-from json import loads
 from sqlalchemy import exc, select, func
 
 from common.helpers import tables
