@@ -6,7 +6,7 @@ steps:
 1. Generate the changelog:
   * `./scripts/changelog.py vX.Y.Z > CHANGELOG.md`
 2. Commit the changelog:
-  * `git commit -a CHANGELOG.md -m "Release vX.Y.Z"`
+  * `git commit -am "Release vX.Y.Z"`
   * "Release" should be capitalized.
 3. Create an annotated tag:
   * `git tag -a vX.Y.Z -m`
