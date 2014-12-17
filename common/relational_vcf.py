@@ -185,6 +185,8 @@ def vcf_format(val):
     vals = val.split(',')
     if len(vals) <= 1:
         return val
+    elif val[0] != '[':
+        return ','.join(v.strip() for v in vals)
     else: # It's a list.
         assert val[0] == '['
         assert val[-1] == ']'
