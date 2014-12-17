@@ -37,6 +37,9 @@ th.ref, td.ref, th.alt, td.alt {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+th.tag {
+  width: 5px;
+}
 th.ref, td.ref {
   padding-right: 0;
   text-align: right;
@@ -141,15 +144,16 @@ th.uber-column {
   width: 600px;
   text-align: right;
 }
-.vcf-table .dalliance-button {
-  width: 600px;
-  margin-bottom: 4px;
+.vcf-table .dalliance-open {
+  float: left;
+  background: url(/static/img/magnifying-glass-noun_907.svg) no-repeat 2px 6px;
+  cursor: pointer;
+  padding: 3px 0 0 21px;
+  line-height: 1.6em;
+  background-size: 15px 15px;
 }
-.vcf-table tr:nth-child(odd) {
-  background: rgb(253, 253, 253);
-}
-.vcf-table tr:first-child {
-  background: none;
+.vcf-table tbody tr:nth-child(even) {
+  background: rgb(245, 245, 245);
 }
 .vcf-table tr.selected {
   background: rgb(254, 255, 207);
@@ -168,6 +172,10 @@ th .sorting-by.desc:before {
 }
 td.pos {
   font-family: "inconsolata", monospace;
+}
+td.has-comment {
+  background: url(/static/img/speech-bubble-noun_5483.svg) no-repeat 11px 2px;
+  background-size: 15px 15px;
 }
 td, th {
   text-align: center;
@@ -349,7 +357,7 @@ dt {
   right: 375px;  /* width of Stats Table + 25px */
   width: 20px;
   height: 20px;
-  background: url(/static/img/noun_61692.svg);
+  background: url(/static/img/question-mark-noun_61692.svg);
   background-size: 20px 20px;
   opacity: 0.55;
 }
@@ -399,7 +407,7 @@ a.download-vcf {
   font-size: 0.92em;
   text-decoration: none;
   padding-left: 38px;
-  background: url(/static/img/noun_4501.svg) no-repeat 11px 2px;
+  background: url(/static/img/download-noun_4501.svg) no-repeat 11px 2px;
   background-size: 15px 15px;
   opacity: 0.55;
 }

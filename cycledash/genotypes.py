@@ -2,8 +2,9 @@
 from collections import OrderedDict
 import copy
 
-from sqlalchemy import (select, func, types, cast, join, asc, desc, and_,
-                        Integer, Float, String)
+from sqlalchemy import (select, func, types, cast, join, outerjoin, asc, desc,
+                        and_, Integer, Float, String)
+from sqlalchemy.sql.expression import label, column
 import vcf as pyvcf
 from plone.memoize import forever
 
@@ -81,15 +82,36 @@ def get(vcf_id, query, with_stats=True, truth_vcf_id=None):
     }
     """
     query = _annotate_query_with_types(query, spec(vcf_id))
-    with tables(db, 'genotypes') as (con, genotypes):
-        q = select([genotypes]).where(genotypes.c.vcf_id == vcf_id)
-        q = _add_range(q, genotypes, query.get('range'))
-        q = _add_filters(q, genotypes, query.get('filters'))
-        q = _add_orderings(q, genotypes, query.get('sortBy'))
-        q = _add_paging(q, genotypes, query.get('limit'), query.get('page'))
-        q = q.order_by(asc(func.length(genotypes.c.contig)),
-                       asc(genotypes.c.contig),
-                       asc(genotypes.c.position))
+    if truth_vcf_id is None:
+        vcf = _get_vcf_by_id(vcf_id)
+        truth_vcf_id = derive_truth_vcf_id(vcf['dataset_name'])
+    with tables(db, 'genotypes') as (con, g):
+        if truth_vcf_id:
+            # We consider a genotype validated if a truth genotype exists at its
+            # location (contig/position) with the same ref/alts.  This isn't
+            # entirely accurate: for example, it handles SVs very poorly.
+            gt = g.alias()
+            joined_q = outerjoin(g, gt, and_(
+                gt.c.vcf_id == truth_vcf_id,
+                g.c.contig == gt.c.contig,
+                g.c.position == gt.c.position,
+                g.c.reference == gt.c.reference,
+                g.c.alternates == gt.c.alternates))
+            valid_column = label('tag:true-positive', gt.c.contig != None)
+            q = (select(g.c + [valid_column])
+                 .select_from(joined_q)
+                 .where(g.c.vcf_id == vcf_id))
+        else:
+            q = select(g.c).where(g.c.vcf_id == vcf_id)
+
+        q = _add_range(q, g, query.get('range'))
+        q = _add_filters(q, g, query.get('filters'))
+        q = _add_orderings(q, g, query.get('sortBy'))
+        q = _add_paging(q, g, query.get('limit'), query.get('page'))
+        q = q.order_by(asc(func.length(g.c.contig)),
+                       asc(g.c.contig),
+                       asc(g.c.position))
+
         genotypes = [dict(g) for g in con.execute(q).fetchall()]
     stats = calculate_stats(vcf_id, truth_vcf_id, query) if with_stats else {}
     return {'records': genotypes, 'stats': stats}
@@ -97,15 +119,14 @@ def get(vcf_id, query, with_stats=True, truth_vcf_id=None):
 
 @forever.memoize
 def calculate_stats(vcf_id, truth_vcf_id, query):
-    """Return stats for genotypes in vcf and truth_vcf (if not None) conforming
-    to query.
+    """Return stats for genotypes in vcf and truth_vcf conforming to query.
 
     Args:
        vcf_id: the vcf being examined.
        truth_vcf_id: the truth_vcf being validated against.
-       count: the number of records being shown, given filters and range.
+       query: the query object.
     """
-    with tables(db, 'genotypes', 'vcfs') as (con, genotypes, vcfs):
+    with tables(db, 'genotypes') as (con, genotypes):
         # The number of records being displayed:
         count_q = select([func.count()]).where(genotypes.c.vcf_id == vcf_id)
         count_q = _add_filters(count_q, genotypes, query.get('filters'))
@@ -116,11 +137,6 @@ def calculate_stats(vcf_id, truth_vcf_id, query):
         total_count_q = select([func.count()]).where(
             genotypes.c.vcf_id == vcf_id)
         (total_count,) = con.execute(total_count_q).fetchone()
-
-        vcf = con.execute(select([vcfs]).where(vcfs.c.id == vcf_id)).fetchone()
-
-        if truth_vcf_id is None:
-            truth_vcf_id = derive_truth_vcf_id(vcf['dataset_name'])
     return genotype_statistics(query, vcf_id, truth_vcf_id, count, total_count)
 
 
@@ -143,13 +159,14 @@ def genotype_statistics(query, vcf_id, truth_vcf_id, count, total_count):
             and_(g.c.vcf_id == vcf_id, gt.c.vcf_id == truth_vcf_id))
         true_pos_q = _add_filters(true_pos_q, g, query.get('filters'))
         true_pos_q = _add_range(true_pos_q, g, query.get('range'))
+
+        query = _whitelist_query_filters(query)
         true_pos_q = _add_filters(true_pos_q, gt, query.get('filters'))
         true_pos_q = _add_range(true_pos_q, gt, query.get('range'))
         (true_positives,) = con.execute(true_pos_q).fetchone()
 
-        # This query calculates the total number of truth records given a subset
-        # of the filters which makes sense to apply to a validation set.
-        query = _whitelist_query_filters(query)
+        # This calculates the total number of truth records given a subset of
+        # the filters which makes sense to apply to a validation set.
         total_truth_q = select(
             [func.count()]).select_from(g).where(g.c.vcf_id == truth_vcf_id)
         total_truth_q = _add_filters(total_truth_q, g, query.get('filters'))
@@ -248,17 +265,20 @@ def _add_filters(sql_query, table, filters):
 
 def _add_filter(sql_query, table, column_name, column_type, value, op_name):
     sqla_type = vcf_type_to_sqla_type(column_type)
-    column = cast(table.c[column_name], sqla_type)
+    col = column(column_name)
+    if table.c.get(column_name) is not None:
+        col = cast(table.c[column_name], sqla_type)
     return {
-        '=': sql_query.where(table.c[column_name] == value),
-        '<': sql_query.where(column < value),
-        '>': sql_query.where(column > value),
-        '>=': sql_query.where(column >= value),
-        '<=': sql_query.where(column <= value),
-        'NULL': sql_query.where(column != None),
-        'NOT NULL': sql_query.where(column == None),
-        'LIKE': sql_query.where(table.c[column_name].like(value)),
-        'RLIKE': sql_query.where(table.c[column_name].op('~*')(value))
+        '=': sql_query.where(col == value),
+        '!=': sql_query.where(col != value),
+        '<': sql_query.where(col < value),
+        '>': sql_query.where(col > value),
+        '>=': sql_query.where(col >= value),
+        '<=': sql_query.where(col <= value),
+        'NULL': sql_query.where(col != None),
+        'NOT NULL': sql_query.where(col == None),
+        'LIKE': sql_query.where(col.like(value)),
+        'RLIKE': sql_query.where(col.op('~*')(value))
     }.get(op_name)
 
 
@@ -422,3 +442,9 @@ def _whitelist_query_filters(query, ok_fields=['reference', 'alternates']):
     query['filters'] = [f for f in query['filters']
                         if f.get('columnName') in ok_fields]
     return query
+
+
+def _get_vcf_by_id(vcf_id):
+    with tables(db, 'vcfs') as (con, vcfs):
+        vcf = con.execute(select([vcfs]).where(vcfs.c.id == vcf_id)).fetchone()
+    return dict(vcf)
