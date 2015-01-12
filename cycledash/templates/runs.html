@@ -56,23 +56,23 @@
     <thead>
       <tr>
         <th></th>
-        <th>Caller Name</th>
-        <th>Dataset</th>
-        <th>Submitted On</th>
+        <th class="caller-name">Caller Name</th>
+        <th class="dataset">Dataset</th>
+        <th class="date">Submitted On</th>
         <th></th>
       </tr>
     </thead>
     <tbody>
       {%- for run in runs %}
       <tr class="run" data-runId="{{ run['id'] }}">
-        <td>
+        <td class="run-id">
           <span class="run-id">{{ run['id'] }}</span>
           <a class="btn btn-default btn-xs" href="/runs/{{ run['id'] }}/examine">Examine</a>
         </td>
-        <td>{{ run['caller_name'] }}</td>
-        <td>{{ run['dataset_name'] }}</td>
-        <td title="{{ run['created_at'] }}">{{ run['created_at'].strftime('%Y-%m-%d') }}</td>
-        <td>
+        <td class="caller-name">{{ run['caller_name'] }}</td>
+        <td class="dataset">{{ run['dataset_name'] }}</td>
+        <td class="date" title="{{ run['created_at'] }}">{{ run['created_at'].strftime('%Y-%m-%d') }}</td>
+        <td class="labels">
           {%- if run['validation_vcf'] %}<span class="label label-info" title="Is a validation VCF">validation</span>{% endif -%}
           {%- if run['tumor_bam_uri'] %}<span class="label label-info" title="Has an associated tumor BAM">tumor</span>{% endif -%}
           {%- if run['normal_bam_uri'] %}<span class="label label-info" title="Has an associated normal BAM">normal</span>{% endif -%}
