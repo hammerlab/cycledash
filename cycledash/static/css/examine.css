@@ -20,35 +20,41 @@ body {
 .vcf-table {
   padding-top: 20px;
 }
-th {
+.vcf-table th {
   font-size: 19px;
   position: relative;
   white-space: nowrap;
 }
-th.arrow, td.arrow {
+.vcf-table th.arrow,
+.vcf-table td.arrow {
   width: 20px;
   max-width: 20px;
   padding: 0;
   margin: 0;
 }
-th.ref, td.ref, th.alt, td.alt {
+.vcf-table th.ref,
+.vcf-table td.ref,
+.vcf-table th.alt,
+.vcf-table td.alt {
   width: 100px;
   max-width: 100px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-th.tag {
+.vcf-table th.tag {
   width: 5px;
 }
-th.ref, td.ref {
+.vcf-table th.ref,
+.vcf-table td.ref {
   padding-right: 0;
   text-align: right;
 }
-th.alt, td.alt {
+.vcf-table th.alt,
+.vcf-table td.alt {
   padding-left: 0;
   text-align: left;
 }
-th.uber-column {
+.vcf-table th.uber-column {
   border-left: 1px solid #bbb;
 }
 .vcf-table .tooltip {
@@ -158,35 +164,35 @@ th.uber-column {
 .vcf-table tr.selected {
   background: rgb(254, 255, 207);
 }
-th .sort {
+.vcf-table th .sort {
   cursor: pointer;
 }
-th .sort:before {
+.vcf-table th .sort:before {
   content: ' ↕';
 }
-th .sorting-by.asc:before {
+.vcf-table th .sorting-by.asc:before {
   content: ' ↑';
 }
-th .sorting-by.desc:before {
+.vcf-table th .sorting-by.desc:before {
   content: ' ↓';
 }
-td.pos {
+.vcf-table td.pos {
   font-family: "inconsolata", monospace;
 }
-td.has-comment {
+.vcf-table td.has-comment {
   background: url(/static/img/speech-bubble-noun_5483.svg) no-repeat 11px 2px;
   background-size: 15px 15px;
 }
-td, th {
+.vcf-table td, .vcf-table th {
   text-align: center;
   padding: 3px 13px;
 }
-td {
+.vcf-table td {
   border: none;
   font-size: 13px;
   white-space: nowrap;
 }
-table {
+table.vcf-table {
   border-collapse: collapse;
   width: 100%;
 }
@@ -202,6 +208,20 @@ table {
   border: 1px solid #B6B6B7;
   margin-top: -17px;
   padding: 13px 0px;
+}
+#stats-container table {
+  border-collapse: collapse;
+  width: 100%;
+  border: none;
+  font-size: 13px;
+  white-space: nowrap;
+}
+#stats-container td {
+  text-align: center;
+  padding: 3px 13px;
+}
+#stats-container td.label {
+  padding: .2em .6em .3em  /* from bootstrap */
 }
 #stats-container .precision-recall .label {
   display: table-cell; /* This is needed to override Bootstrap. */
