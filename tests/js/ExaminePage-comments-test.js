@@ -107,6 +107,11 @@ describe('ExaminePage Comments', function() {
   }
 
   it('should get, modify, create and delete', function() {
+    // This test often exceeds the default of 2000ms, as each Simulate call takes
+    // approximately 50ms.
+    // TODO(tavi) Look into why this is.
+    this.timeout(10000);
+
     examine = renderExamine({});
     stubDialogs();
 
