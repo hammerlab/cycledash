@@ -14,13 +14,10 @@ def tables(database, *table_names):
             ...
       Where vcfs and genotypes are tables in the provided db.
     """
-    try:
-        connection = database.engine.connect()
+    with database.engine.connect() as connection:
         metadata = sqlalchemy.MetaData(bind=connection)
         metadata.reflect()
         yield tuple([connection] + [metadata.tables[t] for t in table_names])
-    finally:
-        connection.close()
 
 
 def order(lst, ordering, key=None):
