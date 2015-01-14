@@ -49,7 +49,7 @@ span.comment-bubble {
   height: 15px;
   display: inline-block;
 }
-span.no-comment-dimmed {
+span.no-comment {
   opacity: 0.3;
 }
 td.comments {

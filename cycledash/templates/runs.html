@@ -79,9 +79,9 @@
           {%- if run['normal_bam_uri'] %}<span class="label label-info" title="Has an associated normal BAM">normal</span>{% endif -%}
         </td>
         <td class="comments">
-          <span class="comment-bubble {{ '' if run['num_comments'] > 0 else 'no-comment-dimmed'}}">
+          <span class="comment-bubble {{ '' if run['num_comments'] else 'no-comment'}}">
           </span>
-          <span class="{{ '' if run['num_comments'] > 0 else 'no-comment-dimmed' }}">
+          <span class="{{ '' if run['num_comments'] else 'no-comment' }}">
             {{ run['num_comments'] }}
           </span>
         </td>
