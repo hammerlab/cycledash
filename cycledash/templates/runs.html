@@ -56,6 +56,7 @@
     <thead>
       <tr>
         <th></th>
+        <th></th>
         <th class="caller-name">Caller Name</th>
         <th class="dataset">Dataset</th>
         <th class="date">Submitted On</th>
@@ -65,6 +66,7 @@
     <tbody>
       {%- for run in runs %}
       <tr class="run" data-runId="{{ run['id'] }}">
+        <td class="{{ 'has-comment' if run['comment_vcf_id'] else ''}}"></td>
         <td class="run-id">
           <span class="run-id">{{ run['id'] }}</span>
           <a class="btn btn-default btn-xs" href="/runs/{{ run['id'] }}/examine">Examine</a>
