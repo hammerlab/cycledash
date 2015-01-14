@@ -13,7 +13,7 @@ from celery import chain
 from flask import (request, redirect, Response, render_template, jsonify,
                    url_for, send_file)
 import requests
-from sqlalchemy import select, desc
+from sqlalchemy import select, desc, func
 
 from cycledash import app, db
 import cycledash.genotypes as gt
@@ -60,11 +60,12 @@ def runs():
         return redirect(url_for('runs'))
     elif request.method == 'GET':
         with tables(db, 'vcfs', 'user_comments') as (con, vcfs, user_comments):
-            j = vcfs.outerjoin(user_comments, vcfs.c.id == user_comments.c.vcf_id)
+            joined = vcfs.outerjoin(user_comments, vcfs.c.id == user_comments.c.vcf_id)
             # distinct is needed because user_comments.vcf_id is duplicated across
             # user_comment rows
-            q = select(vcfs.c + [user_comments.c.vcf_id.label('comment_vcf_id')],
-                       distinct=True).select_from(j).order_by(desc(vcfs.c.id))
+            num_comments = func.count(user_comments.c.vcf_id).label('num_comments')
+            q = select(vcfs.c + [num_comments]).select_from(joined).group_by(
+                user_comments.c.vcf_id, vcfs.c.id).order_by(desc(vcfs.c.id))
             vcfs = [dict(v) for v in con.execute(q).fetchall()]
         if 'text/html' in request.accept_mimetypes:
             return render_template('runs.html', runs=vcfs, run_kvs=RUN_ADDL_KVS)

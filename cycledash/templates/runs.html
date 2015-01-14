@@ -56,17 +56,16 @@
     <thead>
       <tr>
         <th></th>
-        <th></th>
         <th class="caller-name">Caller Name</th>
         <th class="dataset">Dataset</th>
         <th class="date">Submitted On</th>
+        <th></th>
         <th></th>
       </tr>
     </thead>
     <tbody>
       {%- for run in runs %}
       <tr class="run" data-runId="{{ run['id'] }}">
-        <td class="{{ 'has-comment' if run['comment_vcf_id'] else ''}}"></td>
         <td class="run-id">
           <span class="run-id">{{ run['id'] }}</span>
           <a class="btn btn-default btn-xs" href="/runs/{{ run['id'] }}/examine">Examine</a>
@@ -79,9 +78,16 @@
           {%- if run['tumor_bam_uri'] %}<span class="label label-info" title="Has an associated tumor BAM">tumor</span>{% endif -%}
           {%- if run['normal_bam_uri'] %}<span class="label label-info" title="Has an associated normal BAM">normal</span>{% endif -%}
         </td>
+        <td class="comments">
+          <span class="comment-bubble {{ '' if run['num_comments'] > 0 else 'no-comment-dimmed'}}">
+          </span>
+          <span class="{{ '' if run['num_comments'] > 0 else 'no-comment-dimmed' }}">
+            {{ run['num_comments'] }}
+          </span>
+        </td>
       </tr>
       <tr class="run-info" data-runId="{{ run['id'] }}">
-        <td colspan=5>
+        <td colspan=6>
           <dl class="dl-horizontal">
             {% for name, key in run_kvs.iteritems() %}
             {%- if run.get(key) %}
