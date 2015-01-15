@@ -253,7 +253,7 @@ def _make_record_from_gt(genotype, info_fields, format_fields, samples):
                              gt['quality'],                        # QUAL
                              _maybe_split(gt['filters'], ','),     # FILTER
                              info,                                 # INFO
-                             ','.join(format_fields),              # FORMAT
+                             ':'.join(format_fields),              # FORMAT
                              [0],                               # sample_indexes
                              samples=samples)                   # samples/calls
 
