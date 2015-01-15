@@ -54,6 +54,7 @@ span.no-comment {
 }
 td.comments {
   text-align: right;
+  white-space: nowrap;
 }
 
 .runs .run-id, .runs .date {
