@@ -314,7 +314,7 @@ var VCFRecord = React.createClass({
       {'has-comment': _.has(this.props.record, 'comment')});
     var tds = [
       <td className={commentClasses} key='has-comment'></td>,
-      <td title="This record is a true positive.">
+      <td title="This record is a true positive." key='true-positive'>
         {this.props.record['tag:true-positive'] ? '✓' : ''}
       </td>,
       <td key='contig-position'
