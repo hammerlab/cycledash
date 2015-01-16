@@ -129,6 +129,7 @@ CycleDash uses [nosetests](https://nose.readthedocs.org/en/latest/) for Python t
 To run tests:
 
 ```
+source venv/bin/activate
 source ENV.sh  # make sure all our environment variables are around
 nosetests tests/python   # Run Python tests
 npm test   # Run JS tests
@@ -145,8 +146,12 @@ To run an individual JavaScript test, you can use:
 CycleDash uses dpxdt for perceptual diff testing. To update the reference screenshots:
 
 ```
+source venv/bin/activate
 dpxdt update tests/pdifftests
 ```
+
+Note: You don't need to source `./ENV.sh`, and doing so may break the pdiff
+tests (if, for example, you specify a TypeKit URL in your ENV.sh).
 
 Running `git status` after this should indicate whether the screenshots have changed.
 
