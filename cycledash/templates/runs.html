@@ -14,8 +14,9 @@
   {{ run_form() }}
 
   {% if last_comments -%}
-  <h4>Last {{ last_comments|length}} Comments: <a href="/comments" class="all-comments">(see all)</a></h4>
+  <h4 class="last-comments">Last {{ last_comments|length}} Comments:</h4>
   {{ comment_list(last_comments) }}
+  <a href="/comments" class="all-comments">See all…</a>
   {%- endif %}
 
   <table class="runs table condenses table-hover">
