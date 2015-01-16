@@ -96,18 +96,19 @@ var VCFTableHeader = React.createClass({
     var uberColumns = [],
         columnHeaders = [],
         sortBy = this.props.sortBys[0],
-        sorterClasses = React.addons.classSet({
+        posSorts = this.props.sortBys.filter(c => _.contains(['position', 'contig'], c.columnName)),
+        posSorterClasses = React.addons.classSet({
           'sort': true,
           'desc': sortBy.order === 'desc',
           'asc': sortBy.order === 'asc',
-          'sorting-by': _.contains(['position', 'contig'], sortBy.columnName)
+          'sorting-by': posSorts.length > 0
         }),
         leftSideTableHeaders = [
             <th className='has-comment tag' key='has-comment' />,
             <th className='true-positive tag' key='true-positive' />,
             <th key='contig-position' data-attribute='position'>
               contig:position
-              <a className={sorterClasses}
+              <a className={posSorterClasses}
                  onClick={this.handleSortByChange('position', 'contig')}></a>
             </th>,
             <th key='ref' className='ref'>REF</th>,
