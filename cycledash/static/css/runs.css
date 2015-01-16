@@ -11,6 +11,17 @@ form#submit {
 #show-submit {
   float: right;
 }
+
+/* Last comments list: */
+h4.last-comments {
+  margin-bottom: 5px;
+}
+a.all-comments {
+  font-size: 14px;
+  color: #adadad;
+}
+
+/* Runs table: */
 .runs.table {
   margin-top: 23px;
 }

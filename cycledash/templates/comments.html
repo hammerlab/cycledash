@@ -1,0 +1,13 @@
+{% extends "layouts/layout.html" %}
+{%- from 'macros/nav.html' import nav -%}
+{%- from 'macros/comments.html' import comment_list -%}
+
+{% block body %}
+{{ nav("runs") }}
+<main>
+  <section>
+    <h1>All Comments</h1>
+    {{ comment_list(comments) }}
+  </section>
+</main>
+{% endblock %}

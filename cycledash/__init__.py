@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+import humanize
 
 
 def initialize_application():
@@ -7,6 +8,7 @@ def initialize_application():
 
     _configure_application(app)
     _configure_logging(app)
+    _configure_templates(app)
 
     return app
 
@@ -30,6 +32,10 @@ def _configure_logging(app):
 def _configure_application(app):
     app.config.from_object('config')
 
+def _configure_templates(app):
+    @app.template_filter('humanize_date')
+    def humanize_date(time):
+        return humanize.naturalday(time)
 
 app = initialize_application()
 db = SQLAlchemy(app)
