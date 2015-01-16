@@ -157,8 +157,10 @@ var ColumnHeader = React.createClass({
   isSortable: function() {
     var props = this.props,
         hasValues = _.some(props.records, r =>
-                           _.isFinite(r[props.column.columnName]));
-    return (hasValues && _.contains(['Integer', 'Float'], props.info.type));
+                           _.isFinite(r[props.column.columnName])),
+        isSortableType = _.contains(['Integer', 'Float'], props.info.type),
+        isNotArray = props.info.number && props.info.number == 1;
+    return hasValues && isSortableType && isNotArray;
   },
   render: function() {
     var tooltip;
@@ -205,12 +207,14 @@ var InfoColumnTooltip = React.createClass({
   render: function() {
     var infoText = this.props.info.description,
         infoType = this.props.info.type,
+        number = this.props.info.number,
         path = this.props.column.path.join(' → ');
     return (
       <div className='tooltip'>
         <p className='description'>{infoText}</p>
         <p className='description'>{path}</p>
         <p className='type'>Type: <strong>{infoType}</strong></p>
+        <p className='number'>Num: <strong>{number}</strong></p>
       </div>
     );
   }

@@ -55,7 +55,7 @@ describe('DataUtils', function() {
       'sample:RD': 22,
       'sample:AD': 22,
       'sample:FREQ': '50%',
-      'sample:DP4': '16,6,9,13',
+      'sample:DP4': [16, 6, 9, 13],
       sample_name: 'NORMAL'
     }, records[0]);
     // Record 1 is the same as record 0, except for sample fields.
