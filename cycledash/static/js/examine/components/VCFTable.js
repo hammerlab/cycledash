@@ -78,11 +78,6 @@ var VCFTableHeader = React.createClass({
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
   },
   handleSortByChange: function(columnNames) {
-    if (arguments.length == 1) {
-      columnNames = [columnNames];
-    } else {
-      columnNames = _.toArray(arguments);
-    }
     return (e) => {
       var sortBys = _.map(columnNames, (columnName) => {
         var sortBy = _.findWhere(this.props.sortBys, {columnName}),
@@ -95,12 +90,11 @@ var VCFTableHeader = React.createClass({
   render: function() {
     var uberColumns = [],
         columnHeaders = [],
-        sortBy = this.props.sortBys[0],
         posSorts = this.props.sortBys.filter(c => _.contains(['position', 'contig'], c.columnName)),
         posSorterClasses = React.addons.classSet({
           'sort': true,
-          'desc': sortBy.order === 'desc',
-          'asc': sortBy.order === 'asc',
+          'desc': posSorts[0] && posSorts[0].order === 'desc',
+          'asc': posSorts[0] && posSorts[0].order === 'asc',
           'sorting-by': posSorts.length > 0
         }),
         leftSideTableHeaders = [
@@ -109,7 +103,7 @@ var VCFTableHeader = React.createClass({
             <th key='contig-position' data-attribute='position'>
               contig:position
               <a className={posSorterClasses}
-                 onClick={this.handleSortByChange('position', 'contig')}></a>
+                 onClick={this.handleSortByChange(['position', 'contig'])}></a>
             </th>,
             <th key='ref' className='ref'>REF</th>,
             <th key='arrow' className='arrow'>→</th>,
@@ -126,7 +120,7 @@ var VCFTableHeader = React.createClass({
       );
       for (var columnName in columns) {
         var column = columns[columnName],
-            sortHandle = this.handleSortByChange(column.path.join(':'));
+            sortHandle = this.handleSortByChange([column.path.join(':')]);
 
         columnHeaders.push(<ColumnHeader info={column.info}
                                          key={column.path.join(':')}
