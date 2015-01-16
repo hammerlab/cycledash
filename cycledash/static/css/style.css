@@ -10,3 +10,29 @@ section {
   margin: auto;
 }
 img.cycle { float: right; }
+
+.comments {
+  list-style: none;
+}
+.comments .run-id {
+  font-weight: bold;
+}
+.comments .run-id a {
+  color: black;
+}
+.comments .location {
+  padding-left: 7px;
+}
+.comments .summary {
+  padding-left: 20px;
+}
+.comments .summary:before {
+  content: '“';
+  font-size: 19px;
+  padding-right: 5px;
+}
+.comments .summary:after {
+  content: '”';
+  font-size: 19px;
+  padding-left: 5px;
+}

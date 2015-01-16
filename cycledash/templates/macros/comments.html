@@ -1,0 +1,13 @@
+{% macro comment_list(comments) -%}
+<ul class="comments">
+  {% for comment in comments -%}
+  <li>
+    <span class="run-id">
+      <a href="/runs/{{ comment['vcf_id'] }}/examine">Run {{ comment['vcf_id'] }}</a>
+    </span>
+    <span class="location">{{ comment['contig'] }}:{{ comment['position'] }}</span>
+    <span class="summary">{{ comment['comment_text']|truncate(80)}}</span>
+  </li>
+  {% endfor -%}
+</ul>
+{%- endmacro %}

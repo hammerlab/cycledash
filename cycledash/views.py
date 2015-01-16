@@ -65,8 +65,13 @@ def runs():
             q = select(vcfs.c + [num_comments]).select_from(joined).group_by(
                 vcfs.c.id).order_by(desc(vcfs.c.id))
             vcfs = [dict(v) for v in con.execute(q).fetchall()]
+
+            q = select(user_comments.c).order_by(
+                desc(user_comments.c.last_modified)).limit(5)
+            last_comments = [dict(c) for c in con.execute(q).fetchall()]
         if 'text/html' in request.accept_mimetypes:
-            return render_template('runs.html', runs=vcfs, run_kvs=RUN_ADDL_KVS)
+            return render_template('runs.html', runs=vcfs, run_kvs=RUN_ADDL_KVS,
+                                   last_comments=last_comments)
         elif 'application/json' in request.accept_mimetypes:
             return jsonify({'runs': vcfs})
 
@@ -91,6 +96,14 @@ def download_vcf(run_id):
     filename = VCF_FILENAME.format(run_id)
     return send_file(fd, as_attachment=True, attachment_filename=filename)
 
+
+@app.route('/comments')
+def all_comments():
+    with tables(db, 'user_comments') as (con, user_comments):
+        q = select(user_comments.c).order_by(
+            desc(user_comments.c.last_modified))
+        comments = [dict(c) for c in con.execute(q).fetchall()]
+    return render_template('comments.html', comments=comments)
 
 @app.route('/runs/<vcf_id>/comments', methods=['GET', 'POST'])
 def comments(vcf_id):

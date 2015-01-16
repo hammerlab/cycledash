@@ -1,5 +1,7 @@
 {% extends "layouts/layout.html" %}
 {%- from 'macros/nav.html' import nav -%}
+{%- from 'macros/run_form.html' import run_form -%}
+{%- from 'macros/comments.html' import comment_list -%}
 
 {% block head %}
 <link rel="stylesheet" href="static/css/runs.css">
@@ -9,48 +11,12 @@
 {{ nav("runs") }}
 <main>
   <h2>Runs Directory <button id="show-submit" class="btn btn-default">Submit New Run</button></h2>
-  <form method="POST" action="/runs" role="form" id="submit">
-    <h2><button type="button" class="close" aria-hidden="true">&times;</button></h3>
-      <div class="form-group">
-        <label>Variant Caller Name:</label>
-        <input class="form-control" type="text" name="variantCallerName"
-               placeholder="Guacamole::Somatic">
-      </div>
-      <div class="form-group">
-        <label>Dataset Name:</label>
-        <input class="form-control" type="text" name="dataset"
-               placeholder="DREAM training chr20">
-      </div>
-      <div class="form-group">
-        <label>VCF Path:</label>
-        <input class="uploadable form-control" type="text" name="vcfPath"
-               placeholder="/data/somevcf.vcf">
-      </div>
-      <div class="form-group">
-        <label>Truth VCF Path:</label>
-        <input class="uploadable form-control" type="text" name="truthVcfPath"
-               placeholder="/data/true_somevcf.vcf">
-      </div>
-      <br/>
-      <h4>Optional <small>all paths should be HDFS paths to canonical data</small></h4>
-      <div class="form-group">
-        <label>Tumor BAM:</label>
-        <input class="form-control" type="text" name="tumorPath"
-               placeholder="/data/dream/tumor.chr20.bam">
-      </div>
-      <div class="form-group">
-        <label>Normal BAM:</label>
-        <input class="form-control" type="text" name="normalPath"
-               placeholder="/data/dream/normal.chr20.bam">
-      </div>
-      <div class="form-group">
-        <label>Notes, Config, Params:</label>
-        <textarea class="form-control" rows="3" name="params"
-                  placeholder="command line parameters here"></textarea>
-      </div>
+  {{ run_form() }}
 
-      <button type="submit" class="btn btn-success btn-block">Submit New Run</button>
-  </form>
+  {% if last_comments -%}
+  <h4>Last {{ last_comments|length}} Comments: <a href="/comments" class="all-comments">(see all)</a></h4>
+  {{ comment_list(last_comments) }}
+  {%- endif %}
 
   <table class="runs table condenses table-hover">
     <thead>
