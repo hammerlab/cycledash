@@ -14,7 +14,7 @@
 ##FORMAT=<ID=RD,Number=1,Type=Integer,Description="Depth of reference-supporting bases (reads1)">
 ##FORMAT=<ID=AD,Number=1,Type=Integer,Description="Depth of variant-supporting bases (reads2)">
 ##FORMAT=<ID=FREQ,Number=1,Type=String,Description="Variant allele frequency">
-##FORMAT=<ID=DP4,Number=1,Type=String,Description="Strand read counts: ref/fwd, ref/rev, var/fwd, var/rev">
+##FORMAT=<ID=DP4,Number=4,Type=Integer,Description="Strand read counts: ref/fwd, ref/rev, var/fwd, var/rev">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NORMAL	TUMOR
 20	61795	.	G	T	.	PASS	DP=81;SS=1;SSC=2;GPV=4.6768E-16;SPV=5.4057E-1	GT:GQ:DP:RD:AD:FREQ:DP4	0/1:.:44:22:22:50%:16,6,9,13	0/1:.:37:18:19:51.35%:10,8,10,9
 20	62731	.	C	A	.	PASS	DP=68;SS=1;SSC=1;GPV=1.4855E-11;SPV=7.5053E-1	GT:GQ:DP:RD:AD:FREQ:DP4	0/1:.:32:17:15:46.88%:9,8,9,6	0/1:.:36:21:15:41.67%:8,13,8,7
