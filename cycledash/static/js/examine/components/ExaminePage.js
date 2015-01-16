@@ -27,8 +27,8 @@ var ExaminePage = React.createClass({
       this.setState(this.props.recordStore.getState());
     });
   },
-  handleSortByChange: function({columnName, order}) {
-    this.props.recordActions.updateSortBy({columnName, order});
+  handleSortByChange: function(sortBys) {
+    this.props.recordActions.updateSortBys(sortBys);
   },
   handleRequestPage: function() {
     this.props.recordActions.requestPage();

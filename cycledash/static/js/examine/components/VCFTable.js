@@ -77,32 +77,38 @@ var VCFTableHeader = React.createClass({
     handleSortByChange: React.PropTypes.func.isRequired,
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
   },
-  handleSortByChange: function(columnName) {
+  handleSortByChange: function(columnNames) {
     return (e) => {
-      var sortBy = this.props.sortBys[0],
-          order = 'asc';
-      if (sortBy && sortBy.columnName == columnName) {
-        order = sortBy.order == 'asc' ? 'desc' : 'asc';
-      }
-      this.props.handleSortByChange({columnName, order});
+      var sortBys = _.map(columnNames, (columnName) => {
+        var sortBy = _.findWhere(this.props.sortBys, {columnName}),
+            order = sortBy && sortBy.order == 'asc' ? 'desc' : 'asc';
+        return {columnName, order};
+      });
+      this.props.handleSortByChange(sortBys);
     };
   },
   render: function() {
-    var uberColumns = [];
-    var columnHeaders = [];
-    var leftSideTableHeaders = [
-      <th className='has-comment tag' key='has-comment' />,
-      <th className='true-positive tag' key='true-positive' />,
-      <th key='contig-position' data-attribute='position'>
-        contig:position
-        <a className={sorterClasses}
-          onClick={this.handleSortByChange('position')}>
-        </a>
-      </th>,
-      <th key='ref' className='ref'>REF</th>,
-      <th key='arrow' className='arrow'>→</th>,
-      <th key='alt' className='alt'>ALT</th>
-    ];
+    var uberColumns = [],
+        columnHeaders = [],
+        posSorts = this.props.sortBys.filter(c => _.contains(['position', 'contig'], c.columnName)),
+        posSorterClasses = React.addons.classSet({
+          'sort': true,
+          'desc': posSorts[0] && posSorts[0].order === 'desc',
+          'asc': posSorts[0] && posSorts[0].order === 'asc',
+          'sorting-by': posSorts.length > 0
+        }),
+        leftSideTableHeaders = [
+            <th className='has-comment tag' key='has-comment' />,
+            <th className='true-positive tag' key='true-positive' />,
+            <th key='contig-position' data-attribute='position'>
+              contig:position
+              <a className={posSorterClasses}
+                 onClick={this.handleSortByChange(['position', 'contig'])}></a>
+            </th>,
+            <th key='ref' className='ref'>REF</th>,
+            <th key='arrow' className='arrow'>→</th>,
+            <th key='alt' className='alt'>ALT</th>
+        ];
 
     _.each(this.props.columns, (columns, topLevelColumnName) => {
       uberColumns.push(
@@ -114,7 +120,7 @@ var VCFTableHeader = React.createClass({
       );
       for (var columnName in columns) {
         var column = columns[columnName],
-            sortHandle = this.handleSortByChange(column.path.join(':'));
+            sortHandle = this.handleSortByChange([column.path.join(':')]);
 
         columnHeaders.push(<ColumnHeader info={column.info}
                                          key={column.path.join(':')}
@@ -123,14 +129,6 @@ var VCFTableHeader = React.createClass({
                                          records={this.props.records}
                                          handleSortByChange={sortHandle} />);
       }
-    });
-
-    var sortBy = this.props.sortBys[0];
-    var sorterClasses = React.addons.classSet({
-      'sort': true,
-      'desc': sortBy.order === 'desc',
-      'asc': sortBy.order === 'asc',
-      'sorting-by': sortBy.columnName == 'position'
     });
 
     return (

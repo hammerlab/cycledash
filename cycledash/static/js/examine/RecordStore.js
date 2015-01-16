@@ -73,7 +73,7 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
   function receiver(action) {
     switch(action.actionType) {
       case ACTION_TYPES.SORT_BY:
-        updateSortBys(action.columnName, action.order);
+        updateSortBys(action.sortBys);
         ignorePendingRequests();
         updateGenotypes({append: false});
         break;
@@ -371,14 +371,12 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
   }
 
   /**
-   * Updates the sortBys by columnName and order.
+   * Updates the sortBys.
    *
    * NB: mutates store state!
    */
-  function updateSortBys(columnName, order) {
-    // Right now, we just sort by one column (this will change on CQL
-    // integration).
-    sortBys = [{columnName, order}];
+  function updateSortBys(newSortBys) {
+    sortBys = newSortBys;
   }
 
   /**

@@ -13,11 +13,10 @@ var ACTION_TYPES = {
 
 function getRecordActions(dispatcher) {
   return {
-    updateSortBy: function({columnName, order}) {
+    updateSortBys: function(sortBys) {
       dispatcher.dispatch({
         actionType: ACTION_TYPES.SORT_BY,
-        columnName,
-        order
+        sortBys
       });
     },
     setQuery: function(query) {
