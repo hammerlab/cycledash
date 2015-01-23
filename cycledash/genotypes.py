@@ -431,9 +431,13 @@ def _annotate_query_with_types(query, vcf_spec):
     """Adds a columnType field to each filter and sortBy in query."""
     operations = query.get('sortBy', []) + query.get('filters', [])
     for operation in operations:
-        info = _find_column(vcf_spec, operation['columnName'])
+        name = operation['columnName']
+        info = _find_column(vcf_spec, name)
         if not info:
-            operation['columnType'] = 'string'
+            if name == 'position':
+                operation['columnType'] = 'integer'
+            else:
+                operation['columnType'] = 'string'
             continue
         column_type = info.get('info', {}).get('type', 'string').lower()
         operation['columnType'] = column_type
