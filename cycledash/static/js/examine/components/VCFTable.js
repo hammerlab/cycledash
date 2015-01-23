@@ -305,8 +305,7 @@ var VCFRecord = React.createClass({
       this.props.handleSelectRecord(this.props.record);
     }
   },
-  formatCell: function(column) {
-    var val = this.props.record[column.path.join(':')];
+  formatCell: function(val) {
     return val === null ? '-' : String(val);
   },
   render: function() {
@@ -332,10 +331,11 @@ var VCFRecord = React.createClass({
     ];
     _.each(this.props.columns, (columns, topLevelColumnName) => {
       for (var columnName in columns) {
-        var column = columns[columnName];
+        var column = columns[columnName],
+            val = this.props.record[column.path.join(':')];
         tds.push(
-          <td key={column.path.join(':')} title={column.path.join('→')}>
-            {this.formatCell(column)}
+          <td key={column.path.join(':')} title={val}>
+            {this.formatCell(val)}
           </td>
         );
       }
