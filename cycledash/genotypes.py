@@ -4,7 +4,9 @@ import copy
 
 from sqlalchemy import (select, func, types, cast, join, outerjoin, asc, desc,
                         and_, Integer, Float, String)
+from sqlalchemy.sql import text
 from sqlalchemy.sql.expression import label, column
+from sqlalchemy.sql.functions import coalesce
 import vcf as pyvcf
 from plone.memoize import forever
 
@@ -108,9 +110,9 @@ def get(vcf_id, query, with_stats=True, truth_vcf_id=None):
         q = _add_filters(q, g, query.get('filters'))
         q = _add_orderings(q, g, query.get('sortBy'))
         q = _add_paging(q, g, query.get('limit'), query.get('page'))
-        q = q.order_by(asc(func.length(g.c.contig)),
-                       asc(g.c.contig),
-                       asc(g.c.position))
+
+        q = _add_ordering(q, g, 'String', 'contig', 'asc')
+        q = _add_ordering(q, g, 'Integer', 'position', 'asc')
 
         genotypes = [dict(g) for g in con.execute(q).fetchall()]
     stats = calculate_stats(vcf_id, truth_vcf_id, query) if with_stats else {}
@@ -231,12 +233,16 @@ def _add_orderings(sql_query, table, sort_by):
 def _add_ordering(sql_query, table, column_type, column_name, order):
     # Special case for this column, which sorts contigs correctly:
     if column_name == 'contig':
+        contig_num_col = "SUBSTRING({} FROM '^\d+')".format(table.c.contig)
+        # 1000 used here to mean "should be at the end of all the numbers",
+        # assuming we never hit a contig >= 1000.
+        contig_num_col = coalesce(cast(text(contig_num_col), type_=Integer), 1000)
         contig_len_col = func.length(table.c.contig)
         contig_col = table.c.contig
         if order == 'desc':
             contig_len_col = desc(contig_len_col)
             contig_col = desc(contig_col)
-        return sql_query.order_by(contig_len_col, contig_col)
+        return sql_query.order_by(contig_num_col, contig_len_col, contig_col)
     sqla_type = vcf_type_to_sqla_type(column_type)
     column = cast(table.c[column_name], type_=sqla_type)
     column = {'asc': asc(column), 'desc': desc(column)}.get(order)
