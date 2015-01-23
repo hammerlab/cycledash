@@ -191,6 +191,9 @@ body {
   border: none;
   font-size: 13px;
   white-space: nowrap;
+  max-width: 95px;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
 }
 table.vcf-table {
   border-collapse: collapse;
