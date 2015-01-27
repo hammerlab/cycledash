@@ -14,6 +14,9 @@ form#submit .form-control {
 form#submit .form-control::-webkit-input-placeholder {
   color: #adadad;
 }
+form#submit .form-control::-moz-placeholder {
+  color: #adadad;
+}
 #show-submit {
   float: right;
 }
