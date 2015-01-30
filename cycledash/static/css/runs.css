@@ -8,6 +8,15 @@ form#submit {
   display: none;
   max-width: 500px;
 }
+form#submit .form-control {
+  color: black;
+}
+form#submit .form-control::-webkit-input-placeholder {
+  color: #adadad;
+}
+form#submit .form-control::-moz-placeholder {
+  color: #adadad;
+}
 #show-submit {
   float: right;
 }
