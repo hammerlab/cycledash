@@ -92,6 +92,7 @@ JSON should be POSTed to `/runs` with following fields:
 
 **Optional**<br />
 `dataset` -- The name of the dataset on which the caller was run (e.g. Dream Chromosome 20).<br />
+`projectName` -- The name of the project this run belongs to.
 `tumorPath` -- The path on HDFS of the tumor BAM on which the caller was run.<br />
 `normalPath` -- The path on HDFS of the normalBAM on which the caller was run.<br />
 `params` -- Params that the caller was run with, or other notes relevant to the run.<br />

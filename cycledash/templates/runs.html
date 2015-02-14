@@ -19,58 +19,12 @@
   <a href="/comments" class="all-comments">See all…</a>
   {%- endif %}
 
-  <table class="runs table condenses table-hover">
-    <thead>
-      <tr>
-        <th></th>
-        <th class="caller-name">Caller Name</th>
-        <th class="dataset">Dataset</th>
-        <th class="date">Submitted On</th>
-        <th></th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      {%- for run in runs %}
-      <tr class="run" data-runId="{{ run['id'] }}">
-        <td class="run-id">
-          <span class="run-id">{{ run['id'] }}</span>
-          <a class="btn btn-default btn-xs" href="/runs/{{ run['id'] }}/examine">Examine</a>
-        </td>
-        <td class="caller-name">{{ run['caller_name'] }}</td>
-        <td class="dataset">{{ run['dataset_name'] }}</td>
-        <td class="date" title="{{ run['created_at'] }}">{{ run['created_at'].strftime('%Y-%m-%d') }}</td>
-        <td class="labels">
-          {%- if run['validation_vcf'] %}<span class="label label-info" title="Is a validation VCF">validation</span>{% endif -%}
-          {%- if run['tumor_bam_uri'] %}<span class="label label-info" title="Has an associated tumor BAM">tumor</span>{% endif -%}
-          {%- if run['normal_bam_uri'] %}<span class="label label-info" title="Has an associated normal BAM">normal</span>{% endif -%}
-        </td>
-        <td class="comments">
-          <span class="comment-bubble {{ '' if run['num_comments'] else 'no-comment'}}">
-          </span>
-          <span class="{{ '' if run['num_comments'] else 'no-comment' }}">
-            {{ run['num_comments'] }}
-          </span>
-        </td>
-      </tr>
-      <tr class="run-info" data-runId="{{ run['id'] }}">
-        <td colspan=6>
-          <dl class="dl-horizontal">
-            {% for name, key in run_kvs.iteritems() %}
-            {%- if run.get(key) %}
-            <dt>{{ name }}</dt> <dd>{{ run[key] }}</dd>
-            {% endif -%}
-            {% endfor %}
-          </dl>
-        </td>
-      </tr>
-      {% endfor -%}
-    </tbody>
-  </table>
-  <main>
-    <script type="text/javascript" src="/static/js/dist/bundled.js"></script>
-    <script>
-     window.activateRunsUI();
-    </script>
-
-    {% endblock %}
+  <div id="runs"></div>
+</main>
+<script type="text/javascript" src="/static/js/dist/bundled.js"></script>
+<script>
+ window.renderRunPage(document.getElementById('runs'),
+                      {{ runs | tojson }},
+                      {{ run_kvs | tojson}});
+</script>
+{% endblock %}
