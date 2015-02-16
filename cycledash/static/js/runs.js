@@ -12,13 +12,18 @@ var NO_FILTER = '----';
 var RunsPage = React.createClass({
   propTypes: {
     runs: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-    runKeyVals: React.PropTypes.object.isRequired
+    runDescriptionTitleKeys: React.PropTypes.object.isRequired
   },
   getInitialState: function() {
     return {selectedRunId: null, projectFilter: null};
   },
   filteredRuns: function() {
-    return this.props.runs.filter(run => (this.state.projectFilter === null) || this.state.projectFilter.match(run.project_name) );
+    return this.props.runs.filter(run => {
+      var filter = this.state.projectFilter,
+          noFilter = filter === null,
+          matches = filter && filter.match(run.project_name);
+      return noFilter || matches;
+    });
   },
   handleClickRun: function(runId) {
     return () => {
@@ -31,12 +36,20 @@ var RunsPage = React.createClass({
   },
   render: function() {
     var projectNames = _.unique(_.pluck(this.props.runs, 'project_name'));
-    var projects = projectNames.map(name => <option value={name} key={name ? name : NO_FILTER}>{name ? name : NO_FILTER}</option>);
+    var projects = projectNames.map(name => {
+      return (
+          <option value={name} key={name ? name : NO_FILTER}>
+            {name ? name : NO_FILTER}
+          </option>
+      );
+    });
     var runs = this.filteredRuns();
     var rows = runs.map((run) => {
-      var rows = [<RunRow run={run} key={run.id} handleClick={this.handleClickRun(run.id)} />];
+      var rows = [<Run run={run} key={run.id} handleClick={this.handleClickRun(run.id)} />];
       if (run.id === this.state.selectedRunId) {
-        rows.push(<RowValues run={run} runKeyVals={this.props.runKeyVals} key={'row-values-'+run.id} />);
+        rows.push(<RunDescription run={run}
+                                   runDescriptionTitleKeys={this.props.runDescriptionTitleKeys}
+                                   key={'row-values-'+run.id} />);
       }
       return rows;
     });
@@ -66,7 +79,7 @@ var RunsPage = React.createClass({
   }
 });
 
-var RunRow = React.createClass({
+var Run = React.createClass({
   propTypes: {
     run: React.PropTypes.object.isRequired,
     handleClick: React.PropTypes.func.isRequired
@@ -82,21 +95,21 @@ var RunRow = React.createClass({
         <td className='caller-name'>{ run.caller_name }</td>
         <td className='dataset'>{ run.dataset_name }</td>
         <td className='date' title='{ run.created_at }'>{ run.created_at }</td>
-        <RowLabels run={run} />
-        <RowComments run={run} />
+        <RunLabels run={run} />
+        <RunComments run={run} />
       </tr>
     );
   }
 });
 
-var RowValues = React.createClass({
+var RunDescription = React.createClass({
   propTypes: {
     run: React.PropTypes.object.isRequired,
-    runKeyVals: React.PropTypes.object.isRequired
+    runDescriptionTitleKeys: React.PropTypes.object.isRequired
   },
   render: function() {
     var run = this.props.run,
-        descriptions = _.reduce(this.props.runKeyVals, function(acc, key, title) {
+        descriptions = _.reduce(this.props.runDescriptionTitleKeys, function(acc, key, title) {
           if (run[key]) {
             acc.push(<dt key={'dt'+key}>{ title }</dt>);
             acc.push(<dd key={'dd'+key}>{ run[key] }</dd>);
@@ -115,23 +128,43 @@ var RowValues = React.createClass({
   }
 });
 
-var RowLabels = React.createClass({
+var RunLabels = React.createClass({
   propTypes: {
     run: React.PropTypes.object.isRequired
   },
   render: function() {
-    var run = this.props.run;
+    var run = this.props.run,
+        labels = [];
+    if (run.validation_vcf) {
+      labels.push(<span className='label label-info'
+                        title='Is a validation VCF'
+                        key='valid-label'>
+                    validation
+                  </span>);
+    }
+    if (run.tumor_bam_uri) {
+      labels.push(<span className='label label-info'
+                        title='Has an associated tumor BAM'
+                        key='tumor-bam-label'>
+                    tumor
+                  </span>);
+    }
+    if (run.normal_bam_uri) {
+      labels.push(<span className='label label-info'
+                        title='Has an associated normal BAM'
+                        key='normal-bam-label'>
+                    normal
+                  </span>);
+    }
     return (
         <td className='labels'>
-          { run.validation_vcf ? <span className='label label-info' title='Is a validation VCF'>validation</span> : null }
-          { run.tumor_bam_uri ? <span className='label label-info' title='Has an associated tumor BAM'>tumor</span> : null }
-          { run.normal_bam_uri ? <span className='label label-info' title='Has an associated normal BAM'>normal</span> : null }
+          {labels}
         </td>
     );
   }
 });
 
-var RowComments = React.createClass({
+var RunComments = React.createClass({
   propTypes: {
     run: React.PropTypes.object.isRequired
   },
@@ -190,8 +223,9 @@ function extractError(response) {
 }
 
 
-window.renderRunPage = function(el, runs, runKeyVals) {
-  React.render(<RunsPage runs={runs} runKeyVals={runKeyVals} />, el);
+window.renderRunPage = function(el, runs, runDescriptionTitleKeys) {
+  React.render(<RunsPage runs={runs}
+                         runDescriptionTitleKeys={runDescriptionTitleKeys} />, el);
 
   d3.select('#show-submit')
       .on('click', function() {
