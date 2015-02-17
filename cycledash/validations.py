@@ -23,6 +23,7 @@ CreateRunSchema = Schema({
     'is_validation': bool,
     'params': unicode,
     'dataset': unicode,
+    'project_name': unicode,
     'vcf_header': unicode
 })
 
@@ -35,6 +36,7 @@ UpdateRunSchema = Schema({
     'is_validation': bool,
     'params': unicode,
     'dataset': unicode,
+    'project_name': unicode,
     'vcf_header': unicode,
     'true_positive': Coerce(int),
     'false_positive': Coerce(int),

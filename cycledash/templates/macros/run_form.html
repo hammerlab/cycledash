@@ -12,6 +12,11 @@
              placeholder="DREAM training chr20">
     </div>
     <div class="form-group">
+      <label>Project:</label>
+      <input class="form-control" type="text" name="projectName"
+             placeholder="PT0123">
+    </div>
+    <div class="form-group">
       <label>VCF Path:</label>
       <input class="uploadable form-control" type="text" name="vcfPath"
              placeholder="/data/somevcf.vcf">
@@ -38,7 +43,7 @@
       <textarea class="form-control" rows="3" name="params"
                 placeholder="command line parameters here"></textarea>
     </div>
-    
+
     <button type="submit" class="btn btn-success btn-block">Submit New Run</button>
 </form>
 {%- endmacro -%}

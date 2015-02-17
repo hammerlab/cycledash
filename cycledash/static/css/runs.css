@@ -42,7 +42,6 @@ tr.run.selected {
   font-weight: 500;
 }
 tr.run-info {
-  display: none;
   background: rgb(247, 252, 253);
 }
 tr.run-info ul {

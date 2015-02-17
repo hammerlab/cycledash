@@ -3,6 +3,9 @@ CREATE TABLE vcfs (
        created_at TIMESTAMP DEFAULT statement_timestamp() NOT NULL,
        caller_name TEXT NOT NULL, -- Name of the caller this came from.
        dataset_name TEXT NOT NULL, -- Name of the dataset VCF is from (e.g. Synth4, PC7114)
+
+       project_name TEXT, -- Name of the project (research, patient, etc) this VCF is part of.
+
        tumor_bam_uri TEXT, -- URI of tumor BAM
        normal_bam_uri TEXT, -- URI of normal BAM
        validation_vcf BOOLEAN DEFAULT false, -- whether or not this is a validation VCF

@@ -38,7 +38,8 @@ WEBHDFS_OPEN_OP = '?user.name={}&op=OPEN'.format(app.config['WEBHDFS_USER'])
 RUN_ADDL_KVS = {'Tumor BAM': 'tumor_bam_uri',
                 'Normal BAM': 'normal_bam_uri',
                 'VCF URI': 'uri',
-                'Notes': 'notes'}
+                'Notes': 'notes',
+                'Project': 'project_name'}
 
 VCF_FILENAME = 'cycledash-run-{}.vcf'
 
