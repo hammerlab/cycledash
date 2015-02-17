@@ -78,6 +78,18 @@ tests:
           $('[class="variant-info"]').find('button:contains("Edit")').get(0).dispatchEvent(c)
         }, 250);
 
+  - name: examine-bad-query
+    description: Examine page showing a poorly formed query
+    url: http://localhost:5001/runs/1/examine
+    config:
+      <<: *std-config
+      injectJs: |
+        setTimeout(function() {
+          q = $('.query-status').first();
+          q.removeClass('good');
+          q.addClass('bad');
+        }, 250);
+
   - name: runs
     description: Initial view of the runs page
     url: http://localhost:5001/

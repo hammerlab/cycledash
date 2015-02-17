@@ -103,7 +103,7 @@ var QueryBox = React.createClass({
   componentWillUnmount: function() {
     $(document).off('keydown.cqlbox');
   },
-  
+
   // Update the CQL box to reflect this.props.query.
   setQueryBoxToQuery: function() {
     if (document.activeElement == this.refs.input.getDOMNode()) {
