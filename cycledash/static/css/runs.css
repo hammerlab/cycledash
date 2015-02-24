@@ -22,8 +22,11 @@ form#submit .form-control::-moz-placeholder {
 }
 
 /* Last comments list: */
+div.comments {
+  margin: 29px 0 29px 0;
+}
 h4.last-comments {
-  margin-bottom: 5px;
+ margin-bottom: 5px;
 }
 a.all-comments {
   font-size: 14px;
