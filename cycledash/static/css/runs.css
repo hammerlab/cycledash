@@ -22,7 +22,7 @@ form#submit .form-control::-moz-placeholder {
 
 /* Last comments list: */
 div.comments {
-  margin: 29px 0 29px 0;
+  margin: 29px 0;
 }
 h4.last-comments {
  margin-bottom: 5px;
@@ -70,7 +70,7 @@ span.comment-bubble {
   height: 15px;
   display: inline-block;
 }
-span.no-comment {
+.no-comment > span {
   opacity: 0.3;
 }
 td.comments {

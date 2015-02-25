@@ -11,13 +11,23 @@ var NO_FILTER = '----';
 var RunsPage = React.createClass({
   propTypes: {
     runs: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+
+    // This is a map from titles to keys in `run` objects that are optionally
+    // there to appear in the description field of an expanded RunRow.
     runDescriptionTitleKeys: React.PropTypes.object.isRequired,
+
     comments: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+
+    // This is a map containing possible completions for typeahead in the
+    // SubmitRunForm.
+    // { variantCallerNames: ['forexample', 'guacamole', 'Strelka'], ... };
     completions: React.PropTypes.object.isRequired
   },
   getInitialState: function() {
-    return {selectedRunId: null, projectFilter: null,
-            showForm: false, draggingOver: false};
+    return {selectedRunId: null,
+            projectFilter: null,
+            showForm: false,
+            draggingOver: false};
   },
   filteredRuns: function() {
     return this.props.runs.filter(run => {
@@ -37,14 +47,11 @@ var RunsPage = React.createClass({
     var val = evt.target.value;
     this.setState({projectFilter: val === NO_FILTER ? null : val});
   },
-  handleShowForm: function(show) {
-    return () => this.setState({showForm: show});
+  createDisplayFormHandler: function(showForm) {
+    return () => this.setState({showForm});
   },
-  handleDragOver: function() {
-    this.setState({draggingOver: true});
-  },
-  handleDragLeave: function() {
-    this.setState({draggingOver: false});
+  createDragOverHandler: function(over) {
+    return () => this.setState({draggingOver: over});
   },
   render: function() {
     var projectNames = _.chain(this.props.runs)
@@ -53,17 +60,16 @@ var RunsPage = React.createClass({
         .filter(p => p)
         .sortBy(p => p)
         .value();
-    var projects = projectNames.map(name => {
+    var projectOptions = [NO_FILTER].concat(projectNames).map(name => {
       return <option value={name} key={name}>{name}</option>;
     });
-    projects.unshift(<option value={NO_FILTER} key={NO_FILTER}>{NO_FILTER}</option>);
     var runs = this.filteredRuns();
-    var rows = runs.map((run) => {
-      var rows = [<Run run={run} key={run.id}
-                       handleClick={this.handleClickRun(run.id)} />];
+    var rows = runs.map(run => {
+      var rows = [<RunRow run={run} key={run.id}
+                          handleClick={this.handleClickRun(run.id)} />];
       if (run.id === this.state.selectedRunId) {
         var runDescription = (
-            <RunDescription
+            <RunDescriptionRow
               run={run}
               runDescriptionTitleKeys={this.props.runDescriptionTitleKeys}
               key={'row-values-'+run.id} />);
@@ -71,28 +77,23 @@ var RunsPage = React.createClass({
       }
       return rows;
     });
-    var completions = this.props.completions;
-    var form = <SubmitRunForm variantCallerNames={completions.variantCallerNames}
-                              datasetNames={completions.datasetNames}
-                              projectNames={completions.projectNames}
-                              normalBamPaths={completions.normalBamPaths}
-                              tumorBamPaths={completions.tumorBamPaths}
-                              handleClose={this.handleShowForm(false)}
-                              handleDrop={this.handleDragLeave} />;
+    var form = <SubmitRunForm completions={this.props.completions}
+                              handleClose={this.createDisplayFormHandler(false)}
+                              handleDrop={this.createDragOverHandler(false)} />;
     return (
-      <div onDragOver={this.handleDragOver} onDragLeave={this.handleDragLeave}
-           className={this.state.draggingOver ? 'dragging-over' : '' }>
+      <div onDragOver={this.createDragOverHandler(true)} onDragLeave={this.createDragOverHandler(false)}
+           className={this.state.draggingOver ? 'dragging-over' : ''}>
         <h2>Runs Directory
           { !this.state.showForm ?
             <button id='show-submit' className='btn btn-default'
-                    onClick={this.handleShowForm(true)}>Submit New Run</button>
+                    onClick={this.createDisplayFormHandler(true)}>Submit New Run</button>
             : null }
         </h2>
         { this.state.showForm ? form : null }
         <LatestComments comments={this.props.comments} />
         <h5>Filter runs by project name:&nbsp;&nbsp;
           <select value={this.state.projectFilter}
-                  onChange={this.handleProjectFilter}>{projects}</select>
+                  onChange={this.handleProjectFilter}>{projectOptions}</select>
         </h5>
         <table className='runs table table-hover' >
           <thead>
@@ -114,7 +115,7 @@ var RunsPage = React.createClass({
   }
 });
 
-var Run = React.createClass({
+var RunRow = React.createClass({
   propTypes: {
     run: React.PropTypes.object.isRequired,
     handleClick: React.PropTypes.func.isRequired
@@ -124,12 +125,12 @@ var Run = React.createClass({
     return (
       <tr className='run' onClick={this.props.handleClick}>
         <td className='run-id'>
-          <span className='run-id'>{ run.id }</span>
+          <span className='run-id'>{run.id}</span>
           <a className='btn btn-default btn-xs' href={'/runs/' + run.id + '/examine'}>Examine</a>
         </td>
-        <td className='caller-name'>{ run.caller_name }</td>
-        <td className='dataset'>{ run.dataset_name }</td>
-        <td className='date' title={ run.created_at }>{ moment(new Date(run.created_at)).format('YYYY-MM-DD') }</td>
+        <td className='caller-name'>{run.caller_name}</td>
+        <td className='dataset'>{run.dataset_name}</td>
+        <td className='date' title={run.created_at}>{moment(new Date(run.created_at)).format('YYYY-MM-DD')}</td>
         <RunLabels run={run} />
         <RunComments run={run} />
       </tr>
@@ -137,20 +138,19 @@ var Run = React.createClass({
   }
 });
 
-var RunDescription = React.createClass({
+var RunDescriptionRow = React.createClass({
   propTypes: {
     run: React.PropTypes.object.isRequired,
     runDescriptionTitleKeys: React.PropTypes.object.isRequired
   },
   render: function() {
     var run = this.props.run,
-        descriptions = _.reduce(this.props.runDescriptionTitleKeys, function(acc, key, title) {
+        descriptions = _.map(this.props.runDescriptionTitleKeys, (key, title) => {
           if (run[key]) {
-            acc.push(<dt key={'dt'+key}>{ title }</dt>);
-            acc.push(<dd key={'dd'+key}>{ run[key] }</dd>);
+            return [<dt key={'dt'+key}>{title}</dt>,
+                    <dd key={'dd'+key}>{run[key]}</dd>];
           }
-          return acc;
-        }, []);
+        });
     return (
       <tr className='run-info'>
         <td colSpan='6'>
@@ -168,29 +168,21 @@ var RunLabels = React.createClass({
     run: React.PropTypes.object.isRequired
   },
   render: function() {
-    var run = this.props.run,
-        labels = [];
-    if (run.validation_vcf) {
-      labels.push(<span className='label label-info'
-                        title='Is a validation VCF'
-                        key='valid-label'>
-                    validation
-                  </span>);
-    }
-    if (run.tumor_bam_uri) {
-      labels.push(<span className='label label-info'
-                        title='Has an associated tumor BAM'
-                        key='tumor-bam-label'>
-                    tumor
-                  </span>);
-    }
-    if (run.normal_bam_uri) {
-      labels.push(<span className='label label-info'
-                        title='Has an associated normal BAM'
-                        key='normal-bam-label'>
-                    normal
-                  </span>);
-    }
+    var run = this.props.run;
+    var labelTypes = [
+      ['validation_vcf', 'validation', 'Is a validation VCF'],
+      ['tumor_bam_uri', 'tumor', 'Has an associated tumor BAM'],
+      ['normal_bam_uri', 'normal', 'Has an associated normal BAM']
+    ];
+    var labels = labelTypes.map(function([key, text, title]) {
+      if (run[key]) {
+        return (
+            <span className='label label-info' title={title} key={key}>
+              {text}
+          </span>
+        );
+      }
+    });
     return (
         <td className='labels'>
           {labels}
@@ -205,10 +197,14 @@ var RunComments = React.createClass({
   },
   render: function() {
     var run = this.props.run;
+    var tdClasses = React.addons.classSet({
+      'comments': true,
+      'no-comment': run.num_comments == 0
+    });
     return (
-      <td className='comments'>
-        <span className={'comment-bubble' + (run.num_comments ? '' : ' no-comment') }></span>
-        <span className={ run.num_comments ? '' : 'no-comment' }>
+      <td className={tdClasses}>
+        <span className='comment-bubble'></span>
+        <span>
           { run.num_comments }
         </span>
       </td>

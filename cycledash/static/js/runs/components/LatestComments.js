@@ -32,11 +32,11 @@ var Comment = React.createClass({
     return (
         <li>
           <span className='run-id'>
-            <a href='/runs/{ comment.vcf_id }/examine'>Run { comment.vcf_id }</a>
+          <a href={'/runs/' + comment.vcf_id + '/examine'}>Run {comment.vcf_id}</a>
           </span>
-          <span className='location'>{ comment.contig }:{ comment.position }</span>
-          <span className='summary'>{ comment.comment_text.slice(0, 60) }</span>
-          <span className='time' title='{ comment.last_modified }'>{ relativeDate }</span>
+          <span className='location'>{comment.contig}:{comment.position}</span>
+          <span className='summary'>{comment.comment_text.slice(0, 60)}</span>
+          <span className='time' title={comment.last_modified}>{relativeDate}</span>
         </li>
     );
   }

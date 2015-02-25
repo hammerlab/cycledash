@@ -66,7 +66,6 @@ def runs():
             q = select(vcfs.c + [num_comments]).select_from(joined).group_by(
                 vcfs.c.id).order_by(desc(vcfs.c.id))
             vcfs = [dict(v) for v in con.execute(q).fetchall()]
-            print vcfs
             completions = _extract_completions(vcfs)
 
             q = select(user_comments.c).order_by(
@@ -81,15 +80,15 @@ def runs():
 
 
 def _extract_completions(vcfs):
-    def _pluck_unique(objs, attr):
+    def pluck_unique(objs, attr):
         vals = {obj[attr] for obj in objs if obj.get(attr)}
         return list(vals)
     return {
-        'variantCallerNames': _pluck_unique(vcfs, 'caller_name'),
-        'datasetNames': _pluck_unique(vcfs, 'dataset_name'),
-        'projectNames': _pluck_unique(vcfs, 'project_name'),
-        'normalBamPaths': _pluck_unique(vcfs, 'normal_bam_uri'),
-        'tumorBamPaths': _pluck_unique(vcfs, 'tumor_bam_uri')
+        'variantCallerNames': pluck_unique(vcfs, 'caller_name'),
+        'datasetNames': pluck_unique(vcfs, 'dataset_name'),
+        'projectNames': pluck_unique(vcfs, 'project_name'),
+        'normalBamPaths': pluck_unique(vcfs, 'normal_bam_uri'),
+        'tumorBamPaths': pluck_unique(vcfs, 'tumor_bam_uri')
     }
 
 
@@ -176,7 +175,6 @@ def upload():
     tmp_dir = app.config['TEMPORARY_DIR']
     dest_path = get_secure_unique_filename(f.filename, tmp_dir)
     f.save(dest_path)
-    print 'file://' + dest_path
     return 'file://' + dest_path
 
 

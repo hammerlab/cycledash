@@ -21,43 +21,38 @@ var SubmitRunForm = React.createClass({
   propTypes: {
     handleClose: React.PropTypes.func.isRequired,
     handleDrop: React.PropTypes.func,
-
-    // Completions:
-    variantCallerNames: React.PropTypes.arrayOf(React.PropTypes.string),
-    datasetNames: React.PropTypes.arrayOf(React.PropTypes.string),
-    projectNames: React.PropTypes.arrayOf(React.PropTypes.string),
-    normalBamPaths: React.PropTypes.arrayOf(React.PropTypes.string),
-    tumorBamPaths: React.PropTypes.arrayOf(React.PropTypes.string)
+    completions: React.PropTypes.object.isRequired
   },
   render: function() {
+    var props = this.props;
     return (
       <form method='POST' action='/runs' role='form' id='submit'>
         <h2>
-        <button type='button'
-                className='close' aria-hidden='true'
-                onClick={this.props.handleClose}>&times;</button>
+          <button type='button'
+                  className='close' aria-hidden='true'
+                  onClick={props.handleClose}>&times;</button>
         </h2>
 
         <TextInput label='Variant Caller Name:' name='variantCallerName'
-                   completions={this.props.variantCallerNames}
+                   completions={props.completions.variantCallerNames}
                    placeholder='Guacamole::Somatic' />
         <TextInput label='Dataset Name:' name='dataset'
-                   completions={this.props.datasetNames}
+                   completions={props.completions.datasetNames}
                    placeholder='DREAM training chr20' />
         <TextInput label='Project:' name='projectName'
-                   completions={this.props.projectNames}
+                   completions={props.completions.projectNames}
                    placeholder='PT123' />
         <TextInput label='VCF Path:' name='vcfPath'
                    placeholder='/data/somevcf.vcf'
-                   uploadable={true} handleDrop={this.props.handleDrop} />
+                   uploadable={true} handleDrop={props.handleDrop} />
         <TextInput label='Truth VCF Path:' name='truthVcfPath'
                    placeholder='/data/truth_somevcf.vcf'
-                   uploadable={true} handleDrop={this.props.handleDrop} />
+                   uploadable={true} handleDrop={props.handleDrop} />
         <TextInput label='Tumor BAM:' name='tumorPath'
-                   completions={this.props.tumorBamPaths}
+                   completions={props.completions.tumorBamPaths}
                    placeholder='/data/dream/tumor.chr20.bam' />
         <TextInput label='Normal BAM:' name='normalPath'
-                   completions={this.props.normalBamPaths}
+                   completions={props.completions.normalBamPaths}
                    placeholder='/data/dream/normal.chr20.bam' />
         <div className='form-group'>
           <label>Notes, Config, Params:</label>
