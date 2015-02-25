@@ -79,6 +79,7 @@ def insert_run(run, engine, connection, metadata):
             'normal_bam_uri': run.get('normal_path'),
             'tumor_bam_uri': run.get('tumor_path'),
             'notes': run.get('params'),
+            'project_name': run.get('project_name'),
             'vcf_header': header_text,
             'validation_vcf': is_validation
         }

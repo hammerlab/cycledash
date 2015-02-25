@@ -1,9 +1,11 @@
+'use strict';
 var React = require('react'),
     SubmitRunForm = require('./SubmitRunForm'),
     LatestComments = require('./LatestComments'),
     _ = require('underscore');
 
 var NO_FILTER = '----';
+
 
 var RunsPage = React.createClass({
   propTypes: {
@@ -12,7 +14,8 @@ var RunsPage = React.createClass({
     comments: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
   },
   getInitialState: function() {
-    return {selectedRunId: null, projectFilter: null};
+    return {selectedRunId: null, projectFilter: null,
+            showForm: false, draggingOver: false};
   },
   filteredRuns: function() {
     return this.props.runs.filter(run => {
@@ -24,44 +27,67 @@ var RunsPage = React.createClass({
   },
   handleClickRun: function(runId) {
     return () => {
-      this.setState({selectedRunId: this.state.selectedRunId === runId ? null : runId});
+      var selectedRunId = this.state.selectedRunId === runId ? null : runId;
+      this.setState({selectedRunId});
     };
   },
   handleProjectFilter: function(evt) {
     var val = evt.target.value;
     this.setState({projectFilter: val === NO_FILTER ? null : val});
   },
+  handleShowForm: function(show) {
+    return () => this.setState({showForm: show});
+  },
+  handleDragOver: function() {
+    this.setState({draggingOver: true});
+  },
+  handleDragLeave: function() {
+    this.setState({draggingOver: false});
+  },
   render: function() {
-    var projectNames = _.unique(_.pluck(this.props.runs, 'project_name'));
+    var projectNames = _.chain(this.props.runs)
+        .pluck('project_name')
+        .unique()
+        .filter(p => p)
+        .sortBy(p => p)
+        .value();
     var projects = projectNames.map(name => {
-      return (
-          <option value={name} key={name ? name : NO_FILTER}>
-            {name ? name : NO_FILTER}
-          </option>
-      );
+      return <option value={name} key={name}>{name}</option>;
     });
+    projects.unshift(<option value={NO_FILTER} key={NO_FILTER}>{NO_FILTER}</option>);
     var runs = this.filteredRuns();
     var rows = runs.map((run) => {
-      var rows = [<Run run={run} key={run.id} handleClick={this.handleClickRun(run.id)} />];
+      var rows = [<Run run={run} key={run.id}
+                       handleClick={this.handleClickRun(run.id)} />];
       if (run.id === this.state.selectedRunId) {
-        rows.push(<RunDescription run={run}
-                                   runDescriptionTitleKeys={this.props.runDescriptionTitleKeys}
-                                   key={'row-values-'+run.id} />);
+        var runDescription = (
+            <RunDescription
+              run={run}
+              runDescriptionTitleKeys={this.props.runDescriptionTitleKeys}
+              key={'row-values-'+run.id} />);
+        rows.push(runDescription);
       }
       return rows;
     });
     return (
-      <div>
+      <div onDragOver={this.handleDragOver} onDragLeave={this.handleDragLeave}
+           className={this.state.draggingOver ? 'dragging-over' : '' }>
         <h2>Runs Directory
-          <button id="show-submit" className="btn btn-default">Submit New Run</button>
+          { !this.state.showForm ?
+            <button id='show-submit' className='btn btn-default'
+                    onClick={this.handleShowForm(true)}>Submit New Run</button>
+            : null }
         </h2>
-        <SubmitRunForm />
+        { this.state.showForm ?
+          <SubmitRunForm handleClose={this.handleShowForm(false)}
+                         handleDrop={this.handleDragLeave} />
+          : null }
         <LatestComments comments={this.props.comments} />
         <h5>Filter runs by project name:&nbsp;&nbsp;
           <select value={this.state.projectFilter}
                   onChange={this.handleProjectFilter}>{projects}</select>
         </h5>
-        <table className='runs table condenses table-hover' >
+        <table className='runs table table-hover' >
           <thead>
             <tr>
               <th></th>

@@ -5,7 +5,6 @@ main {
 }
 form#submit {
   margin: 0 auto 27px auto;
-  display: none;
   max-width: 500px;
 }
 form#submit .form-control {
@@ -84,9 +83,9 @@ td.comments {
 }
 
 /* drag and drop file upload */
-.receiving-drag {
+main#runs .receiving-drag.uploadable {
   background: rgb(247, 252, 253);
 }
-.wanting-drag {
+main#runs .dragging-over .uploadable {
   border: 2px dashed #777;
 }

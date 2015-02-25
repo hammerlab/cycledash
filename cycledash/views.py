@@ -160,6 +160,7 @@ def upload():
     tmp_dir = app.config['TEMPORARY_DIR']
     dest_path = get_secure_unique_filename(f.filename, tmp_dir)
     f.save(dest_path)
+    print 'file://' + dest_path
     return 'file://' + dest_path
 
 
