@@ -66,15 +66,31 @@ def runs():
             q = select(vcfs.c + [num_comments]).select_from(joined).group_by(
                 vcfs.c.id).order_by(desc(vcfs.c.id))
             vcfs = [dict(v) for v in con.execute(q).fetchall()]
+            print vcfs
+            completions = _extract_completions(vcfs)
 
             q = select(user_comments.c).order_by(
                 desc(user_comments.c.last_modified)).limit(5)
             last_comments = [dict(c) for c in con.execute(q).fetchall()]
         if 'text/html' in request.accept_mimetypes:
             return render_template('runs.html', runs=vcfs, run_kvs=RUN_ADDL_KVS,
-                                   last_comments=last_comments)
+                                   last_comments=last_comments,
+                                   completions=completions)
         elif 'application/json' in request.accept_mimetypes:
             return jsonify({'runs': vcfs})
+
+
+def _extract_completions(vcfs):
+    def _pluck_unique(objs, attr):
+        vals = {obj[attr] for obj in objs if obj.get(attr)}
+        return list(vals)
+    return {
+        'variantCallerNames': _pluck_unique(vcfs, 'caller_name'),
+        'datasetNames': _pluck_unique(vcfs, 'dataset_name'),
+        'projectNames': _pluck_unique(vcfs, 'project_name'),
+        'normalBamPaths': _pluck_unique(vcfs, 'normal_bam_uri'),
+        'tumorBamPaths': _pluck_unique(vcfs, 'tumor_bam_uri')
+    }
 
 
 @app.route('/runs/<run_id>/genotypes')

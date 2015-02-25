@@ -13,6 +13,7 @@
  window.renderRunPage(document.getElementById('runs'),
                       {{ runs | tojson }},
                       {{ run_kvs | tojson }},
-                      {{ last_comments | tojson }});
+                      {{ last_comments | tojson }},
+                      {{ completions | tojson }});
 </script>
 {% endblock %}

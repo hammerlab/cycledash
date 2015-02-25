@@ -1,12 +1,33 @@
 'use strict';
 var React = require('react'),
-    d3 = require('d3');
+    d3 = require('d3'),
+    _ = require('underscore'),
+    CompletionUtils = require('../../CompletionUtils'),
+    $ = require('jquery');
+
+
+// Hack to make typeahead.js use the correct jQuery.
+// This should be improved when typeahead v0.11 is released, see
+// https://github.com/twitter/typeahead.js/issues/743#issuecomment-52817924
+(function() {
+  var oldJQuery = window.jQuery;
+  window.jQuery = $;
+  require('typeahead.js');
+  window.jQuery = oldJQuery;
+})(); // from ../examine/components/QueryBox.js
 
 
 var SubmitRunForm = React.createClass({
   propTypes: {
     handleClose: React.PropTypes.func.isRequired,
-    handleDrop: React.PropTypes.func
+    handleDrop: React.PropTypes.func,
+
+    // Completions:
+    variantCallerNames: React.PropTypes.arrayOf(React.PropTypes.string),
+    datasetNames: React.PropTypes.arrayOf(React.PropTypes.string),
+    projectNames: React.PropTypes.arrayOf(React.PropTypes.string),
+    normalBamPaths: React.PropTypes.arrayOf(React.PropTypes.string),
+    tumorBamPaths: React.PropTypes.arrayOf(React.PropTypes.string)
   },
   render: function() {
     return (
@@ -18,10 +39,13 @@ var SubmitRunForm = React.createClass({
         </h2>
 
         <TextInput label='Variant Caller Name:' name='variantCallerName'
+                   completions={this.props.variantCallerNames}
                    placeholder='Guacamole::Somatic' />
         <TextInput label='Dataset Name:' name='dataset'
+                   completions={this.props.datasetNames}
                    placeholder='DREAM training chr20' />
         <TextInput label='Project:' name='projectName'
+                   completions={this.props.projectNames}
                    placeholder='PT123' />
         <TextInput label='VCF Path:' name='vcfPath'
                    placeholder='/data/somevcf.vcf'
@@ -30,8 +54,10 @@ var SubmitRunForm = React.createClass({
                    placeholder='/data/truth_somevcf.vcf'
                    uploadable={true} handleDrop={this.props.handleDrop} />
         <TextInput label='Tumor BAM:' name='tumorPath'
+                   completions={this.props.tumorBamPaths}
                    placeholder='/data/dream/tumor.chr20.bam' />
         <TextInput label='Normal BAM:' name='normalPath'
+                   completions={this.props.normalBamPaths}
                    placeholder='/data/dream/normal.chr20.bam' />
         <div className='form-group'>
           <label>Notes, Config, Params:</label>
@@ -41,7 +67,7 @@ var SubmitRunForm = React.createClass({
 
         <button type='submit' className='btn btn-success btn-block'>Submit New Run</button>
       </form>
-  );
+    );
   }
 });
 
@@ -51,10 +77,29 @@ var TextInput = React.createClass({
     name: React.PropTypes.string.isRequired,
     placeholder: React.PropTypes.string.isRequired,
     uploadable: React.PropTypes.bool,
-    handleDrop: React.PropTypes.func
+    handleDrop: React.PropTypes.func,
+    completions: React.PropTypes.arrayOf(React.PropTypes.string)
   },
   getInitialState: function() {
     return {receivingDrag: false};
+  },
+  componentDidMount: function(prevProps, prevState) {
+    var $input = $(this.refs.input.getDOMNode());
+    if (this.props.completions) {
+      $input
+        .typeahead({
+          highlight: true
+        }, {
+          name: 'data',
+          source: this.queryMatcher(this.props.completions)
+        });
+    }
+  },
+  queryMatcher: function(strings) {
+    return function(q, callback) {
+      var matches = CompletionUtils.fuzzyFilter(strings, q);
+      callback(matches.map(s => ({value: s.completion})));
+    };
   },
   handleDragOver: function() {
     if (this.props.uploadable) {
@@ -78,7 +123,7 @@ var TextInput = React.createClass({
       } else {
         this._upload(files[0], this.refs.input.getDOMNode());
       }
-    };
+    }
   },
   _extractError: function(response) {
     // Extract an error message from an XMLHttpRequest response

@@ -89,3 +89,23 @@ main#runs .receiving-drag.uploadable {
 main#runs .dragging-over .uploadable {
   border: 2px dashed #777;
 }
+
+/* autocomplete styling */
+main#runs .twitter-typeahead, .tt-hint { width: 100%; }
+main#runs .tt-dropdown-menu {
+    width: 422px;
+    margin-top: 12px;
+    padding: 8px 0;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    box-shadow: 0 5px 10px rgba(0,0,0,.2);
+}
+main#runs .tt-suggestion {
+    padding: 3px 20px;
+}
+main#runs .tt-suggestion.tt-cursor {
+  color: #fff;
+  background-color: #0097cf;
+}

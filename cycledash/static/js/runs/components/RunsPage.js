@@ -2,7 +2,8 @@
 var React = require('react'),
     SubmitRunForm = require('./SubmitRunForm'),
     LatestComments = require('./LatestComments'),
-    _ = require('underscore');
+    _ = require('underscore'),
+    moment = require('moment');
 
 var NO_FILTER = '----';
 
@@ -11,7 +12,8 @@ var RunsPage = React.createClass({
   propTypes: {
     runs: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     runDescriptionTitleKeys: React.PropTypes.object.isRequired,
-    comments: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
+    comments: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+    completions: React.PropTypes.object.isRequired
   },
   getInitialState: function() {
     return {selectedRunId: null, projectFilter: null,
@@ -69,6 +71,14 @@ var RunsPage = React.createClass({
       }
       return rows;
     });
+    var completions = this.props.completions;
+    var form = <SubmitRunForm variantCallerNames={completions.variantCallerNames}
+                              datasetNames={completions.datasetNames}
+                              projectNames={completions.projectNames}
+                              normalBamPaths={completions.normalBamPaths}
+                              tumorBamPaths={completions.tumorBamPaths}
+                              handleClose={this.handleShowForm(false)}
+                              handleDrop={this.handleDragLeave} />;
     return (
       <div onDragOver={this.handleDragOver} onDragLeave={this.handleDragLeave}
            className={this.state.draggingOver ? 'dragging-over' : '' }>
@@ -78,10 +88,7 @@ var RunsPage = React.createClass({
                     onClick={this.handleShowForm(true)}>Submit New Run</button>
             : null }
         </h2>
-        { this.state.showForm ?
-          <SubmitRunForm handleClose={this.handleShowForm(false)}
-                         handleDrop={this.handleDragLeave} />
-          : null }
+        { this.state.showForm ? form : null }
         <LatestComments comments={this.props.comments} />
         <h5>Filter runs by project name:&nbsp;&nbsp;
           <select value={this.state.projectFilter}
@@ -118,11 +125,11 @@ var Run = React.createClass({
       <tr className='run' onClick={this.props.handleClick}>
         <td className='run-id'>
           <span className='run-id'>{ run.id }</span>
-          <a className='btn btn-default btn-xs' href='/runs/{ run.id }/examine'>Examine</a>
+          <a className='btn btn-default btn-xs' href={'/runs/' + run.id + '/examine'}>Examine</a>
         </td>
         <td className='caller-name'>{ run.caller_name }</td>
         <td className='dataset'>{ run.dataset_name }</td>
-        <td className='date' title='{ run.created_at }'>{ run.created_at }</td>
+        <td className='date' title={ run.created_at }>{ moment(new Date(run.created_at)).format('YYYY-MM-DD') }</td>
         <RunLabels run={run} />
         <RunComments run={run} />
       </tr>
