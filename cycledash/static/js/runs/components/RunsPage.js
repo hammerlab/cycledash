@@ -69,10 +69,9 @@ var RunsPage = React.createClass({
                           handleClick={this.handleClickRun(run.id)} />];
       if (run.id === this.state.selectedRunId) {
         var runDescription = (
-            <RunDescriptionRow
-              run={run}
-              runDescriptionTitleKeys={this.props.runDescriptionTitleKeys}
-              key={'row-values-'+run.id} />);
+            <RunDescriptionRow run={run}
+                               runDescriptionTitleKeys={this.props.runDescriptionTitleKeys}
+                               key={'row-values-'+run.id} />);
         rows.push(runDescription);
       }
       return rows;
@@ -120,13 +119,17 @@ var RunRow = React.createClass({
     run: React.PropTypes.object.isRequired,
     handleClick: React.PropTypes.func.isRequired
   },
+  handleClick: function(evt) {
+    if (evt.target == this.refs.link.getDOMNode()) return;
+    this.props.handleClick();
+  },
   render: function() {
     var run = this.props.run;
     return (
-      <tr className='run' onClick={this.props.handleClick}>
+      <tr className='run' onClick={this.handleClick}>
         <td className='run-id'>
           <span className='run-id'>{run.id}</span>
-          <a className='btn btn-default btn-xs' href={'/runs/' + run.id + '/examine'}>Examine</a>
+          <a className='btn btn-default btn-xs' href={'/runs/' + run.id + '/examine'} ref='link'>Examine</a>
         </td>
         <td className='caller-name'>{run.caller_name}</td>
         <td className='dataset'>{run.dataset_name}</td>
