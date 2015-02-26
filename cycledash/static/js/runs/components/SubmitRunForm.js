@@ -93,7 +93,7 @@ var TextInput = React.createClass({
   queryMatcher: function(strings) {
     return function(q, callback) {
       var matches = CompletionUtils.fuzzyFilter(strings, q);
-      callback(matches.map(s => ({value: s.completion})));
+      callback(matches.map(s => ({value: s.query})));
     };
   },
   handleDragOver: function() {
