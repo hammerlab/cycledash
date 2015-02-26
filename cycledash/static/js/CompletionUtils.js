@@ -28,7 +28,7 @@ function tokenize(str) {
     t.token += character;
     t.stop = position + 1;
   };
-  
+
   var inQuote = false, inWhitespaceRun = true;
   for (var i = 0; i < str.length; i++) {
     var c = str.charAt(i);

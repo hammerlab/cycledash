@@ -5,7 +5,6 @@ main {
 }
 form#submit {
   margin: 0 auto 27px auto;
-  display: none;
   max-width: 500px;
 }
 form#submit .form-control {
@@ -22,8 +21,11 @@ form#submit .form-control::-moz-placeholder {
 }
 
 /* Last comments list: */
+div.comments {
+  margin: 29px 0;
+}
 h4.last-comments {
-  margin-bottom: 5px;
+ margin-bottom: 5px;
 }
 a.all-comments {
   font-size: 14px;
@@ -68,7 +70,7 @@ span.comment-bubble {
   height: 15px;
   display: inline-block;
 }
-span.no-comment {
+.no-comment > span {
   opacity: 0.3;
 }
 td.comments {
@@ -81,9 +83,29 @@ td.comments {
 }
 
 /* drag and drop file upload */
-.receiving-drag {
+main#runs .receiving-drag.uploadable {
   background: rgb(247, 252, 253);
 }
-.wanting-drag {
+main#runs .dragging-over .uploadable {
   border: 2px dashed #777;
+}
+
+/* autocomplete styling */
+main#runs .twitter-typeahead, .tt-hint { width: 100%; }
+main#runs .tt-dropdown-menu {
+    width: 422px;
+    margin-top: 12px;
+    padding: 8px 0;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    box-shadow: 0 5px 10px rgba(0,0,0,.2);
+}
+main#runs .tt-suggestion {
+    padding: 3px 20px;
+}
+main#runs .tt-suggestion.tt-cursor {
+  color: #fff;
+  background-color: #0097cf;
 }
