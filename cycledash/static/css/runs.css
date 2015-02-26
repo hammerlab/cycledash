@@ -20,6 +20,25 @@ form#submit .form-control::-moz-placeholder {
   float: right;
 }
 
+/* Projects  */
+div.project-header h2 {
+  margin: 0;
+}
+div.project-header div.project-stats {
+  font-size: 1.2em;
+  float: right;
+  top: -15px;
+  color: #9d9d9d;
+}
+div.project {
+  margin: 77px 0;
+}
+div.project tbody {
+  height: 100px;
+  width: 500px;
+  overflow: auto;
+}
+
 /* Last comments list: */
 div.comments {
   margin: 29px 0;
@@ -30,6 +49,11 @@ h4.last-comments {
 a.all-comments {
   font-size: 14px;
   color: #adadad;
+}
+
+/* LastComments */
+div.comments {
+  margin-left: 11px;
 }
 
 /* Runs table: */
