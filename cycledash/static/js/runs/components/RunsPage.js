@@ -202,7 +202,7 @@ var RunComments = React.createClass({
     var run = this.props.run;
     var tdClasses = React.addons.classSet({
       'comments': true,
-      'no-comment': run.num_comments == 0
+      'no-comment': run.num_comments === 0
     });
     return (
       <td className={tdClasses}>
