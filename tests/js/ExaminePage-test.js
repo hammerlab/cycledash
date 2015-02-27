@@ -31,7 +31,7 @@ function renderExamine(fakeServer) {
     created_at: '',
     uri: '/tests/data/snv.vcf'
   };
-  var igvHttpfsUrl = 'http://example.com/';
+  var igvHttpfsUrl = '';  // not needed
 
   var dispatcher = new Dispatcher(),
       recordActions = RecordActions.getRecordActions(dispatcher),

@@ -3,6 +3,11 @@
 var _ = require('underscore');
 
 
+// This is where IGV listens for commands.
+// See http://www.broadinstitute.org/igv/PortCommands
+var LOCAL_IGV_HOST = 'localhost:60151';
+
+
 /**
  * Returns the value in object found at path.
  *
@@ -37,7 +42,7 @@ function makeIGVLink(run, igvHttpfsUrl) {
   var fileParam = nameFilePairs.map(x => fileUrl(x[1])).join(','),
       nameParam = nameFilePairs.map(x => x[0]).join(',');
 
-  return `http://localhost:60151/load?user=cycledash&genome=hg19` +
+  return `http://${LOCAL_IGV_HOST}/load?user=cycledash&genome=hg19` +
       `&file=${fileParam}&name=${nameParam}`;
 }
 

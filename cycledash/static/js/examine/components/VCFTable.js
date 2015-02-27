@@ -499,7 +499,7 @@ var VCFCommentHeader = React.createClass({
         </a>
         <span className='igv-links'>
           IGV: <a href={loadIGVLink}>Load at Locus</a>&nbsp;
-               <a href={jumpLink}>(Jump)</a>
+               <a href={jumpLink}>(Jump)</a>&nbsp;
                <a href="https://github.com/hammerlab/cycledash/wiki/IGV-Integration">help</a>
         </span>
         <button className='btn btn-default btn-xs comment-button btn-danger'
