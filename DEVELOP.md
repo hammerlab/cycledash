@@ -143,7 +143,8 @@ To run an individual JavaScript test, you can use:
 
 #### Perceptual Diff Testing
 
-CycleDash uses dpxdt for perceptual diff testing. To update the reference screenshots:
+CycleDash uses dpxdt for perceptual diff testing. To update the reference
+screenshots, start Postgres on your machine and run:
 
 ```
 source venv/bin/activate
