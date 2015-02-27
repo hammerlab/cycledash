@@ -32,6 +32,8 @@ var VCFTable = React.createClass({
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     // Attribute by which we are sorting
     sortBys: React.PropTypes.array.isRequired,
+    // Link to load data in IGV
+    igvLink: React.PropTypes.string,
     handleSortByChange: React.PropTypes.func.isRequired,
     handleSelectRecord: React.PropTypes.func.isRequired,
     handleOpenViewer: React.PropTypes.func.isRequired,
@@ -60,6 +62,7 @@ var VCFTable = React.createClass({
         <VCFTableBody records={this.props.records}
                       columns={this.props.columns}
                       selectedRecord={this.props.selectedRecord}
+                      igvLink={this.props.igvLink}
                       handleRequestPage={this.props.handleRequestPage}
                       handleSelectRecord={this.props.handleSelectRecord}
                       handleOpenViewer={this.props.handleOpenViewer}
@@ -229,6 +232,7 @@ var VCFTableBody = React.createClass({
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     columns: React.PropTypes.object.isRequired,
     selectedRecord: React.PropTypes.object,
+    igvLink: React.PropTypes.string,
     handleSelectRecord: React.PropTypes.func.isRequired,
     handleOpenViewer: React.PropTypes.func.isRequired,
     handleRequestPage: React.PropTypes.func.isRequired,
@@ -271,6 +275,7 @@ var VCFTableBody = React.createClass({
             elements.push(
               <VCFCommentBox record={record}
                              key={commentKey}
+                             igvLink={this.props.igvLink}
                              handleOpenViewer={this.props.handleOpenViewer}
                              handleSetComment={this.props.handleSetComment}
                              handleDeleteComment={this.props.handleDeleteComment} />
@@ -358,6 +363,7 @@ var VCFRecord = React.createClass({
 var VCFCommentBox = React.createClass({
   propTypes: {
     record: React.PropTypes.object.isRequired,
+    igvLink: React.PropTypes.string,
     handleOpenViewer: React.PropTypes.func.isRequired,
     handleSetComment: React.PropTypes.func.isRequired,
     handleDeleteComment: React.PropTypes.func.isRequired
@@ -399,6 +405,7 @@ var VCFCommentBox = React.createClass({
         <td colSpan={10000} className='variant-info'>
           <VCFComment record={this.props.record}
                       commentText={commentText}
+                      igvLink={this.props.igvLink}
                       handleOpenViewer={this.props.handleOpenViewer}
                       handleDelete={this.handleDelete}
                       handleSave={this.handleSave} />
@@ -416,6 +423,7 @@ var VCFComment = React.createClass({
   propTypes: {
     record: React.PropTypes.object.isRequired,
     commentText: React.PropTypes.string.isRequired,
+    igvLink: React.PropTypes.string,
     handleOpenViewer: React.PropTypes.func.isRequired,
     handleDelete: React.PropTypes.func.isRequired,
     handleSave: React.PropTypes.func.isRequired
@@ -455,6 +463,7 @@ var VCFComment = React.createClass({
       commentHeader = (
           <VCFCommentHeader handleEdit={() => {this.setEditState(true);}}
                             record={this.props.record}
+                            igvLink={this.props.igvLink}
                             handleOpenViewer={this.props.handleOpenViewer}
                             handleDelete={this.props.handleDelete} />
       );
@@ -471,17 +480,28 @@ var VCFComment = React.createClass({
 var VCFCommentHeader = React.createClass({
   propTypes: {
     record: React.PropTypes.object.isRequired,
+    igvLink: React.PropTypes.string,
     handleOpenViewer: React.PropTypes.func.isRequired,
     handleEdit: React.PropTypes.func.isRequired,
     handleDelete: React.PropTypes.func.isRequired
   },
   render: function() {
+    var r = this.props.record,
+        locusParam = `&locus=${r.contig}:${r.position}`,
+        loadIGVLink = this.props.igvLink + locusParam,
+        jumpLink = loadIGVLink.replace(/\/load.*/, '/goto?') + locusParam;
+
     return (
       <div className='comment-header'>
         <a className='dalliance-open'
-           onClick={() => {this.props.handleOpenViewer(this.props.record);}}>
+           onClick={() => {this.props.handleOpenViewer(r);}}>
           Open Pileup Viewer
         </a>
+        <span className='igv-links'>
+          IGV: <a href={loadIGVLink}>Load at Locus</a>&nbsp;
+               <a href={jumpLink}>(Jump)</a>
+               <a href="https://github.com/hammerlab/cycledash/wiki/IGV-Integration">help</a>
+        </span>
         <button className='btn btn-default btn-xs comment-button btn-danger'
                 onClick={this.props.handleDelete}>
           Delete

@@ -48,14 +48,15 @@ describe('ExaminePage Comments', function() {
       created_at: '',
       uri: '/tests/js/data/snv.vcf'
     };
+  var igvHttpfsUrl = 'http://example.com/';
 
     var dispatcher = new Dispatcher();
     var recordActions = RecordActions.getRecordActions(dispatcher);
-    var recordStore = createRecordStore(run, dispatcher, fakeServer);
+    var recordStore = createRecordStore(run, igvHttpfsUrl, dispatcher, fakeServer);
     return TestUtils.renderIntoDocument(
       <ExaminePage recordStore={recordStore}
                    recordActions={recordActions}
-                   igvHttpfsUrl=""
+                   igvHttpfsUrl={igvHttpfsUrl}
                    run={run} />);
   }
 

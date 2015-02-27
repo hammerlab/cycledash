@@ -31,15 +31,16 @@ function renderExamine(fakeServer) {
     created_at: '',
     uri: '/tests/data/snv.vcf'
   };
+  var igvHttpfsUrl = 'http://example.com/';
 
   var dispatcher = new Dispatcher(),
       recordActions = RecordActions.getRecordActions(dispatcher),
-      recordStore = createRecordStore(run, dispatcher, fakeServer);
+      recordStore = createRecordStore(run, igvHttpfsUrl, dispatcher, fakeServer);
 
   return TestUtils.renderIntoDocument(
       <ExaminePage recordStore={recordStore}
                    recordActions={recordActions}
-                   igvHttpfsUrl=""
+                   igvHttpfsUrl={igvHttpfsUrl}
                    run={run} />);
 }
 
@@ -59,12 +60,12 @@ describe('ExaminePage', function() {
     });
   });
 
-  beforeEach(function() {
-    examine = renderExamine(fakeServer);
-  });
-
   after(function() {
     stub.restore();
+  });
+
+  beforeEach(function() {
+    examine = renderExamine(fakeServer);
   });
 
   it('should display and select records', function() {

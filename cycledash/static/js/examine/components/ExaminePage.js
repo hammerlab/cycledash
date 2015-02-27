@@ -89,6 +89,7 @@ var ExaminePage = React.createClass({
                   selectedRecord={state.selectedRecord}
                   contigs={state.contigs}
                   sortBys={state.sortBys}
+                  igvLink={state.igvLink}
                   handleSortByChange={this.handleSortByChange}
                   handleRequestPage={this.handleRequestPage}
                   handleSelectRecord={this.handleSelectRecord}
