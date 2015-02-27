@@ -24,8 +24,7 @@ var RunsPage = React.createClass({
     completions: React.PropTypes.object.isRequired
   },
   getInitialState: function() {
-    return {selectedRunId: null,
-            projectFilter: null,
+    return {projectFilter: null,
             showForm: false,
             draggingOver: false};
   },
@@ -37,12 +36,6 @@ var RunsPage = React.createClass({
       return noFilter || matches;
     });
   },
-  handleClickRun: function(runId) {
-    return () => {
-      var selectedRunId = this.state.selectedRunId === runId ? null : runId;
-      this.setState({selectedRunId});
-    };
-  },
   handleProjectFilter: function(evt) {
     var val = evt.target.value;
     this.setState({projectFilter: val === NO_FILTER ? null : val});
@@ -50,8 +43,8 @@ var RunsPage = React.createClass({
   createDisplayFormHandler: function(showForm) {
     return () => this.setState({showForm});
   },
-  createDragOverHandler: function(over) {
-    return () => this.setState({draggingOver: over});
+  createDragOverHandler: function(draggingOver) {
+    return () => this.setState({draggingOver});
   },
   render: function() {
     var projectNames = _.chain(this.props.runs)
@@ -64,9 +57,70 @@ var RunsPage = React.createClass({
       return <option value={name} key={name}>{name}</option>;
     });
     var runs = this.filteredRuns();
-    var rows = runs.map(run => {
-      var rows = [<RunRow run={run} key={run.id}
-                          handleClick={this.handleClickRun(run.id)} />];
+    var projectTables = _.chain(runs)
+        .groupBy('project_name')
+        .map((runs, projectName) => [projectName, runs])
+        .sortBy(function([projectName, runs]) {
+          return -runs[0].id; // to sort by the descending ID
+        }).map(function([projectName, runs]) {
+          return <ProjectTable key={projectName}
+                               runs={runs}
+                               runDescriptionTitleKeys={this.props.runDescriptionTitleKeys}
+                               name={projectName} />;
+        }.bind(this)).value();
+
+    var form = <SubmitRunForm completions={this.props.completions}
+                              handleClose={this.createDisplayFormHandler(false)}
+                              handleDrop={this.createDragOverHandler(false)} />;
+    return (
+      <div onDragOver={this.createDragOverHandler(true)}
+           onDragLeave={this.createDragOverHandler(false)}
+           className={this.state.draggingOver ? 'dragging-over' : ''}>
+        <h1>
+          Data Directory
+          {!this.state.showForm ?
+           <button id='show-submit'
+                   className='btn btn-default'
+                   onClick={this.createDisplayFormHandler(true)}>
+             Submit New Run
+           </button>
+           : null}
+        </h1>
+        {this.state.showForm ? form : null}
+        <LatestComments comments={this.props.comments} />
+        <h5>
+          Filter runs by project name:&nbsp;&nbsp;
+          <select value={this.state.projectFilter}
+                  onChange={this.handleProjectFilter}>
+            {projectOptions}
+          </select>
+        </h5>
+        {projectTables}
+      </div>
+    );
+  }
+});
+
+var ProjectTable = React.createClass({
+  propTypes: {
+    name: React.PropTypes.string.isRequired,
+    runs: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+    // This is a map from titles to keys in `run` objects that are optionally
+    // there to appear in the description field of an expanded RunRow.
+    runDescriptionTitleKeys: React.PropTypes.object.isRequired
+  },
+  getInitialState: function() {
+    return {selectedRunId: null};
+  },
+  createClickRunHandler: function(runId) {
+    return () => {
+      var selectedRunId = this.state.selectedRunId === runId ? null : runId;
+      this.setState({selectedRunId});
+    };
+  },
+  render: function() {
+    var rows = this.props.runs.map(run => {
+      var rows = [<RunRow run={run} key={run.id} handleClick={this.createClickRunHandler(run.id)} />];
       if (run.id === this.state.selectedRunId) {
         var runDescription = (
             <RunDescriptionRow run={run}
@@ -76,25 +130,17 @@ var RunsPage = React.createClass({
       }
       return rows;
     });
-    var form = <SubmitRunForm completions={this.props.completions}
-                              handleClose={this.createDisplayFormHandler(false)}
-                              handleDrop={this.createDragOverHandler(false)} />;
+    var numDatasets = _.chain(this.props.runs).pluck('dataset_name').unique().value().length;
+    var numRuns = this.props.runs.length;
     return (
-      <div onDragOver={this.createDragOverHandler(true)} onDragLeave={this.createDragOverHandler(false)}
-           className={this.state.draggingOver ? 'dragging-over' : ''}>
-        <h2>Runs Directory
-          { !this.state.showForm ?
-            <button id='show-submit' className='btn btn-default'
-                    onClick={this.createDisplayFormHandler(true)}>Submit New Run</button>
-            : null }
-        </h2>
-        { this.state.showForm ? form : null }
-        <LatestComments comments={this.props.comments} />
-        <h5>Filter runs by project name:&nbsp;&nbsp;
-          <select value={this.state.projectFilter}
-                  onChange={this.handleProjectFilter}>{projectOptions}</select>
-        </h5>
-        <table className='runs table table-hover' >
+      <div className='project'>
+        <div className='project-header'>
+          <h2>{this.props.name === 'null' ? 'No Project' : this.props.name}</h2>
+          <div className='project-stats'>
+            <em>{numDatasets}</em> Datasets, &nbsp;<em>{numRuns}</em> Runs
+          </div>
+        </div>
+        <table className='runs table table-hover'>
           <thead>
             <tr>
               <th></th>
@@ -156,11 +202,12 @@ var RunDescriptionRow = React.createClass({
         });
     return (
       <tr className='run-info'>
-        <td colSpan='6'>
+        <td colSpan='5'>
           <dl className='dl-horizontal'>
             {descriptions}
           </dl>
         </td>
+        <td><button className='btn btn-xs btn-default'>edit</button></td>
       </tr>
     );
   }
@@ -180,8 +227,8 @@ var RunLabels = React.createClass({
     var labels = labelTypes.map(function([key, text, title]) {
       if (run[key]) {
         return (
-            <span className='label label-info' title={title} key={key}>
-              {text}
+          <span className='label label-info' title={title} key={key}>
+            {text}
           </span>
         );
       }
