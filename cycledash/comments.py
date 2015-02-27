@@ -2,12 +2,20 @@
 from datetime import datetime
 from flask import jsonify, request
 from functools import wraps, partial
-from sqlalchemy import exc, select, func
+from sqlalchemy import exc, select, func, desc
 
 from common.helpers import tables
 from cycledash import db
 from cycledash.helpers import (prepare_request_data, success_response,
                                error_response)
+
+
+def get_all_comments():
+    """Return a list of all comments."""
+    with tables(db, 'user_comments') as (con, user_comments):
+        q = select(user_comments.c).order_by(
+            desc(user_comments.c.last_modified))
+        comments = [dict(c) for c in con.execute(q).fetchall()]
 
 
 def user_comments_db(f=None, use_transaction=False):
@@ -76,7 +84,7 @@ def create_comment(vcf_id, conn, user_comments, data):
 
 
 @user_comments_db
-def get_comments(vcf_id, conn, user_comments, data):
+def get_vcf_comments(vcf_id, conn, user_comments, data):
     """Return all user comments in the following format:
     {
       "comments": {
