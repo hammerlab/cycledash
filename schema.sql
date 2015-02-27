@@ -127,6 +127,7 @@ CREATE TABLE genotypes (
        "info:SGT" TEXT, -- Most likely somatic genotype excluding normal noise states
        "info:TQSS" TEXT, -- [INTEGER] Data tier used to compute QSS
        "info:TQSS_NT" TEXT, -- [INTEGER] Data tier used to compute QSS_NT
+       "info:NT" TEXT, -- Genotype of the normal in all data tiers, as used to classify somatic variants. One of {ref,het,hom,conflict}
        "sample:FDP" TEXT, -- [INTEGER] Number of basecalls filtered from original read depth for tier1
        "sample:SDP" TEXT, -- [INTEGER] Number of reads with deletions spanning this site at tier1
        "sample:SUBDP" TEXT, -- [INTEGER] Number of reads below tier1 mapping quality threshold aligned across this site
