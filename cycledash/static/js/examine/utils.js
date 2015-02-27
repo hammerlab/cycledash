@@ -3,6 +3,11 @@
 var _ = require('underscore');
 
 
+// This is where IGV listens for commands.
+// See http://www.broadinstitute.org/igv/PortCommands
+var LOCAL_IGV_HOST = 'localhost:60151';
+
+
 /**
  * Returns the value in object found at path.
  *
@@ -19,4 +24,27 @@ function juxt(fns) {
   return o => _.map(fns, fn => fn(o));
 }
 
-module.exports = { getIn, juxt };
+/**
+ * Construct a link template for opening IGV with all the available data.
+ * run is a run object, as passed to the ExaminePage or RecordStore.
+ */
+function makeIGVLink(run, igvHttpfsUrl) {
+  function fileUrl(file) {
+    return igvHttpfsUrl + file;
+  }
+
+  var nameFilePairs = [
+      ['Run', run.uri],
+      ['Normal', run.normal_bam_uri], 
+      ['Tumor', run.tumor_bam_uri]
+  ].filter(x => x[1]);
+
+  var fileParam = nameFilePairs.map(x => fileUrl(x[1])).join(','),
+      nameParam = nameFilePairs.map(x => x[0]).join(',');
+
+  return `http://${LOCAL_IGV_HOST}/load?user=cycledash&genome=hg19` +
+      `&file=${fileParam}&name=${nameParam}`;
+}
+
+
+module.exports = { getIn, juxt, makeIGVLink };

@@ -150,13 +150,20 @@ body {
   width: 600px;
   text-align: right;
 }
-.vcf-table .dalliance-open {
+.vcf-table .dalliance-open, .vcf-table .igv-links {
   float: left;
-  background: url(/static/img/magnifying-glass-noun_907.svg) no-repeat 2px 6px;
-  cursor: pointer;
   padding: 3px 0 0 21px;
   line-height: 1.6em;
+}
+.vcf-table .dalliance-open {
+  background: url(/static/img/magnifying-glass-noun_907.svg) no-repeat 2px 6px;
+  cursor: pointer;
   background-size: 15px 15px;
+}
+.vcf-table .igv-links {
+  background: url(/static/img/igv32x32.jpg) no-repeat 2px 3px;
+  background-size: 16px 16px;
+  margin-left: 10px;
 }
 .vcf-table tbody tr:nth-child(even) {
   background: rgb(245, 245, 245);

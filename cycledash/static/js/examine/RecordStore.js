@@ -27,7 +27,7 @@ var ENTIRE_GENOME = {start: null, end: null, contig: types.ALL_CHROMOSOMES};
 
 // opt_testDataSource is provided for testing.
 // Its type is function(url, type, data, done_callback, err_callback).
-function createRecordStore(run, dispatcher, opt_testDataSource) {
+function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
   // Initial state of the store. This is mutable. There be monsters.
   var vcfId = run.id,
       hasPendingRequest = false,
@@ -45,7 +45,9 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
       range = ENTIRE_GENOME,
 
       contigs = run.contigs,
-      columns = run.spec;
+      columns = run.spec,
+
+      igvLink = utils.makeIGVLink(run, igvHttpfsUrl);
 
   // Internal to RecordStore, this is a map from row key (contig +
   // position + ...) to the record's index in records.
@@ -423,19 +425,20 @@ function createRecordStore(run, dispatcher, opt_testDataSource) {
     getState: function() {
       var query = queryFrom(range, filters, sortBys, page, limit);
       return {
+        columns,
+        contigs,
+        filters,
         hasLoaded,
         hasPendingRequest,
-        loadError,
-        records,
-        stats,
-        selectedRecord,
+        igvLink,
         isViewerOpen,
-        filters,
-        sortBys,
+        loadError,
+        query,
         range,
-        contigs,
-        columns,
-        query
+        records,
+        selectedRecord,
+        sortBys,
+        stats
       };
     },
 
