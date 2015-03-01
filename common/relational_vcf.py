@@ -43,7 +43,7 @@ def flatten_record(record, info_prefix, sample_prefix, sample_name_key):
     fields.update(prefix_keys(record.INFO, info_prefix))
     def prepare(samp):
         "Prepare a sample dict by populating its fields."
-        sample = prefix_keys(samp.data.__dict__, sample_prefix)
+an        sample = prefix_keys(samp.data.__dict__, sample_prefix)
         sample = dict(sample, **fields)
         sample[sample_name_key] = samp.sample
         return sample
@@ -113,7 +113,7 @@ def vcf_to_csv(vcfdata, columns, filename, **kwargs):
 
     Args:
         vcfdata: A vcf.Reader of records.
-        columns: An list of columns.
+        columns: A list of columns.
         filename: The name of the CSV to be written to.
 
     Returns:
