@@ -204,7 +204,7 @@ var RunDescriptionRow = React.createClass({
         });
     return (
       <tr className='run-info'>
-        <td colSpan='5'>
+        <td colSpan='6'>
           <dl className='dl-horizontal'>
             {descriptions}
           </dl>
