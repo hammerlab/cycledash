@@ -15,7 +15,7 @@ def get_all_comments():
     with tables(db, 'user_comments') as (con, user_comments):
         q = select(user_comments.c).order_by(
             desc(user_comments.c.last_modified))
-        comments = [dict(c) for c in con.execute(q).fetchall()]
+        return [dict(c) for c in con.execute(q).fetchall()]
 
 
 def user_comments_db(f=None, use_transaction=False):
