@@ -15,7 +15,7 @@ from cycledash.helpers import (prepare_request_data, error_response,
 import cycledash.validations as valid
 import cycledash.genotypes
 import cycledash.comments
-import cycledash.runs as runs
+import cycledash.runs
 
 from common.relational_vcf import genotypes_to_file
 from common.helpers import tables
@@ -51,7 +51,7 @@ def list_runs():
         workers.runner.start_workers_for_run(data)
         return redirect(url_for('runs'))
     elif request.method == 'GET':
-        vcfs, last_comments, completions = runs.get_runs()
+        vcfs, last_comments, completions = cycledash.runs.get_runs()
         if 'text/html' in request.accept_mimetypes:
             return render_template('runs.html', runs=vcfs, run_kvs=RUN_ADDL_KVS,
                                    last_comments=last_comments,
@@ -62,7 +62,7 @@ def list_runs():
 
 @app.route('/runs/<run_id>/examine')
 def examine(run_id):
-    return render_template('examine.html', run=runs.get_run(run_id))
+    return render_template('examine.html', run=cycledash.runs.get_run(run_id))
 
 
 @app.route('/runs/<run_id>/genotypes')
