@@ -26,15 +26,20 @@ var Comment = React.createClass({
   propTypes: {
     comment: React.PropTypes.object.isRequired
   },
+  urlForComment: function(c) {
+    return `/runs/${c.vcf_id}/examine?query=${c.contig}:${c.position}-${1+c.position}`;
+  },
   render: function() {
     var comment = this.props.comment,
         relativeDate = moment(new Date(comment.last_modified)).fromNow();
     return (
         <li>
           <span className='run-id'>
-          <a href={'/runs/' + comment.vcf_id + '/examine'}>Run {comment.vcf_id}</a>
+          <a href={`/runs/${comment.vcf_id}/examine`}>Run {comment.vcf_id}</a>
           </span>
-          <span className='location'>{comment.contig}:{comment.position}</span>
+          <a className='location' href={this.urlForComment(comment)}>
+            {comment.contig}:{comment.position}
+          </a>
           <span className='summary'>{comment.comment_text.slice(0, 60)}</span>
           <span className='time' title={comment.last_modified}>{relativeDate}</span>
         </li>
