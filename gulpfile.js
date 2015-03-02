@@ -65,14 +65,6 @@ gulp.task('watch', function() {
   gulp.watch(PATHS.css, ['css']);
 });
 
-// Default task which compiles the JS and then watches the JS and CSS for
-// changes.
-gulp.task('default', ['watch', 'js']);
-
-// Build production resources and copy them into the serving directory.
-gulp.task('prod', ['peg', 'build', 'dalliance']);
-
-
 // Task which builds the production-ready JS.
 // Minified, polyfilled, JSX & ES6, and browserified.
 gulp.task('build', function() {
@@ -98,11 +90,26 @@ gulp.task('dalliance', function() {
     .pipe(gulp.dest('./cycledash/static/dalliance'));
 });
 
+// Copy over prebuilt bootstrap files from node_modules.
+gulp.task('bootstrap', function() {
+  gulp.src('./node_modules/bootstrap/dist/**/*',
+           {base: './node_modules/bootstrap/dist'})
+    .pipe(gulp.dest('./cycledash/static/lib/bootstrap'));
+});
+
 gulp.task('peg', function() {
   gulp.src(PATHS.pegGrammar)
       .pipe(peg().on('error', console.error))
       .pipe(gulp.dest('./cycledash/static/lib'));
 });
+
+
+// Default task which compiles the JS and then watches the JS and CSS for
+// changes.
+gulp.task('default', ['watch', 'js']);
+
+// Build production resources and copy them into the serving directory.
+gulp.task('prod', ['peg', 'build', 'dalliance', 'bootstrap']);
 
 gulp.task('help', function() {
   console.log([
@@ -113,5 +120,6 @@ gulp.task('help', function() {
       '  prod       -- all resources needed for production deployment.',
       '  build      -- compile production-ready JS',
       '  dalliance  -- Move biodalliance JS/CSS into place',
+      '  bootstrap  -- Move bootstrap JS/CSS into place',
       ''].join('\n'));
 });

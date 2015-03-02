@@ -10,5 +10,6 @@ bundled.js
 .bin
 .bundled.js
 cycledash/static/lib/querylanguage.js
+cycledash/static/lib/bootstrap/
 cycledash/static/dalliance/
 coverage.html
