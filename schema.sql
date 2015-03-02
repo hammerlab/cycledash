@@ -13,6 +13,7 @@ CREATE TABLE vcfs (
        uri TEXT UNIQUE, -- URI of source file, if any
        vcf_header TEXT, -- Plaintext header of the VCF
        extant_columns TEXT, -- JSON list of non-null columns in the VCF
+       genotype_count BIGINT,  -- number of variants in this VCF
 
        precision NUMERIC,
        recall NUMERIC,
