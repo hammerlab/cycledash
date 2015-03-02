@@ -9,6 +9,5 @@ node_modules
 bundled.js
 .bin
 .bundled.js
-cycledash/static/lib/querylanguage.js
-cycledash/static/dalliance/
+cycledash/static/lib/
 coverage.html

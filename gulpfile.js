@@ -65,14 +65,6 @@ gulp.task('watch', function() {
   gulp.watch(PATHS.css, ['css']);
 });
 
-// Default task which compiles the JS and then watches the JS and CSS for
-// changes.
-gulp.task('default', ['watch', 'js']);
-
-// Build production resources and copy them into the serving directory.
-gulp.task('prod', ['peg', 'build', 'dalliance']);
-
-
 // Task which builds the production-ready JS.
 // Minified, polyfilled, JSX & ES6, and browserified.
 gulp.task('build', function() {
@@ -87,22 +79,40 @@ gulp.task('build', function() {
     .pipe(gulp.dest(PATHS.dest));
 });
 
-// Copy over prebuilt Biodalliance files from node_modules.
-gulp.task('dalliance', function() {
-  gulp.src('./node_modules/dalliance/{css,fonts,img,help}/*.*',
-           {base: './node_modules/dalliance'})
-    .pipe(gulp.dest('./cycledash/static/dalliance'));
-
-  gulp.src('./node_modules/dalliance/build/*.js',
-           {base: './node_modules/dalliance/build'})
-    .pipe(gulp.dest('./cycledash/static/dalliance'));
-});
-
 gulp.task('peg', function() {
   gulp.src(PATHS.pegGrammar)
       .pipe(peg().on('error', console.error))
       .pipe(gulp.dest('./cycledash/static/lib'));
 });
+
+gulp.task('staticlibs', function() {
+  // jQuery
+  gulp.src('./node_modules/jquery/dist/*.{js,map}',
+           {base: './node_modules/jquery/dist'})
+    .pipe(gulp.dest('./cycledash/static/lib/jquery'));
+
+  // Bootstrap
+  gulp.src('./node_modules/bootstrap/dist/**/*',
+           {base: './node_modules/bootstrap/dist'})
+    .pipe(gulp.dest('./cycledash/static/lib/bootstrap'));
+
+  // BioDalliance
+  gulp.src('./node_modules/dalliance/{css,fonts,img,help}/*.*',
+           {base: './node_modules/dalliance'})
+    .pipe(gulp.dest('./cycledash/static/lib/dalliance'));
+
+  gulp.src('./node_modules/dalliance/build/*.js',
+           {base: './node_modules/dalliance/build'})
+    .pipe(gulp.dest('./cycledash/static/lib/dalliance'));
+});
+
+
+// Default task which compiles the JS and then watches the JS and CSS for
+// changes.
+gulp.task('default', ['watch', 'js']);
+
+// Build production resources and copy them into the serving directory.
+gulp.task('prod', ['peg', 'build', 'staticlibs']);
 
 gulp.task('help', function() {
   console.log([
@@ -112,6 +122,6 @@ gulp.task('help', function() {
       '                the browser upon CSS or JS source changes.',
       '  prod       -- all resources needed for production deployment.',
       '  build      -- compile production-ready JS',
-      '  dalliance  -- Move biodalliance JS/CSS into place',
+      '  staticlibs -- Move third-party static content into place',
       ''].join('\n'));
 });

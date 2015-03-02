@@ -126,7 +126,7 @@ var BioDalliance = React.createClass({
         viewEnd:   2684736 + 50,
 
         noSourceCSS: true,
-        uiPrefix: document.location.protocol + '//' + document.location.host + '/static/dalliance/',
+        uiPrefix: document.location.protocol + '//' + document.location.host + '/static/lib/dalliance/',
         noPersist: true,
 
         coordSystem: {
