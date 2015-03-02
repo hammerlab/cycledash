@@ -8,6 +8,7 @@ var _ = require('underscore'),
     React = require('react'),
     QueryLanguage = require('../../QueryLanguage'),
     QueryCompletion = require('../../QueryCompletion'),
+    utils = require('../utils'),
     $ = require('jquery');
 
 // Hack to make typeahead.js use the correct jQuery.
@@ -19,15 +20,6 @@ var _ = require('underscore'),
   require('typeahead.js');
   window.jQuery = oldJQuery;
 })();
-
-// Extracts a flat list of column names from the uber-columns object
-function extractFlatColumnList(columns) {
-  // columns looks something like {SAMPLE: {DP: {columnName: ...}}}
-  var samples = _.values(columns);
-  var columnInfos = _.flatten(samples.map(_.values));
-  var columnNames = _.pluck(columnInfos, 'columnName');
-  return ['reference', 'alternates', 'contig', 'position'].concat(columnNames);
-}
 
 var QueryBox = React.createClass({
   propTypes: {
@@ -41,7 +33,7 @@ var QueryBox = React.createClass({
     errorMessage: null  // null = no error
   }),
   parseQuery: function(queryStr) {
-    var columnNames = extractFlatColumnList(this.props.columns);
+    var columnNames = utils.extractFlatColumnList(this.props.columns);
     return QueryLanguage.parse(queryStr, columnNames);
   },
   parseAndUpdate: function(queryStr) {
@@ -68,7 +60,7 @@ var QueryBox = React.createClass({
       this.parseAndUpdate($input.val());
     };
     var completionSource = QueryCompletion.createTypeaheadSource(
-        QueryLanguage.parse, extractFlatColumnList(this.props.columns));
+        QueryLanguage.parse, utils.extractFlatColumnList(this.props.columns));
 
     $input
       .typeahead({

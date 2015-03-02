@@ -73,6 +73,8 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
 
   var currentPendingQuery = null;
 
+  var cqlColumnList = utils.extractFlatColumnList(columns);
+
   function receiver(action) {
     switch(action.actionType) {
       case ACTION_TYPES.SORT_BY:
@@ -357,9 +359,18 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
     };
   }
 
+  // Like encodeURIComponent, but uses + instead of %20 to escape spaces.
+  function encodeURIPlus(str) {
+    return encodeURIComponent(str).replace(/%20/g, '+');
+  }
+
+  // Like decodeURIComponent, but uses + instead of %20 to escape spaces.
+  function decodeURIPlus(q) {
+    return decodeURIComponent(q.replace(/\+/g, '%20'));
+  }
+
   function setSearchStringToQuery(query) {
-    var queryString = encodeURIComponent(QueryLanguage.toString(query));
-    console.log(QueryLanguage.toString(query));
+    var queryString = encodeURIPlus(QueryLanguage.toString(query));
     window.history.replaceState(null, null, '?query=' + queryString);
   }
 
@@ -369,11 +380,10 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
         vars = search.split('&');
     var val = _.first(_.filter(vars, v => {
       var [key, val] = v.split('=');
-      return decodeURIComponent(key) == name;
+      return decodeURIPlus(key) == name;
     }));
     if (val) {
-      var cqlQuery = decodeURIComponent(val.split('=')[1]);
-      return QueryLanguage.parse(cqlQuery);
+      return decodeURIPlus(val.split('=')[1]);
     }
     return null;
   }
@@ -402,7 +412,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
   var existingQuery = getQueryStringValue('query');
   if (existingQuery) {
     try {
-      var jsonQuery = JSON.parse(existingQuery);
+      var jsonQuery = QueryLanguage.parse(existingQuery, cqlColumnList);
       setQuery(jsonQuery);
     } catch (e) {
       // query is invalid
