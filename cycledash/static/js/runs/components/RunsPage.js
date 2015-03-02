@@ -147,6 +147,7 @@ var ProjectTable = React.createClass({
               <th className='caller-name'>Caller Name</th>
               <th className='dataset'>Dataset</th>
               <th className='date'>Submitted On</th>
+              <th className='num-variants'>Variants</th>
               <th></th>
               <th></th>
             </tr>
@@ -180,6 +181,7 @@ var RunRow = React.createClass({
         <td className='caller-name'>{run.caller_name}</td>
         <td className='dataset'>{run.dataset_name}</td>
         <td className='date' title={run.created_at}>{moment(new Date(run.created_at)).format('YYYY-MM-DD')}</td>
+        <td className='num-variants' title={run.genotype_count}>{run.genotype_count}</td>
         <RunLabels run={run} />
         <RunComments run={run} />
       </tr>
