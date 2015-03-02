@@ -68,7 +68,7 @@ range "range"
     { return { type: 'range', contig: contig, range: range } }
 
 contig
-  = chars:[0-9]+  { return chars.join('') }
+  = chr:"chr"i? chars:[0-9]+  { return (chr || '') + chars.join('') }
   / "X"
   / "Y"
 
