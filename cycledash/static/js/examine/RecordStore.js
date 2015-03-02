@@ -12,6 +12,7 @@
 
 var _ = require('underscore'),
     utils = require('./utils'),
+    QueryLanguage = require('../QueryLanguage'),
     $ = require('jquery'),
     ACTION_TYPES = require('./RecordActions').ACTION_TYPES,
     types = require('./components/types');
@@ -357,7 +358,8 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
   }
 
   function setSearchStringToQuery(query) {
-    var queryString = encodeURIComponent(JSON.stringify(query));
+    var queryString = encodeURIComponent(QueryLanguage.toString(query));
+    console.log(QueryLanguage.toString(query));
     window.history.replaceState(null, null, '?query=' + queryString);
   }
 
@@ -369,7 +371,11 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
       var [key, val] = v.split('=');
       return decodeURIComponent(key) == name;
     }));
-    if (val) return decodeURIComponent(val.split('=')[1]);
+    if (val) {
+      var cqlQuery = decodeURIComponent(val.split('=')[1]);
+      return QueryLanguage.parse(cqlQuery);
+    }
+    return null;
   }
 
   /**
