@@ -36,6 +36,7 @@ describe('Query Language', function() {
       expectParse('20:1234-', {range: {contig: '20', start: '1234'}});
       expectParse('20:-4,567', {range: {contig: '20', end: '4567'}});
       expectParse('X:345-4,567', {range: {contig: 'X', start: '345', end: '4567'}});
+      expectParse('chr12:1234-4,567', {range: {contig: 'chr12', start: '1234', end: '4567'}});
     });
 
     it('should parse simple order bys', function() {
