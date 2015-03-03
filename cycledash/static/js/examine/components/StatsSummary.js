@@ -11,15 +11,19 @@ var StatsSummary = React.createClass({
     stats: React.PropTypes.object.isRequired,
   },
   render: function() {
-    var props = this.props;
-    if (props.truthRecords === null) return null;
+    var stats = this.props.stats;
+    var variantStats = null;
+    if (stats.totalTruthRecords !== undefined) {
+      variantStats = <VariantStats hasLoaded={this.props.hasLoaded}
+                                   stats={stats} />;
+    }
+
     return (
       <div id="stats-container">
-        <VariantStats hasLoaded={props.hasLoaded}
-                      stats={props.stats} />
-        <RecordsShown hasLoaded={props.hasLoaded}
-                      numberOfFilteredRecords={props.stats.totalRecords}
-                      totalNumberOfRecords={props.stats.totalUnfilteredRecords} />
+        {variantStats}
+        <RecordsShown hasLoaded={this.props.hasLoaded}
+                      numberOfFilteredRecords={stats.totalRecords}
+                      totalNumberOfRecords={stats.totalUnfilteredRecords} />
       </div>
     );
   }
