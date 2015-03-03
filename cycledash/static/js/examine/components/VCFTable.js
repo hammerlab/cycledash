@@ -253,6 +253,10 @@ var VCFTableBody = React.createClass({
       }
     });
   },
+  getInitialState: () => ({hasOpenedIGV: false}),
+  didClickIGVLink: function() {
+    this.setState({hasOpenedIGV: true});
+  },
   componentWillUnmount: function() {
     $(window).off('scroll.vcftable');
     $(this.refs.lazyload.getDOMNode()).off('click');
@@ -276,6 +280,8 @@ var VCFTableBody = React.createClass({
               <VCFCommentBox record={record}
                              key={commentKey}
                              igvLink={this.props.igvLink}
+                             hasOpenedIGV={this.state.hasOpenedIGV}
+                             didClickIGVLink={this.didClickIGVLink}
                              handleOpenViewer={this.props.handleOpenViewer}
                              handleSetComment={this.props.handleSetComment}
                              handleDeleteComment={this.props.handleDeleteComment} />
@@ -364,6 +370,8 @@ var VCFCommentBox = React.createClass({
   propTypes: {
     record: React.PropTypes.object.isRequired,
     igvLink: React.PropTypes.string,
+    hasOpenedIGV: React.PropTypes.bool.isRequired,
+    didClickIGVLink: React.PropTypes.func.isRequired,
     handleOpenViewer: React.PropTypes.func.isRequired,
     handleSetComment: React.PropTypes.func.isRequired,
     handleDeleteComment: React.PropTypes.func.isRequired
@@ -406,6 +414,8 @@ var VCFCommentBox = React.createClass({
           <VCFComment record={this.props.record}
                       commentText={commentText}
                       igvLink={this.props.igvLink}
+                      hasOpenedIGV={this.props.hasOpenedIGV}
+                      didClickIGVLink={this.props.didClickIGVLink}
                       handleOpenViewer={this.props.handleOpenViewer}
                       handleDelete={this.handleDelete}
                       handleSave={this.handleSave} />
@@ -424,6 +434,8 @@ var VCFComment = React.createClass({
     record: React.PropTypes.object.isRequired,
     commentText: React.PropTypes.string.isRequired,
     igvLink: React.PropTypes.string,
+    hasOpenedIGV: React.PropTypes.bool.isRequired,
+    didClickIGVLink: React.PropTypes.func.isRequired,
     handleOpenViewer: React.PropTypes.func.isRequired,
     handleDelete: React.PropTypes.func.isRequired,
     handleSave: React.PropTypes.func.isRequired
@@ -464,6 +476,8 @@ var VCFComment = React.createClass({
           <VCFCommentHeader handleEdit={() => {this.setEditState(true);}}
                             record={this.props.record}
                             igvLink={this.props.igvLink}
+                            hasOpenedIGV={this.props.hasOpenedIGV}
+                            didClickIGVLink={this.props.didClickIGVLink}
                             handleOpenViewer={this.props.handleOpenViewer}
                             handleDelete={this.props.handleDelete} />
       );
@@ -481,6 +495,8 @@ var VCFCommentHeader = React.createClass({
   propTypes: {
     record: React.PropTypes.object.isRequired,
     igvLink: React.PropTypes.string,
+    hasOpenedIGV: React.PropTypes.bool.isRequired,
+    didClickIGVLink: React.PropTypes.func.isRequired,
     handleOpenViewer: React.PropTypes.func.isRequired,
     handleEdit: React.PropTypes.func.isRequired,
     handleDelete: React.PropTypes.func.isRequired
@@ -491,6 +507,14 @@ var VCFCommentHeader = React.createClass({
         loadIGVLink = this.props.igvLink + locusParam,
         jumpLink = loadIGVLink.replace(/\/load.*/, '/goto?') + locusParam;
 
+    // The links are worded differently depending on previous actions.
+    var didClick = this.props.didClickIGVLink;
+    var igvLinks = this.props.hasOpenedIGV ?
+        [<a href={jumpLink} onClick={didClick}>Jump to Locus</a>,
+         <a href={loadIGVLink} onClick={didClick}>(reload)</a>] :
+        [<a href={loadIGVLink} onClick={didClick}>Load at Locus</a>,
+         <a href={jumpLink} onClick={didClick}>(Jump)</a>];
+
     return (
       <div className='comment-header'>
         <a className='dalliance-open'
@@ -498,8 +522,8 @@ var VCFCommentHeader = React.createClass({
           Open Pileup Viewer
         </a>
         <span className='igv-links'>
-          IGV: <a href={loadIGVLink}>Load at Locus</a>&nbsp;
-               <a href={jumpLink}>(Jump)</a>&nbsp;
+          IGV: {igvLinks[0]}&nbsp;
+               {igvLinks[1]}&nbsp;
                <a href="https://github.com/hammerlab/cycledash/wiki/IGV-Integration">help</a>
         </span>
         <button className='btn btn-default btn-xs comment-button btn-danger'
