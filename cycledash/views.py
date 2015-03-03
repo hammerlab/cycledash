@@ -49,7 +49,7 @@ def list_runs():
         except Exception as e:
             return error_response('Run validation', str(e))
         workers.runner.start_workers_for_run(data)
-        return redirect(url_for('runs'))
+        return redirect(url_for('list_runs'))
     elif request.method == 'GET':
         vcfs, last_comments, completions = cycledash.runs.get_runs()
         if 'text/html' in request.accept_mimetypes:
