@@ -370,7 +370,7 @@ var VCFCommentBox = React.createClass({
   propTypes: {
     record: React.PropTypes.object.isRequired,
     igvLink: React.PropTypes.string,
-    hasOpenedIGV: React.PropTypes.bool,
+    hasOpenedIGV: React.PropTypes.bool.isRequired,
     didClickIGVLink: React.PropTypes.func.isRequired,
     handleOpenViewer: React.PropTypes.func.isRequired,
     handleSetComment: React.PropTypes.func.isRequired,
@@ -434,7 +434,7 @@ var VCFComment = React.createClass({
     record: React.PropTypes.object.isRequired,
     commentText: React.PropTypes.string.isRequired,
     igvLink: React.PropTypes.string,
-    hasOpenedIGV: React.PropTypes.bool,
+    hasOpenedIGV: React.PropTypes.bool.isRequired,
     didClickIGVLink: React.PropTypes.func.isRequired,
     handleOpenViewer: React.PropTypes.func.isRequired,
     handleDelete: React.PropTypes.func.isRequired,
@@ -495,7 +495,7 @@ var VCFCommentHeader = React.createClass({
   propTypes: {
     record: React.PropTypes.object.isRequired,
     igvLink: React.PropTypes.string,
-    hasOpenedIGV: React.PropTypes.bool,
+    hasOpenedIGV: React.PropTypes.bool.isRequired,
     didClickIGVLink: React.PropTypes.func.isRequired,
     handleOpenViewer: React.PropTypes.func.isRequired,
     handleEdit: React.PropTypes.func.isRequired,
