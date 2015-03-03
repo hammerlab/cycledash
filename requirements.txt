@@ -1,4 +1,5 @@
 beautifulsoup4
+coverage
 Flask-SQLAlchemy==1.0
 Flask==0.10.1
 Jinja2==2.7.2
