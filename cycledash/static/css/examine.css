@@ -209,15 +209,15 @@ table.vcf-table {
 
 /* StatsSummary */
 #stats-container {
-  margin-top: 40px;
+  margin-top: 23px;
   width: 350px;
   float: right;
+  border: 1px solid #B6B6B7;
+  border-radius: 3px;
 }
 #stats-container .precision-recall {
-  border-radius: 3px 3px 0 0;
-  border: 1px solid #B6B6B7;
-  margin-top: -17px;
   padding: 13px 0px;
+  border-bottom: 1px solid #B6B6B7;
 }
 #stats-container table {
   border-collapse: collapse;
@@ -241,10 +241,7 @@ table.vcf-table {
 }
 #stats-container .total-records {
   text-align: center;
-  border: 1px solid #B6B6B7;
-  border-top: none;
   padding: 3px 0;
-  border-radius: 0 0 3px 3px;
 }
 
 /* BioDalliance */
