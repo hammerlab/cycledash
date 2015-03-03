@@ -11,7 +11,8 @@ import json
 import config
 from workers.shared import (load_vcf, worker,
                             initialize_database, DATABASE_URI,
-                            TEMPORARY_DIR, update_extant_columns)
+                            TEMPORARY_DIR, update_extant_columns,
+                            update_vcf_count)
 from common.relational_vcf import insert_genotypes_with_copy
 
 
@@ -91,6 +92,7 @@ def insert_run(run, engine, connection, metadata):
                                    temporary_dir=TEMPORARY_DIR)
 
         update_extant_columns(metadata, connection, vcf_id)
+        update_vcf_count(metadata, connection, vcf_id)
         vcf_ids.append(vcf_id)
 
     return vcf_ids

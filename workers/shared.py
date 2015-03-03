@@ -6,7 +6,7 @@ import tempfile
 
 import vcf as pyvcf
 import celery
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import select, func, create_engine, MetaData
 import pywebhdfs.webhdfs
 import pywebhdfs.errors
 
@@ -142,3 +142,14 @@ def extant_columns(metadata, connection, vcf_id):
 
     maxed_columns = dict(connection.execute(query).fetchall()[0])
     return [k for k, v in maxed_columns.iteritems() if v is not None]
+
+
+def update_vcf_count(metadata, connection, vcf_id):
+    """Adds variant count to the metadata for the VCF."""
+    genotypes = metadata.tables.get('genotypes')
+    count_q = select([func.count()]).where(genotypes.c.vcf_id == vcf_id)
+    (count,) = connection.execute(count_q).fetchone()
+
+    vcfs = metadata.tables.get('vcfs')
+    vcfs.update().where(vcfs.c.id == vcf_id).values(
+        genotype_count=count).execute()
