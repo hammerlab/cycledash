@@ -166,6 +166,11 @@ describe('Query Language', function() {
       assert.equal(toString(makeFilter(`A\\"'B\\'"C`)), `A > 'A\\\\"\\'B\\\\\\'"C'`);
     });
 
+    it('should serialize not null', function() {
+      assert.equal(toString({filters:[{type: 'NOT NULL', columnName: 'A'}]}),
+                   'A IS NOT NULL');
+    });
+
     it('should be the inverse of parse()', function() {
       var columns = ['A', 'B', 'INFO.DP', 'annotations:gene_name'];
       var assertInverse = function(str) {
@@ -183,6 +188,7 @@ describe('Query Language', function() {
       assertInverse(`20:-123 AND A <= 0 ORDER BY B DESC, INFO.DP`);
       assertInverse(`20:123- AND A <= 0 ORDER BY B DESC, INFO.DP`);
       assertInverse(`X:123-456 AND A <= 0 ORDER BY B DESC, INFO.DP`);
+      assertInverse(`annotations:gene_name IS NOT NULL`);
     });
   });
 

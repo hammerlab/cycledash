@@ -139,8 +139,14 @@ function toString(parsedQuery) {
 
   // e.g. {filters:[{type: '<', filterValue:'10', columnName:'A'}]}
   if (parsedQuery.filters) {
-    filters = filters.concat(parsedQuery.filters.map(
-        f => `${f.columnName} ${f.type} ${maybeQuote(f.filterValue)}`));
+    filters = filters.concat(parsedQuery.filters.map(f => {
+      var type = f.type.toLowerCase();
+      if (type == 'null' || type == 'not null') {
+        return `${f.columnName} IS ${f.type}`;
+      } else {
+        return `${f.columnName} ${f.type} ${maybeQuote(f.filterValue)}`;
+      }
+    }));
   }
 
   // e.g. {sortBy: [{"columnName": "sample:DP", "order": "desc"}]}

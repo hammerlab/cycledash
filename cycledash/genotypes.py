@@ -274,18 +274,16 @@ def _add_filter(sql_query, table, column_name, column_type, value, op_name):
     col = column(column_name)
     if table.c.get(column_name) is not None:
         col = cast(table.c[column_name], sqla_type)
-    return {
-        '=': sql_query.where(col == value),
-        '!=': sql_query.where(col != value),
-        '<': sql_query.where(col < value),
-        '>': sql_query.where(col > value),
-        '>=': sql_query.where(col >= value),
-        '<=': sql_query.where(col <= value),
-        'NULL': sql_query.where(col != None),
-        'NOT NULL': sql_query.where(col == None),
-        'LIKE': sql_query.where(col.like(value)),
-        'RLIKE': sql_query.where(col.op('~*')(value))
-    }.get(op_name)
+    if op_name == '=':    return sql_query.where(col == value)
+    elif op_name == '!=': return sql_query.where(col != value)
+    elif op_name == '<':  return sql_query.where(col < value)
+    elif op_name == '>':  return sql_query.where(col > value)
+    elif op_name == '>=': return sql_query.where(col >= value)
+    elif op_name == '<=': return sql_query.where(col <= value)
+    elif op_name == 'NULL': return sql_query.where(col == None)
+    elif op_name == 'NOT NULL': return sql_query.where(col != None)
+    elif op_name == 'LIKE': return sql_query.where(col.like(value))
+    elif op_name == 'RLIKE': return sql_query.where(col.op('~*')(value))
 
 
 def _add_range(sql_query, table, rangeq):
