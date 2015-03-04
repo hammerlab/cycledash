@@ -177,7 +177,6 @@ var RunRow = React.createClass({
         <td className='run-id'>
           <span className='run-id'>{run.id}</span>
           <a className='btn btn-default btn-xs' href={'/runs/' + run.id + '/examine'} ref='link'>Examine</a>
-          {run.task_states}
         </td>
         <td className='caller-name'>{run.caller_name}</td>
         <td className='dataset'>{run.dataset_name}</td>
@@ -220,17 +219,33 @@ var RunLabels = React.createClass({
   propTypes: {
     run: React.PropTypes.object.isRequired
   },
+  // Simplified task state map for state icons
+  stateMap: {
+    'STARTED': 'run',
+    'PENDING': 'run',
+    'FAILURE': 'fail',
+    'SUCCESS': null
+  },
   render: function() {
     var run = this.props.run;
+    var taskStates = _.chain(run.task_states)
+                      .map(x => this.stateMap[x])
+                      .unique()
+                      .filter(x => x)
+                      .map(x => [x, true])
+                      .object()
+                      .value();
     var labelTypes = [
       ['validation_vcf', 'validation', 'Is a validation VCF'],
       ['tumor_bam_uri', 'tumor', 'Has an associated tumor BAM'],
-      ['normal_bam_uri', 'normal', 'Has an associated normal BAM']
+      ['normal_bam_uri', 'normal', 'Has an associated normal BAM'],
+      ['run', '', 'Has a running worker task'],
+      ['fail', '', 'Has a failed worker task']
     ];
     var labels = labelTypes.map(function([key, text, title]) {
-      if (run[key]) {
+      if (run[key] || taskStates[key]) {
         return (
-          <span className='label label-info' title={title} key={key}>
+          <span className={`label label-info ${key}`} title={title} key={key}>
             {text}
           </span>
         );

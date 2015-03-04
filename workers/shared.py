@@ -168,7 +168,7 @@ def register_running_task(task, vcf_id=None, vcf_path=None):
     record = {
         'task_id': task.request.id,
         'type': task.name,
-        'state': 'RUNNING'
+        'state': 'STARTED'
     }
     if vcf_path:
         record['vcf_path'] = vcf_path
@@ -190,7 +190,7 @@ def update_tasks_table():
     for task_status_id, task_id in connection.execute(pending_tasks_q).fetchall():
         new_state = worker.AsyncResult(task_id).state
         checks += 1
-        if new_state != 'RUNNING':
+        if new_state != 'STARTED':
             updates.append({'id_': task_status_id, 'state': new_state})
 
     print 'Ran %d checks' % checks
