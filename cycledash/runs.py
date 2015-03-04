@@ -4,7 +4,7 @@ from sqlalchemy import select, desc, func, or_
 from cycledash import db
 import cycledash.genotypes as genotypes
 
-from common.helpers import tables
+from common.helpers import tables, CRUDError
 from workers.shared import update_tasks_table, worker
 
 
@@ -57,6 +57,7 @@ def get_tasks(run_id_or_path):
         return [{
                     'type': _simplify_type(typ),
                     'state': state,
+                    # pylint: disable=too-many-function-args
                     'traceback': worker.AsyncResult(task_id).traceback
                 }
                 for task_id, typ, state in con.execute(q).fetchall()]

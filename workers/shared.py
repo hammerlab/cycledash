@@ -188,6 +188,7 @@ def update_tasks_table():
     updates = []
     checks = 0
     for task_status_id, task_id in connection.execute(pending_tasks_q).fetchall():
+        # pylint: disable=too-many-function-args
         new_state = worker.AsyncResult(task_id).state
         checks += 1
         if new_state != 'STARTED':

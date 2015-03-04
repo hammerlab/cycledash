@@ -20,6 +20,13 @@ def tables(database, *table_names):
         yield tuple([connection] + [metadata.tables[t] for t in table_names])
 
 
+class CRUDError(Exception):
+    """Represents an issue with results from a CRUD operation."""
+    def __init__(self, subject, message):
+        self.subject = subject
+        self.message = message
+
+
 def order(lst, ordering, key=None):
     """Sorts, in-place, and return lst sorted by ordering on key.
 

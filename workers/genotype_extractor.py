@@ -29,7 +29,6 @@ def extract(self, run):
 
     register_running_task(self, vcf_path=run['vcf_path'])
 
-    time.sleep(20)
     if vcf_exists(connection, run['vcf_path']):
         if config.ALLOW_VCF_OVERWRITES:
             was_deleted = delete_vcf(metadata, connection, run['vcf_path'])
