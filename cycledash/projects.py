@@ -24,7 +24,7 @@ def get_projects():
     """Return list of projects ordered by recency."""
     with tables(db, 'projects') as (con, projects):
         q = select(projects.c).order_by(desc(projects.c.id))
-        return jsonify({'runs': [dict(r) for r in con.execute(q).fetchall()]})
+        return jsonify({'projects': [dict(r) for r in con.execute(q).fetchall()]})
 
 
 def create_project(request):
@@ -42,10 +42,10 @@ def create_project(request):
         msg  = 'Could not create project {}'.format(data)
         return error_response(message=str(e),
                               error=msg)
-    if 'text/html' in request.accept_mimetypes:
-        return redirect(url_for('project', project_id=project.get('id'))), 201
-    elif 'application/json' in request.accept_mimetypes:
+    if 'application/json' in request.accept_mimetypes:
         return jsonify(project), 201
+    elif 'text/html' in request.accept_mimetypes:
+        return redirect(url_for('project', project_id=project.get('id'))), 201
 
 
 def update_project(project_id, request):

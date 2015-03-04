@@ -1,7 +1,7 @@
 setup: |
     gulp prod
-    ./tests/pdifftests/create-test-db.sh
-    ./tests/pdifftests/start-cycledash.sh
+    ./tests/create-test-db.sh
+    ./tests/start-cycledash.sh
 
 waitFor:
     url: http://localhost:5001/about

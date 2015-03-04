@@ -15,12 +15,12 @@ PathString = All(unicode,
 
 
 CreateRunSchema = Schema({
-    Required('variant_caller_name'): unicode,
+    'variant_caller_name': unicode,
     Required('vcf_path'): PathString,
     'project_id': Coerce(int),
+    'tumor_dataset_id': Coerce(int),
+    'normal_dataset_id': Coerce(int),
     'truth_vcf_path': PathString,
-    Required('tumor_dataset_id'): Coerce(int),
-    Required('normal_dataset_id'): Coerce(int),
     'is_validation': bool,
     'params': unicode,
     'dataset': unicode,

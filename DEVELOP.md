@@ -130,9 +130,9 @@ To run tests:
 
 ```
 source venv/bin/activate
-source ENV.sh  # make sure all our environment variables are around
+source ./tests/ENV.sh    # make sure all our environment variables are around
 nosetests tests/python   # Run Python tests
-npm test   # Run JS tests
+npm test                 # Run JS tests
 ```
 
 To run an individual JavaScript test, you can use:

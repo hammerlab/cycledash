@@ -24,7 +24,7 @@ def get_bams():
     """Return json list of BAMs ordered by recency."""
     with tables(db, 'bams') as (con, bams):
         q = select(bams.c).order_by(desc(bams.c.id))
-        return jsonify({'runs': [dict(r) for r in con.execute(q).fetchall()]})
+        return jsonify({'bams': [dict(r) for r in con.execute(q).fetchall()]})
 
 
 def create_bam(request):
@@ -52,10 +52,10 @@ def create_bam(request):
         msg  = 'Could not create bam {}'.format(data)
         return error_response(message=str(e),
                               error=msg)
-    if 'text/html' in request.accept_mimetypes:
-        return redirect(url_for('bam', bam_id=bam.get('id'))), 201
-    elif 'application/json' in request.accept_mimetypes:
+    if 'application/json' in request.accept_mimetypes:
         return jsonify(bam), 201
+    elif 'text/html' in request.accept_mimetypes:
+        return redirect(url_for('bam', bam_id=bam.get('id'))), 201
 
 
 def update_bam(bam_id, request):

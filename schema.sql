@@ -22,8 +22,14 @@ CREATE TABLE bams (
 CREATE TABLE vcfs (
        id BIGSERIAL PRIMARY KEY,
        created_at TIMESTAMP DEFAULT statement_timestamp() NOT NULL,
-       tumor_bam_id BIGINT REFERENCES datasets,
-       normal_bam_id BIGINT REFERENCES datasets,
+       tumor_bam_id BIGINT REFERENCES bams,
+       normal_bam_id BIGINT REFERENCES bams,
+
+       -- TO REMOVE: TODO:
+       dataset_name TEXT,
+       project_name TEXT,
+       tumor_bam_uri TEXT,
+       normal_bam_uri TEXT,
 
        caller_name TEXT NOT NULL, -- Name of the caller this came from.
        validation_vcf BOOLEAN DEFAULT false, -- whether or not this is a validation VCF

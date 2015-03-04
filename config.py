@@ -1,11 +1,11 @@
 import os
 
 def handle_false(value):
+    # ensure that false in config isn't interpreted as True
     if value and value.lower() == 'false':
         value = False
     return value
 
-# ensure that false in config isn't interpreted as True
 USE_RELOADER = handle_false(os.environ.get('USE_RELOADER', False))
 SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URI']
 PORT = int(os.environ.get('PORT', 5000))
