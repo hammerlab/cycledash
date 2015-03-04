@@ -38,19 +38,38 @@ def get_run(run_id):
     return run
 
 
-def get_tasks(run_id):
-    run = get_run(run_id)
-    vcf_path = run['uri']
+def _run_id_and_path(run_id_or_path):
+    """Converts an ID _or_ path into an ID _and_ a path."""
+    if isinstance(run_id_or_path, int) or '/' not in run_id_or_path:
+        run = get_run(run_id_or_path)
+        return int(run_id_or_path), run['uri']
+    else:
+        return -1, run_id_or_path
+
+
+def get_tasks(run_id_or_path):
+    run_id, vcf_path = _run_id_and_path(run_id_or_path)
 
     with tables(db, 'task_states') as (con, tasks):
         q = (select([tasks.c.task_id, tasks.c.type, tasks.c.state])
-            .where(or_(tasks.c.vcf_id == run_id, tasks.c.vcf_path == vcf_path)))
+            .where(or_(tasks.c.vcf_id == run_id,
+                       tasks.c.vcf_path == vcf_path)))
         return [{
                     'type': _simplify_type(typ),
                     'state': state,
                     'traceback': worker.AsyncResult(task_id).traceback
                 }
                 for task_id, typ, state in con.execute(q).fetchall()]
+
+
+def delete_tasks(run_id_or_path):
+    run_id, vcf_path = _run_id_and_path(run_id_or_path)
+    with tables(db, 'task_states') as (con, tasks):
+        stmt = tasks.delete(or_(tasks.c.vcf_id == run_id,
+                                tasks.c.vcf_path == vcf_path))
+        result = con.execute(stmt)
+        if result.rowcount == 0:
+            raise CRUDError('No Rows', 'No tasks were deleted')
 
 
 def _extract_completions(vcfs):

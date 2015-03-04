@@ -315,7 +315,11 @@ var OrphanTasksTable = React.createClass({
     }
 
     var rows = _.map(this.props.orphanTasks, (state, vcf) => (
-                     <tr key={vcf}><td>{state}</td><td>{vcf}</td></tr>));
+      <tr key={vcf}>
+        <td><a href={`/tasks/${vcf}`}>{state}</a></td>
+        <td>{vcf}</td>
+      </tr>
+    ));
 
     return (
       <div className='recent-runs'>

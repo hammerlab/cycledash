@@ -63,13 +63,17 @@ def list_runs():
             return jsonify({'runs': vcfs})
 
 
-@app.route('/tasks/<run_id>', methods=['GET'])
-def get_tasks(run_id):
-    if request_wants_json():
-        return jsonify({'tasks': cycledash.runs.get_tasks(run_id)})
-    else:
-        return render_template('tasks.html',
-                               tasks=cycledash.runs.get_tasks(run_id))
+@app.route('/tasks/<path:run_id_or_path>', methods=['GET', 'DELETE'])
+def get_tasks(run_id_or_path):
+    if request.method == 'GET':
+        tasks = cycledash.runs.get_tasks(run_id_or_path)
+        if request_wants_json():
+            return jsonify({'tasks': tasks})
+        else:
+            return render_template('tasks.html', tasks=tasks)
+    elif request.method == 'DELETE':
+        cycledash.runs.delete_tasks(run_id_or_path)
+        return success_response()
 
 
 @app.route('/runs/<run_id>/examine')
