@@ -20,7 +20,6 @@ from contextlib import contextmanager
 import csv
 from sqlalchemy import select, Table, Column
 from sqlalchemy.types import Text, Integer
-import time
 
 import config
 
@@ -44,7 +43,6 @@ def annotate(self, vcf_ids):
 
 
 def _annotate_one(vcf_id):
-    time.sleep(20)
     _, connection, metadata = initialize_database(DATABASE_URI)
     with close_and_discard(connection):
         gene_names = get_gene_names(

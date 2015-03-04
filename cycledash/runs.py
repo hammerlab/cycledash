@@ -47,7 +47,13 @@ def _run_id_and_path(run_id_or_path):
         return -1, run_id_or_path
 
 
+def _simplify_type(typ):
+    """Simplifies worker names, e.g. workers.gene_annotations.annotate."""
+    return '.'.join(typ.split('.')[1:-1])
+
+
 def get_tasks(run_id_or_path):
+    """Returns a list of all tasks associated with a run."""
     run_id, vcf_path = _run_id_and_path(run_id_or_path)
 
     with tables(db, 'task_states') as (con, tasks):
@@ -64,6 +70,7 @@ def get_tasks(run_id_or_path):
 
 
 def delete_tasks(run_id_or_path):
+    """Delete all tasks associated with a run."""
     run_id, vcf_path = _run_id_and_path(run_id_or_path)
     with tables(db, 'task_states') as (con, tasks):
         stmt = tasks.delete(or_(tasks.c.vcf_id == run_id,
@@ -86,12 +93,8 @@ def _extract_completions(vcfs):
     }
 
 
-def _simplify_type(typ):
-    """Simplifies worker names, e.g. workers.gene_annotations.annotate."""
-    return '.'.join(typ.split('.')[1:-1])
-
-
 def _join_task_states(vcfs):
+    """Add a task_states field to each VCF in a list of VCFs."""
     update_tasks_table()
     ts = _get_running_failed_task_vcfs()
 
@@ -109,6 +112,7 @@ def _join_task_states(vcfs):
 
 
 def _get_running_failed_task_vcfs():
+    """Returns a map from (id|path) -> [list of unique states of tasks]."""
     with tables(db, 'task_states') as (con, tasks):
         q = (select([tasks.c.vcf_id, tasks.c.vcf_path, tasks.c.state])
                 .where(tasks.c.state != 'SUCCESS')

@@ -54,13 +54,13 @@ def list_runs():
         return redirect(url_for('list_runs'))
     elif request.method == 'GET':
         vcfs, last_comments, completions, orphan_tasks = cycledash.runs.get_runs()
-        if 'text/html' in request.accept_mimetypes:
+        if request_wants_json():
+            return jsonify({'runs': vcfs})
+        elif 'text/html' in request.accept_mimetypes:
             return render_template('runs.html', runs=vcfs, run_kvs=RUN_ADDL_KVS,
                                    last_comments=last_comments,
                                    completions=completions,
                                    orphan_tasks=orphan_tasks)
-        elif 'application/json' in request.accept_mimetypes:
-            return jsonify({'runs': vcfs})
 
 
 @app.route('/tasks/<path:run_id_or_path>', methods=['GET', 'DELETE'])
