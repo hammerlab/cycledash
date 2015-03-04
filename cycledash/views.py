@@ -21,6 +21,7 @@ from common.relational_vcf import genotypes_to_file
 from common.helpers import tables
 
 import workers.runner
+import workers.shared
 
 
 WEBHDFS_ENDPOINT = app.config['WEBHDFS_URL'] + '/webhdfs/v1/'
@@ -51,13 +52,19 @@ def list_runs():
         workers.runner.start_workers_for_run(data)
         return redirect(url_for('list_runs'))
     elif request.method == 'GET':
-        vcfs, last_comments, completions = cycledash.runs.get_runs()
+        vcfs, last_comments, completions, orphan_tasks = cycledash.runs.get_runs()
         if 'text/html' in request.accept_mimetypes:
             return render_template('runs.html', runs=vcfs, run_kvs=RUN_ADDL_KVS,
                                    last_comments=last_comments,
-                                   completions=completions)
+                                   completions=completions,
+                                   orphan_tasks=orphan_tasks)
         elif 'application/json' in request.accept_mimetypes:
             return jsonify({'runs': vcfs})
+
+
+@app.route('/tasks/<run_id>', methods=['GET'])
+def get_tasks(run_id):
+    return jsonify({'tasks': cycledash.runs.get_tasks(run_id)})
 
 
 @app.route('/runs/<run_id>/examine')

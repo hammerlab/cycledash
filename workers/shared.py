@@ -3,10 +3,11 @@ import os
 import urlparse
 import uuid
 import tempfile
+from collections import defaultdict
 
 import vcf as pyvcf
 import celery
-from sqlalchemy import select, func, create_engine, MetaData
+from sqlalchemy import select, func, create_engine, MetaData, bindparam, not_, or_
 import pywebhdfs.webhdfs
 import pywebhdfs.errors
 
@@ -27,6 +28,9 @@ DATABASE_URI = os.environ['DATABASE_URI']
 TEMPORARY_DIR = config.TEMPORARY_DIR
 
 worker = celery.Celery(broker=CELERY_BROKER, backend=CELERY_BACKEND)
+worker.config_from_object({
+    'CELERY_TRACK_STARTED': True
+})
 
 
 def _get_hdfs_client():
@@ -153,3 +157,46 @@ def update_vcf_count(metadata, connection, vcf_id):
     vcfs = metadata.tables.get('vcfs')
     vcfs.update().where(vcfs.c.id == vcf_id).values(
         genotype_count=count).execute()
+
+
+def register_running_task(task, vcf_id=None, vcf_path=None):
+    """Record the existence of a Celery task in the database."""
+    assert vcf_id or vcf_path
+
+    engine, connection, metadata = initialize_database(DATABASE_URI)
+
+    record = {
+        'task_id': task.request.id,
+        'type': task.name,
+        'state': 'RUNNING'
+    }
+    if vcf_path:
+        record['vcf_path'] = vcf_path
+    else:
+        record['vcf_id'] = vcf_id
+
+    task_states = metadata.tables.get('task_states')
+    task_states.insert(record).execute()
+
+
+def update_tasks_table():
+    engine, connection, metadata = initialize_database(DATABASE_URI)
+    task_states = metadata.tables.get('task_states')
+
+    pending_tasks_q = (select([task_states.c.id, task_states.c.task_id])
+                      .where(not_(task_states.c.state.in_(['SUCCESS', 'FAILURE']))))
+    updates = []
+    checks = 0
+    for task_status_id, task_id in connection.execute(pending_tasks_q).fetchall():
+        new_state = worker.AsyncResult(task_id).state
+        checks += 1
+        if new_state != 'RUNNING':
+            updates.append({'id_': task_status_id, 'state': new_state})
+
+    print 'Ran %d checks' % checks
+    print 'Updates: %s' % updates
+
+    if len(updates) > 0:
+        update_q = task_states.update().where(task_states.c.id == bindparam('id_'))
+        connection.execute(update_q, updates)
+

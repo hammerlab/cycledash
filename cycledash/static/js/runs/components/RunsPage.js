@@ -177,6 +177,7 @@ var RunRow = React.createClass({
         <td className='run-id'>
           <span className='run-id'>{run.id}</span>
           <a className='btn btn-default btn-xs' href={'/runs/' + run.id + '/examine'} ref='link'>Examine</a>
+          {run.task_states}
         </td>
         <td className='caller-name'>{run.caller_name}</td>
         <td className='dataset'>{run.dataset_name}</td>

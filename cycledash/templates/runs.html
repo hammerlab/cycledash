@@ -14,6 +14,7 @@
                       {{ runs | tojson }},
                       {{ run_kvs | tojson }},
                       {{ last_comments | tojson }},
-                      {{ completions | tojson }});
+                      {{ completions | tojson }},
+                      {{ orphan_tasks | tojson }});
 </script>
 {% endblock %}

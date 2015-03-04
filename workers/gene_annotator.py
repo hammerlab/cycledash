@@ -20,27 +20,31 @@ from contextlib import contextmanager
 import csv
 from sqlalchemy import select, Table, Column
 from sqlalchemy.types import Text, Integer
+import time
 
 import config
 
 from workers.shared import (worker, DATABASE_URI, TEMPORARY_DIR,
                             initialize_database, temp_csv,
-                            update_extant_columns)
+                            update_extant_columns, register_running_task)
 
 if not config.TRAVIS:
     from pyensembl import EnsemblRelease
 
 
 # TODO(tavi) Handle inconsistent states and retries.
-@worker.task
-def annotate(vcf_ids):
+@worker.task(bind=True)
+def annotate(self, vcf_ids):
     if vcf_ids == False:
         return  # An error must have occurred earlier.
+    for vcf_id in vcf_ids:
+        register_running_task(self, vcf_id=vcf_id)
     for vcf_id in vcf_ids:
         _annotate_one(vcf_id)
 
 
 def _annotate_one(vcf_id):
+    time.sleep(20)
     _, connection, metadata = initialize_database(DATABASE_URI)
     with close_and_discard(connection):
         gene_names = get_gene_names(

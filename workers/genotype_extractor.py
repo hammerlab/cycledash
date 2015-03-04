@@ -12,12 +12,12 @@ import config
 from workers.shared import (load_vcf, worker,
                             initialize_database, DATABASE_URI,
                             TEMPORARY_DIR, update_extant_columns,
-                            update_vcf_count)
+                            update_vcf_count, register_running_task)
 from common.relational_vcf import insert_genotypes_with_copy
 
 
-@worker.task
-def extract(run):
+@worker.task(bind=True)
+def extract(self, run):
     """Extract the genotype and VCF metadata required to insert a VCF into the
     CycleDash database, and insert it.
 
@@ -27,6 +27,9 @@ def extract(run):
     run = json.loads(run)
     engine, connection, metadata = initialize_database(DATABASE_URI)
 
+    register_running_task(self, vcf_path=run['vcf_path'])
+
+    time.sleep(20)
     if vcf_exists(connection, run['vcf_path']):
         if config.ALLOW_VCF_OVERWRITES:
             was_deleted = delete_vcf(metadata, connection, run['vcf_path'])

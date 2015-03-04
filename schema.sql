@@ -32,6 +32,15 @@ CREATE TABLE user_comments (
        last_modified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE task_states (
+      id BIGSERIAL PRIMARY KEY,
+      vcf_id BIGINT REFERENCES vcfs,
+      vcf_path TEXT,  -- for when there's no vcf_id (yet)
+      type TEXT,  -- worker name
+      task_id TEXT,  -- Celery task ID
+      state TEXT  -- worker state: SUCCEEDED, FAILED, PENDING, STARTED
+);
+
 CREATE TABLE genotypes (
        vcf_id BIGINT REFERENCES vcfs ON DELETE CASCADE NOT NULL,
        sample_name TEXT,
