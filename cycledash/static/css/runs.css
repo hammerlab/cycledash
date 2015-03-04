@@ -146,3 +146,8 @@ main#runs .tt-suggestion.tt-cursor {
   color: #fff;
   background-color: #0097cf;
 }
+
+/* recently-submitted runs */
+.recent-runs th, .recent-runs td {
+  padding: 5px;
+}
