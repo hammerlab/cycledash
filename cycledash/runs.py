@@ -27,12 +27,16 @@ def get_runs():
         return vcfs, last_comments, completions, orphan_tasks
 
 
+def _get_run_dict(run_id):
+    with tables(db, 'vcfs') as (con, vcfs):
+        q = select(vcfs.c).where(vcfs.c.id == run_id)
+        return dict(con.execute(q).fetchone())
+
+
 def get_run(run_id):
     """Return a run with a given ID, and the spec and list of contigs for that
     run for use by the /examine page."""
-    with tables(db, 'vcfs') as (con, vcfs):
-        q = select(vcfs.c).where(vcfs.c.id == run_id)
-        run = dict(con.execute(q).fetchone())
+    run = _get_run_dict(run_id)
     run['spec'] = genotypes.spec(run_id)
     run['contigs'] = genotypes.contigs(run_id)
     return run
@@ -41,7 +45,7 @@ def get_run(run_id):
 def _run_id_and_path(run_id_or_path):
     """Converts an ID _or_ path into an ID _and_ a path."""
     if isinstance(run_id_or_path, int) or '/' not in run_id_or_path:
-        run = get_run(run_id_or_path)
+        run = _get_run_dict(run_id_or_path)
         return int(run_id_or_path), run['uri']
     else:
         return -1, run_id_or_path
