@@ -9,8 +9,13 @@ from workers.shared import update_tasks_table, worker
 
 
 def get_runs():
-    """Return a tuple of a list of all runs, the last 5 comments, and an object with
-    lists of potential completions for the run upload form typeahead fields."""
+    """Return a tuple of:
+        - a list of all runs
+        - the last 5 comments
+        - an object with lists of potential completions for the run upload form
+          typeahead fields.
+        - Tasks without associated runs.
+        """
     with tables(db, 'vcfs', 'user_comments') as (con, vcfs, user_comments):
         joined = vcfs.outerjoin(user_comments, vcfs.c.id == user_comments.c.vcf_id)
         num_comments = func.count(user_comments.c.vcf_id).label('num_comments')

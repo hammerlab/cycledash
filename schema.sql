@@ -38,7 +38,7 @@ CREATE TABLE task_states (
       vcf_path TEXT,  -- for when there's no vcf_id (yet)
       type TEXT,  -- worker name
       task_id TEXT,  -- Celery task ID
-      state TEXT  -- worker state: SUCCEEDED, FAILED, PENDING, STARTED
+      state TEXT  -- worker state, e.g. SUCCESS, FAILURE, STARTED, ...
 );
 
 CREATE TABLE genotypes (

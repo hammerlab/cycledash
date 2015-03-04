@@ -99,6 +99,7 @@ def error_response(error, message):
 
 # See http://flask.pocoo.org/snippets/45/
 def request_wants_json():
+    """Is a JSON response most appropriate for the current request?"""
     best = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     return (best == 'application/json' and
         request.accept_mimetypes[best] > request.accept_mimetypes['text/html'])
