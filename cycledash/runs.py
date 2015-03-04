@@ -5,7 +5,7 @@ from cycledash import db
 import cycledash.genotypes as genotypes
 
 from common.helpers import tables
-from workers.shared import update_tasks_table
+from workers.shared import update_tasks_table, worker
 
 
 def get_runs():
@@ -43,9 +43,14 @@ def get_tasks(run_id):
     vcf_path = run['uri']
 
     with tables(db, 'task_states') as (con, tasks):
-        q = (select([tasks.c.type, tasks.c.state])
+        q = (select([tasks.c.task_id, tasks.c.type, tasks.c.state])
             .where(or_(tasks.c.vcf_id == run_id, tasks.c.vcf_path == vcf_path)))
-        return [{'type': typ, 'state': state} for typ, state in con.execute(q).fetchall()]
+        return [{
+                    'type': _simplify_type(typ),
+                    'state': state,
+                    'traceback': worker.AsyncResult(task_id).traceback
+                }
+                for task_id, typ, state in con.execute(q).fetchall()]
 
 
 def _extract_completions(vcfs):
@@ -59,6 +64,11 @@ def _extract_completions(vcfs):
         'normalBamPaths': pluck_unique(vcfs, 'normal_bam_uri'),
         'tumorBamPaths': pluck_unique(vcfs, 'tumor_bam_uri')
     }
+
+
+def _simplify_type(typ):
+    """Simplifies worker names, e.g. workers.gene_annotations.annotate."""
+    return '.'.join(typ.split('.')[1:-1])
 
 
 def _join_task_states(vcfs):

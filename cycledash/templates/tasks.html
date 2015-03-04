@@ -1,0 +1,17 @@
+{% extends "layouts/layout.html" %}
+{%- from 'macros/nav.html' import nav -%}
+
+{% block body %}
+{{ nav("tasks") }}
+<main>
+  <section>
+    <h3>Task State</h3>
+    {% for task in tasks %}
+    <h4>{{ task.type }}: {{ task.state }}</h4>
+    {% if task.traceback %}
+    <pre>{{ task.traceback }}</pre>
+    {% endif %}
+    {% endfor %}
+  </section>
+</main>
+{% endblock %}

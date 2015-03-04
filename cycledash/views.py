@@ -11,7 +11,8 @@ from sqlalchemy import select, desc, func
 
 from cycledash import app, db
 from cycledash.helpers import (prepare_request_data, error_response,
-                               success_response, get_secure_unique_filename)
+                               success_response, get_secure_unique_filename,
+                               request_wants_json)
 import cycledash.validations as valid
 import cycledash.genotypes
 import cycledash.comments
@@ -64,7 +65,11 @@ def list_runs():
 
 @app.route('/tasks/<run_id>', methods=['GET'])
 def get_tasks(run_id):
-    return jsonify({'tasks': cycledash.runs.get_tasks(run_id)})
+    if request_wants_json():
+        return jsonify({'tasks': cycledash.runs.get_tasks(run_id)})
+    else:
+        return render_template('tasks.html',
+                               tasks=cycledash.runs.get_tasks(run_id))
 
 
 @app.route('/runs/<run_id>/examine')
