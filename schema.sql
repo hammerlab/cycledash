@@ -1,13 +1,31 @@
+CREATE TABLE projects (
+       id BIGSERIAL PRIMARY KEY,
+       name TEXT UNIQUE NOT NULL,
+       notes TEXT
+);
+
+CREATE TABLE bams (
+       id BIGSERIAL PRIMARY KEY,
+       project_id BIGINT REFERENCES projects,
+       name TEXT,
+       notes TEXT,
+       flagstat TEXT, -- the output of running flagstat on a dataset
+       tissues TEXT,
+       resection_date TEXT,
+       sequence_type TEXT, -- DNA or RNA
+       library TEXT,
+       sequencing_platform TEXT,
+       primary_cancer_site BOOLEAN DEFAULT FALSE, -- i.e. not a met.
+       uri TEXT
+);
+
 CREATE TABLE vcfs (
        id BIGSERIAL PRIMARY KEY,
        created_at TIMESTAMP DEFAULT statement_timestamp() NOT NULL,
+       tumor_bam_id BIGINT REFERENCES datasets,
+       normal_bam_id BIGINT REFERENCES datasets,
+
        caller_name TEXT NOT NULL, -- Name of the caller this came from.
-       dataset_name TEXT NOT NULL, -- Name of the dataset VCF is from (e.g. Synth4, PC7114)
-
-       project_name TEXT, -- Name of the project (research, patient, etc) this VCF is part of.
-
-       tumor_bam_uri TEXT, -- URI of tumor BAM
-       normal_bam_uri TEXT, -- URI of normal BAM
        validation_vcf BOOLEAN DEFAULT false, -- whether or not this is a validation VCF
        notes TEXT, -- Any notes, params, etc the user might add. Ideally in JSON format.
        uri TEXT UNIQUE, -- URI of source file, if any

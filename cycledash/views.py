@@ -17,6 +17,8 @@ import cycledash.genotypes
 import cycledash.comments
 import cycledash.runs
 import cycledash.tasks
+import cycledash.bams
+import cycledash.projects
 
 from common.relational_vcf import genotypes_to_file
 from common.helpers import tables
@@ -24,22 +26,24 @@ from common.helpers import tables
 import workers.shared
 
 
-WEBHDFS_ENDPOINT = app.config['WEBHDFS_URL'] + '/webhdfs/v1/'
-WEBHDFS_OPEN_OP = '?user.name={}&op=OPEN'.format(app.config['WEBHDFS_USER'])
+  ###########
+ ## About ##
+###########
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+
+  ##########
+ ## Runs ##
+###########
 
 RUN_ADDL_KVS = {'Tumor BAM': 'tumor_bam_uri',
                 'Normal BAM': 'normal_bam_uri',
                 'VCF URI': 'uri',
                 'Notes': 'notes',
                 'Project': 'project_name'}
-
-VCF_FILENAME = 'cycledash-run-{}.vcf'
-
-
-@app.route('/about')
-def about():
-    return render_template('about.html')
-
 
 @app.route('/', methods=['POST', 'GET'])
 @app.route('/runs', methods=['POST', 'GET'])
@@ -75,6 +79,54 @@ def get_tasks(run_id):
         return success_response()
 
 
+  ##############
+ ## Projects ##
+##############
+
+@app.route('/projects', methods=['POST', 'GET'])
+def projects():
+    if request.method == 'POST':
+        return cycledash.projects.create_project(request)
+    elif request.method == 'GET':
+        return cycledash.projects.get_projects()
+
+
+@app.route('/projects/<project_id>', methods=['PUT', 'GET', 'DELETE'])
+def project(project_id):
+    if request.method == 'PUT':
+        return cycledash.projects.update_project(project_id, request)
+    elif request.method == 'GET':
+        return cycledash.projects.get_project(project_id)
+    elif request.method == 'DELETE':
+        return cycledash.projects.delete_project(project_id)
+
+
+  ##########
+ ## BAMs ##
+##########
+
+@app.route('/bams', methods=['POST', 'GET'])
+def bams():
+    if request.method == 'POST':
+        return cycledash.bams.create_bam(request)
+    elif request.method == 'GET':
+        return cycledash.bams.get_bams()
+
+
+@app.route('/bams/<bam_id>', methods=['PUT', 'GET', 'DELETE'])
+def bam(bam_id):
+    if request.method == 'PUT':
+        return cycledash.bams.update_bam(bam_id, request)
+    elif request.method == 'GET':
+        return cycledash.bams.get_bam(bam_id)
+    elif request.method == 'DELETE':
+        return cycledash.bams.delete_bam(bam_id)
+
+
+  #############
+ ## Examine ##
+#############
+
 @app.route('/runs/<run_id>/examine')
 def examine(run_id):
     return render_template('examine.html', run=cycledash.runs.get_run(run_id))
@@ -85,6 +137,10 @@ def genotypes(run_id):
     gts = cycledash.genotypes.get(run_id, json.loads(request.args.get('q')))
     return jsonify(gts)
 
+
+  ##############
+ ## Comments ##
+##############
 
 @app.route('/comments')
 def all_comments():
@@ -107,6 +163,12 @@ def comment(run_id, comment_id):
     elif request.method == 'DELETE':
         return cycledash.comments.delete_comment(comment_id)
 
+
+  ##################
+ ## VCFs Up/Down ##
+##################
+
+VCF_FILENAME = 'cycledash-run-{}.vcf'
 
 @app.route('/runs/<run_id>/download')
 def download_vcf(run_id):
