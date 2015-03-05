@@ -160,10 +160,7 @@ def update_vcf_count(metadata, connection, vcf_id):
 
 
 def register_running_task(task, vcf_id):
-    """Record the existence of a Celery task in the database.
-    
-    Either vcf_id or vcf_path must be set.
-    """
+    """Record the existence of a Celery task in the database."""
     engine, connection, metadata = initialize_database(DATABASE_URI)
 
     record = {

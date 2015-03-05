@@ -36,7 +36,7 @@ if not config.TRAVIS:
 def annotate(self, vcf_id):
     if vcf_id == False:
         return  # An error must have occurred earlier.
-    register_running_task(self, vcf_id=vcf_id)
+    register_running_task(self, vcf_id)
 
     _, connection, metadata = initialize_database(DATABASE_URI)
     with close_and_discard(connection):

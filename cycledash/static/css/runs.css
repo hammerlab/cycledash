@@ -79,6 +79,9 @@ tr.run-info li {
 input.selector {
   margin-right: 13px;
 }
+td .label {
+  margin: 0 3px 0 3px;
+}
 
 td span.run-id {
   color: #d5d9d9;
@@ -145,9 +148,4 @@ main#runs .tt-suggestion {
 main#runs .tt-suggestion.tt-cursor {
   color: #fff;
   background-color: #0097cf;
-}
-
-/* recently-submitted runs */
-.recent-runs th, .recent-runs td {
-  padding: 5px;
 }
