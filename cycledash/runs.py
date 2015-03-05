@@ -11,10 +11,18 @@ def get_runs():
     """Return a tuple of a list of all runs, the last 5 comments, and an object with
     lists of potential completions for the run upload form typeahead fields."""
     with tables(db, 'vcfs', 'user_comments') as (con, vcfs, user_comments):
-        joined = vcfs.outerjoin(user_comments, vcfs.c.id == user_comments.c.vcf_id)
+        validation_vcfs = vcfs.select().where(vcfs.c.validation_vcf == True).alias()
+        joined = (vcfs
+            .outerjoin(user_comments, vcfs.c.id == user_comments.c.vcf_id)
+            .outerjoin(validation_vcfs,
+                       validation_vcfs.c.dataset_name == vcfs.c.dataset_name))
         num_comments = func.count(user_comments.c.vcf_id).label('num_comments')
-        q = select(vcfs.c + [num_comments]).select_from(joined).group_by(
-            vcfs.c.id).order_by(desc(vcfs.c.id))
+        is_validated = func.count(validation_vcfs.c.id).label('is_validated')
+        q = (select(vcfs.c + [num_comments] + [is_validated])
+            .select_from(joined)
+            .where(vcfs.c.validation_vcf == False)
+            .group_by(vcfs.c.id)
+            .order_by(desc(vcfs.c.id)))
         vcfs = [dict(v) for v in con.execute(q).fetchall()]
         completions = _extract_completions(vcfs)
 
