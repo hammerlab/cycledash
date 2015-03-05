@@ -125,7 +125,7 @@ def _vcf_exists(vcfs_table, uri):
     """Return True if the VCF exists in the vcfs table, else return False."""
     q = select([vcfs_table.c.id]).where(vcfs_table.c.uri == uri)
     result = q.execute()
-    return True if result.rowcount > 0 else False
+    return result.rowcount > 0
 
 
 def _extract_completions(vcfs):

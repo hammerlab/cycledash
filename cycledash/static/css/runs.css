@@ -82,7 +82,6 @@ input.selector {
 td .label {
   margin: 0 3px 0 3px;
 }
-
 td span.run-id {
   color: #d5d9d9;
   margin-right: 11px;
@@ -102,7 +101,6 @@ td span.run-id {
   color: blue;
   content: '…';
 }
-
 span.comment-bubble {
   background: url(/static/img/speech-bubble-noun_5483.svg) no-repeat 0px 3px;
   background-size: 15px 15px;

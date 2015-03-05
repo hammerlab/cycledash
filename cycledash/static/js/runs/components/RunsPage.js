@@ -194,7 +194,7 @@ var RunDescriptionRow = React.createClass({
     run: React.PropTypes.object.isRequired,
     runDescriptionTitleKeys: React.PropTypes.object.isRequired
   },
-  getInitialState: () => ({tasks: null}),
+  getInitialState: () => ({tasks: []}),
   render: function() {
     var run = this.props.run,
         descriptions = _.map(this.props.runDescriptionTitleKeys, (key, title) => {
@@ -203,14 +203,12 @@ var RunDescriptionRow = React.createClass({
                     <dd key={'dd'+key}>{run[key]}</dd>];
           }
         }),
-        tasks = this.state.tasks &&
-          this.state.tasks.map(function({type, state}, i) {
-            var ds = [<dt key={'tdt'+i}>{type}</dt>,
-                      <dd key={'tdd'+i}>{state}</dd>];
-            if (state == 'FAILURE') {
-              ds[1] = <a href={`/tasks/${run.id}`}>{ds[1]}</a>;
-            }
-            return ds;
+        tasks = this.state.tasks.map(
+          function({type, state}, i) {
+            var stateEl = state == 'FAILURE' ?
+                <a href={`/tasks/${run.id}`}>{state}</a> : state;
+            return [<dt key={'tdt'+i}>{type}</dt>,
+                    <dd key={'tdd'+i}>{stateEl}</dd>];
           });
     return (
       <tr className='run-info'>
