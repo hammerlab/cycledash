@@ -39,15 +39,12 @@ def all_non_success_tasks():
     """Returns a map from vcf_id -> [list of unique states of its tasks]."""
     update_tasks_table()
     with tables(db, 'task_states') as (con, tasks):
-        q = (select([tasks.c.vcf_id, tasks.c.vcf_path, tasks.c.state])
+        q = (select([tasks.c.vcf_id, tasks.c.state])
                 .where(tasks.c.state != 'SUCCESS')
                 .distinct())
 
-        # maps either vcf_path or vcf_id to current states
+        # maps vcf_id to current states
         ids_to_states = defaultdict(set)
-        for vcf_id, vcf_path, state in con.execute(q).fetchall():
-            if vcf_id:
-                ids_to_states[vcf_id].add(state)
-            if vcf_path:
-                ids_to_states[vcf_path].add(state)
+        for vcf_id, state in con.execute(q).fetchall():
+            ids_to_states[vcf_id].add(state)
         return {k: list(v) for k, v in ids_to_states.iteritems()}
