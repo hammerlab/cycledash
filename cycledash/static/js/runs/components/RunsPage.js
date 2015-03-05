@@ -21,7 +21,7 @@ var RunsPage = React.createClass({
     // This is a map containing possible completions for typeahead in the
     // SubmitRunForm.
     // { variantCallerNames: ['forexample', 'guacamole', 'Strelka'], ... };
-    completions: React.PropTypes.object.isRequired
+    completions: React.PropTypes.object.isRequired,
   },
   getInitialState: function() {
     return {projectFilter: null,
@@ -194,6 +194,7 @@ var RunDescriptionRow = React.createClass({
     run: React.PropTypes.object.isRequired,
     runDescriptionTitleKeys: React.PropTypes.object.isRequired
   },
+  getInitialState: () => ({tasks: []}),
   render: function() {
     var run = this.props.run,
         descriptions = _.map(this.props.runDescriptionTitleKeys, (key, title) => {
@@ -201,17 +202,34 @@ var RunDescriptionRow = React.createClass({
             return [<dt key={'dt'+key}>{title}</dt>,
                     <dd key={'dd'+key}>{run[key]}</dd>];
           }
-        });
+        }),
+        tasks = this.state.tasks.map(
+          function({type, state}, i) {
+            var stateEl = state == 'FAILURE' ?
+                <a href={`/tasks/${run.id}`}>{state}</a> : state;
+            return [<dt key={'tdt'+i}>{type}</dt>,
+                    <dd key={'tdd'+i}>{stateEl}</dd>];
+          });
     return (
       <tr className='run-info'>
-        <td colSpan='6'>
+        <td colSpan='7'>
           <dl className='dl-horizontal'>
             {descriptions}
+            {tasks}
           </dl>
         </td>
-        <td><button className='btn btn-xs btn-default'>edit</button></td>
       </tr>
     );
+  },
+  componentDidMount: function() {
+    $.ajax({
+      url: `/tasks/${this.props.run.id}`,
+      dataType: "json",
+      contentType: "application/json;charset=utf-8",
+    })
+    .done(tasks => {
+      this.setState({tasks: tasks.tasks});
+    });
   }
 });
 
@@ -219,17 +237,33 @@ var RunLabels = React.createClass({
   propTypes: {
     run: React.PropTypes.object.isRequired
   },
+  // Simplified task state map for state icons
+  stateMap: {
+    'STARTED': 'run',
+    'PENDING': 'run',
+    'FAILURE': 'fail',
+    'SUCCESS': null
+  },
   render: function() {
     var run = this.props.run;
+    var taskStates = _.chain(run.task_states)
+                      .map(x => this.stateMap[x])
+                      .unique()
+                      .filter(x => x)
+                      .map(x => [x, true])
+                      .object()
+                      .value();
     var labelTypes = [
       ['is_validated', 'validated', 'Has associated validation data'],
       ['tumor_bam_uri', 'tumor', 'Has an associated tumor BAM'],
-      ['normal_bam_uri', 'normal', 'Has an associated normal BAM']
+      ['normal_bam_uri', 'normal', 'Has an associated normal BAM'],
+      ['run', '', 'Has a running worker task'],
+      ['fail', '', 'Has a failed worker task']
     ];
     var labels = labelTypes.map(function([key, text, title]) {
-      if (run[key]) {
+      if (run[key] || taskStates[key]) {
         return (
-          <span className='label label-info' title={title} key={key}>
+          <span className={`label label-info ${key}`} title={title} key={key}>
             {text}
           </span>
         );

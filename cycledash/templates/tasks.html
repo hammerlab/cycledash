@@ -1,0 +1,46 @@
+{% extends "layouts/layout.html" %}
+{%- from 'macros/nav.html' import nav -%}
+
+{% block body %}
+{{ nav("tasks") }}
+<main>
+  <section>
+    <h3>Task State</h3>
+    {% for task in tasks %}
+    <h4>{{ task.type }}: {{ task.state }}</h4>
+    {% if task.traceback %}
+    <pre>{{ task.traceback }}</pre>
+    {% endif %}
+    {% endfor %}
+  </section>
+
+  <section>
+    <button id='delete' class='btn btn-danger'>
+      Delete these tasks
+    </button>
+  </section>
+</main>
+
+<script>
+$(function() {
+  $('#delete').on('click', function(e) {
+    if (window.confirm('Are you sure you want to delete these tasks?')) {
+      $.ajax({
+        url: window.location,
+        type: 'DELETE'
+      }).done(function() {
+        window.location = '/runs';
+      }).fail(function(e) {
+        console.error(e);
+        alert('Something went wrong. ' +  e);
+      })
+    }
+  });
+});
+</script>
+<style>
+#delete {
+  float: right;
+}
+</style>
+{% endblock %}

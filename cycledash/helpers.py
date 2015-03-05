@@ -2,7 +2,7 @@
 import os
 import re
 
-from flask import jsonify
+from flask import jsonify, request
 from werkzeug.utils import secure_filename
 
 
@@ -95,3 +95,11 @@ def error_response(error, message):
     response = jsonify({'error': error, 'message': message})
     response.status_code = 400
     return response
+
+
+# See http://flask.pocoo.org/snippets/45/
+def request_wants_json():
+    """Is a JSON response most appropriate for the current request?"""
+    best = request.accept_mimetypes.best_match(['application/json', 'text/html'])
+    return (best == 'application/json' and
+        request.accept_mimetypes[best] > request.accept_mimetypes['text/html'])

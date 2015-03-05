@@ -4,7 +4,7 @@ from flask import jsonify, request
 from functools import wraps, partial
 from sqlalchemy import exc, select, func, desc
 
-from common.helpers import tables
+from common.helpers import tables, CRUDError
 from cycledash import db
 from cycledash.helpers import (prepare_request_data, success_response,
                                error_response)
@@ -47,13 +47,6 @@ def user_comments_db(f=None, use_transaction=False):
                     transaction.rollback()
                 return error_response('SQL Exception', e.message)
     return wrapper
-
-
-class CRUDError(Exception):
-    """Represents an issue with results from a CRUD operation."""
-    def __init__(self, subject, message):
-        self.subject = subject
-        self.message = message
 
 
 @user_comments_db

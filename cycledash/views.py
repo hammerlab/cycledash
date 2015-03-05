@@ -6,21 +6,22 @@ import tempfile
 
 from flask import (request, redirect, Response, render_template, jsonify,
                    url_for, send_file)
-
 from sqlalchemy import select, desc, func
+import voluptuous
 
 from cycledash import app, db
 from cycledash.helpers import (prepare_request_data, error_response,
-                               success_response, get_secure_unique_filename)
-import cycledash.validations as valid
+                               success_response, get_secure_unique_filename,
+                               request_wants_json)
 import cycledash.genotypes
 import cycledash.comments
 import cycledash.runs
+import cycledash.tasks
 
 from common.relational_vcf import genotypes_to_file
 from common.helpers import tables
 
-import workers.runner
+import workers.shared
 
 
 WEBHDFS_ENDPOINT = app.config['WEBHDFS_URL'] + '/webhdfs/v1/'
@@ -45,19 +46,33 @@ def about():
 def list_runs():
     if request.method == 'POST':
         try:
-            data = valid.CreateRunSchema(prepare_request_data(request))
-        except Exception as e:
+            cycledash.runs.create_run(prepare_request_data(request))
+        except voluptuous.Invalid as e:
             return error_response('Run validation', str(e))
-        workers.runner.start_workers_for_run(data)
-        return redirect(url_for('runs'))
+        except Exception as e:
+            return error_response('Error', str(e))
+        return redirect(url_for('list_runs'))
     elif request.method == 'GET':
         vcfs, last_comments, completions = cycledash.runs.get_runs()
-        if 'text/html' in request.accept_mimetypes:
+        if request_wants_json():
+            return jsonify({'runs': vcfs})
+        elif 'text/html' in request.accept_mimetypes:
             return render_template('runs.html', runs=vcfs, run_kvs=RUN_ADDL_KVS,
                                    last_comments=last_comments,
                                    completions=completions)
-        elif 'application/json' in request.accept_mimetypes:
-            return jsonify({'runs': vcfs})
+
+
+@app.route('/tasks/<run_id>', methods=['GET', 'DELETE'])
+def get_tasks(run_id):
+    if request.method == 'GET':
+        tasks = cycledash.tasks.get_tasks(run_id)
+        if request_wants_json():
+            return jsonify({'tasks': tasks})
+        else:
+            return render_template('tasks.html', tasks=tasks)
+    elif request.method == 'DELETE':
+        cycledash.tasks.delete_tasks(run_id)
+        return success_response()
 
 
 @app.route('/runs/<run_id>/examine')
