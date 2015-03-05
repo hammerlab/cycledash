@@ -1,13 +1,12 @@
-from collections import defaultdict
-from sqlalchemy import select, desc, func, or_
+from sqlalchemy import select, desc, func
 
 import config
 from cycledash import db
 from cycledash import validations
 from cycledash import genotypes
+import cycledash.tasks
 
 from common.helpers import tables, CRUDError
-from workers.shared import update_tasks_table, worker
 import workers.runner
 
 
@@ -129,34 +128,6 @@ def _vcf_exists(vcfs_table, uri):
     return True if result.rowcount > 0 else False
 
 
-def _simplify_type(typ):
-    """Simplifies worker names, e.g. workers.gene_annotations.annotate."""
-    return '.'.join(typ.split('.')[1:-1])
-
-
-def get_tasks(run_id):
-    """Returns a list of all tasks associated with a run."""
-    with tables(db, 'task_states') as (con, tasks):
-        q = (select([tasks.c.task_id, tasks.c.type, tasks.c.state])
-            .where(tasks.c.vcf_id == run_id))
-        return [{
-                    'type': _simplify_type(typ),
-                    'state': state,
-                    # pylint: disable=too-many-function-args
-                    'traceback': worker.AsyncResult(task_id).traceback
-                }
-                for task_id, typ, state in con.execute(q).fetchall()]
-
-
-def delete_tasks(run_id):
-    """Delete all tasks associated with a run."""
-    with tables(db, 'task_states') as (con, tasks):
-        stmt = tasks.delete(tasks.c.vcf_id == run_id)
-        result = con.execute(stmt)
-        if result.rowcount == 0:
-            raise CRUDError('No Rows', 'No tasks were deleted')
-
-
 def _extract_completions(vcfs):
     def pluck_unique(objs, attr):
         vals = {obj[attr] for obj in objs if obj.get(attr)}
@@ -172,25 +143,7 @@ def _extract_completions(vcfs):
 
 def _join_task_states(vcfs):
     """Add a task_states field to each VCF in a list of VCFs."""
-    update_tasks_table()
-    ts = _get_running_failed_task_vcfs()
+    ts = cycledash.tasks.all_non_success_tasks()
 
     for vcf in vcfs:
-        vcf['task_states'] = list(set(ts.get(vcf['id'], [])))
-
-
-def _get_running_failed_task_vcfs():
-    """Returns a map from (id|path) -> [list of unique states of tasks]."""
-    with tables(db, 'task_states') as (con, tasks):
-        q = (select([tasks.c.vcf_id, tasks.c.vcf_path, tasks.c.state])
-                .where(tasks.c.state != 'SUCCESS')
-                .distinct())
-
-        # maps either vcf_path or vcf_id to current states
-        ids_to_states = defaultdict(set)
-        for vcf_id, vcf_path, state in con.execute(q).fetchall():
-            if vcf_id:
-                ids_to_states[vcf_id].add(state)
-            if vcf_path:
-                ids_to_states[vcf_path].add(state)
-        return {k: list(v) for k, v in ids_to_states.iteritems()}
+        vcf['task_states'] = ts.get(vcf['id'], [])

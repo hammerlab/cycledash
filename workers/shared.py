@@ -169,7 +169,7 @@ def register_running_task(task, vcf_id):
     record = {
         'task_id': task.request.id,
         'type': task.name,
-        'state': 'STARTED'
+        'state': 'STARTED',
         'vcf_id': vcf_id
     }
 

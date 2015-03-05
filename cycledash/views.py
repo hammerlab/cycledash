@@ -16,6 +16,7 @@ from cycledash.helpers import (prepare_request_data, error_response,
 import cycledash.genotypes
 import cycledash.comments
 import cycledash.runs
+import cycledash.tasks
 
 from common.relational_vcf import genotypes_to_file
 from common.helpers import tables
@@ -64,13 +65,13 @@ def list_runs():
 @app.route('/tasks/<run_id>', methods=['GET', 'DELETE'])
 def get_tasks(run_id):
     if request.method == 'GET':
-        tasks = cycledash.runs.get_tasks(run_id)
+        tasks = cycledash.tasks.get_tasks(run_id)
         if request_wants_json():
             return jsonify({'tasks': tasks})
         else:
             return render_template('tasks.html', tasks=tasks)
     elif request.method == 'DELETE':
-        cycledash.runs.delete_tasks(run_id)
+        cycledash.tasks.delete_tasks(run_id)
         return success_response()
 
 
