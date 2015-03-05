@@ -222,7 +222,7 @@ var RunLabels = React.createClass({
   render: function() {
     var run = this.props.run;
     var labelTypes = [
-      ['validation_vcf', 'validation', 'Is a validation VCF'],
+      ['is_validated', 'validated', 'Has associated validation data'],
       ['tumor_bam_uri', 'tumor', 'Has an associated tumor BAM'],
       ['normal_bam_uri', 'normal', 'Has an associated normal BAM']
     ];
