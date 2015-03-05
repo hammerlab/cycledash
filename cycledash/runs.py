@@ -62,7 +62,7 @@ def create_run(request):
         _ensure_no_existing_vcf(vcfs_table, run['vcf_path'])
 
         vcfs = [{'uri': run['vcf_path'], 'is_validation': False}]
-        if run.get('truth_vcf_path'):
+        if run.get('truth_vcf_path'):  # pylint: disable=no-member
             vcfs.append({'uri': run['truth_vcf_path'], 'is_validation': True})
 
         # Insert VCFs which aren't already in the database.
