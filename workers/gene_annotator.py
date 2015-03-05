@@ -33,16 +33,11 @@ if not config.TRAVIS:
 
 # TODO(tavi) Handle inconsistent states and retries.
 @worker.task(bind=True)
-def annotate(self, vcf_ids):
-    if vcf_ids == False:
+def annotate(self, vcf_id):
+    if vcf_id == False:
         return  # An error must have occurred earlier.
-    for vcf_id in vcf_ids:
-        register_running_task(self, vcf_id=vcf_id)
-    for vcf_id in vcf_ids:
-        _annotate_one(vcf_id)
+    register_running_task(self, vcf_id=vcf_id)
 
-
-def _annotate_one(vcf_id):
     _, connection, metadata = initialize_database(DATABASE_URI)
     with close_and_discard(connection):
         gene_names = get_gene_names(

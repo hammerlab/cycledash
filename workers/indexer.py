@@ -10,10 +10,12 @@ import bai_indexer
 from StringIO import StringIO
 
 from workers.shared import (get_contents_from_hdfs, worker, put_new_file_to_hdfs,
-                            does_hdfs_file_exist, HdfsFileAlreadyExistsError)
+                            does_hdfs_file_exist, HdfsFileAlreadyExistsError,
+                            register_running_task)
 
-@worker.task
-def index(hdfs_bam_path):
+@worker.task(bind=True)
+def index(self, vcf_id, hdfs_bam_path):
+    register_running_task(self, vcf_id)
     if '.bam' not in hdfs_bam_path:
         raise ValueError('Expected path to BAM file, got %s' % hdfs_bam_path)
 

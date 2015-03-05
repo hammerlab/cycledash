@@ -35,7 +35,6 @@ CREATE TABLE user_comments (
 CREATE TABLE task_states (
       id BIGSERIAL PRIMARY KEY,
       vcf_id BIGINT REFERENCES vcfs,
-      vcf_path TEXT,  -- for when there's no vcf_id (yet)
       type TEXT,  -- worker name
       task_id TEXT,  -- Celery task ID
       state TEXT  -- worker state, e.g. SUCCESS, FAILURE, STARTED, ...

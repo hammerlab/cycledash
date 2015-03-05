@@ -22,10 +22,6 @@ var RunsPage = React.createClass({
     // SubmitRunForm.
     // { variantCallerNames: ['forexample', 'guacamole', 'Strelka'], ... };
     completions: React.PropTypes.object.isRequired,
-
-    // VCF path --> current states (e.g. 'PENDING', 'STARTED', 'FAILURE')
-    // for runs that don't have an associated run ID yet.
-    orphanTasks: React.PropTypes.object
   },
   getInitialState: function() {
     return {projectFilter: null,
@@ -91,7 +87,6 @@ var RunsPage = React.createClass({
            : null}
         </h1>
         {this.state.showForm ? form : null}
-        <OrphanTasksTable orphanTasks={this.props.orphanTasks} />
         <LatestComments comments={this.props.comments} />
         <h5>
           Filter runs by project name:&nbsp;&nbsp;
@@ -301,34 +296,6 @@ var RunComments = React.createClass({
           { run.num_comments }
         </span>
       </td>
-    );
-  }
-});
-
-var OrphanTasksTable = React.createClass({
-  propTypes: {
-    orphanTasks: React.PropTypes.object
-  },
-  render: function() {
-    if (_.isEmpty(this.props.orphanTasks)) {  // also checks orphanTasks=null
-      return null;
-    }
-
-    var rows = _.map(this.props.orphanTasks, (state, vcf) => (
-      <tr key={vcf}>
-        <td><a href={`/tasks/${vcf}`}>{state}</a></td>
-        <td>{vcf}</td>
-      </tr>
-    ));
-
-    return (
-      <div className='recent-runs'>
-        <h2>Recently-submitted Runs</h2>
-        <table>
-          <tr><th>State</th><th>VCF</th></tr>
-          {rows}
-        </table>
-      </div>
     );
   }
 });

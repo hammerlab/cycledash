@@ -159,27 +159,23 @@ def update_vcf_count(metadata, connection, vcf_id):
         genotype_count=count).execute()
 
 
-def register_running_task(task, vcf_id=None, vcf_path=None):
+def register_running_task(task, vcf_id):
     """Record the existence of a Celery task in the database.
     
     Either vcf_id or vcf_path must be set.
     """
-    assert vcf_id or vcf_path
-
     engine, connection, metadata = initialize_database(DATABASE_URI)
 
     record = {
         'task_id': task.request.id,
         'type': task.name,
         'state': 'STARTED'
+        'vcf_id': vcf_id
     }
-    if vcf_path:
-        record['vcf_path'] = vcf_path
-    else:
-        record['vcf_id'] = vcf_id
 
     tasks = metadata.tables.get('task_states')
     tasks.insert(record).execute()
+    connection.close()
 
 
 def update_tasks_table():

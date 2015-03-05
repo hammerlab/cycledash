@@ -1,11 +1,18 @@
 from collections import defaultdict
 from sqlalchemy import select, desc, func, or_
 
+import config
 from cycledash import db
-import cycledash.genotypes as genotypes
+from cycledash import validations
+from cycledash import genotypes
 
 from common.helpers import tables, CRUDError
 from workers.shared import update_tasks_table, worker
+import workers.runner
+
+
+class CollisionError(Exception):
+    pass
 
 
 def get_runs():
@@ -14,7 +21,6 @@ def get_runs():
         - the last 5 comments
         - an object with lists of potential completions for the run upload form
           typeahead fields.
-        - Tasks without associated runs.
         """
     with tables(db, 'vcfs', 'user_comments') as (con, vcfs, user_comments):
         joined = vcfs.outerjoin(user_comments, vcfs.c.id == user_comments.c.vcf_id)
@@ -27,33 +33,100 @@ def get_runs():
         q = select(user_comments.c).order_by(
             desc(user_comments.c.last_modified)).limit(5)
         last_comments = [dict(c) for c in con.execute(q).fetchall()]
-        orphan_tasks = _join_task_states(vcfs)
+        _join_task_states(vcfs)
 
-        return vcfs, last_comments, completions, orphan_tasks
-
-
-def _get_run_dict(run_id):
-    with tables(db, 'vcfs') as (con, vcfs):
-        q = select(vcfs.c).where(vcfs.c.id == run_id)
-        return dict(con.execute(q).fetchone())
+        return vcfs, last_comments, completions
 
 
 def get_run(run_id):
     """Return a run with a given ID, and the spec and list of contigs for that
     run for use by the /examine page."""
-    run = _get_run_dict(run_id)
+    with tables(db, 'vcfs') as (con, vcfs):
+        q = select(vcfs.c).where(vcfs.c.id == run_id)
+        run = dict(con.execute(q).fetchone())
     run['spec'] = genotypes.spec(run_id)
     run['contigs'] = genotypes.contigs(run_id)
     return run
 
 
-def _run_id_and_path(run_id_or_path):
-    """Converts an ID _or_ path into an ID _and_ a path."""
-    if isinstance(run_id_or_path, int) or '/' not in run_id_or_path:
-        run = _get_run_dict(run_id_or_path)
-        return int(run_id_or_path), run['uri']
+def create_run(request):
+    """Create a new run, inserting it into the vcfs table and starting workers.
+
+    This raises an exception if anything goes wrong.
+
+    Args:
+        request: validations.CreateRunSchema
+    """
+    run = validations.CreateRunSchema(request)  # throws on error
+
+    with tables(db, 'vcfs') as (con, vcfs_table):
+        _ensure_no_existing_vcf(vcfs_table, run['vcf_path'])
+
+        vcfs = [{'uri': run['vcf_path'], 'is_validation': False}]
+        if run.get('truth_vcf_path'):
+            vcfs.append({'uri': run['truth_vcf_path'], 'is_validation': True})
+
+        # Insert VCFs which aren't already in the database.
+        # (the _ensure_no_existing_vcf check only checks the Run VCF, not truth)
+        vcf_ids = [_insert_vcf(vcf, run, vcfs_table, con) for vcf in vcfs]
+        vcf_ids = [x for x in vcf_ids if x]  # filter out `None`s
+
+    # Kick off Celery workers for each new VCF.
+    for vcf_id in vcf_ids:
+        workers.runner.start_workers_for_vcf_id(vcf_id, run)
+
+
+def _ensure_no_existing_vcf(vcfs_table, vcf_path):
+    """Ensures no other VCFs with the same path. Raises if this isn't so."""
+    if not _vcf_exists(vcfs_table, vcf_path):
+        return
+    if config.ALLOW_VCF_OVERWRITES:
+        was_deleted = _delete_vcf(vcfs_table, vcf_path)
+        if not was_deleted:
+            raise CRUDError('Rows should have been deleted if we are '
+                            'deleting a VCF that exists')
     else:
-        return -1, run_id_or_path
+        raise CollisionError(
+            'VCF already exists with URI {}'.format(vcf_path))
+
+
+def _insert_vcf(vcf, run, vcfs_table, connection):
+    """Insert a new row in the vcfs table, if it's not there already."""
+    uri = vcf['uri']
+    if _vcf_exists(vcfs_table, uri):
+        return None
+    record = {
+        'uri': uri,
+        'dataset_name': run.get('dataset'),
+        'caller_name': run.get('variant_caller_name'),
+        'normal_bam_uri': run.get('normal_path'),
+        'tumor_bam_uri': run.get('tumor_path'),
+        'notes': run.get('params'),
+        'project_name': run.get('project_name'),
+        'vcf_header': '(pending)',
+        'validation_vcf': vcf['is_validation']
+    }
+    vcfs_table.insert(record).execute()
+    return _get_vcf_id(connection, uri)
+
+
+def _get_vcf_id(connection, uri):
+    """Return id from vcfs table for the vcf corresponding to the given run."""
+    query = "SELECT * FROM vcfs WHERE uri = '" + uri + "'"
+    return connection.execute(query).first().id
+
+
+def _delete_vcf(vcfs_table, uri):
+    """Delete VCFs with this URI, and return True if rows were deleted."""
+    result = vcfs_table.delete().where(vcfs_table.c.uri == uri).execute()
+    return result.rowcount > 0
+
+
+def _vcf_exists(vcfs_table, uri):
+    """Return True if the VCF exists in the vcfs table, else return False."""
+    q = select([vcfs_table.c.id]).where(vcfs_table.c.uri == uri)
+    result = q.execute()
+    return True if result.rowcount > 0 else False
 
 
 def _simplify_type(typ):
@@ -61,14 +134,11 @@ def _simplify_type(typ):
     return '.'.join(typ.split('.')[1:-1])
 
 
-def get_tasks(run_id_or_path):
+def get_tasks(run_id):
     """Returns a list of all tasks associated with a run."""
-    run_id, vcf_path = _run_id_and_path(run_id_or_path)
-
     with tables(db, 'task_states') as (con, tasks):
         q = (select([tasks.c.task_id, tasks.c.type, tasks.c.state])
-            .where(or_(tasks.c.vcf_id == run_id,
-                       tasks.c.vcf_path == vcf_path)))
+            .where(tasks.c.vcf_id == run_id))
         return [{
                     'type': _simplify_type(typ),
                     'state': state,
@@ -78,12 +148,10 @@ def get_tasks(run_id_or_path):
                 for task_id, typ, state in con.execute(q).fetchall()]
 
 
-def delete_tasks(run_id_or_path):
+def delete_tasks(run_id):
     """Delete all tasks associated with a run."""
-    run_id, vcf_path = _run_id_and_path(run_id_or_path)
     with tables(db, 'task_states') as (con, tasks):
-        stmt = tasks.delete(or_(tasks.c.vcf_id == run_id,
-                                tasks.c.vcf_path == vcf_path))
+        stmt = tasks.delete(tasks.c.vcf_id == run_id)
         result = con.execute(stmt)
         if result.rowcount == 0:
             raise CRUDError('No Rows', 'No tasks were deleted')
@@ -108,16 +176,7 @@ def _join_task_states(vcfs):
     ts = _get_running_failed_task_vcfs()
 
     for vcf in vcfs:
-        id_ = vcf['id']
-        uri = vcf['uri']
-        states = ts.get(id_, []) + ts.get(uri, [])
-        vcf['task_states'] = list(set(states))
-        if id_ in ts: del ts[id_]
-        if uri in ts: del ts[uri]
-
-    # the remaining tasks are orphans -- possibly recently submitted runs which
-    # haven't been fully indexed.
-    return ts
+        vcf['task_states'] = list(set(ts.get(vcf['id'], [])))
 
 
 def _get_running_failed_task_vcfs():
