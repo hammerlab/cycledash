@@ -1,6 +1,5 @@
 # pylint: disable=no-value-for-parameter
-"""Defines all views for CycleDash.
-"""
+"""Defines all views for CycleDash."""
 import json
 import tempfile
 
@@ -37,13 +36,7 @@ def about():
 
   ##########
  ## Runs ##
-###########
-
-RUN_ADDL_KVS = {'Tumor BAM': 'tumor_bam_uri',
-                'Normal BAM': 'normal_bam_uri',
-                'VCF URI': 'uri',
-                'Notes': 'notes',
-                'Project': 'project_name'}
+##########
 
 @app.route('/', methods=['POST', 'GET'])
 @app.route('/runs', methods=['POST', 'GET'])
@@ -57,14 +50,21 @@ def list_runs():
             return error_response('Error', str(e))
         return redirect(url_for('list_runs'))
     elif request.method == 'GET':
-        vcfs, last_comments, completions = cycledash.runs.get_runs()
         if request_wants_json():
+            vcfs = cycledash.runs.get_runs(as_project_tree=True)
             return jsonify({'runs': vcfs})
         elif 'text/html' in request.accept_mimetypes:
-            return render_template('runs.html', runs=vcfs, run_kvs=RUN_ADDL_KVS,
+            vcfs = cycledash.runs.get_runs(as_project_tree=True)
+            last_comments = cycledash.comments.get_last_comments()
+            return render_template('runs.html',
                                    last_comments=last_comments,
-                                   completions=completions)
+                                   runs=vcfs)
 
+
+@app.route('/json', methods=['POST', 'GET'])
+def all():
+    vcfs = cycledash.runs.get_runs(as_project_tree=True)
+    return jsonify({'projects':vcfs})
 
 @app.route('/tasks/<run_id>', methods=['GET', 'DELETE'])
 def get_tasks(run_id):

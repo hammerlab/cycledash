@@ -31,7 +31,6 @@ CreateRunSchema = Schema({
 
 UpdateRunSchema = Schema({
     'variant_caller_name': unicode,
-    'vcf_path': PathString,
     'project_id': Coerce(int),
     'tumor_dataset_id': Coerce(int),
     'normal_dataset_id': Coerce(int),

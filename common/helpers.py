@@ -56,3 +56,10 @@ def order(lst, ordering, key=None):
     ordering = {name: idx for idx, name in enumerate(ordering)}
     lst.sort(key=lambda x: ordering[lookup(x)])
     return lst
+
+
+def find(lst, pred):
+    """Return first element in lst for which pred returns true, else None."""
+    for x in lst:
+        if pred(x):
+            return x

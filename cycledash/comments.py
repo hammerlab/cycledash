@@ -113,6 +113,13 @@ def get_vcf_comments(vcf_id, conn, user_comments, data):
     return jsonify(response)
 
 
+def get_last_comments(n=5):
+    with tables(db, 'user_comments') as (con, user_comments):
+        q = select(user_comments.c).order_by(
+            desc(user_comments.c.last_modified)).limit(n)
+        return [dict(c) for c in con.execute(q).fetchall()]
+
+
 def get_row_key(comment, table):
     """Each variant row should have a unique row key, and we key our JSON
     comment represention by this value. Also see getRowKey in RecordStore.js.

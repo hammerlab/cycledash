@@ -5,7 +5,8 @@ from sqlalchemy import exc, select, func, desc
 from common.helpers import tables
 from cycledash import db
 import cycledash.validations
-from cycledash.helpers import prepare_request_data, error_response
+from cycledash.helpers import (prepare_request_data, error_response,
+                               request_wants_json)
 
 
 def get_project(project_id):
@@ -42,7 +43,7 @@ def create_project(request):
         msg  = 'Could not create project {}'.format(data)
         return error_response(message=str(e),
                               error=msg)
-    if 'application/json' in request.accept_mimetypes:
+    if request_wants_json():
         return jsonify(project), 201
     elif 'text/html' in request.accept_mimetypes:
         return redirect(url_for('project', project_id=project.get('id'))), 201
@@ -65,10 +66,10 @@ def update_project(project_id, request):
         msg  = 'Could not update project {}'.format(project)
         return error_response(message=str(e),
                               error=msg)
-    if 'text/html' in request.accept_mimetypes:
-        return redirect(url_for('project', project_id=project.get('id')))
-    elif 'application/json' in request.accept_mimetypes:
+    if request_wants_json():
         return jsonify(project)
+    elif 'text/html' in request.accept_mimetypes:
+        return redirect(url_for('project', project_id=project.get('id')))
 
 
 def delete_project(project_id):

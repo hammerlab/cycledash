@@ -5,7 +5,8 @@ from sqlalchemy import exc, select, func, desc
 from common.helpers import tables
 import cycledash.validations
 from cycledash import db
-from cycledash.helpers import prepare_request_data, error_response
+from cycledash.helpers import (prepare_request_data, error_response,
+                               request_wants_json)
 
 
 def get_bam(bam_id):
@@ -52,7 +53,7 @@ def create_bam(request):
         msg  = 'Could not create bam {}'.format(data)
         return error_response(message=str(e),
                               error=msg)
-    if 'application/json' in request.accept_mimetypes:
+    if request_wants_json():
         return jsonify(bam), 201
     elif 'text/html' in request.accept_mimetypes:
         return redirect(url_for('bam', bam_id=bam.get('id'))), 201
@@ -78,10 +79,11 @@ def update_bam(bam_id, request):
         msg  = 'Could not update bam {}'.format(bam)
         return error_response(message=str(e),
                               error=msg)
-    if 'text/html' in request.accept_mimetypes:
-        return redirect(url_for('bam', bam_id=bam.get('id')))
-    elif 'application/json' in request.accept_mimetypes:
+    if request_wants_json():
         return jsonify(bam)
+    elif 'text/html' in request.accept_mimetypes:
+        return redirect(url_for('bam', bam_id=bam.get('id')))
+
 
 
 def delete_bam(bam_id):
@@ -96,4 +98,3 @@ def delete_bam(bam_id):
     else:
         msg = 'No bam with id={} found'.format(bam_id)
         return jsonify(error='No bam found for deletion', message=msg), 404
-

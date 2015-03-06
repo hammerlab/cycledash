@@ -6,7 +6,7 @@ from cycledash import validations
 from cycledash import genotypes
 import cycledash.tasks
 
-from common.helpers import tables, CRUDError
+from common.helpers import tables, CRUDError, find
 import workers.runner
 
 
@@ -14,14 +14,21 @@ class CollisionError(Exception):
     pass
 
 
-def get_runs():
-    """Return a tuple of:
-        - a list of all runs
-        - the last 5 comments
-        - an object with lists of potential completions for the run upload form
-          typeahead fields.
-        """
-    with tables(db, 'vcfs', 'user_comments') as (con, vcfs, user_comments):
+def get_runs(as_project_tree=False):
+    """Return a list of all runs.
+
+    If `as_project_tree` is True, pivot the runs so that the returned object is:
+    { "projects": [
+      { "name": "Project Name",
+        "notes": "Some test notes"
+        "vcfs": [...]
+        "bams": [
+          { "name": "a dataset", ... }, ...
+      ]}, ...
+    ]}
+    """
+    with tables(db, 'vcfs', 'user_comments', 'bams', 'projects') as \
+         (con, vcfs, user_comments, bams, projects):
         validation_vcfs = vcfs.select().where(vcfs.c.validation_vcf == True).alias()
         joined = (vcfs
             .outerjoin(user_comments, vcfs.c.id == user_comments.c.vcf_id)
@@ -35,14 +42,38 @@ def get_runs():
             .group_by(vcfs.c.id)
             .order_by(desc(vcfs.c.id)))
         vcfs = [dict(v) for v in con.execute(q).fetchall()]
-        completions = _extract_completions(vcfs)
 
-        q = select(user_comments.c).order_by(
-            desc(user_comments.c.last_modified)).limit(5)
-        last_comments = [dict(c) for c in con.execute(q).fetchall()]
+        q = select(bams.c)
+        bams = [dict(b) for b in con.execute(q).fetchall()]
+
+        q = select(projects.c)
+        projects = [dict(b) for b in con.execute(q).fetchall()]
+
+        for vcf in vcfs:
+            normal_bam_id = vcf.get('normal_bam_id')
+            tumor_bam_id = vcf.get('tumor_bam_id')
+            project_id = vcf.get('project_id')
+
+            vcf['project'] = dict(find(projects,
+                                       lambda x: x.get('id') == project_id) or {})
+            vcf['tumor_bam'] = dict(find(bams,
+                                         lambda x: x.get('id') == tumor_bam_id) or {})
+            vcf['normal_bam'] = dict(find(bams,
+                                          lambda x: x.get('id') == normal_bam_id) or {})
         _join_task_states(vcfs)
 
-        return vcfs, last_comments, completions
+        if as_project_tree:
+            for project in projects:
+                project_id = project['id']
+                project_bams = [bam for bam in bams
+                                if bam.get('project_id') == project_id]
+                project_vcfs = [vcf for vcf in vcfs
+                                if vcf.get('project_id') == project_id]
+                project['bams'] = project_bams
+                project['vcfs'] = project_vcfs
+            return projects
+        return vcfs
+
 
 
 def get_run(run_id):
@@ -104,12 +135,11 @@ def _insert_vcf(vcf, run, vcfs_table, connection):
         return None
     record = {
         'uri': uri,
-        'dataset_name': run.get('dataset'),
         'caller_name': run.get('variant_caller_name'),
-        'normal_bam_uri': run.get('normal_path'),
-        'tumor_bam_uri': run.get('tumor_path'),
+        'normal_bam_id': run.get('normal_bam_id'),
+        'tumor_bam_id': run.get('tumor_bam_id'),
         'notes': run.get('params'),
-        'project_name': run.get('project_name'),
+        'project_id': run.get('project_id'),
         'vcf_header': '(pending)',
         'validation_vcf': vcf['is_validation']
     }
