@@ -501,19 +501,26 @@ var VCFCommentHeader = React.createClass({
     handleEdit: React.PropTypes.func.isRequired,
     handleDelete: React.PropTypes.func.isRequired
   },
+  getInitialState: function() {
+    // We keep track of the original value of this prop so as to avoid swapping
+    // out links in a visually surprising way and regressing on #523.
+    return {
+      initialHasOpenedIGV: this.props.hasOpenedIGV
+    };
+  },
   render: function() {
     var r = this.props.record,
-        locusParam = `&locus=${r.contig}:${r.position}`,
-        loadIGVLink = this.props.igvLink + locusParam,
+        locusParam = `locus=${r.contig}:${r.position}`,
+        loadIGVLink = this.props.igvLink + '&' + locusParam,
         jumpLink = loadIGVLink.replace(/\/load.*/, '/goto?') + locusParam;
 
     // The links are worded differently depending on previous actions.
     var didClick = this.props.didClickIGVLink;
-    var igvLinks = this.props.hasOpenedIGV ?
-        [<a href={jumpLink} onClick={didClick}>Jump to Locus</a>,
-         <a href={loadIGVLink} onClick={didClick}>(reload)</a>] :
-        [<a href={loadIGVLink} onClick={didClick}>Load at Locus</a>,
-         <a href={jumpLink} onClick={didClick}>(Jump)</a>];
+    var igvLinks = this.state.initialHasOpenedIGV ?
+        [<a key="jump" href={jumpLink} onClick={didClick}>Jump to Locus</a>,
+         <a key="load" href={loadIGVLink} onClick={didClick}>(reload)</a>] :
+        [<a key="load" href={loadIGVLink} onClick={didClick}>Load at Locus</a>,
+         <a key="jump" href={jumpLink} onClick={didClick}>(Jump)</a>];
 
     return (
       <div className='comment-header'>
