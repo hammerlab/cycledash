@@ -7,7 +7,6 @@
  */
 'use strict';
 
-
 var _ = require('underscore'),
     React = require('react/addons'),
     types = require('./types'),
@@ -121,6 +120,9 @@ var VCFComment = React.createClass({
   setEditState: function(isEdit) {
     this.setState({isEdit: isEdit});
   },
+  makeEditable: function() {
+    this.setState({isEdit: true});
+  },
   componentDidUpdate: function(prevProps, prevState) {
     if (prevProps.commentText !== this.props.commentText) {
       this.setCommentTextState();
@@ -139,7 +141,7 @@ var VCFComment = React.createClass({
     var commentHeader;
     if (!this.state.isEdit) {
       commentHeader = (
-          <VCFCommentHeader handleEdit={() => {this.setEditState(true);}}
+          <VCFCommentHeader handleEdit={this.makeEditable}
                             record={this.props.record}
                             igvLink={this.props.igvLink}
                             hasOpenedIGV={this.props.hasOpenedIGV}
@@ -167,12 +169,13 @@ var VCFCommentHeader = React.createClass({
     handleEdit: React.PropTypes.func.isRequired,
     handleDelete: React.PropTypes.func.isRequired
   },
-  getInitialState: function() {
-    // We keep track of the original value of this prop so as to avoid swapping
-    // out links in a visually surprising way and regressing on #523.
-    return {
-      initialHasOpenedIGV: this.props.hasOpenedIGV
-    };
+  shouldComponentUpdate: function(newProps, newState) {
+    if (this.state != newState) return true;  // in case we add state later.
+
+    // If only 'hasOpenedIGV' has changed, then don't update the UI.
+    // This prevents the links from shifting surprisingly (and causing #523).
+    return !_.isEqual(_.omit(newProps, 'hasOpenedIGV'),
+                      _.omit(this.props, 'hasOpenedIGV'));
   },
   render: function() {
     var r = this.props.record,
@@ -182,7 +185,7 @@ var VCFCommentHeader = React.createClass({
 
     // The links are worded differently depending on previous actions.
     var didClick = this.props.didClickIGVLink;
-    var igvLinks = this.state.initialHasOpenedIGV ?
+    var igvLinks = this.props.hasOpenedIGV ?
         [<a key="jump" href={jumpLink} onClick={didClick}>Jump to Locus</a>,
          <a key="load" href={loadIGVLink} onClick={didClick}>(reload)</a>] :
         [<a key="load" href={loadIGVLink} onClick={didClick}>Load at Locus</a>,

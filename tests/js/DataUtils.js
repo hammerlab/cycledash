@@ -72,8 +72,7 @@ function getRecords(vcfData) {
  *  - /runs/1/comments
  */
 function makeFakeServer(vcfPath, handleCommentPath) {
-  var parseVcf = vcf.parser(),
-      vcfData = parseVcf(fs.readFileSync(vcfPath, {encoding:'utf8'})),
+  var vcfData = loadVCF(vcfPath),
       spec = getSpec(vcfData),
       contigs = getContigs(vcfData),
       records = getRecords(vcfData);
@@ -102,9 +101,18 @@ function makeFakeServer(vcfPath, handleCommentPath) {
   return ajax;
 }
 
+/**
+ * Load a VCF file from disk and parse it. You can pass the result to getSpec,
+ * getContigs and getRecords.
+ */
+function loadVCF(vcfPath) {
+  return vcf.parser()(fs.readFileSync(vcfPath, {encoding:'utf8'}));
+}
+
 module.exports = {
   getSpec,
   getContigs,
   getRecords,
-  makeFakeServer
+  makeFakeServer,
+  loadVCF
 };
