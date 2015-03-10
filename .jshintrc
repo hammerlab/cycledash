@@ -12,6 +12,7 @@
   "shadow": true,
   "browser": true,
   "mocha": true,
+  "unused": "vars",  // unused vars are bad, but function params are OK
   // allow module-level "use strict", which is OK with browserify.
   "globalstrict": true,
   "globals": {

@@ -340,8 +340,7 @@ var VCFRecord = React.createClass({
         );
       }
     });
-    var recordClasses = React.addons.classSet({selected: this.props.isSelected}),
-        record = this.props.record;
+    var recordClasses = React.addons.classSet({selected: this.props.isSelected});
     return (
       <tr className={recordClasses} onClick={this.handleClick}>
         {tds}

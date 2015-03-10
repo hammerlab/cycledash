@@ -4,8 +4,7 @@
 require('./testdom')('<html><body></body></html>');
 var React = require('react/addons'),
     assert = require('assert'),
-    _ = require('underscore'),
-    sinon = require('sinon');
+    _ = require('underscore');
 
 global.reactModulesToStub = [
   'components/BioDalliance.js'

@@ -1,8 +1,7 @@
 'use strict';
 
 var utils = require('../../cycledash/static/js/examine/utils'),
-    assert = require('assert'),
-    React = require('react/addons');
+    assert = require('assert');
 
 describe('Examine Utils', function() {
   var igvHttpfsUrl = 'http://example.com';

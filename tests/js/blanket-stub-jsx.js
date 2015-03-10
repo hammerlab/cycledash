@@ -5,8 +5,7 @@
 var fs = require('fs'),
     glob = require('glob'),
     path = require('path'),
-    transformer = require('./jsx-stub-transformer'),
-    ReactTools = require('react-tools');
+    transformer = require('./jsx-stub-transformer');
 
 
 module.exports = function(blanket) {

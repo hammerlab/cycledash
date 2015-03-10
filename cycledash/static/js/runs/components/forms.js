@@ -1,7 +1,6 @@
 'use strict';
 var React = require('react'),
     d3 = require('d3'),
-    _ = require('underscore'),
     CompletionUtils = require('../../CompletionUtils'),
     $ = require('jquery');
 

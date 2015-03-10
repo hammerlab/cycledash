@@ -69,16 +69,6 @@ var BioDalliance = React.createClass({
   lazilyCreateDalliance: function() {
     if (this.browser) return;
 
-    // Workaround for https://github.com/dasmoth/dalliance/issues/125
-    var uniquelyNamedBlob = (function() {
-      var id = 0;
-      return function(bytes) {
-        var blob = new Blob([bytes]);
-        blob.name = id++;
-        return blob;
-      };
-    })();
-
     var vcfSource = (name, path) => {
       var source = {
         name: name,
@@ -285,39 +275,6 @@ var bamStyle = [
     "_typeRE": {},
     "_labelRE": {},
     "_methodRE": {}
-  }
-];
-
-
-// Style for visualizing BAM coverage.
-var coverageStyle = [
-  {
-    "type": "density",
-    "zoom": "low",
-    "style": {
-      "glyph": "HISTOGRAM",
-      "COLOR1": "gray",
-      "HEIGHT": 30
-    }
-  },
-  {
-    "type": "density",
-    "zoom": "medium",
-    "style": {
-      "glyph": "HISTOGRAM",
-      "COLOR1": "gray",
-      "HEIGHT": 30
-    }
-  },
-  {
-    "type": "base-coverage",
-    "zoom": "high",
-    "style": {
-      "glyph": "HISTOGRAM",
-      "COLOR1": "lightgray",
-      "BGITEM": true,
-      "HEIGHT": 30
-    }
   }
 ];
 
