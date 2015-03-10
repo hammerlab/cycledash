@@ -29,12 +29,12 @@ from workers.shared import (worker, DATABASE_URI, TEMPORARY_DIR,
 
 if not config.TRAVIS:
     from pyensembl import EnsemblRelease
-    EnsemblRelease(77).install() # will only run the first time for this release
 
 
 # TODO(tavi) Handle inconsistent states and retries.
 @worker.task(bind=True)
 def annotate(self, vcf_id):
+    EnsemblRelease(77).install()  # Only runs the first time for this release.
     if vcf_id == False:
         return  # An error must have occurred earlier.
     register_running_task(self, vcf_id)

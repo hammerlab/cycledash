@@ -10,6 +10,8 @@ from cycledash.helpers import (prepare_request_data, error_response,
                                request_wants_json)
 import cycledash.projects
 
+import workers.indexer
+
 
 def get_bam(bam_id):
     """Return JSON of BAM, or error is no matching bam is found."""
@@ -57,6 +59,8 @@ def create_bam(request):
             bam = dict(result.fetchone())
     except Exception as e:
         return error_response('Could not create bam {}'.format(data), str(e))
+
+    workers.indexer.index.delay(bam['id'])
 
     if request_wants_json():
         return jsonify(bam), 201

@@ -9,18 +9,23 @@ import json
 import bai_indexer
 from StringIO import StringIO
 
-from workers.shared import (get_contents_from_hdfs, worker, put_new_file_to_hdfs,
-                            does_hdfs_file_exist, HdfsFileAlreadyExistsError,
-                            register_running_task)
+from workers.shared import (get_contents_from_hdfs, worker,
+                            put_new_file_to_hdfs, does_hdfs_file_exist,
+                            HdfsFileAlreadyExistsError, register_running_task,
+                            DATABASE_URI, initialize_database)
 
 @worker.task(bind=True)
-def index(self, vcf_id, hdfs_bam_path):
-    register_running_task(self, vcf_id)
-    if '.bam' not in hdfs_bam_path:
-        raise ValueError('Expected path to BAM file, got %s' % hdfs_bam_path)
+def index(self, bam_id):
+    engine, connection, metadata = initialize_database(DATABASE_URI)
+    bams_table = metadata.tables.get('bams')
+    bam = bams_table.select().where(bams_table.c.id == bam_id).execute().fetchone()
+    bam_path = bam['uri']
 
-    bai_path = hdfs_bam_path.replace('.bam', '.bam.bai')
-    bai_json_path = hdfs_bam_path.replace('.bam', '.bam.bai.json')
+    if '.bam' not in bam_path:
+        raise ValueError('Expected path to BAM file, got %s' % bam_path)
+
+    bai_path = bam_path.replace('.bam', '.bam.bai')
+    bai_json_path = bam_path.replace('.bam', '.bam.bai.json')
 
     if does_hdfs_file_exist(bai_json_path):
         return  # nothing to do -- it's already been created

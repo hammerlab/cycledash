@@ -109,19 +109,6 @@ tests:
           $('tr.run').get(0).dispatchEvent(c);
         }, 250);
 
-  - name: validated-run
-    description: Examine page showing a run with associated validation data.
-    url: http://localhost:5001/runs/2/examine
-    config:
-      <<: *std-config
-
-  - name: validated-run-with-filter
-    description: Same as "validated-run", but with a filter applied.
-    # CQL: reference = G ORDER BY contig, position
-    url: http://localhost:5001/runs/2/examine?query=reference+%3D+G+ORDER+BY+contig%2C+position
-    config:
-      <<: *std-config
-
   - name: comments
     description: Initial view of the comments page
     url: http://localhost:5001/comments
