@@ -18,76 +18,6 @@ class CollisionError(Exception):
     pass
 
 
-def _get_runs(as_project_tree=False):
-    """Return a list of all runs.
-
-    If `as_project_tree` is True, pivot the runs on projects so that the
-    returned object is:
-
-    { "projects": [
-      { "name": "Project Name",
-        "notes": "Some test notes"
-        "vcfs": [...]
-        "bams": [
-          { "name": "a dataset", ... }, ...
-      ]}, ...
-    ]}
-    """
-    with tables(db, 'vcfs', 'user_comments', 'bams', 'projects') as \
-         (con, vcfs, user_comments, bams, projects):
-        joined = (vcfs
-            .outerjoin(user_comments, vcfs.c.id == user_comments.c.vcf_id))
-        num_comments = func.count(user_comments.c.vcf_id).label('num_comments')
-        q = (select(vcfs.c + [num_comments])
-            .select_from(joined)
-            .group_by(vcfs.c.id)
-            .order_by(desc(vcfs.c.id)))
-        vcfs = [dict(v) for v in con.execute(q).fetchall()]
-
-        q = select(bams.c)
-        bams = [dict(b) for b in con.execute(q).fetchall()]
-
-        q = select(projects.c)
-        projects = [dict(b) for b in con.execute(q).fetchall()]
-
-        for vcf in vcfs:
-            normal_bam_id = vcf.get('normal_bam_id')
-            tumor_bam_id = vcf.get('tumor_bam_id')
-            project_id = vcf.get('project_id')
-
-            vcf['project'] = dict(find(projects,
-                                       lambda x: x.get('id') == project_id) or {})
-            vcf['tumor_bam'] = dict(find(bams,
-                                         lambda x: x.get('id') == tumor_bam_id) or {})
-            vcf['normal_bam'] = dict(find(bams,
-                                          lambda x: x.get('id') == normal_bam_id) or {})
-        _join_task_states(vcfs)
-
-        if as_project_tree:
-            for project in projects:
-                project_id = project['id']
-                project_bams = [bam for bam in bams
-                                if bam.get('project_id') == project_id]
-                project_vcfs = [vcf for vcf in vcfs
-                                if vcf.get('project_id') == project_id]
-                project['bams'] = project_bams
-                project['vcfs'] = project_vcfs
-            return projects
-        return vcfs
-
-
-def get_runs():
-    if request_wants_json():
-        vcfs = _get_runs(as_project_tree=True)
-        return jsonify({'runs': vcfs})
-    elif 'text/html' in request.accept_mimetypes:
-        vcfs = _get_runs(as_project_tree=True)
-        last_comments = cycledash.comments.get_last_comments()
-        return render_template('runs.html',
-                               last_comments=last_comments,
-                               runs=vcfs)
-
-
 def get_run(run_id):
     """Return a run with a given ID, and the spec and list of contigs for that
     run for use by the /examine page."""
@@ -103,12 +33,9 @@ def create_run():
     """Create a new run, inserting it into the vcfs table and starting workers.
 
     This raises an exception if anything goes wrong.
-
-    Args:
-        request: validations.CreateRunSchema
     """
     try:
-        run = validations.CreateRunSchema((prepare_request_data(request)))
+        run = validations.CreateRun((prepare_request_data(request)))
         project_attr = validations.expect_one_of(run, 'project_name', 'project_id')
     except voluptuous.MultipleInvalid as err:
         return error_response('Run validation', [str(e) for e in err.errors])
@@ -138,8 +65,12 @@ def create_run():
 
 
 def _set_or_verify_bam_id_on(run, bam_type):
-    id_key = bam_type+'_bam_id'
-    uri_key = bam_type+'_bam_uri'
+    """After calling this, run['(bam_type)_bam_id'] will be set to a valid BAM ID.
+
+    If there is not a matching BAM, it will raise voluptuous.Invalid.
+    """
+    id_key = bam_type + '_bam_id'
+    uri_key = bam_type + '_bam_uri'
     bam_id = run.get(id_key)
     if bam_id:
         if get_where('bams', db, id=bam_id) is None:
@@ -202,11 +133,3 @@ def _vcf_exists(vcfs_table, uri):
     q = select([vcfs_table.c.id]).where(vcfs_table.c.uri == uri)
     result = q.execute()
     return result.rowcount > 0
-
-
-def _join_task_states(vcfs):
-    """Add a task_states field to each VCF in a list of VCFs."""
-    ts = cycledash.tasks.all_non_success_tasks()
-
-    for vcf in vcfs:
-        vcf['task_states'] = ts.get(vcf['id'], [])

@@ -15,7 +15,7 @@ PathString = All(unicode,
                      'path must start with "/", "file://" or "hdfs://"'))
 
 
-CreateRunSchema = Schema({
+CreateRun = Schema({
     Required('uri'): PathString,
 
     # One of `project` is required, but not supported in voluptuous, so we
@@ -41,7 +41,7 @@ CreateRunSchema = Schema({
 })
 
 
-UpdateRunSchema = Schema({
+UpdateRun = Schema({
     'variant_caller_name': unicode,
 
     Exclusive('normal_bam_id', 'normal_bam'): Coerce(int),
@@ -50,7 +50,6 @@ UpdateRunSchema = Schema({
     Exclusive('tumor_bam_uri', 'tumor_bam'): PathString,
 
     'params': unicode,
-    'dataset': unicode,
     'vcf_header': unicode,
 
     'true_positive': Coerce(int),
@@ -61,19 +60,19 @@ UpdateRunSchema = Schema({
 })
 
 
-CreateProjectSchema = Schema({
+CreateProject = Schema({
     Required('name'): unicode,
     'notes': unicode
 })
 
 
-UpdateProjectSchema = Schema({
+UpdateProject = Schema({
     'name': unicode,
     'notes': unicode
 })
 
 
-CreateBamSchema = Schema({
+CreateBam = Schema({
     # One of `project` is required, but not supported in voluptuous, so we
     # enforce this in code. cf. https://github.com/alecthomas/voluptuous/issues/115
     Exclusive('project_id', 'project'): Coerce(int),
@@ -81,27 +80,17 @@ CreateBamSchema = Schema({
 
     'name': unicode,
     'notes': unicode,
-    'flagstat': unicode,
     'tissues': unicode,
     'resection_date': unicode,
-    'sequence_type': unicode,
-    'library': unicode,
-    'sequencing_platform': unicode,
-    'primary_cancer_site': bool,
     Required('uri'): PathString
 })
 
 
-UpdateBamSchema = Schema({
+UpdateBam = Schema({
     'name': unicode,
     'notes': unicode,
-    'flagstat': unicode,
     'tissues': unicode,
     'resection_date': unicode,
-    'sequence_type': unicode,
-    'library': unicode,
-    'sequencing_platform': unicode,
-    'primary_cancer_site': bool,
     'uri': PathString
 })
 

@@ -31,13 +31,13 @@ if not config.TRAVIS:
     from pyensembl import EnsemblRelease
 
 
-# TODO(tavi) Handle inconsistent states and retries.
 @worker.task(bind=True)
 def annotate(self, vcf_id):
-    EnsemblRelease(77).install()  # Only runs the first time for this release.
     if vcf_id == False:
         return  # An error must have occurred earlier.
     register_running_task(self, vcf_id)
+
+    EnsemblRelease(config.ENSEMBL_RELEASE).install()  # Only runs the first time for this release.
 
     _, connection, metadata = initialize_database(DATABASE_URI)
     with close_and_discard(connection):

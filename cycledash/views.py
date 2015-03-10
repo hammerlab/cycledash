@@ -42,7 +42,7 @@ def list_runs():
     if request.method == 'POST':
         return cycledash.runs.create_run()
     elif request.method == 'GET':
-        return cycledash.runs.get_runs()
+        return cycledash.projects.get_projects_tree()
 
 
 @app.route('/tasks/<run_id>', methods=['GET', 'DELETE'])
@@ -65,7 +65,7 @@ def get_tasks(run_id):
 @app.route('/projects', methods=['POST', 'GET'])
 def projects():
     if request.method == 'POST':
-        return cycledash.projects.create_project(request)
+        return cycledash.projects.create_project()
     elif request.method == 'GET':
         return cycledash.projects.get_projects()
 
@@ -73,7 +73,7 @@ def projects():
 @app.route('/projects/<project_id>', methods=['PUT', 'GET', 'DELETE'])
 def project(project_id):
     if request.method == 'PUT':
-        return cycledash.projects.update_project(project_id, request)
+        return cycledash.projects.update_project(project_id)
     elif request.method == 'GET':
         return cycledash.projects.get_project(project_id)
     elif request.method == 'DELETE':
@@ -87,7 +87,7 @@ def project(project_id):
 @app.route('/bams', methods=['POST', 'GET'])
 def bams():
     if request.method == 'POST':
-        return cycledash.bams.create_bam(request)
+        return cycledash.bams.create_bam()
     elif request.method == 'GET':
         return cycledash.bams.get_bams()
 
@@ -95,7 +95,7 @@ def bams():
 @app.route('/bams/<bam_id>', methods=['PUT', 'GET', 'DELETE'])
 def bam(bam_id):
     if request.method == 'PUT':
-        return cycledash.bams.update_bam(bam_id, request)
+        return cycledash.bams.update_bam(bam_id)
     elif request.method == 'GET':
         return cycledash.bams.get_bam(bam_id)
     elif request.method == 'DELETE':
@@ -143,9 +143,9 @@ def comment(run_id, comment_id):
         return cycledash.comments.delete_comment(comment_id)
 
 
-  ##################
- ## VCFs Up/Down ##
-##################
+  ##########################
+ ## VCFs Upload/Download ##
+##########################
 
 VCF_FILENAME = 'cycledash-run-{}.vcf'
 

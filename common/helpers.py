@@ -58,8 +58,8 @@ def order(lst, ordering, key=None):
     return lst
 
 
-def find(lst, pred):
-    """Return first element in lst for which pred returns true, else None."""
-    for x in lst:
+def find(iterable, pred):
+    """Return first element in iterable where pred returns true, else None."""
+    for x in iterable:
         if pred(x):
             return x

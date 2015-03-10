@@ -64,7 +64,9 @@ def prepare_request_data(request):
 
 def get_where(table_name, db, **kwargs):
     """Returns the first record in the table which matches the criteria in
-    **kwargs.
+    kwargs.
+
+    kwargs is a dict of column_name: column_value.
     """
     with tables(db, table_name) as (_, table):
         q = table.select()
@@ -77,7 +79,9 @@ def get_where(table_name, db, **kwargs):
 
 def get_id_where(table_name, db, **kwargs):
     """Returns the id of the first record in the table which matches the
-    criteria in **kwargs.
+    criteria in kwargs.
+
+    kwargs is a dict of column_name: column_value.
     """
     obj = get_where(table_name, db, **kwargs)
     if obj:

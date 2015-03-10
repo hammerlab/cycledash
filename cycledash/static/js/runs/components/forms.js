@@ -26,7 +26,7 @@ var NewRunForm = React.createClass({
   render: function() {
     var props = this.props;
     return (
-        <form method='POST' action='/runs' role='form' className='run-form'>
+        <form method='POST' action='/runs' className='run-form'>
         <h3>New Run</h3>
         <TextInput label='Tumor BAM URI:' name='tumorBamUri'
                    completions={props.bamUris}
@@ -65,7 +65,7 @@ var NewBAMForm = React.createClass({
   render: function() {
     var props = this.props;
     return (
-        <form method='POST' action='/bams' role='form' className='bam-form'>
+        <form method='POST' action='/bams' className='bam-form'>
         <h3>New BAM</h3>
 
         <TextInput label='Name:' name='name' required={true}
@@ -101,7 +101,7 @@ var NewProjectForm = React.createClass({
   },
   render: function() {
     return (
-      <form method='POST' action='/projects' role='form' className='project-form'>
+      <form method='POST' action='/projects' className='project-form'>
         <h2>
           <button className='close' type='button'
                   onClick={this.props.handleClose}>&times;</button>

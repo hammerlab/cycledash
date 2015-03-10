@@ -1,6 +1,6 @@
 'use strict';
 var React = require('react'),
-    forms = require('./Forms'),
+    forms = require('./forms'),
     LatestComments = require('./LatestComments'),
     _ = require('underscore'),
     moment = require('moment'),
@@ -11,6 +11,7 @@ var NO_FILTER = '----';
 
 var RunsPage = React.createClass({
   propTypes: {
+    // cf. cycledash.projects._get_projects
     projects: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     comments: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
   },
@@ -19,7 +20,7 @@ var RunsPage = React.createClass({
             draggingOver: false,
             displayProjectForm: false};
   },
-  displayProjectForm: function(displayProjectForm) {
+  setDisplayProjectForm: function(displayProjectForm) {
     this.setState({displayProjectForm});
   },
   handleProjectFilter: function(evt) {
@@ -27,8 +28,8 @@ var RunsPage = React.createClass({
   },
   filteredProjects: function() {
     return this.state.projectFilter === NO_FILTER ?
-      this.props.projects :
-      _.where(this.props.projects, {'name': this.state.projectFilter});
+        this.props.projects :
+        _.where(this.props.projects, {'name': this.state.projectFilter});
   },
   createDisplayProjectFormHandler: function(showForm) {
     return () => this.setState({showForm});
@@ -41,18 +42,19 @@ var RunsPage = React.createClass({
       return <option value={name} key={name}>{name}</option>;
     });
     var projectTables = _.chain(this.filteredProjects())
-        .sortBy(function(project) {
-          var run = -project.vcfs[0];
-          return run ?  -project.vcfs[0].id : -100; // to sort by the descending ID, assumuning project.runs is already sorted by descending ID
+        .sortBy(project => {
+          var vcf = project.vcfs[0];
+          // to sort by the descending ID, assumuning project.runs is already sorted by descending ID
+          return vcf ?  -vcf.id : -100;
         }).map(function(project) {
-          return <ProjectTable key={project.name}
-                               runs={project.vcfs}
-                               bams={project.bams}
-                               project_id={project.id}
-                               name={project.name}
-                               notes={project.notes} />;
+            return <ProjectTable key={project.name}
+                                 runs={project.vcfs}
+                                 bams={project.bams}
+                                 project_id={project.id}
+                                 name={project.name}
+                                 notes={project.notes} />;
         }.bind(this)).value();
-    var newProjectForm = <forms.NewProjectForm handleClose={() => this.displayProjectForm(false)} />;
+    var newProjectForm = <forms.NewProjectForm handleClose={() => this.setDisplayProjectForm(false)} />;
     return (
       <div onDragOver={this.createDragOverHandler(true)}
            onDragLeave={this.createDragOverHandler(false)}
@@ -60,7 +62,7 @@ var RunsPage = React.createClass({
         <h1>
           Data Directory
           {!this.state.displayProjectForm ?
-           <button className='btn btn-default' id='new-project' onClick={() => this.displayProjectForm(true)}>
+           <button className='btn btn-default' id='new-project' onClick={() => this.setDisplayProjectForm(true)}>
              New Project
            </button> : null}
         </h1>
@@ -88,7 +90,11 @@ var ProjectTable = React.createClass({
     bams: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
   },
   getInitialState: function() {
-    return {selectedRunId: null, selectedBamId: null, displayRunForm: false, displayBAMForm: false, bamsTable: false};
+    return {selectedRunId: null,
+            selectedBamId: null,
+            displayRunForm: false,
+            displayBAMForm: false,
+            bamsTable: false};
   },
   displayRunForm: function(displayRunForm) {
     this.setState({displayRunForm});
@@ -345,7 +351,7 @@ var RunComments = React.createClass({
 
 var BamsTable = React.createClass({
   propsType: {
-    bams: React.PropTypes.string.isRequired,
+    bams: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     selectedBamId: React.PropTypes.integer,
     createClickBamHandler: React.PropTypes.func.isRequired,
   },
@@ -383,7 +389,6 @@ var BamRow = React.createClass({
     handleClick: React.PropTypes.func.isRequired
   },
   handleClick: function(evt) {
-    console.log('clicked', this.props.bam);
     this.props.handleClick();
   },
   render: function() {

@@ -10,13 +10,8 @@ CREATE TABLE bams (
        name TEXT,
        normal BOOLEAN DEFAULT FALSE, -- true if the bam is of normal tissue
        notes TEXT,
-       flagstat TEXT, -- the output of running flagstat on a dataset
        tissues TEXT,
        resection_date TEXT,
-       sequence_type TEXT, -- DNA or RNA
-       library TEXT,
-       sequencing_platform TEXT,
-       primary_cancer_site BOOLEAN DEFAULT FALSE, -- i.e. not a met.
        uri TEXT NOT NULL
 );
 

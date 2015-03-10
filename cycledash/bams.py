@@ -1,4 +1,5 @@
-from flask import redirect, jsonify, url_for
+"""Defines the API for BAMs."""
+from flask import redirect, jsonify, url_for, request
 
 from sqlalchemy import exc, select, func, desc
 import voluptuous
@@ -7,7 +8,7 @@ from common.helpers import tables
 import cycledash.validations
 from cycledash import db
 from cycledash.helpers import (prepare_request_data, error_response,
-                               request_wants_json)
+                               request_wants_json, get_where)
 import cycledash.projects
 
 import workers.indexer
@@ -15,14 +16,12 @@ import workers.indexer
 
 def get_bam(bam_id):
     """Return JSON of BAM, or error is no matching bam is found."""
-    with tables(db, 'bams') as (con, bams):
-        q = select(bams.c).where(bams.c.id == bam_id)
-        bam = con.execute(q).fetchone()
+    bam = get_where('bams', db, id=bam_id)
     if bam:
         return jsonify(dict(bam))
     else:
         msg = 'No bam with id={} found'.format(bam_id)
-        return jsonify(error='No bam found', message=msg), 404
+        return error_response('No bam found', msg), 404
 
 
 def get_bams():
@@ -32,20 +31,18 @@ def get_bams():
         return jsonify({'bams': [dict(r) for r in con.execute(q).fetchall()]})
 
 
-def create_bam(request):
+def create_bam():
     """Create a bam, return the JSON of BAM or error.
 
     Redirect if the request was HTML.
     """
     try:
-        data = cycledash.validations.CreateBamSchema(
+        data = cycledash.validations.CreateBam(
             prepare_request_data(request))
         project_attr = cycledash.validations.expect_one_of(
             data, 'project_name', 'project_id')
     except voluptuous.MultipleInvalid as e:
         errors = [str(err) for err in e.errors]
-        if len(errors) == 1:
-            errors = errors[0]
         return error_response('BAM validation', errors)
 
     try:
@@ -63,23 +60,21 @@ def create_bam(request):
     workers.indexer.index.delay(bam['id'])
 
     if request_wants_json():
-        return jsonify(bam), 201
+        return jsonify(bam), 201  # HTTP 201 Created
     elif 'text/html' in request.accept_mimetypes:
         return redirect(url_for('list_runs'))
 
 
-def update_bam(bam_id, request):
+def update_bam(bam_id):
     """Update the bam, return the updated BAM as JSON, or error.
 
     Redirect if the request was HTML.
     """
     try:
-        data = cycledash.validations.UpdateBamSchema(
+        data = cycledash.validations.UpdateBam(
             prepare_request_data(request))
     except voluptuous.MultipleInvalid as e:
         errors = [str(err) for err in e.errors]
-        if len(errors) == 1:
-            errors = errors[0]
         return error_response('BAM validation', errors)
     try:
         with tables(db, 'bams') as (con, bams):

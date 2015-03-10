@@ -1,6 +1,4 @@
 #!/bin/bash
-# Creates a test database for use with tests.
-#
 # See tests/pdifftests/README.md for details.
 
 set -o errexit

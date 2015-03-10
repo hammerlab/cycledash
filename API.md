@@ -90,10 +90,4 @@ JSON should be POSTed to <tt>/bams</tt> with following fields:
   <dd>The resected tissue types.</dd>
   <dt>resection_date</dt>
   <dd>The resected date, in YYYY-MM-DD form.</dd>
-  <dt>library</dt>
-  <dd>The library used for sequencing.</dd>
-  <dt>sequencing_platform</dt>
-  <dd>e.g. Illumina, PacBio, etc.</dd>
-  <dt>primary_cancer_site</dt>
-  <dd>true or false</dd>
 </dl>
