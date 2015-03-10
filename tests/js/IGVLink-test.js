@@ -20,8 +20,20 @@ var CommentBox = require('../../cycledash/static/js/examine/components/CommentBo
 // <CommentBox> corresponds to a <tr>, which can't be instantiated directly.
 // This wraps it in a valid table.
 var CommentTable = React.createClass({
+  propTypes: {
+    selectedRow: React.PropTypes.number
+  },
   render: function() {
-    return <table><tbody><CommentBox {...this.props} /></tbody></table>;
+    // This is conceptually similar to how VCFTable creates a CommentBox.
+    var rows = _.range(0, 2).map(idx => {
+      var r = [<tr key={'row' + idx}><td>Row {idx}</td></tr>];
+      if (idx === this.props.selectedRow) {
+        r.push(<CommentBox key={'c' + idx} {...this.props} />);
+      }
+      return r;
+    });
+
+    return <table><tbody>{rows}</tbody></table>;
   }
 });
 
@@ -54,6 +66,7 @@ describe('IGV Links', function() {
 
   it('should display load/jump initially', function() {
     var commentBox = renderCommentBox({
+      selectedRow: 0,
       hasOpenedIGV: false
     });
 
@@ -67,6 +80,7 @@ describe('IGV Links', function() {
 
   it('should swap to jump/reload after a click', function() {
     var commentBox = renderCommentBox({
+      selectedRow: 0,
       hasOpenedIGV: false
     });
 
@@ -83,7 +97,7 @@ describe('IGV Links', function() {
 
     // But after changing a record, they do.
     commentBox.setProps({
-      record: records[1]
+      selectedRow: 1
     });
     links = getIGVLinks(commentBox);
     assert.equal(2, getIGVLinks(commentBox).length);
