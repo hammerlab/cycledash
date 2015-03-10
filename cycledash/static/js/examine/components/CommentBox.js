@@ -169,13 +169,9 @@ var VCFCommentHeader = React.createClass({
     handleEdit: React.PropTypes.func.isRequired,
     handleDelete: React.PropTypes.func.isRequired
   },
-  shouldComponentUpdate: function(newProps, newState) {
-    if (this.state != newState) return true;  // in case we add state later.
-
-    // If only 'hasOpenedIGV' has changed, then don't update the UI.
-    // This prevents the links from shifting surprisingly (and causing #523).
-    return !_.isEqual(_.omit(newProps, 'hasOpenedIGV'),
-                      _.omit(this.props, 'hasOpenedIGV'));
+  getInitialState: function() {
+    // Stash the initial value to avoid surprising link swaps (see #523).
+    return {initialHasOpenedIgv: this.props.hasOpenedIGV};
   },
   render: function() {
     var r = this.props.record,
@@ -185,7 +181,7 @@ var VCFCommentHeader = React.createClass({
 
     // The links are worded differently depending on previous actions.
     var didClick = this.props.didClickIGVLink;
-    var igvLinks = this.props.hasOpenedIGV ?
+    var igvLinks = this.state.initialHasOpenedIgv ?
         [<a key="jump" href={jumpLink} onClick={didClick}>Jump to Locus</a>,
          <a key="load" href={loadIGVLink} onClick={didClick}>(reload)</a>] :
         [<a key="load" href={loadIGVLink} onClick={didClick}>Load at Locus</a>,
