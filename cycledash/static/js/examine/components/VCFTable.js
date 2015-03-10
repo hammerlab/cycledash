@@ -4,8 +4,7 @@ var _ = require('underscore'),
     React = require('react/addons'),
     types = require('./types'),
     $ = require('jquery'),
-    CommentBox = require('./CommentBox'),
-    utils = require('../utils');
+    CommentBox = require('./CommentBox');
 
 var VCFTable = React.createClass({
   propTypes: {

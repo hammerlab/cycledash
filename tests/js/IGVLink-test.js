@@ -7,9 +7,7 @@
 require('./testdom')('<html><body></body></html>');
 var React = require('react/addons'),
     assert = require('assert'),
-    _ = require('underscore'),
-    $ = require('jquery'),
-    fs = require('fs');
+    _ = require('underscore');
 
 var CommentBox = require('../../cycledash/static/js/examine/components/CommentBox'),
     TestUtils = React.addons.TestUtils,
