@@ -170,10 +170,10 @@ var BioDalliance = React.createClass({
           .done((chunks) => {
             this.setState(_.object([propName], [chunks]));
           }).fail((jqXHR, error, textStatus) => {
-            if (textStatus != 'Not Found') {
-              console.warn('Invalid bai.json file', chunkPath, error, textStatus);
-            }
             this.setState(_.object([propName], [CHUNKS_NOT_AVAILABLE]));
+            if (textStatus != 'Not Found') {
+              throw `Invalid bai.json file ${chunkPath} ${error} ${textStatus}`;
+            }
           });
       });
   },
@@ -239,10 +239,8 @@ var EventGuardian = function(elementClass, inputEvents) {
 
   this.elementClass_ = elementClass;
   var realListener = this.elementClass_.prototype.addEventListener;
-  console.log('Guarding against', this.elementClass_, events);
   this.elementClass_.prototype.addEventListener = function(name, meth, useCapture) {
     if (events.indexOf(name) >= 0) {
-      console.log('Blocking attempt to listen to', name);
       return;
     }
     return realListener.call(this, name, meth, useCapture);

@@ -40,7 +40,7 @@ module.exports = function(blanket) {
         instrumented = instrumented.replace(/require\s*\(\s*("|')\./g,'require($1' + baseDirPath);
         localModule._compile(instrumented, normalizedFilename);
       } catch(err){
-        console.log("Error parsing instrumented code: " + err);
+        throw "Error parsing instrumented code: " + err;
       }
     });
   };

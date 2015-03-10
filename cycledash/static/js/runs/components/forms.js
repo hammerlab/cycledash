@@ -200,9 +200,9 @@ var TextInput = React.createClass({
       .on('load', path => {
         fileInputElement.value = path;
       })
-      .on('error', error => {
-        console.error(error);
+      .on('error', function(error) {
         fileInputElement.value = this._extractError(error);
+        throw error;
       })
       .on('progress', () => {
         var e = d3.event;
