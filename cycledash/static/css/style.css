@@ -42,3 +42,13 @@ ul.comments .time {
   float: right;
   padding-right: 19px;
 }
+.form-group.required .control-label:after {
+  content:"*";
+  color:red;
+}
+
+section#api-docs > section {
+  margin: 31px 0 87px 0;
+  padding: 0 67px;
+  border-left: 7px solid #e4e4e4;
+}

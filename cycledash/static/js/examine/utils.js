@@ -35,8 +35,8 @@ function makeIGVLink(run, igvHttpfsUrl) {
 
   var nameFilePairs = [
       ['Run', run.uri],
-      ['Normal', run.normal_bam_uri], 
-      ['Tumor', run.tumor_bam_uri]
+      ['Normal', run.normal_bam && run.normal_bam.uri],
+      ['Tumor', run.tumor_bam && run.tumor_bam.uri]
   ].filter(x => x[1]);
 
   var fileParam = nameFilePairs.map(x => fileUrl(x[1])).join(','),

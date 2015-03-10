@@ -1,12 +1,14 @@
 from flask import redirect, jsonify, url_for
 
 from sqlalchemy import exc, select, func, desc
+import voluptuous
 
 from common.helpers import tables
 import cycledash.validations
 from cycledash import db
 from cycledash.helpers import (prepare_request_data, error_response,
                                request_wants_json)
+import cycledash.projects
 
 
 def get_bam(bam_id):
@@ -36,27 +38,30 @@ def create_bam(request):
     try:
         data = cycledash.validations.CreateBamSchema(
             prepare_request_data(request))
-    except Exception as e:
-        return error_response('Bam validation', str(e))
-    with tables(db, 'projects') as (con, projects):
-        project_id = data.get('project_id')
-        q = select(projects.c).where(projects.c.id == project_id)
-        project = con.execute(q).fetchone()
-    if project is None:
-        return error_response('Invalid BAM',
-                              'project_id={} does not exist'.format(project_id))
+        project_attr = cycledash.validations.expect_one_of(
+            data, 'project_name', 'project_id')
+    except voluptuous.MultipleInvalid as e:
+        errors = [str(err) for err in e.errors]
+        if len(errors) == 1:
+            errors = errors[0]
+        return error_response('BAM validation', errors)
+
+    try:
+        cycledash.projects.set_and_verify_project_id_on(data)
+    except voluptuous.Invalid as e:
+        return error_response('Project not found', str(e))
+
     try:
         with tables(db, 'bams') as (con, bams):
             result = bams.insert(data).returning(*bams.c).execute()
             bam = dict(result.fetchone())
     except Exception as e:
-        msg  = 'Could not create bam {}'.format(data)
-        return error_response(message=str(e),
-                              error=msg)
+        return error_response('Could not create bam {}'.format(data), str(e))
+
     if request_wants_json():
         return jsonify(bam), 201
     elif 'text/html' in request.accept_mimetypes:
-        return redirect(url_for('bam', bam_id=bam.get('id'))), 201
+        return redirect(url_for('list_runs'))
 
 
 def update_bam(bam_id, request):
@@ -67,8 +72,11 @@ def update_bam(bam_id, request):
     try:
         data = cycledash.validations.UpdateBamSchema(
             prepare_request_data(request))
-    except Exception as e:
-        return error_response('Bam validation', str(e))
+    except voluptuous.MultipleInvalid as e:
+        errors = [str(err) for err in e.errors]
+        if len(errors) == 1:
+            errors = errors[0]
+        return error_response('BAM validation', errors)
     try:
         with tables(db, 'bams') as (con, bams):
             result = bams.update().where(
@@ -82,7 +90,7 @@ def update_bam(bam_id, request):
     if request_wants_json():
         return jsonify(bam)
     elif 'text/html' in request.accept_mimetypes:
-        return redirect(url_for('bam', bam_id=bam.get('id')))
+        return redirect(url_for('list_runs'))
 
 
 

@@ -29,6 +29,7 @@ from workers.shared import (worker, DATABASE_URI, TEMPORARY_DIR,
 
 if not config.TRAVIS:
     from pyensembl import EnsemblRelease
+    EnsemblRelease(77).install() # will only run the first time for this release
 
 
 # TODO(tavi) Handle inconsistent states and retries.
@@ -41,7 +42,7 @@ def annotate(self, vcf_id):
     _, connection, metadata = initialize_database(DATABASE_URI)
     with close_and_discard(connection):
         gene_names = get_gene_names(
-            connection, metadata, vcf_id, ensembl_release_num=75)
+            connection, metadata, vcf_id, ensembl_release_num=77)
 
         # Open file for both writing (the gene annotations) and reading that
         # out to Postgres

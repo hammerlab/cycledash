@@ -8,6 +8,9 @@ from flask import (request, redirect, Response, render_template, jsonify,
 from sqlalchemy import select, desc, func
 import voluptuous
 
+from common.relational_vcf import genotypes_to_file
+from common.helpers import tables
+
 from cycledash import app, db
 from cycledash.helpers import (prepare_request_data, error_response,
                                success_response, get_secure_unique_filename,
@@ -18,11 +21,6 @@ import cycledash.runs
 import cycledash.tasks
 import cycledash.bams
 import cycledash.projects
-
-from common.relational_vcf import genotypes_to_file
-from common.helpers import tables
-
-import workers.shared
 
 
   ###########
@@ -42,29 +40,10 @@ def about():
 @app.route('/runs', methods=['POST', 'GET'])
 def list_runs():
     if request.method == 'POST':
-        try:
-            cycledash.runs.create_run(prepare_request_data(request))
-        except voluptuous.Invalid as e:
-            return error_response('Run validation', str(e))
-        except Exception as e:
-            return error_response('Error', str(e))
-        return redirect(url_for('list_runs'))
+        return cycledash.runs.create_run()
     elif request.method == 'GET':
-        if request_wants_json():
-            vcfs = cycledash.runs.get_runs(as_project_tree=True)
-            return jsonify({'runs': vcfs})
-        elif 'text/html' in request.accept_mimetypes:
-            vcfs = cycledash.runs.get_runs(as_project_tree=True)
-            last_comments = cycledash.comments.get_last_comments()
-            return render_template('runs.html',
-                                   last_comments=last_comments,
-                                   runs=vcfs)
+        return cycledash.runs.get_runs()
 
-
-@app.route('/json', methods=['POST', 'GET'])
-def all():
-    vcfs = cycledash.runs.get_runs(as_project_tree=True)
-    return jsonify({'projects':vcfs})
 
 @app.route('/tasks/<run_id>', methods=['GET', 'DELETE'])
 def get_tasks(run_id):

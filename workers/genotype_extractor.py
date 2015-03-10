@@ -18,7 +18,7 @@ from common.relational_vcf import insert_genotypes_with_copy
 
 @worker.task(bind=True)
 def extract(self, vcf_id):
-    """Extract the genotype from an on-disk VCF and insert it into the DB.
+    """Extract the genotypes from an on-disk or HDFS VCF and insert into the DB.
 
     This also fills in a few fields in the vcfs table which aren't available
     until the entire VCF has been read, e.g. the variant count.
@@ -31,12 +31,8 @@ def extract(self, vcf_id):
 
     vcf = vcfs_table.select().where(vcfs_table.c.id == vcf_id).execute().fetchone()
 
-    # Validate the contents of the VCFs before modifying the database.
+    # Validate the contents of the VCF before modifying the database.
     reader, header_text = load_vcf(vcf['uri'])
-    if vcf['validation_vcf'] and len(reader.samples) > 1:
-        print 'Validation VCFs may only have one sample. {} has {}'.format(
-                vcf['uri'], reader.samples)
-        return False
 
     # Fill in VCF header text, which is now available.
     (vcfs_table.update()

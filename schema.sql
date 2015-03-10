@@ -6,8 +6,9 @@ CREATE TABLE projects (
 
 CREATE TABLE bams (
        id BIGSERIAL PRIMARY KEY,
-       project_id BIGINT REFERENCES projects,
+       project_id BIGINT REFERENCES projects NOT NULL,
        name TEXT,
+       normal BOOLEAN DEFAULT FALSE, -- true if the bam is of normal tissue
        notes TEXT,
        flagstat TEXT, -- the output of running flagstat on a dataset
        tissues TEXT,
@@ -16,7 +17,7 @@ CREATE TABLE bams (
        library TEXT,
        sequencing_platform TEXT,
        primary_cancer_site BOOLEAN DEFAULT FALSE, -- i.e. not a met.
-       uri TEXT
+       uri TEXT NOT NULL
 );
 
 CREATE TABLE vcfs (
@@ -24,14 +25,9 @@ CREATE TABLE vcfs (
        created_at TIMESTAMP DEFAULT statement_timestamp() NOT NULL,
        tumor_bam_id BIGINT REFERENCES bams,
        normal_bam_id BIGINT REFERENCES bams,
+       project_id BIGINT REFERENCES projects NOT NULL,
 
-       -- TO REMOVE: TODO:
-       dataset_name TEXT,
-       project_name TEXT,
-       tumor_bam_uri TEXT,
-       normal_bam_uri TEXT,
-
-       caller_name TEXT NOT NULL, -- Name of the caller this came from.
+       caller_name TEXT, -- Name of the caller this came from.
        validation_vcf BOOLEAN DEFAULT false, -- whether or not this is a validation VCF
        notes TEXT, -- Any notes, params, etc the user might add. Ideally in JSON format.
        uri TEXT UNIQUE, -- URI of source file, if any

@@ -102,6 +102,10 @@ div.project-header div.project-stats {
 }
 div.project-header div.project-stats a.selected-pivot {
   color: #3d3d3d;
+  cursor: default;
+}
+div.project-header div.project-stats a.selected-pivot:hover {
+  text-decoration: none;
 }
 div.project-header div.project-stats div {
   width: 100%;
@@ -136,24 +140,14 @@ div.comments {
 }
 
 /* Runs table: */
-tr.run {
-  background: white;
+#runs tbody tr {
   cursor: pointer;
 }
-tr.run:hover {
+#runs tbody tr:hover {
   background: #F6FAFC;
 }
-tr.run.selected {
-  font-weight: 500;
-}
-tr.run-info {
+#runs tr.info>td {
   background: rgb(247, 252, 253);
-}
-tr.run-info ul {
-  text-align: left;
-}
-tr.run-info li {
-  list-style: none;
 }
 input.selector {
   margin-right: 13px;

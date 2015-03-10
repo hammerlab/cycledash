@@ -77,22 +77,5 @@ before filing an issue.
 
 ## Basic JSON API
 
-The primary endpoint for posting data to from an external source is `/runs`.
-
-Additional information can be found at `/`, on the running webserver.
-
-JSON should be POSTed to `/runs` with following fields:
-
-**Required**<br />
-`vcfPath` -- The path on HDFS where the VCF can be found. This should be immutable, as CycleDash expects to be able to find the VCF here at any time.<br />
-`variantCallerName` -- The name of the variant caller which produced this VCF. This should remain constrant between VCFs with the same caller in order to compare runs to one another.<br />
-
-**Optional, highly recommended if truth VCF exists**<br />
-`truthVcfPath` -- The path on HDFS for the truth (or "reference") VCF. This should be immutable.<br />
-
-**Optional**<br />
-`dataset` -- The name of the dataset on which the caller was run (e.g. Dream Chromosome 20).<br />
-`projectName` -- The name of the project this run belongs to.
-`tumorPath` -- The path on HDFS of the tumor BAM on which the caller was run.<br />
-`normalPath` -- The path on HDFS of the normalBAM on which the caller was run.<br />
-`params` -- Params that the caller was run with, or other notes relevant to the run.<br />
+You can find documentation at /about on a running CycleDash instance, or at
+[API.md](/API.md).

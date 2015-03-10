@@ -3,7 +3,8 @@ var React = require('react'),
     forms = require('./Forms'),
     LatestComments = require('./LatestComments'),
     _ = require('underscore'),
-    moment = require('moment');
+    moment = require('moment'),
+    utils = require('../../examine/utils');
 
 var NO_FILTER = '----';
 
@@ -47,10 +48,11 @@ var RunsPage = React.createClass({
           return <ProjectTable key={project.name}
                                runs={project.vcfs}
                                bams={project.bams}
+                               project_id={project.id}
                                name={project.name}
                                notes={project.notes} />;
         }.bind(this)).value();
-    var newProjectForm = <forms.NewProjectForm handleClose={() => this.displayProjectForm(false)} />
+    var newProjectForm = <forms.NewProjectForm handleClose={() => this.displayProjectForm(false)} />;
     return (
       <div onDragOver={this.createDragOverHandler(true)}
            onDragLeave={this.createDragOverHandler(false)}
@@ -79,6 +81,7 @@ var RunsPage = React.createClass({
 
 var ProjectTable = React.createClass({
   propTypes: {
+    project_id: React.PropTypes.number.isRequired,
     name: React.PropTypes.string.isRequired,
     notes: React.PropTypes.string,
     runs: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
@@ -106,8 +109,11 @@ var ProjectTable = React.createClass({
     };
   },
   render: function() {
-    var newRunForm = <forms.NewRunForm completions={{}} projectId={this.props.id} projectName={this.props.name} />;
-    var newBAMForm = <forms.NewBAMForm completions={{}} projectId={this.props.id} projectName={this.props.name} />;
+    var newRunForm = <forms.NewRunForm bamUris={_.unique(_.pluck(this.props.bams, 'uri'))}
+                                       projectId={this.props.id}
+                                       projectName={this.props.name} />;
+    var newBAMForm = <forms.NewBAMForm projectId={this.props.id}
+                                       projectName={this.props.name} />;
     var numBams = this.props.bams.length;
     var numRuns = this.props.runs.length;
     var table;
@@ -123,7 +129,7 @@ var ProjectTable = React.createClass({
     return (
       <div className='project'>
         <div className='project-header'>
-          <h2>{this.props.name === 'null' ? 'No Project' : this.props.name}</h2>
+        <h2 title={this.props.project_id}>{this.props.name === 'null' ? 'No Project' : this.props.name}</h2>
           <div className='project-stats'>
             <div>
               <a onClick={() => this.setState({bamsTable: true})} className={this.state.bamsTable ? 'selected-pivot' : ''}>
@@ -229,18 +235,18 @@ var RunDescriptionRow = React.createClass({
   // This is a map from titles to keys in `run` objects that are optionally
   // there to appear in the description field of an expanded RunRow.
   runDescriptionTitleKeys: {
-    'Tumor BAM': 'tumor_bam_uri',
-    'Normal BAM': 'normal_bam_uri',
-    'VCF URI': 'uri',
-    'Notes': 'notes',
-    'Project': 'project_name'
+    'Tumor BAM': ['tumor_bam', 'uri'],
+    'Normal BAM': ['normal_bam', 'uri'],
+    'VCF URI': ['uri'],
+    'Notes': ['notes'],
+    'Project': ['project_name']
   },
   render: function() {
     var run = this.props.run,
-        descriptions = _.map(this.runDescriptionTitleKeys, (key, title) => {
-          if (run[key]) {
-            return [<dt key={'dt'+key}>{title}</dt>,
-                    <dd key={'dd'+key}>{run[key]}</dd>];
+        descriptions = _.map(this.runDescriptionTitleKeys, (keys, title) => {
+          if (utils.getIn(run, keys)) {
+            return [<dt key={'dt'+keys}>{title}</dt>,
+                    <dd key={'dd'+keys}>{utils.getIn(run, keys)}</dd>];
           }
         }),
         tasks = this.state.tasks.map(
@@ -251,7 +257,7 @@ var RunDescriptionRow = React.createClass({
                     <dd key={'tdd'+i}>{stateEl}</dd>];
           });
     return (
-      <tr className='run-info'>
+      <tr className='info'>
         <td colSpan='7'>
           <dl className='dl-horizontal'>
             {descriptions}
@@ -294,9 +300,8 @@ var RunLabels = React.createClass({
                       .object()
                       .value();
     var labelTypes = [
-      ['is_validated', 'validated', 'Has associated validation data'],
-      ['tumor_bam_uri', 'tumor', 'Has an associated tumor BAM'],
-      ['normal_bam_uri', 'normal', 'Has an associated normal BAM'],
+      ['tumor_bam_id', 'tumor', 'Has an associated tumor BAM'],
+      ['normal_bam_id', 'normal', 'Has an associated normal BAM'],
       ['run', '', 'Has a running worker task'],
       ['fail', '', 'Has a failed worker task']
     ];
@@ -330,7 +335,7 @@ var RunComments = React.createClass({
     return (
       <td className={tdClasses}>
         <span>
-          {run.num_comments == 0 ? null : run.num_comments}
+          {run.num_comments === 0 ? null : run.num_comments}
         </span>
         <span className='comment-bubble'></span>
       </td>
@@ -413,7 +418,7 @@ var BamDescriptionRow = React.createClass({
           }
         });
     return (
-      <tr className='bam-info'>
+      <tr className='info'>
         <td colSpan='7'>
           <dl className='dl-horizontal'>
             {descriptions}

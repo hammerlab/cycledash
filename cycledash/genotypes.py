@@ -84,9 +84,6 @@ def get(vcf_id, query, with_stats=True, truth_vcf_id=None):
     }
     """
     query = _annotate_query_with_types(query, spec(vcf_id))
-    if truth_vcf_id is None:
-        vcf = _get_vcf_by_id(vcf_id)
-        truth_vcf_id = derive_truth_vcf_id(vcf['dataset_name'])
     with tables(db, 'genotypes') as (con, g):
         if truth_vcf_id:
             # We consider a genotype validated if a truth genotype exists at its
@@ -303,16 +300,6 @@ def _add_range(sql_query, table, rangeq):
 def vcf_type_to_sqla_type(column_type='integer'):
     column_type = column_type.lower()
     return {'integer': Integer, 'float': Float}.get(column_type, String)
-
-
-def derive_truth_vcf_id(dataset_name):
-    with tables(db, 'vcfs') as (con, vcfs):
-        truth_vcf_q = (select([vcfs.c.id])
-                       .where(vcfs.c.validation_vcf == True)
-                       .where(vcfs.c.dataset_name == dataset_name))
-        truth_vcf_rel = con.execute(truth_vcf_q).fetchone()
-        if truth_vcf_rel:
-            return truth_vcf_rel.id
 
 
   ######################
