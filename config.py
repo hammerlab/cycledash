@@ -27,6 +27,6 @@ except subprocess.CalledProcessError:
 TEMPORARY_DIR = os.environ.get('TEMPORARY_DIR', '/tmp')
 
 TRAVIS = os.environ.get('TRAVIS')
-ENSEMBL_RELEASE = os.environ.get('ENSEMBL_RELEASE', 77)
+ENSEMBL_RELEASE = os.environ.get('ENSEMBL_RELEASE', 75)
 
 del os

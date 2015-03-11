@@ -41,7 +41,7 @@ var NewRunForm = React.createClass({
         <TextInput label='VCF Path:' name='uri'
                    placeholder='/data/somevcf.vcf'
                    required={true}
-                   uploadable={true} />
+                   uploadable={true} uploadPath={'/upload'} />
 
         <input type='hidden' value={this.props.projectName} name='projectName' />
 
@@ -59,7 +59,6 @@ var NewRunForm = React.createClass({
 
 var NewBAMForm = React.createClass({
   propTypes: {
-    completions: React.PropTypes.object.isRequired,
     projectName: React.PropTypes.string.isRequired
   },
   render: function() {
@@ -78,8 +77,7 @@ var NewBAMForm = React.createClass({
 
         <TextInput label='BAM URI:' name='uri'
                    required={true}
-                   placeholder='hdfs:///data/somebam.bam'
-                   uploadable={true} />
+                   placeholder='hdfs:///data/somebam.bam' />
 
         <input type='hidden' value={this.props.projectName} name='projectName' />
 
@@ -165,8 +163,12 @@ var TextInput = React.createClass({
   handleDrop: function(evt) {
     if (this.props.uploadable) {
       evt.preventDefault();
-      this.props.handleDrop();
-      this.handleDragLeave();
+      if (this.props.handleDrop) {
+        this.props.handleDrop();
+      }
+      if (this.handleDragLeave) {
+        this.handleDragLeave();
+      }
       var files = evt.dataTransfer.files;
       if (files.length === 0) return;
       if (files.length > 1) {
@@ -193,16 +195,16 @@ var TextInput = React.createClass({
     var formData = new FormData();
     formData.append('file', file);
 
-    d3.text('/upload')
+    d3.text(this.props.uploadPath)
       .post(formData)
-      .on('load', function(path) {
+      .on('load', path => {
         fileInputElement.value = path;
       })
-      .on('error', function(error) {
+      .on('error', error => {
         console.error(error);
         fileInputElement.value = this._extractError(error);
       })
-      .on('progress', function() {
+      .on('progress', () => {
         var e = d3.event;
         if (e.lengthComputable) {
           fileInputElement.value = 'Uploaded ' + e.loaded + '/' + e.total + ' bytes';

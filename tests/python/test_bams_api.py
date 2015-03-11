@@ -1,5 +1,5 @@
+import mock
 import nose
-
 import json
 
 from cycledash import app, db
@@ -31,7 +31,7 @@ class TestBamsAPI(object):
             bams.delete(bams.c.name == self.BAM_NAME).execute()
             projects.delete(projects.c.name == self.PROJECT_NAME).execute()
 
-
+    @mock.patch('workers.indexer.index.delay', lambda *args, **kwargs: True)
     def test_create_bam(self):
         NOTES = 'random notes'
         TISSUES = 'left ovary etc'
@@ -52,6 +52,7 @@ class TestBamsAPI(object):
         assert json.loads(r.data)['notes'] == NOTES
         assert json.loads(r.data)['uri'] == self.PATH
 
+    @mock.patch('workers.indexer.index.delay', lambda *args, **kwargs: True)
     def test_create_bam_with_project_name(self):
         r = self.app.post('/bams',
                           data=json.dumps({'name': self.BAM_NAME,

@@ -34,7 +34,7 @@ form.run-form .run-form-notes {
 form.run-form .run-form-notes textarea {
   height: 182px;
 }
-form.run-form input[name=vcfPath] {
+form.run-form input[name=uri] {
   width: 800px;
 }
 form.run-form button[type=submit] {
