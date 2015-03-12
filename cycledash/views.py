@@ -1,6 +1,5 @@
 # pylint: disable=no-value-for-parameter
-"""Defines all views for CycleDash.
-"""
+"""Defines all views for CycleDash."""
 import json
 import tempfile
 
@@ -8,6 +7,9 @@ from flask import (request, redirect, Response, render_template, jsonify,
                    url_for, send_file)
 from sqlalchemy import select, desc, func
 import voluptuous
+
+from common.relational_vcf import genotypes_to_file
+from common.helpers import tables
 
 from cycledash import app, db
 from cycledash.helpers import (prepare_request_data, error_response,
@@ -17,49 +19,30 @@ import cycledash.genotypes
 import cycledash.comments
 import cycledash.runs
 import cycledash.tasks
-
-from common.relational_vcf import genotypes_to_file
-from common.helpers import tables
-
-import workers.shared
+import cycledash.bams
+import cycledash.projects
 
 
-WEBHDFS_ENDPOINT = app.config['WEBHDFS_URL'] + '/webhdfs/v1/'
-WEBHDFS_OPEN_OP = '?user.name={}&op=OPEN'.format(app.config['WEBHDFS_USER'])
-
-RUN_ADDL_KVS = {'Tumor BAM': 'tumor_bam_uri',
-                'Normal BAM': 'normal_bam_uri',
-                'VCF URI': 'uri',
-                'Notes': 'notes',
-                'Project': 'project_name'}
-
-VCF_FILENAME = 'cycledash-run-{}.vcf'
-
+  ###########
+ ## About ##
+###########
 
 @app.route('/about')
 def about():
     return render_template('about.html')
 
 
+  ##########
+ ## Runs ##
+##########
+
 @app.route('/', methods=['POST', 'GET'])
 @app.route('/runs', methods=['POST', 'GET'])
 def list_runs():
     if request.method == 'POST':
-        try:
-            cycledash.runs.create_run(prepare_request_data(request))
-        except voluptuous.Invalid as e:
-            return error_response('Run validation', str(e))
-        except Exception as e:
-            return error_response('Error', str(e))
-        return redirect(url_for('list_runs'))
+        return cycledash.runs.create_run()
     elif request.method == 'GET':
-        vcfs, last_comments, completions = cycledash.runs.get_runs()
-        if request_wants_json():
-            return jsonify({'runs': vcfs})
-        elif 'text/html' in request.accept_mimetypes:
-            return render_template('runs.html', runs=vcfs, run_kvs=RUN_ADDL_KVS,
-                                   last_comments=last_comments,
-                                   completions=completions)
+        return cycledash.projects.get_projects_tree()
 
 
 @app.route('/tasks/<run_id>', methods=['GET', 'DELETE'])
@@ -75,6 +58,54 @@ def get_tasks(run_id):
         return success_response()
 
 
+  ##############
+ ## Projects ##
+##############
+
+@app.route('/projects', methods=['POST', 'GET'])
+def projects():
+    if request.method == 'POST':
+        return cycledash.projects.create_project()
+    elif request.method == 'GET':
+        return cycledash.projects.get_projects()
+
+
+@app.route('/projects/<project_id>', methods=['PUT', 'GET', 'DELETE'])
+def project(project_id):
+    if request.method == 'PUT':
+        return cycledash.projects.update_project(project_id)
+    elif request.method == 'GET':
+        return cycledash.projects.get_project(project_id)
+    elif request.method == 'DELETE':
+        return cycledash.projects.delete_project(project_id)
+
+
+  ##########
+ ## BAMs ##
+##########
+
+@app.route('/bams', methods=['POST', 'GET'])
+def bams():
+    if request.method == 'POST':
+        return cycledash.bams.create_bam()
+    elif request.method == 'GET':
+        return cycledash.bams.get_bams()
+
+
+@app.route('/bams/<bam_id>', methods=['PUT', 'GET', 'DELETE'])
+def bam(bam_id):
+    if request.method == 'PUT':
+        return cycledash.bams.update_bam(bam_id)
+    elif request.method == 'GET':
+        return cycledash.bams.get_bam(bam_id)
+    elif request.method == 'DELETE':
+        return cycledash.bams.delete_bam(bam_id)
+
+
+  #############
+ ## Examine ##
+#############
+
 @app.route('/runs/<run_id>/examine')
 def examine(run_id):
     return render_template('examine.html', run=cycledash.runs.get_run(run_id))
@@ -85,6 +116,10 @@ def genotypes(run_id):
     gts = cycledash.genotypes.get(run_id, json.loads(request.args.get('q')))
     return jsonify(gts)
 
+
+  ##############
+ ## Comments ##
+##############
 
 @app.route('/comments')
 def all_comments():
@@ -107,6 +142,12 @@ def comment(run_id, comment_id):
     elif request.method == 'DELETE':
         return cycledash.comments.delete_comment(comment_id)
 
+
+  ##########################
+ ## VCFs Upload/Download ##
+##########################
+
+VCF_FILENAME = 'cycledash-run-{}.vcf'
 
 @app.route('/runs/<run_id>/download')
 def download_vcf(run_id):

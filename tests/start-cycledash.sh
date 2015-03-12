@@ -4,5 +4,5 @@
 # See tests/pdifftests/README.md for details.
 set -o errexit
 
-source tests/pdifftests/ENV.sh
+source tests/ENV.sh
 python ./run.py

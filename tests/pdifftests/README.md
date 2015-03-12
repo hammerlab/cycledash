@@ -37,7 +37,7 @@ You can submit the new run using either the web UI or the the REST interface.
 
 To export the new run to the CSV file, you generate a database dump:
 
-    pg_dump --data-only cycledash-dpxdt > tests/pdifftests/data.sql
+    pg_dump --data-only cycledash-test > tests/data.sql
 
 For database migrations, it may be easiest to just resubmit all the runs.
 

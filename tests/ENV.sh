@@ -1,6 +1,6 @@
 # See tests/pdifftests/README.md for details.
 export PORT=5001
-export DATABASE_URI='postgres://localhost/cycledash-dpxdt'
+export DATABASE_URI='postgres://localhost/cycledash-test'
 export WEBHDFS_USER=testing
 export WEBHDFS_URL='http://example.com:123456'
 export IGV_HTTPFS_URL='http://example.com:123456'

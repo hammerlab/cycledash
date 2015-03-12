@@ -1,48 +1,21 @@
+from flask import request, jsonify, redirect, render_template, url_for
 from sqlalchemy import select, desc, func
+import voluptuous
 
 import config
-from cycledash import db
-from cycledash import validations
-from cycledash import genotypes
+from cycledash import db, validations, genotypes
+from cycledash.helpers import (prepare_request_data, error_response,
+                               get_id_where, get_where, request_wants_json)
 import cycledash.tasks
+import cycledash.comments
+import cycledash.projects
 
-from common.helpers import tables, CRUDError
+from common.helpers import tables, CRUDError, find
 import workers.runner
 
 
 class CollisionError(Exception):
     pass
-
-
-def get_runs():
-    """Return a tuple of:
-        - a list of all runs
-        - the last 5 comments
-        - an object with lists of potential completions for the run upload form
-          typeahead fields.
-        """
-    with tables(db, 'vcfs', 'user_comments') as (con, vcfs, user_comments):
-        validation_vcfs = vcfs.select().where(vcfs.c.validation_vcf == True).alias()
-        joined = (vcfs
-            .outerjoin(user_comments, vcfs.c.id == user_comments.c.vcf_id)
-            .outerjoin(validation_vcfs,
-                       validation_vcfs.c.dataset_name == vcfs.c.dataset_name))
-        num_comments = func.count(user_comments.c.vcf_id).label('num_comments')
-        is_validated = func.count(validation_vcfs.c.id).label('is_validated')
-        q = (select(vcfs.c + [num_comments] + [is_validated])
-            .select_from(joined)
-            .where(vcfs.c.validation_vcf == False)
-            .group_by(vcfs.c.id)
-            .order_by(desc(vcfs.c.id)))
-        vcfs = [dict(v) for v in con.execute(q).fetchall()]
-        completions = _extract_completions(vcfs)
-
-        q = select(user_comments.c).order_by(
-            desc(user_comments.c.last_modified)).limit(5)
-        last_comments = [dict(c) for c in con.execute(q).fetchall()]
-        _join_task_states(vcfs)
-
-        return vcfs, last_comments, completions
 
 
 def get_run(run_id):
@@ -56,65 +29,91 @@ def get_run(run_id):
     return run
 
 
-def create_run(request):
+def create_run():
     """Create a new run, inserting it into the vcfs table and starting workers.
 
     This raises an exception if anything goes wrong.
-
-    Args:
-        request: validations.CreateRunSchema
     """
-    run = validations.CreateRunSchema(request)  # throws on error
+    try:
+        run = validations.CreateRun((prepare_request_data(request)))
+        project_attr = validations.expect_one_of(run, 'project_name', 'project_id')
+    except voluptuous.MultipleInvalid as err:
+        return error_response('Run validation', [str(e) for e in err.errors])
+
+    try:
+        cycledash.projects.set_and_verify_project_id_on(run)
+    except voluptuous.Invalid as e:
+        return error_response('Project not found', str(e)), 404
+
+    try:
+        _set_or_verify_bam_id_on(run, bam_type='normal')
+        _set_or_verify_bam_id_on(run, bam_type='tumor')
+    except voluptuous.Invalid as e:
+        return error_response('BAM not found', str(e)), 404
 
     with tables(db, 'vcfs') as (con, vcfs_table):
-        _ensure_no_existing_vcf(vcfs_table, run['vcf_path'])
+        try:
+            _ensure_no_existing_vcf(vcfs_table, run['uri'])
+        except CollisionError as e:
+            return error_response('VCF already submitted', str(e))
 
-        vcfs = [{'uri': run['vcf_path'], 'is_validation': False}]
-        if run.get('truth_vcf_path'):  # pylint: disable=no-member
-            vcfs.append({'uri': run['truth_vcf_path'], 'is_validation': True})
+        vcf_id = _insert_vcf(run, vcfs_table, con)
 
-        # Insert VCFs which aren't already in the database.
-        # (the _ensure_no_existing_vcf check only checks the Run VCF, not truth)
-        vcf_ids = [_insert_vcf(vcf, run, vcfs_table, con) for vcf in vcfs]
-        vcf_ids = [x for x in vcf_ids if x]  # filter out `None`s
+    workers.runner.start_workers_for_vcf_id(vcf_id)
 
-    # Kick off Celery workers for each new VCF.
-    for vcf_id in vcf_ids:
-        workers.runner.start_workers_for_vcf_id(vcf_id, run)
+    return redirect(url_for('list_runs'))
 
 
-def _ensure_no_existing_vcf(vcfs_table, vcf_path):
+def _set_or_verify_bam_id_on(run, bam_type):
+    """After calling this, run['(bam_type)_bam_id'] will be set to a valid BAM ID.
+
+    If there is not a matching BAM, it will raise voluptuous.Invalid.
+    """
+    id_key = bam_type + '_bam_id'
+    uri_key = bam_type + '_bam_uri'
+    bam_id = run.get(id_key)
+    if bam_id:
+        if get_where('bams', db, id=bam_id) is None:
+            raise voluptuous.Invalid(
+                'bam with id "{}" does not exist'.format(bam_id))
+    elif run.get(uri_key):
+        bam_id = get_id_where('bams', db, uri=run[uri_key])
+        if bam_id is None:
+            raise voluptuous.Invalid(
+                'bam with uri "{}" does not exist'.format(run[uri_key]))
+        run[id_key] = bam_id
+        del run[uri_key]
+
+
+def _ensure_no_existing_vcf(vcfs_table, vcf_uri):
     """Ensures no other VCFs with the same path. Raises if this isn't so."""
-    if not _vcf_exists(vcfs_table, vcf_path):
+    if not _vcf_exists(vcfs_table, vcf_uri):
         return
     if config.ALLOW_VCF_OVERWRITES:
-        was_deleted = _delete_vcf(vcfs_table, vcf_path)
+        was_deleted = _delete_vcf(vcfs_table, vcf_uri)
         if not was_deleted:
             raise CRUDError('Rows should have been deleted if we are '
                             'deleting a VCF that exists')
     else:
         raise CollisionError(
-            'VCF already exists with URI {}'.format(vcf_path))
+            'VCF already exists with URI {}'.format(vcf_uri))
 
 
-def _insert_vcf(vcf, run, vcfs_table, connection):
+def _insert_vcf(run, vcfs_table, connection):
     """Insert a new row in the vcfs table, if it's not there already."""
-    uri = vcf['uri']
-    if _vcf_exists(vcfs_table, uri):
+    if _vcf_exists(vcfs_table, run['uri']):
         return None
     record = {
-        'uri': uri,
-        'dataset_name': run.get('dataset'),
+        'uri': run['uri'],
         'caller_name': run.get('variant_caller_name'),
-        'normal_bam_uri': run.get('normal_path'),
-        'tumor_bam_uri': run.get('tumor_path'),
+        'normal_bam_id': run.get('normal_bam_id'),
+        'tumor_bam_id': run.get('tumor_bam_id'),
         'notes': run.get('params'),
-        'project_name': run.get('project_name'),
+        'project_id': run.get('project_id'),
         'vcf_header': '(pending)',
-        'validation_vcf': vcf['is_validation']
     }
     vcfs_table.insert(record).execute()
-    return _get_vcf_id(connection, uri)
+    return _get_vcf_id(connection, run['uri'])
 
 
 def _get_vcf_id(connection, uri):
@@ -134,24 +133,3 @@ def _vcf_exists(vcfs_table, uri):
     q = select([vcfs_table.c.id]).where(vcfs_table.c.uri == uri)
     result = q.execute()
     return result.rowcount > 0
-
-
-def _extract_completions(vcfs):
-    def pluck_unique(objs, attr):
-        vals = {obj[attr] for obj in objs if obj.get(attr)}
-        return list(vals)
-    return {
-        'variantCallerNames': pluck_unique(vcfs, 'caller_name'),
-        'datasetNames': pluck_unique(vcfs, 'dataset_name'),
-        'projectNames': pluck_unique(vcfs, 'project_name'),
-        'normalBamPaths': pluck_unique(vcfs, 'normal_bam_uri'),
-        'tumorBamPaths': pluck_unique(vcfs, 'tumor_bam_uri')
-    }
-
-
-def _join_task_states(vcfs):
-    """Add a task_states field to each VCF in a list of VCFs."""
-    ts = cycledash.tasks.all_non_success_tasks()
-
-    for vcf in vcfs:
-        vcf['task_states'] = ts.get(vcf['id'], [])

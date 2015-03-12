@@ -5,10 +5,10 @@ find cycledash/static/js tests -name '*.js' \
   | grep -v /dist/ | grep -v 'bundled' | grep -v /playground/ \
   | xargs ./node_modules/.bin/jsxhint
 
-find . -name '*.py' \
+git ls-files | grep .py \
   | xargs pylint \
   --errors-only \
-  --disable=print-statement \
+  --disable=print-statement,no-member \
   --ignored-classes=SQLAlchemy,Run,Concordance,scoped_session,pysam
 
 echo 'Passes jsxhint and pylint check'

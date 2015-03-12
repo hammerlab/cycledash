@@ -1,7 +1,7 @@
 setup: |
     gulp prod
-    ./tests/pdifftests/create-test-db.sh
-    ./tests/pdifftests/start-cycledash.sh
+    ./tests/create-test-db.sh
+    ./tests/start-cycledash.sh
 
 waitFor:
     url: http://localhost:5001/about
@@ -26,6 +26,10 @@ tests:
     url: http://localhost:5001/runs/1/examine
     config:
       <<: *std-config
+      injectJs: |
+        setTimeout(function() {
+          // pass
+        }, 250);
 
   - name: examine-sorted
     description: Examine page sorted by decreasing Normal Read Depth
@@ -33,9 +37,11 @@ tests:
     config:
       <<: *std-config
       injectJs: |
-        c = document.createEvent('MouseEvent');
-        c.initMouseEvent('click', true, true, window);
-        $('[data-attribute="sample:RD"] a').get(0).dispatchEvent(c);
+        setTimeout(function() {
+          c = document.createEvent('MouseEvent');
+          c.initMouseEvent('click', true, true, window);
+          $('[data-attribute="sample:RD"] a').get(0).dispatchEvent(c);
+        }, 250);
 
   - name: examine-tooltip
     description: Examine page showing a Normal Read Depth tooltip
@@ -108,19 +114,6 @@ tests:
           c.initMouseEvent('click', true, true, window);
           $('tr.run').get(0).dispatchEvent(c);
         }, 250);
-
-  - name: validated-run
-    description: Examine page showing a run with associated validation data.
-    url: http://localhost:5001/runs/2/examine
-    config:
-      <<: *std-config
-
-  - name: validated-run-with-filter
-    description: Same as "validated-run", but with a filter applied.
-    # CQL: reference = G ORDER BY contig, position
-    url: http://localhost:5001/runs/2/examine?query=reference+%3D+G+ORDER+BY+contig%2C+position
-    config:
-      <<: *std-config
 
   - name: comments
     description: Initial view of the comments page

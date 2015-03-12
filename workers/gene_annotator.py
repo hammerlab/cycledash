@@ -31,17 +31,19 @@ if not config.TRAVIS:
     from pyensembl import EnsemblRelease
 
 
-# TODO(tavi) Handle inconsistent states and retries.
 @worker.task(bind=True)
 def annotate(self, vcf_id):
     if vcf_id == False:
         return  # An error must have occurred earlier.
     register_running_task(self, vcf_id)
 
+    EnsemblRelease(config.ENSEMBL_RELEASE).install()  # Only runs the first time for this release.
+
     _, connection, metadata = initialize_database(DATABASE_URI)
     with close_and_discard(connection):
         gene_names = get_gene_names(
-            connection, metadata, vcf_id, ensembl_release_num=75)
+            connection, metadata, vcf_id,
+            ensembl_release_num=config.ENSEMBL_RELEASE)
 
         # Open file for both writing (the gene annotations) and reading that
         # out to Postgres
@@ -98,7 +100,7 @@ def get_gene_names(connection, metadata, vcf_id, ensembl_release_num):
         # starting position of the mutation. This will only expand the gene
         # names in rare cases, unless we're considering structural variants.
         gene_names_for_locus = data.gene_names_at_locus(
-        str(contig), int(position))
+            str(contig), int(position))
         gene_name_str = ','.join(gene_names_for_locus)
         gene_names.append([contig, position, gene_name_str])
 

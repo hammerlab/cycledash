@@ -2,6 +2,10 @@
 import os
 import re
 
+from cycledash import db
+
+from common.helpers import tables
+
 from flask import jsonify, request
 from werkzeug.utils import secure_filename
 
@@ -56,6 +60,32 @@ def prepare_request_data(request):
     simplified_dict = parsimonious_dict(data)
     stringval_dict = remove_empty_strings(simplified_dict)
     return underscorize_keys(stringval_dict)
+
+
+def get_where(table_name, db, **kwargs):
+    """Returns the first record in the table which matches the criteria in
+    kwargs.
+
+    kwargs is a dict of column_name: column_value.
+    """
+    with tables(db, table_name) as (_, table):
+        q = table.select()
+        for key, val in kwargs.iteritems():
+            q = q.where(table.c.__getattr__(key) == val)
+        obj = q.execute().fetchone()
+        if obj:
+            return dict(obj)
+
+
+def get_id_where(table_name, db, **kwargs):
+    """Returns the id of the first record in the table which matches the
+    criteria in kwargs.
+
+    kwargs is a dict of column_name: column_value.
+    """
+    obj = get_where(table_name, db, **kwargs)
+    if obj:
+        return obj.get('id')
 
 
 def update_object(obj, update):

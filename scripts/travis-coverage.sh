@@ -2,7 +2,7 @@
 # Generates LCOV data to post to coveralls.io when running on Travis.
 set -o errexit
 
-. ./ENV.sh
+. ./tests/ENV.sh
 
 # Run the Python tests with coverage -- stores results in coverage.xml
 nosetests \

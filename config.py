@@ -1,11 +1,11 @@
 import os
 
 def handle_false(value):
+    # ensure that false in config isn't interpreted as True
     if value and value.lower() == 'false':
         value = False
     return value
 
-# ensure that false in config isn't interpreted as True
 USE_RELOADER = handle_false(os.environ.get('USE_RELOADER', False))
 SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URI']
 PORT = int(os.environ.get('PORT', 5000))
@@ -27,5 +27,6 @@ except subprocess.CalledProcessError:
 TEMPORARY_DIR = os.environ.get('TEMPORARY_DIR', '/tmp')
 
 TRAVIS = os.environ.get('TRAVIS')
+ENSEMBL_RELEASE = os.environ.get('ENSEMBL_RELEASE', 75)
 
 del os

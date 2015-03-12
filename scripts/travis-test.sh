@@ -2,7 +2,7 @@
 # Run both the Python & JS tests.
 set -o errexit
 
-. ./ENV.sh
+. ./tests/ENV.sh
 nosetests tests/python
 
 ./scripts/run-js-tests.sh

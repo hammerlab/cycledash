@@ -20,10 +20,10 @@ pysam==0.7.8
 pytz==2014.4
 pywebhdfs==0.2.3
 requests==2.3.0
-voluptuous==0.8.5
+voluptuous==0.8.7
 wsgiref==0.1.2
 dpxdt==0.1.5
 psycopg2==2.5.4
 pylint==1.4.1
 humanize==0.5.1
-pyensembl==0.5.4
+pyensembl==0.5.13

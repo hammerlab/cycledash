@@ -27,7 +27,7 @@
     "gulp-react": "^1.0.1",
     "jsdom": "^1.0.3",
     "jsxhint": "^0.7.0",
-    "mocha": "^2.0.1",
+    "mocha": "2.1.0",
     "mocha-clean": "^0.4.0",
     "mocha-lcov-reporter": "0.0.1",
     "pegjs": "^0.8.0",

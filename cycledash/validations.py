@@ -1,7 +1,8 @@
 import json
 
-from voluptuous import (Schema, All, Required, Length, Range, truth, message,
-                        Msg, Coerce)
+from voluptuous import (Schema, All, Any, Required, Length, Range, truth,
+                        message, Msg, Coerce, Exclusive, Invalid,
+                        MultipleInvalid)
 
 
 def is_path(s):
@@ -14,12 +15,24 @@ PathString = All(unicode,
                      'path must start with "/", "file://" or "hdfs://"'))
 
 
-CreateRunSchema = Schema({
-    Required('variant_caller_name'): unicode,
-    Required('vcf_path'): PathString,
+CreateRun = Schema({
+    Required('uri'): PathString,
+
+    # One of `project` is required, but not supported in voluptuous, so we
+    # enforce this in code. cf. https://github.com/alecthomas/voluptuous/issues/115
+    Exclusive('project_id', 'project'): Coerce(int),
+    Exclusive('project_name', 'project'): unicode,
+
+    Exclusive('normal_bam_id', 'normal_bam'): Coerce(int),
+    Exclusive('normal_bam_uri', 'normal_bam'): PathString,
+    Exclusive('tumor_bam_id', 'tumor_bam'): Coerce(int),
+    Exclusive('tumor_bam_uri', 'tumor_bam'): PathString,
+
+    'variant_caller_name': unicode,
+    'project_id': Coerce(int),
+    'tumor_dataset_id': Coerce(int),
+    'normal_dataset_id': Coerce(int),
     'truth_vcf_path': PathString,
-    'normal_path': PathString,
-    'tumor_path': PathString,
     'is_validation': bool,
     'params': unicode,
     'dataset': unicode,
@@ -28,19 +41,70 @@ CreateRunSchema = Schema({
 })
 
 
-UpdateRunSchema = Schema({
+UpdateRun = Schema({
     'variant_caller_name': unicode,
-    'vcf_path': PathString,
-    'normal_path': PathString,
-    'tumor_path': PathString,
-    'is_validation': bool,
+
+    Exclusive('normal_bam_id', 'normal_bam'): Coerce(int),
+    Exclusive('normal_bam_uri', 'normal_bam'): PathString,
+    Exclusive('tumor_bam_id', 'tumor_bam'): Coerce(int),
+    Exclusive('tumor_bam_uri', 'tumor_bam'): PathString,
+
     'params': unicode,
-    'dataset': unicode,
-    'project_name': unicode,
     'vcf_header': unicode,
+
     'true_positive': Coerce(int),
     'false_positive': Coerce(int),
     'precision': Coerce(float),
     'recall': Coerce(float),
     'f1score': Coerce(float)
 })
+
+
+CreateProject = Schema({
+    Required('name'): unicode,
+    'notes': unicode
+})
+
+
+UpdateProject = Schema({
+    'name': unicode,
+    'notes': unicode
+})
+
+
+CreateBam = Schema({
+    # One of `project` is required, but not supported in voluptuous, so we
+    # enforce this in code. cf. https://github.com/alecthomas/voluptuous/issues/115
+    Exclusive('project_id', 'project'): Coerce(int),
+    Exclusive('project_name', 'project'): unicode,
+
+    'name': unicode,
+    'notes': unicode,
+    'tissues': unicode,
+    'resection_date': unicode,
+    Required('uri'): PathString
+})
+
+
+UpdateBam = Schema({
+    'name': unicode,
+    'notes': unicode,
+    'tissues': unicode,
+    'resection_date': unicode,
+    'uri': PathString
+})
+
+
+def expect_one_of(dct, *args):
+    """Return the first attribute found in dct, else Raise MultipleInvalid if at
+    least one required attribute is not present in dct.
+    """
+    for arg in args:
+        if dct.get(arg) is not None:
+            return arg
+    error_string = '{}'.format(args[0])
+    for arg in args[1:]:
+        error_string += ' or {}'.format(arg)
+    error_string += 'is required'
+    error = Invalid(error_string)
+    raise MultipleInvalid(errors=[error])

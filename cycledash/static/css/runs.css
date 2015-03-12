@@ -3,35 +3,118 @@ main {
   margin: auto;
   margin-top: 41px;
 }
-form#submit {
-  margin: 0 auto 27px auto;
-  max-width: 500px;
-}
-form#submit .form-control {
-  color: black;
-}
-form#submit .form-control::-webkit-input-placeholder {
-  color: #adadad;
-}
-form#submit .form-control::-moz-placeholder {
-  color: #adadad;
-}
-#show-submit {
+#new-project {
   float: right;
 }
 
-/* Projects  */
+/* Run Form */
+form.run-form {
+  margin: 57px auto 55px auto;
+  max-width: 800px;
+  height: 340px;
+}
+form.run-form .form-control {
+  color: black;
+}
+form.run-form .form-control::-webkit-input-placeholder {
+  color: #adadad;
+}
+form.run-form .form-control::-moz-placeholder {
+  color: #adadad;
+}
+form.run-form input {
+  width: 380px;
+}
+form.run-form .run-form-notes {
+  position: relative;
+  top: -296px;
+  left: 400px;
+  width: 400px;
+}
+form.run-form .run-form-notes textarea {
+  height: 182px;
+}
+form.run-form input[name=uri] {
+  width: 800px;
+}
+form.run-form button[type=submit] {
+  position: relative;
+  top: -217px;
+}
+
+/* BAM Form */
+form.bam-form {
+  margin: 57px auto 55px auto;
+  max-width: 800px;
+  height: 340px;
+}
+form.bam-form .form-control {
+  color: black;
+}
+form.bam-form .form-control::-webkit-input-placeholder {
+  color: #adadad;
+}
+form.bam-form .form-control::-moz-placeholder {
+  color: #adadad;
+}
+form.bam-form input {
+  width: 380px;
+}
+form.bam-form .bam-form-notes {
+  position: relative;
+  top: -296px;
+  left: 400px;
+  width: 400px;
+}
+form.bam-form .bam-form-notes textarea {
+  height: 182px;
+}
+form.bam-form input[name=uri] {
+  width: 800px;
+}
+form.bam-form button[type=submit] {
+  position: relative;
+  top: -217px;
+}
+
+/* Projects */
 div.project-header h2 {
   margin: 0;
+}
+div.project-header .notes {
+  margin: 17px 0;
+  width: 480px;
+  float: right;
+}
+div.project-header .add {
+  float: left;
+  width: 160px;
+  margin: 17px 0;
+}
+div.project-header .add button {
+  margin-right: 11px;
 }
 div.project-header div.project-stats {
   font-size: 1.2em;
   float: right;
-  top: -15px;
-  color: #9d9d9d;
+  position: relative;
+  top: -1.51em;
+}
+div.project-header div.project-stats a.selected-pivot {
+  color: #3d3d3d;
+  cursor: default;
+}
+div.project-header div.project-stats a.selected-pivot:hover {
+  text-decoration: none;
+}
+div.project-header div.project-stats div {
+  width: 100%;
 }
 div.project {
   margin: 77px 0;
+}
+div.project a {
+  cursor: pointer;
 }
 div.project tbody {
   height: 100px;
@@ -53,28 +136,18 @@ a.all-comments {
 
 /* LastComments */
 div.comments {
-  margin-left: 11px;
+  margin-left: 1;
 }
 
 /* Runs table: */
-.runs.table {
-  margin-top: 23px;
-}
-tr.run {
-  background: white;
+#runs tbody tr {
   cursor: pointer;
 }
-tr.run.selected {
-  font-weight: 500;
+#runs tbody tr:hover {
+  background: #F6FAFC;
 }
-tr.run-info {
+#runs tr.info>td {
   background: rgb(247, 252, 253);
-}
-tr.run-info ul {
-  text-align: left;
-}
-tr.run-info li {
-  list-style: none;
 }
 input.selector {
   margin-right: 13px;
@@ -83,7 +156,7 @@ td .label {
   margin: 0 3px 0 3px;
 }
 td span.run-id {
-  color: #d5d9d9;
+  color: #D5D9D9;
   margin-right: 11px;
   font-size: 0.92em;
 }
@@ -115,7 +188,6 @@ td.comments {
   text-align: right;
   white-space: nowrap;
 }
-
 .runs .run-id, .runs .date {
   white-space: nowrap;
 }
