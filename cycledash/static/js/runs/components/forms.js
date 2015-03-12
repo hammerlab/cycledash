@@ -1,8 +1,6 @@
 'use strict';
 var React = require('react'),
     d3 = require('d3'),
-    _ = require('underscore'),
-    CompletionUtils = require('../../CompletionUtils'),
     $ = require('jquery');
 
 
@@ -62,7 +60,6 @@ var NewBAMForm = React.createClass({
     projectName: React.PropTypes.string.isRequired
   },
   render: function() {
-    var props = this.props;
     return (
         <form method='POST' action='/bams' className='bam-form'>
         <h3>New BAM</h3>
@@ -201,8 +198,8 @@ var TextInput = React.createClass({
         fileInputElement.value = path;
       })
       .on('error', error => {
-        console.error(error);
         fileInputElement.value = this._extractError(error);
+        throw error;
       })
       .on('progress', () => {
         var e = d3.event;

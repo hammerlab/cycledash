@@ -1,7 +1,6 @@
 'use strict';
 
-var _ = require('underscore'),
-    assert = require('assert'),
+var assert = require('assert'),
     QueryLanguage = require('../../cycledash/static/js/QueryLanguage.js');
 
 

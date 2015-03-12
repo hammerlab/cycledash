@@ -11,7 +11,6 @@ global.reactModulesToStub = [
 ];
 
 var ExaminePage = require('../../cycledash/static/js/examine/components/ExaminePage'),
-    QueryBox = require('../../cycledash/static/js/examine/components/QueryBox'),
     createRecordStore = require('../../cycledash/static/js/examine/RecordStore'),
     RecordActions = require('../../cycledash/static/js/examine/RecordActions'),
     Dispatcher = require('../../cycledash/static/js/examine/Dispatcher'),
@@ -104,7 +103,7 @@ describe('ExaminePage Comments', function() {
 
   function stubDialogs() {
     // Stub out confirm dialogs.
-    var stub = sinonSandbox.stub(window, 'confirm', _.constant(true));
+    sinonSandbox.stub(window, 'confirm', _.constant(true));
   }
 
   it('should get, modify, create and delete', function() {

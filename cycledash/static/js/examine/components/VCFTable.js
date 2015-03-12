@@ -4,8 +4,7 @@ var _ = require('underscore'),
     React = require('react/addons'),
     types = require('./types'),
     $ = require('jquery'),
-    CommentBox = require('./CommentBox'),
-    utils = require('../utils');
+    CommentBox = require('./CommentBox');
 
 var VCFTable = React.createClass({
   propTypes: {
@@ -340,8 +339,7 @@ var VCFRecord = React.createClass({
         );
       }
     });
-    var recordClasses = React.addons.classSet({selected: this.props.isSelected}),
-        record = this.props.record;
+    var recordClasses = React.addons.classSet({selected: this.props.isSelected});
     return (
       <tr className={recordClasses} onClick={this.handleClick}>
         {tds}

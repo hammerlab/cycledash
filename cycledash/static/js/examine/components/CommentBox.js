@@ -9,10 +9,7 @@
 
 var _ = require('underscore'),
     React = require('react/addons'),
-    types = require('./types'),
-    $ = require('jquery'),
-    marked = require('marked'),
-    utils = require('../utils');
+    marked = require('marked');
 
 /**
  * Use markdown for comments, and set appropriate flags to:

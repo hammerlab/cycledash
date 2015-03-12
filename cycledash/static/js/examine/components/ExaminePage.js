@@ -1,8 +1,6 @@
 "use strict";
 
-var _ = require('underscore'),
-    React = require('react'),
-    idiogrammatik = require('idiogrammatik.js'),
+var React = require('react'),
     BioDalliance = require('./BioDalliance'),
     StatsSummary = require('./StatsSummary'),
     VCFTable = require('./VCFTable'),

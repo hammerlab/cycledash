@@ -4,8 +4,7 @@
  */
 'use strict';
 
-var _ = require('underscore'),
-    React = require('react'),
+var React = require('react'),
     QueryLanguage = require('../../QueryLanguage'),
     QueryCompletion = require('../../QueryCompletion'),
     utils = require('../utils'),

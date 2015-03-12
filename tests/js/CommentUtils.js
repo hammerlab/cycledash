@@ -1,8 +1,6 @@
 'use strict';
 var _ = require('underscore'),
     fs = require('fs'),
-    vcf = require('vcf.js'),
-    Utils = require('./Utils'),
     DataUtils = require('./DataUtils');
 
 /**

@@ -69,16 +69,6 @@ var BioDalliance = React.createClass({
   lazilyCreateDalliance: function() {
     if (this.browser) return;
 
-    // Workaround for https://github.com/dasmoth/dalliance/issues/125
-    var uniquelyNamedBlob = (function() {
-      var id = 0;
-      return function(bytes) {
-        var blob = new Blob([bytes]);
-        blob.name = id++;
-        return blob;
-      };
-    })();
-
     var vcfSource = (name, path) => {
       var source = {
         name: name,
@@ -170,10 +160,10 @@ var BioDalliance = React.createClass({
           .done((chunks) => {
             this.setState(_.object([propName], [chunks]));
           }).fail((jqXHR, error, textStatus) => {
-            if (textStatus != 'Not Found') {
-              console.warn('Invalid bai.json file', chunkPath, error, textStatus);
-            }
             this.setState(_.object([propName], [CHUNKS_NOT_AVAILABLE]));
+            if (textStatus != 'Not Found') {
+              throw `Invalid bai.json file ${chunkPath} ${error} ${textStatus}`;
+            }
           });
       });
   },
@@ -239,10 +229,8 @@ var EventGuardian = function(elementClass, inputEvents) {
 
   this.elementClass_ = elementClass;
   var realListener = this.elementClass_.prototype.addEventListener;
-  console.log('Guarding against', this.elementClass_, events);
   this.elementClass_.prototype.addEventListener = function(name, meth, useCapture) {
     if (events.indexOf(name) >= 0) {
-      console.log('Blocking attempt to listen to', name);
       return;
     }
     return realListener.call(this, name, meth, useCapture);
@@ -287,39 +275,6 @@ var bamStyle = [
     "_typeRE": {},
     "_labelRE": {},
     "_methodRE": {}
-  }
-];
-
-
-// Style for visualizing BAM coverage.
-var coverageStyle = [
-  {
-    "type": "density",
-    "zoom": "low",
-    "style": {
-      "glyph": "HISTOGRAM",
-      "COLOR1": "gray",
-      "HEIGHT": 30
-    }
-  },
-  {
-    "type": "density",
-    "zoom": "medium",
-    "style": {
-      "glyph": "HISTOGRAM",
-      "COLOR1": "gray",
-      "HEIGHT": 30
-    }
-  },
-  {
-    "type": "base-coverage",
-    "zoom": "high",
-    "style": {
-      "glyph": "HISTOGRAM",
-      "COLOR1": "lightgray",
-      "BGITEM": true,
-      "HEIGHT": 30
-    }
   }
 ];
 

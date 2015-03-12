@@ -1,12 +1,10 @@
 'use strict';
 
-var _ = require('underscore'),
-    assert = require('assert'),
+var assert = require('assert'),
     CompletionUtils = require('../../cycledash/static/js/CompletionUtils.js');
 
 var {
   cartesianProductOf,
-  flatMap,
   fuzzyMatch,
   splitLastToken,
   tokenize

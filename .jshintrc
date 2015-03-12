@@ -11,14 +11,21 @@
   "lastsemic": false,
   "shadow": true,
   "browser": true,
-  "node": true,
   "mocha": true,
+  "unused": "vars",  // unused vars are bad, but function params are OK
+  // allow module-level "use strict", which is OK with browserify.
+  "globalstrict": true,
   "globals": {
     "d3": true,
     "_": true,
     "$": true,
     "Browser": true,
-    "React": true
+    "React": true,
+    // We don't set "node: true" to capture certain issues, e.g. console.log
+    // statements. These globals make up for that.
+    "require": true,
+    "module": true,
+    "global": true
   },
   "maxerr": 100000
 }

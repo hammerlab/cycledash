@@ -1,9 +1,5 @@
 'use strict';
-var _ = require('underscore'),
-    React = require('react'),
-    QueryLanguage = require('../../QueryLanguage'),
-    $ = require('jquery');
-
+var React = require('react');
 
 var Downloads = React.createClass({
   propTypes: {

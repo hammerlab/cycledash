@@ -1,13 +1,11 @@
 'use strict';
 
-var _ = require('underscore'),
-    assert = require('assert'),
+var assert = require('assert'),
     QueryLanguage = require('../../cycledash/static/js/QueryLanguage.js'),
     QueryCompletion = require('../../cycledash/static/js/QueryCompletion.js');
 
 describe('Query Completion', function() {
   var defaultColumns = ['A', 'B', 'INFO.DP', 'sample:GQ'];
-  var filterPrefix = QueryCompletion.filterPrefix;
 
   // Returns a list of possible complete queries.
   function getCompletions(prefix, columns, position) {

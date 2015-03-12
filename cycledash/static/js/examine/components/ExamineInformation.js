@@ -1,7 +1,6 @@
 "use strict";
 
-var _ = require('underscore'),
-    React = require('react/addons');
+var React = require('react/addons');
 
 
 var ExamineInformation = React.createClass({
