@@ -199,7 +199,7 @@ var TextInput = React.createClass({
       .on('load', path => {
         fileInputElement.value = path;
       })
-      .on('error', function(error) {
+      .on('error', error => {
         fileInputElement.value = this._extractError(error);
         throw error;
       })
