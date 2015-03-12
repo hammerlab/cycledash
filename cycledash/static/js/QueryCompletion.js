@@ -159,7 +159,7 @@ function getTokenizedCompletions(query, parse, columnNames) {
     } else {
       // Probably an invalid column name. Pop off the last token and try
       // completing column names. Fuzzy matching happens below.
-      var [subquery] = splitLastToken(query);
+      var subquery = splitLastToken(query)[0];
       completions = completions.concat(concatProductOf([subquery], columnNames));
     }
   } else {

@@ -379,7 +379,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
     var search = window.location.search.substring(1),
         vars = search.split('&');
     var val = _.first(_.filter(vars, v => {
-      var [key] = v.split('=');
+      var key = v.split('=')[0];
       return decodeURIPlus(key) == name;
     }));
     if (val) {
