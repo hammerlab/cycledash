@@ -84,15 +84,15 @@ def get(vcf_id, query, with_stats=True):
     }
     """
     query = _annotate_query_with_types(query, spec(vcf_id))
-    validate_vcf_id = query.get('selectedVcfId')
+    compare_to_vcf_id = query.get('compareToVcfId')
     with tables(db, 'genotypes') as (con, g):
-        if validate_vcf_id:
+        if compare_to_vcf_id:
             # We consider a genotype validated if a truth genotype exists at its
             # location (contig/position) with the same ref/alts.  This isn't
             # entirely accurate: for example, it handles SVs very poorly.
             gt = g.alias()
             joined_q = outerjoin(g, gt, and_(
-                gt.c.vcf_id == validate_vcf_id,
+                gt.c.vcf_id == compare_to_vcf_id,
                 g.c.contig == gt.c.contig,
                 g.c.position == gt.c.position,
                 g.c.reference == gt.c.reference,
@@ -113,7 +113,7 @@ def get(vcf_id, query, with_stats=True):
         q = _add_ordering(q, g, 'Integer', 'position', 'asc')
 
         genotypes = [dict(g) for g in con.execute(q).fetchall()]
-    stats = calculate_stats(vcf_id, validate_vcf_id, query) if with_stats else {}
+    stats = calculate_stats(vcf_id, compare_to_vcf_id, query) if with_stats else {}
     return {'records': genotypes, 'stats': stats}
 
 

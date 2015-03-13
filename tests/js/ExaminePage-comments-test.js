@@ -56,7 +56,7 @@ describe('ExaminePage Comments', function() {
       <ExaminePage recordStore={recordStore}
                    recordActions={recordActions}
                    igvHttpfsUrl={igvHttpfsUrl}
-                   vcf={run} vcfs={[]} />);
+                   vcf={run} comparableVcfs={[]} />);
   }
 
   function commentText() {

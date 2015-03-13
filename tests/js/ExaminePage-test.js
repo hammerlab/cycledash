@@ -41,7 +41,7 @@ function renderExamine(fakeServer) {
                    recordActions={recordActions}
                    igvHttpfsUrl={igvHttpfsUrl}
                    vcf={run}
-                   vcfs={[]} />);
+                   comparableVcfs={[]} />);
 }
 
 

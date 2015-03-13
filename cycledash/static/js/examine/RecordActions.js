@@ -37,10 +37,10 @@ function getRecordActions(dispatcher) {
         record
       });
     },
-    selectValidationVcf: function(validationVcfId) {
+    selectComparisonVcf: function(compareToVcfId) {
       dispatcher.dispatch({
         actionType: ACTION_TYPES.SELECT_VALIDATION_VCF,
-        validationVcfId
+        compareToVcfId
       });
     },
     setViewerOpen: function(isOpen) {

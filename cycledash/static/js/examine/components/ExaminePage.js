@@ -15,9 +15,10 @@ var ExaminePage = React.createClass({
   propTypes: {
     recordStore: React.PropTypes.object.isRequired,
     recordActions: React.PropTypes.object.isRequired,
-    vcf: React.PropTypes.object,
     igvHttpfsUrl: React.PropTypes.string.isRequired,
-    vcfs: React.PropTypes.arrayOf(React.PropTypes.object)
+    vcf: React.PropTypes.object,
+    // a list of VCFs to possibly compare against:
+    comparableVcfs: React.PropTypes.arrayOf(React.PropTypes.object)
   },
   getInitialState: function() {
     return this.props.recordStore.getState();
@@ -49,8 +50,8 @@ var ExaminePage = React.createClass({
   handlePreviousRecord: function() {
     this.moveSelectionInDirection(-1);
   },
-  handleValidationVcfChange: function(selectedVcfId) {
-    this.props.recordActions.selectValidationVcf(selectedVcfId);
+  handleComparisonVcfChange: function(vcfId) {
+    this.props.recordActions.selectComparisonVcf(vcfId);
   },
   moveSelectionInDirection: function(delta) {
     if (!this.state.selectedRecord) return;
@@ -78,10 +79,10 @@ var ExaminePage = React.createClass({
         <StatsSummary hasLoaded={state.hasLoaded}
                       stats={state.stats} />
         <ExamineInformation run={props.vcf}/>
-        {props.vcfs ?
-         <VCFValidation vcfs={props.vcfs}
+        {props.comparableVcfs ?
+         <VCFValidation vcfs={props.comparableVcfs}
                         selectedVcfId={state.selectedVcfId}
-                        handleValidationVcfChange={this.handleValidationVcfChange} /> :
+                        handleComparisonVcfChange={this.handleComparisonVcfChange} /> :
           null}
         <QueryBox columns={state.columns}
                   hasPendingRequest={state.hasPendingRequest}

@@ -41,7 +41,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
       selectedRecord = null,
       isViewerOpen = false,
 
-      selectedVcfId = null,
+      compareToVcfId = null,
 
       filters = [],
       sortBys = DEFAULT_SORT_BYS,
@@ -92,7 +92,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
         notifyChange();
         break;
       case ACTION_TYPES.SELECT_VALIDATION_VCF:
-        selectedVcfId = parseInt(action.validationVcfId);
+        compareToVcfId = action.compareToVcfId;
         updateGenotypes({append: false});
         break;
       case ACTION_TYPES.SET_VIEWER_OPEN:
@@ -139,7 +139,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
       page = 0;
     }
 
-    var query = queryFrom(range, filters, sortBys, page, limit, selectedVcfId);
+    var query = queryFrom(range, filters, sortBys, page, limit, compareToVcfId);
     setQueryStringToQuery(query);
 
     // If we're not just appending records, reset the selected records (as the
@@ -349,7 +349,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
   }
 
   // Returns a JS object query for sending to the backend.
-  function queryFrom(range, filters, sortBy, page, limit, selectedVcfId) {
+  function queryFrom(range, filters, sortBy, page, limit, compareToVcfId) {
     if (sortBy[0].columnName == 'position') {
       sortBy = DEFAULT_SORT_BYS.map(sb => {
         sb.order = sortBys[0].order;
@@ -362,7 +362,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
       sortBy,
       page,
       limit,
-      selectedVcfId
+      compareToVcfId
     };
   }
 
@@ -446,7 +446,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
 
   return {
     getState: function() {
-      var query = queryFrom(range, filters, sortBys, page, limit, selectedVcfId);
+      var query = queryFrom(range, filters, sortBys, page, limit, compareToVcfId);
       return {
         columns,
         contigs,
@@ -460,7 +460,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
         range,
         records,
         selectedRecord,
-        selectedVcfId,
+        compareToVcfId,
         sortBys,
         stats
       };
