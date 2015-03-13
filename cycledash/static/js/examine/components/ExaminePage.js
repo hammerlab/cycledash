@@ -6,7 +6,8 @@ var React = require('react'),
     VCFTable = require('./VCFTable'),
     QueryBox = require('./QueryBox'),
     Downloads = require('./Downloads'),
-    ExamineInformation = require('./ExamineInformation');
+    ExamineInformation = require('./ExamineInformation'),
+    VCFValidation = require('./VCFValidation');
 
 
 // The root component of the page.
@@ -14,8 +15,9 @@ var ExaminePage = React.createClass({
   propTypes: {
     recordStore: React.PropTypes.object.isRequired,
     recordActions: React.PropTypes.object.isRequired,
-    run: React.PropTypes.object,
-    igvHttpfsUrl: React.PropTypes.string.isRequired
+    vcf: React.PropTypes.object,
+    igvHttpfsUrl: React.PropTypes.string.isRequired,
+    vcfs: React.PropTypes.arrayOf(React.PropTypes.object)
   },
   getInitialState: function() {
     return this.props.recordStore.getState();
@@ -47,6 +49,9 @@ var ExaminePage = React.createClass({
   handlePreviousRecord: function() {
     this.moveSelectionInDirection(-1);
   },
+  handleValidationVcfChange: function(selectedVcfId) {
+    this.props.recordActions.selectValidationVcf(selectedVcfId);
+  },
   moveSelectionInDirection: function(delta) {
     if (!this.state.selectedRecord) return;
     var records = this.state.records,
@@ -72,13 +77,18 @@ var ExaminePage = React.createClass({
       <div className="examine-page">
         <StatsSummary hasLoaded={state.hasLoaded}
                       stats={state.stats} />
-        <ExamineInformation run={props.run}/>
+        <ExamineInformation run={props.vcf}/>
+        {props.vcfs ?
+         <VCFValidation vcfs={props.vcfs}
+                        selectedVcfId={state.selectedVcfId}
+                        handleValidationVcfChange={this.handleValidationVcfChange} /> :
+          null}
         <QueryBox columns={state.columns}
                   hasPendingRequest={state.hasPendingRequest}
                   loadError={state.loadError}
                   query={state.query}
                   handleQueryChange={this.handleQueryChange} />
-        <Downloads query={state.query} run_id={props.run.id} />
+        <Downloads query={state.query} run_id={props.vcf.id} />
         <VCFTable ref="vcfTable"
                   hasLoaded={state.hasLoaded}
                   records={state.records}
@@ -94,9 +104,9 @@ var ExaminePage = React.createClass({
                   handleOpenViewer={this.handleOpenViewer}
                   handleSetComment={this.handleSetComment}
                   handleDeleteComment={this.handleDeleteComment} />
-        <BioDalliance vcfPath={props.run.uri}
-                      normalBamPath={props.run.normal_bam_uri}
-                      tumorBamPath={props.run.tumor_bam_uri}
+        <BioDalliance vcfPath={props.vcf.uri}
+                      normalBamPath={props.vcf.normal_bam_uri}
+                      tumorBamPath={props.vcf.tumor_bam_uri}
                       igvHttpfsUrl={props.igvHttpfsUrl}
                       selectedRecord={state.selectedRecord}
                       isOpen={state.isViewerOpen}
@@ -109,4 +119,3 @@ var ExaminePage = React.createClass({
 });
 
 module.exports = ExaminePage;
-

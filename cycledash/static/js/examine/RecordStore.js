@@ -41,6 +41,8 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
       selectedRecord = null,
       isViewerOpen = false,
 
+      selectedVcfId = null,
+
       filters = [],
       sortBys = DEFAULT_SORT_BYS,
       range = ENTIRE_GENOME,
@@ -89,6 +91,10 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
         selectedRecord = action.record;
         notifyChange();
         break;
+      case ACTION_TYPES.SELECT_VALIDATION_VCF:
+        selectedVcfId = parseInt(action.validationVcfId);
+        updateGenotypes({append: false});
+        break;
       case ACTION_TYPES.SET_VIEWER_OPEN:
         isViewerOpen = action.isOpen;
         notifyChange();
@@ -133,8 +139,8 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
       page = 0;
     }
 
-    var query = queryFrom(range, filters, sortBys, page, limit);
-    setSearchStringToQuery(query);
+    var query = queryFrom(range, filters, sortBys, page, limit, selectedVcfId);
+    setQueryStringToQuery(query);
 
     // If we're not just appending records, reset the selected records (as the
     // table is now invalidated).
@@ -343,7 +349,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
   }
 
   // Returns a JS object query for sending to the backend.
-  function queryFrom(range, filters, sortBy, page, limit) {
+  function queryFrom(range, filters, sortBy, page, limit, selectedVcfId) {
     if (sortBy[0].columnName == 'position') {
       sortBy = DEFAULT_SORT_BYS.map(sb => {
         sb.order = sortBys[0].order;
@@ -355,7 +361,8 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
       filters,
       sortBy,
       page,
-      limit
+      limit,
+      selectedVcfId
     };
   }
 
@@ -369,7 +376,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
     return decodeURIComponent(q.replace(/\+/g, '%20'));
   }
 
-  function setSearchStringToQuery(query) {
+  function setQueryStringToQuery(query) {
     var queryString = encodeURIPlus(QueryLanguage.toString(query));
     window.history.replaceState(null, null, '?query=' + queryString);
   }
@@ -439,7 +446,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
 
   return {
     getState: function() {
-      var query = queryFrom(range, filters, sortBys, page, limit);
+      var query = queryFrom(range, filters, sortBys, page, limit, selectedVcfId);
       return {
         columns,
         contigs,
@@ -453,6 +460,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
         range,
         records,
         selectedRecord,
+        selectedVcfId,
         sortBys,
         stats
       };

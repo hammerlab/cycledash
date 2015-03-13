@@ -18,19 +18,29 @@ class CollisionError(Exception):
     pass
 
 
-def get_run(run_id):
-    """Return a run with a given ID, and the spec and list of contigs for that
+def get_vcf(vcf_id):
+    """Return a vcf with a given ID, and the spec and list of contigs for that
     run for use by the /examine page."""
     with tables(db, 'vcfs') as (con, vcfs):
-        q = select(vcfs.c).where(vcfs.c.id == run_id)
-        run = dict(con.execute(q).fetchone())
-    run['spec'] = genotypes.spec(run_id)
-    run['contigs'] = genotypes.contigs(run_id)
-    return run
+        q = select(vcfs.c).where(vcfs.c.id == vcf_id)
+        vcf = dict(con.execute(q).fetchone())
+    vcf['spec'] = genotypes.spec(vcf_id)
+    vcf['contigs'] = genotypes.contigs(vcf_id)
+    return vcf
 
 
-def create_run():
-    """Create a new run, inserting it into the vcfs table and starting workers.
+def get_related_vcfs(vcf):
+    """Return a list of vcfs in the same project as vcf."""
+    with tables(db, 'vcfs') as (con, vcfs):
+        q = select(vcfs.c).where(
+            vcfs.c.project_id == vcf['project_id']).where(
+                vcfs.c.id != vcf['id'])
+        vcfs = [dict(v) for v in con.execute(q).fetchall()]
+    return vcfs
+
+
+def create_vcf():
+    """Create a new vcf, inserting it into the vcfs table and starting workers.
 
     This raises an exception if anything goes wrong.
     """

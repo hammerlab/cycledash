@@ -44,7 +44,8 @@ var RunsPage = React.createClass({
     var projectTables = _.chain(this.filteredProjects())
         .sortBy(project => {
           var vcf = project.vcfs[0];
-          // to sort by the descending ID, assumuning project.runs is already sorted by descending ID
+          // Sort by the descending ID, assuming project.runs is already sorted
+          // by descending ID.
           return vcf ?  -vcf.id : -100;
         }).map(function(project) {
             return <ProjectTable key={project.name}
@@ -62,7 +63,8 @@ var RunsPage = React.createClass({
         <h1>
           Data Directory
           {!this.state.displayProjectForm ?
-           <button className='btn btn-default' id='new-project' onClick={() => this.setDisplayProjectForm(true)}>
+           <button className='btn btn-default' id='new-project'
+                   onClick={() => this.setDisplayProjectForm(true)}>
              New Project
            </button> : null}
         </h1>

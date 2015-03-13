@@ -40,7 +40,8 @@ function renderExamine(fakeServer) {
       <ExaminePage recordStore={recordStore}
                    recordActions={recordActions}
                    igvHttpfsUrl={igvHttpfsUrl}
-                   run={run} />);
+                   vcf={run}
+                   vcfs={[]} />);
 }
 
 
