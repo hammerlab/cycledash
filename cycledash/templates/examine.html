@@ -17,7 +17,8 @@
 <script type="text/javascript" src="/static/js/dist/bundled.js"></script>
 <script>
  window.renderExaminePage(document.getElementById('examine'),
-                          {{ run | tojson }},
+                          {{ vcf | tojson }},
+                          {{ vcfs | tojson }},
                           {{ config['IGV_HTTPFS_URL'] | tojson }});
 </script>
 {% endblock%}

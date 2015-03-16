@@ -97,6 +97,21 @@ tests:
           q.addClass('bad');
         }, 250);
 
+
+  - name: examine-validation
+    description: Examine page with a validation
+    url: http://localhost:5001/runs/1/examine
+    config:
+      <<: *std-config
+      injectJs: |
+        setTimeout(function() {
+          var sel = $('#vcf-validations select');
+          var e = document.createEvent('HTMLEvents');
+          e.initEvent('change', true, false);
+          sel.val(2);
+          sel.get(0).dispatchEvent(e);
+        }, 250);
+
   - name: runs
     description: Initial view of the runs page
     url: http://localhost:5001/

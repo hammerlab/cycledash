@@ -293,6 +293,15 @@ table.vcf-table {
   }
 }
 
+/* VCFValidation */
+#vcf-validations {
+  margin: 11px;
+}
+#vcf-validations select {
+  width: 500px;
+  margin-left: 13px;
+}
+
 /* ExamineInformation */
 .examine-information {
   max-width: 600px;

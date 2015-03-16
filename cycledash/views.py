@@ -40,12 +40,12 @@ def about():
 @app.route('/runs', methods=['POST', 'GET'])
 def list_runs():
     if request.method == 'POST':
-        return cycledash.runs.create_run()
+        return cycledash.runs.create_vcf()
     elif request.method == 'GET':
         return cycledash.projects.get_projects_tree()
 
 
-@app.route('/tasks/<run_id>', methods=['GET', 'DELETE'])
+@app.route('/tasks/<vcf_id>', methods=['GET', 'DELETE'])
 def get_tasks(run_id):
     if request.method == 'GET':
         tasks = cycledash.tasks.get_tasks(run_id)
@@ -108,7 +108,10 @@ def bam(bam_id):
 
 @app.route('/runs/<run_id>/examine')
 def examine(run_id):
-    return render_template('examine.html', run=cycledash.runs.get_run(run_id))
+    vcf = cycledash.runs.get_vcf(run_id)
+    return render_template('examine.html',
+                           vcf=vcf,
+                           vcfs=cycledash.runs.get_related_vcfs(vcf))
 
 
 @app.route('/runs/<run_id>/genotypes')

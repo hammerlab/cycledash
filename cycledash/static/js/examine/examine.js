@@ -7,12 +7,13 @@ var React = require('react'),
     getRecordActions = require('./RecordActions').getRecordActions;
 
 
-window.renderExaminePage = function(el, run, igvHttpfsUrl) {
+window.renderExaminePage = function(el, vcf, comparableVcfs, igvHttpfsUrl) {
   var dispatcher = new Dispatcher();
   var recordActions = getRecordActions(dispatcher);
-  var recordStore = createRecordStore(run, igvHttpfsUrl, dispatcher);
+  var recordStore = createRecordStore(vcf, igvHttpfsUrl, dispatcher);
   React.render(<ExaminePage recordStore={recordStore}
                             recordActions={recordActions}
-                            run={run}
+                            comparableVcfs={comparableVcfs}
+                            vcf={vcf}
                             igvHttpfsUrl={igvHttpfsUrl} />, el);
 };

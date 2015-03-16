@@ -5,6 +5,7 @@ var ACTION_TYPES = {
   DELETE_COMMENT: 'DELETE_COMMENT',
   REQUEST_PAGE: 'REQUEST_PAGE',
   SELECT_RECORD: 'SELECT_RECORD',
+  SELECT_VALIDATION_VCF: 'SELECT_VALIDATION_VCF',
   SET_COMMENT: 'SET_COMMENT',
   SET_QUERY: 'SET_QUERY',
   SET_VIEWER_OPEN: 'SET_VIEWER_OPEN',
@@ -34,6 +35,12 @@ function getRecordActions(dispatcher) {
       dispatcher.dispatch({
         actionType: ACTION_TYPES.SELECT_RECORD,
         record
+      });
+    },
+    selectComparisonVcf: function(compareToVcfId) {
+      dispatcher.dispatch({
+        actionType: ACTION_TYPES.SELECT_VALIDATION_VCF,
+        compareToVcfId
       });
     },
     setViewerOpen: function(isOpen) {

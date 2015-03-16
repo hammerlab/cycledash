@@ -60,7 +60,7 @@ def contigs(vcf_id):
     return [contig for (contig,) in results]
 
 
-def get(vcf_id, query, with_stats=True, truth_vcf_id=None):
+def get(vcf_id, query, with_stats=True):
     """Return a list of genotypes in a vcf conforming to the given query, as
     well as a dict of stats calculated on them.
 
@@ -84,14 +84,15 @@ def get(vcf_id, query, with_stats=True, truth_vcf_id=None):
     }
     """
     query = _annotate_query_with_types(query, spec(vcf_id))
+    compare_to_vcf_id = query.get('compareToVcfId')
     with tables(db, 'genotypes') as (con, g):
-        if truth_vcf_id:
+        if compare_to_vcf_id:
             # We consider a genotype validated if a truth genotype exists at its
             # location (contig/position) with the same ref/alts.  This isn't
             # entirely accurate: for example, it handles SVs very poorly.
             gt = g.alias()
             joined_q = outerjoin(g, gt, and_(
-                gt.c.vcf_id == truth_vcf_id,
+                gt.c.vcf_id == compare_to_vcf_id,
                 g.c.contig == gt.c.contig,
                 g.c.position == gt.c.position,
                 g.c.reference == gt.c.reference,
@@ -112,7 +113,7 @@ def get(vcf_id, query, with_stats=True, truth_vcf_id=None):
         q = _add_ordering(q, g, 'Integer', 'position', 'asc')
 
         genotypes = [dict(g) for g in con.execute(q).fetchall()]
-    stats = calculate_stats(vcf_id, truth_vcf_id, query) if with_stats else {}
+    stats = calculate_stats(vcf_id, compare_to_vcf_id, query) if with_stats else {}
     return {'records': genotypes, 'stats': stats}
 
 
