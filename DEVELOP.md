@@ -143,26 +143,16 @@ To run an individual JavaScript test, you can use:
 
 #### Perceptual Diff Testing
 
-CycleDash uses dpxdt for perceptual diff testing. To update the reference
-screenshots, start Postgres on your machine and run:
+CycleDash uses [seltest](https://github.com/ihodes/seltest) for perceptual
+difference testing. This means the tests operate an actual web browser and take
+screenshots of the web-app being used. To update the reference screenshots, run:
 
 ```
-source venv/bin/activate
-dpxdt update tests/pdifftests
+./tests/pdifftests/run.sh
 ```
-
-Note: You don't need to source `./ENV.sh`, and doing so may break the pdiff
-tests (if, for example, you specify a TypeKit URL in your ENV.sh).
 
 Running `git status` after this should indicate whether the screenshots have changed.
 
 To determine whether there are any pixels that have changed before/after, and to
-generate a perceptual diff that will make it clear where the changes are, use
-the following command:
-
-**Note**: you will need to have [imagemagick](http://www.imagemagick.org/) installed for the following command to
-succeed.
-
-```
-dpxdt test tests/pdifftests
-```
+generate a perceptual diff that will make it clear where the changes are, you
+can use [webdiff](https://github.com/danvk/webdiff): `git webdiff`.
