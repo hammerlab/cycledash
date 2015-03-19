@@ -330,6 +330,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
       '/runs/' + vcfId + '/comments/' + comment.id,
       'PUT',
       {'comment_text': comment.comment_text,
+       'author_name': comment.author_name,
        'last_modified_timestamp': comment.last_modified_timestamp}
     );
   }

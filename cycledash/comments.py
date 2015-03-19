@@ -64,7 +64,8 @@ def create_comment(vcf_id, conn, user_comments, data):
             position=data[cols.position.name],
             reference=data[cols.reference.name],
             alternates=data[cols.alternates.name],
-            comment_text=data[cols.comment_text.name])
+            comment_text=data[cols.comment_text.name],
+            author_name=null_or_value(cols.author_name.name, data))
     result = conn.execute(stmt)
     if result.rowcount > 0:
         one_result = result.fetchone()
@@ -85,6 +86,7 @@ def get_vcf_comments(vcf_id, conn, user_comments, data):
         "<row_key STRING>": {
           "<comment_key STRING>": {
             "alternates": "<STRING>",
+            "author_name": "<STRING>",
             "comment_text": "<STRING>",
             "contig": "<STRING>",
             "created_timestamp": <DATETIME>,
@@ -184,7 +186,9 @@ def delete_comment(comment_id, conn, user_comments, data):
 @user_comments_db(use_transaction=True)
 def update_comment(comment_id, conn, user_comments, data):
     """To update a comment, format PUT data as:
-    {"comment_text": "<comment text>", "last_modified_timestamp": <DATETIME>}
+    {"comment_text": "<comment text>", 
+     "author_name": "<author name>",
+     "last_modified_timestamp": <DATETIME>}
 
     Here, timestamp represents the timestamp of the comment as last retrieved
     from the DB. It allows us to ensure that multiple API updates don't
@@ -203,6 +207,8 @@ def update_comment(comment_id, conn, user_comments, data):
         user_comments.c.id == comment_id).returning(
             user_comments.c.last_modified).values(
                 comment_text=data[user_comments.c.comment_text.name],
+                author_name=null_or_value(
+                    user_comments.c.author_name.name, data),
 
                 # Update the last_modified timestamp, now that we're actually
                 # making a modification.
@@ -263,6 +269,10 @@ def date_as_int(dt):
     microseconds, so we use this simpler format."""
     delta = dt - datetime.fromtimestamp(0)
     return int(delta.total_seconds() * (10**6))
+
+
+def null_or_value(key, d):
+    return None if key not in d else d[key]
 
 
 def convert_col_value(name, value, user_comments):
