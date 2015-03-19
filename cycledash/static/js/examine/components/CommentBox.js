@@ -72,7 +72,7 @@ var CommentBox = React.createClass({
         this.props.record.comment.comment_text : '';
     return (
       <tr>
-        <td colSpan={10000} className='variant-info'>
+        <td colSpan={1000} className='variant-info'>
           <VCFComment record={this.props.record}
                       commentText={commentText}
                       igvLink={this.props.igvLink}

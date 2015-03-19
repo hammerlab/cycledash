@@ -1,4 +1,4 @@
-source venv/bin/activate
+#!/usr/bin/env sh
 source tests/ENV.sh
 python run.py > tests/pdifftests/log.txt 2>&1 &
 RUN_PID=$!

@@ -124,12 +124,13 @@ export TYPEKIT_URL="yourtypekitURLwithfontsincluded"
 
 ## Testing
 
-CycleDash uses [nosetests](https://nose.readthedocs.org/en/latest/) for Python tests, and [Mocha](http://mochajs.org/) for JavaScript testing.
+CycleDash uses [nosetests](https://nose.readthedocs.org/en/latest/) for Python
+tests, and [Mocha](http://mochajs.org/) for JavaScript testing.
 
 To run tests:
 
 ```
-source venv/bin/activate
+source path/to/bin/activate
 source ./tests/ENV.sh    # make sure all our environment variables are around
 nosetests tests/python   # Run Python tests
 npm test                 # Run JS tests
@@ -148,10 +149,35 @@ difference testing. This means the tests operate an actual web browser and take
 screenshots of the web-app being used. To update the reference screenshots, run:
 
 ```
+source path/to/bin/activate
 ./tests/pdifftests/run.sh
 ```
 
-Running `git status` after this should indicate whether the screenshots have changed.
+Running `git status` after this should indicate whether the screenshots have
+changed.
+
+You can pass command-line options to `seltest` through `run.sh`,
+e.g. `./tests/pdifftests/run.sh -d chrome` to run with the Chrome driver, or
+`./tests/pdifftests/run.sh -c examine -f base` to filter the tests to those in
+the 'examine' class with 'base' in their name.
+
+Depnding on your version of firefox, you may find it useful to specify the path
+to the binary you'd like the tests to run on with `--firefox-path` (you can also
+set this in `.seltestrc`, see
+[the github page for seltest](https://github.com/ihodes/seltest)).
+
+Our tests are generated with Firefox
+[release 34](https://ftp.mozilla.org/pub/mozilla.org/firefox/releases/34.0/), on
+OSX. You can download this, save it somewhere (maybe in your virtualenv folder),
+and then point `seltest` to it like so, in `~/.seltestrc`:
+
+```
+[arguments]
+--firefox-path=~/directory/to/Firefox.app/Contents/MacOS/firefox-bin
+```
+
+Be sure to turn off auto-update in Firefox preferences if you plan on opening
+it. Seltest will automatically disable updates when running tests.
 
 To determine whether there are any pixels that have changed before/after, and to
 generate a perceptual diff that will make it clear where the changes are, you

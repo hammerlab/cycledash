@@ -13,7 +13,7 @@ You must have postgres running to update the dpxdt tests, e.g. by running:
     postgres -D /usr/local/var/postgres
 
 If a test is failing or you'd like to create a new test, you may find it
-helpful to run a CycleDash server using the dpxdt test DB. You can do this via:
+helpful to run a CycleDash server using the test DB. You can do this via:
 
     gulp prod
     ./tests/create-test-db.sh
