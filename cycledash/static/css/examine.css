@@ -210,9 +210,13 @@ body {
 .vcf-table td.pos {
   font-family: "inconsolata", monospace;
 }
-.vcf-table td.has-comment {
-  background: url(/static/img/speech-bubble-noun_5483.svg) no-repeat 11px 2px;
+.vcf-table span.comment-bubble {
+  background: url(/static/img/speech-bubble-noun_5483.svg) no-repeat 0px 3px;
   background-size: 15px 15px;
+  width: 15px;
+  height: 15px;
+  display: inline-block;
+  margin-right: 2px;
 }
 .vcf-table td, .vcf-table th {
   text-align: center;

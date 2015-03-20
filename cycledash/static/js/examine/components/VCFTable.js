@@ -314,10 +314,17 @@ var VCFRecord = React.createClass({
     return val === null ? '-' : String(val);
   },
   render: function() {
-    var commentClasses = React.addons.classSet(
-      {'has-comment': _.has(this.props.record, 'comments')});
+    var hasComments = _.has(this.props.record, 'comments');
+    var commentBubbleClass = React.addons.classSet({
+      'comment-bubble': hasComments
+    });
     var tds = [
-      <td className={commentClasses} key='has-comment'></td>,
+      <td key='has-comment'>
+        <span className={commentBubbleClass}></span>
+        <span>
+          {hasComments ? this.props.record.comments.length : ''}
+        </span>
+      </td>,
       <td title="This record is a true positive." key='true-positive'>
         {this.props.record['tag:true-positive'] ? '✓' : ''}
       </td>,

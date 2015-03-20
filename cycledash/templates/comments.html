@@ -1,13 +1,12 @@
 {% extends "layouts/layout.html" %}
 {%- from 'macros/nav.html' import nav -%}
-{%- from 'macros/comments.html' import comment_list -%}
 
 {% block body %}
-{{ nav("runs") }}
-<main>
-  <section>
-    <h1>All Comments</h1>
-    {{ comment_list(comments) }}
-  </section>
-</main>
+{{ nav("comments") }}
+<main id="comments"></main>
+<script type="text/javascript" src="/static/js/dist/bundled.js"></script>
+<script>
+ window.renderCommentsPage(document.getElementById('comments'),
+                           {{ comments | tojson }});
+</script>
 {% endblock %}

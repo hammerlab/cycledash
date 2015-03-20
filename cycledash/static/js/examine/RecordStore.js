@@ -220,6 +220,11 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
       if (indexToRemove !== -1) {
         comments.splice(indexToRemove, 1);
       }
+
+      // If there are no comments left, we don't need a comments list.
+      if (_.isEmpty(comments)) {
+        delete record.comments;
+      }
     } else {
       if (!_.has(record, 'comments')) {
         record.comments = [];

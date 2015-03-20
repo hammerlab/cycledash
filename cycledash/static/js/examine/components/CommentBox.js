@@ -129,8 +129,6 @@ var CommentBox = React.createClass({
     _.each(_.sortBy(comments, comment => {
       return new Date(comment.created_date).getTime();
     }), comment => {
-      var authorName = comment.author_name ?
-          comment.author_name : 'Anonymous';
       // Add the offset to get local time
       var created_timestamp_millis = new Date(comment.created_date).
           getTime() + timezoneOffset;
@@ -143,8 +141,8 @@ var CommentBox = React.createClass({
                       handleSave={this.getHandleSaveForUpdate(comment)}
                       defaultEditState={false}
                       allowCancel={true}
-                      authorName={authorName}
                       saveLocalAuthorName={this.saveLocalAuthorName}
+                      authorName={comment.author_name}
                       createdString={humanize.relativeTime(created_timestamp_seconds)}
                       handleDelete={this.getHandleDelete(comment)} />
       );
@@ -165,8 +163,8 @@ var CommentBox = React.createClass({
                       handleSave={this.getHandleSaveForCreate()}
                       defaultEditState={true}
                       allowCancel={false}
-                      authorName={this.getLocalAuthorName()}
-                      saveLocalAuthorName={this.saveLocalAuthorName} />
+                      saveLocalAuthorName={this.saveLocalAuthorName}
+                      authorName={this.getLocalAuthorName()}/>
         </td>
       </tr>
     );
@@ -184,10 +182,10 @@ var VCFComment = React.createClass({
     handleSave: React.PropTypes.func.isRequired,
     defaultEditState: React.PropTypes.bool.isRequired,
     allowCancel: React.PropTypes.bool.isRequired,
-    authorName: React.PropTypes.string.isRequired,
     saveLocalAuthorName:React.PropTypes.func.isRequired,
 
     // Optional arguments.
+    authorName: React.PropTypes.string,
     createdString: React.PropTypes.string,
     handleDelete: React.PropTypes.func,
   },
@@ -222,12 +220,20 @@ var VCFComment = React.createClass({
   },
   render: function() {
     var placeHolder = 'Enter your comment here';
+    // Only use "Anonymous" in the viewer; the editor should just be
+    // blank in that case.
+    var authorNameOrAnonymous = this.props.authorName ?
+        this.props.authorName :
+        'Anonymous';
+    var authorNameOrBlank = this.props.authorName ?
+        this.props.authorName :
+        '';
 
     // handleDelete is optional, but not providing it requires the
     // edit view.
     var commentElement = (this.state.isEdit || !this.props.handleDelete) ?
       <VCFCommentEditor commentText={this.props.commentText}
-                        authorName={this.props.authorName}
+                        authorName={authorNameOrBlank}
                         saveLocalAuthorName={this.props.saveLocalAuthorName}
                         placeHolder={placeHolder}
                         setCommentTextState={this.setCommentTextState}
@@ -236,7 +242,7 @@ var VCFComment = React.createClass({
                         handleSave={this.props.handleSave}
                         allowCancel={this.props.allowCancel} /> :
       <VCFCommentViewer commentText={this.props.commentText}
-                        authorName={this.props.authorName}
+                        authorName={authorNameOrAnonymous}
                         createdString={this.props.createdString}
                         placeHolder={placeHolder}
                         handleDelete={this.props.handleDelete}
@@ -311,7 +317,7 @@ var VCFCommentViewer = React.createClass({
       <div>
         <div className='comment-header'>
           <span className='comment-by'>
-            Comment by {this.props.authorName}, {this.props.createdString}
+            Comment by <b>{this.props.authorName}</b>, {this.props.createdString}
           </span>
           <span className='edit-buttons'>
             <button className='btn btn-default btn-xs comment-button btn-danger'

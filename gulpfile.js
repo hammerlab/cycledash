@@ -12,7 +12,8 @@ var _ = require('underscore'),
 var PATHS = {
   src: [  // the files being compiled
       './cycledash/static/js/examine/examine.js',
-      './cycledash/static/js/runs/runs.js'
+      './cycledash/static/js/runs/runs.js',
+      './cycledash/static/js/runs/comments.js'
   ],
   dest: './cycledash/static/js/dist/',  // Where the compiled JS bundle will go
   js: ['cycledash/static/js/*.js'],  // All of the JS files we want to watch for changes

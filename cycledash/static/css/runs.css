@@ -180,6 +180,7 @@ span.comment-bubble {
   width: 15px;
   height: 15px;
   display: inline-block;
+  margin-left: 2px;
 }
 .no-comment > span {
   opacity: 0.3;

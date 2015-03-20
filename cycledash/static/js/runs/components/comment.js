@@ -4,20 +4,45 @@ var React = require('react'),
     moment = require('moment');
 
 
+var CommentsPage = React.createClass({
+  propTypes: {
+    comments: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
+  },
+  render: function() {
+    return (
+      <section>
+        <h1>All Comments</h1>
+        <Comments comments={this.props.comments} />
+      </section>
+    );
+  }
+});
+
 var LatestComments = React.createClass({
+  propTypes: {
+    comments: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
+  },
+  render: function() {
+    return (
+      <div className='comments'>
+        <h4>Last {this.props.comments.length} Comments</h4>
+        <Comments comments={this.props.comments} />
+        <a href='/comments' className='all-comments'>See all…</a>
+      </div>
+    );
+  }
+});
+
+var Comments = React.createClass({
   propTypes: {
     comments: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
   },
   render: function() {
     var comments = this.props.comments.map(c => <Comment comment={c} key={c.id} />);
     return (
-      <div className='comments'>
-        <h4>Last {comments.length} Comments</h4>
-        <ul className='comments'>
-          {comments}
-        </ul>
-        <a href='/comments' className='all-comments'>See all…</a>
-      </div>
+      <ul className='comments'>
+        {comments}
+      </ul>
     );
   }
 });
@@ -32,6 +57,8 @@ var Comment = React.createClass({
   render: function() {
     var comment = this.props.comment,
         relativeDate = moment(new Date(comment.last_modified)).fromNow();
+    var authorName = comment.author_name ?
+        comment.author_name.slice(0, 15) : 'Anonymous';
     return (
         <li>
           <span className='run-id'>
@@ -40,7 +67,9 @@ var Comment = React.createClass({
           <a className='location' href={this.urlForComment(comment)}>
             {comment.contig}:{comment.position}
           </a>
-          <span className='summary'>{comment.comment_text.slice(0, 60)}</span>
+          <span className='summary-container'>
+            <b>{authorName}</b>: <span className='summary'>{comment.comment_text.slice(0, 45)}</span>
+          </span>
           <span className='time' title={comment.last_modified}>{relativeDate}</span>
         </li>
     );
@@ -48,4 +77,4 @@ var Comment = React.createClass({
 });
 
 
-module.exports = LatestComments;
+module.exports = { LatestComments, CommentsPage };
