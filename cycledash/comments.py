@@ -83,24 +83,26 @@ def get_vcf_comments(vcf_id, conn, user_comments, data):
     """Return all user comments in the following format:
     {
       "comments": {
-        "<row_key STRING>": {
-          "<comment_key STRING>": {
-            "alternates": "<STRING>",
-            "author_name": "<STRING>",
-            "comment_text": "<STRING>",
-            "contig": "<STRING>",
-            "created_timestamp": <DATETIME>,
-            "last_modified_timestamp": <DATETIME>,
-            "id": <INT>,
-            "position": <INT>,
-            "reference": "<STRING>",
-            "sample_name": "<STRING>",
-            "vcf_id": <INT>
-          },
-          "<comment_key STRING>": {
-            "alternates": "<STRING>",
-            ...
-          }
+        "<row_key STRING>":
+           [
+             {
+              "alternates": "<STRING>",
+              "author_name": "<STRING>",
+              "comment_text": "<STRING>",
+              "contig": "<STRING>",
+              "created_date": <DATETIME>,
+              "last_modified_timestamp": <INT>,
+              "id": <INT>,
+              "position": <INT>,
+              "reference": "<STRING>",
+              "sample_name": "<STRING>",
+              "vcf_id": <INT>
+            },
+            {
+              "alternates": "<STRING>",
+              ...
+            }
+          ]
         },
         "<row_key>": {
           ...
@@ -112,12 +114,11 @@ def get_vcf_comments(vcf_id, conn, user_comments, data):
     results = conn.execute(stmt)
 
     # Turn results into a dictionary
-    results_map = defaultdict(dict)
+    results_map = defaultdict(list)
     for comment in [dict(result) for result in results]:
         row_key = get_row_key(comment, user_comments)
-        comment_key = get_comment_key(comment, user_comments)
-        results_map[row_key][comment_key] = col_name_val_to_response(
-            comment, user_comments)
+        results_map[row_key].append(col_name_val_to_response(
+            comment, user_comments))
 
     response = {'comments': results_map}
     return jsonify(response)
@@ -140,20 +141,6 @@ def get_row_key(comment, table):
             table.c.reference.name,
             table.c.alternates.name,
             table.c.sample_name.name]
-    return get_key(comment, cols, table)
-
-
-def get_comment_key(comment, table):
-    """Each comment should have a unique key, and we key each comment 
-    in our JSON comment represention by this value. Also see 
-    getCommentKey in RecordStore.js.
-    """
-    cols = [table.c.contig.name,
-            table.c.position.name,
-            table.c.reference.name,
-            table.c.alternates.name,
-            table.c.sample_name.name,
-            table.c.created.name]
     return get_key(comment, cols, table)
 
 
@@ -186,8 +173,8 @@ def delete_comment(comment_id, conn, user_comments, data):
 @user_comments_db(use_transaction=True)
 def update_comment(comment_id, conn, user_comments, data):
     """To update a comment, format PUT data as:
-    {"comment_text": "<comment text>", 
-     "author_name": "<author name>",
+    {"comment_text": "<STRING>",
+     "author_name": "<STRING>",
      "last_modified_timestamp": <DATETIME>}
 
     Here, timestamp represents the timestamp of the comment as last retrieved
@@ -260,7 +247,7 @@ def convert_col_name(name, user_comments):
     if name == user_comments.c.last_modified.name:
         return 'last_modified_timestamp'
     if name == user_comments.c.created.name:
-        return 'created_timestamp'
+        return 'created_date'
     return name
 
 
@@ -277,8 +264,7 @@ def null_or_value(key, d):
 
 def convert_col_value(name, value, user_comments):
     """Do any column-specific value conversions."""
-    if (name == user_comments.c.last_modified.name or
-        name == user_comments.c.created.name):
+    if name == user_comments.c.last_modified.name:
         value = date_as_int(value)
     return value
 

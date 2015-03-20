@@ -130,6 +130,7 @@ body {
   text-align: right;
 }
 .vcf-table .comment-text {
+  clear: both;
   width: 100%;
   min-height: 70px;
   height: auto;
@@ -153,6 +154,13 @@ body {
   margin: 6px 0px 6px 6px;
 }
 .vcf-table .edit-buttons {
+  float: right;
+}
+.vcf-table .comment-by {
+  float: left;
+  padding-top: 15px;
+}
+.vcf-table .save-buttons {
   width: 600px;
   text-align: right;
 }

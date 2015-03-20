@@ -315,7 +315,7 @@ var VCFRecord = React.createClass({
   },
   render: function() {
     var commentClasses = React.addons.classSet(
-      {'has-comment': _.has(this.props.record, 'comment')});
+      {'has-comment': _.has(this.props.record, 'comments')});
     var tds = [
       <td className={commentClasses} key='has-comment'></td>,
       <td title="This record is a true positive." key='true-positive'>

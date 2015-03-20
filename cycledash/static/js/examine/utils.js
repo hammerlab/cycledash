@@ -66,17 +66,5 @@ function getRowKey(record) {
   record.sample_name;
 }
 
-// Like the row key, but distinguishes between multiple comments
-// on the same row with thread_position
-function getCommentKey(comment) {
-  return comment.contig +
-  comment.position +
-  comment.reference +
-  comment.alternates +
-  comment.sample_name +
-  comment.created_timestamp +
-  comment.user_id;
-}
-
 module.exports = { getIn, juxt, makeIGVLink, extractFlatColumnList,
-                   getRowKey, getCommentKey };
+                   getRowKey };

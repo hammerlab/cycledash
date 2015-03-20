@@ -66,11 +66,11 @@ var ExaminePage = React.createClass({
   handleQueryChange: function(parsedQuery) {
     this.props.recordActions.setQuery(parsedQuery);
   },
-  handleSetComment: function(comment) {
-    this.props.recordActions.setComment(comment);
+  handleSetComment: function(comment, record) {
+    this.props.recordActions.setComment(comment, record);
   },
-  handleDeleteComment: function(comment) {
-    this.props.recordActions.deleteComment(comment);
+  handleDeleteComment: function(comment, record) {
+    this.props.recordActions.deleteComment(comment, record);
   },
   render: function() {
     var state = this.state, props = this.props;

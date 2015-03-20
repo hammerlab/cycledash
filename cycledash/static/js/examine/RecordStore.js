@@ -57,7 +57,9 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
   var keyToRecordIndex = {};
 
   // Internal to RecordStore, this is a map from row key (contig +
-  // position + ...) to comment.
+  // position + ...) to comment. It is *not* kept updated. Rather,
+  // its information is loaded into record objects, which become
+  // the source of truth.
   var commentMap = {};
 
   // State for paging the server for records. Page should be reset to 0 on most
@@ -105,10 +107,10 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
         updateGenotypes({append: false});
         break;
       case ACTION_TYPES.SET_COMMENT:
-        setComment(action.comment);
+        setComment(action.comment, action.record);
         break;
       case ACTION_TYPES.DELETE_COMMENT:
-        deleteComment(action.comment);
+        deleteComment(action.comment, action.record);
         break;
     }
     // Required: lets the dispatcher know that the Store is done processing.
@@ -200,19 +202,18 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
       // Not all comments map to record indices. Namely, comments that
       // correspond to records that have not yet loaded.
       if (_.has(keyToRecordIndex, rowKey)) {
-        _.each(_.values(comments), comment => {
-          updateCommentInParentRecord(comment, false, records);
+        var idx = keyToRecordIndex[rowKey];
+        _.each(comments, comment => {
+          updateCommentInParentRecord(comment, records[idx], false);
         });
       }
     });
   }
 
   // Given a comment, put the comment into the right record (or delete
-  // it from that record).
-  function updateCommentInParentRecord(comment, isDelete, records) {
-    // Use utils.getRowKey to find the all the comments for a row.
-    var idx = keyToRecordIndex[utils.getRowKey(comment)];
-    var record = records[idx];
+  // it from that record). If a comment was replaced, return the
+  // original.
+  function updateCommentInParentRecord(comment, record, isDelete) {
     if (isDelete) {
       var comments = record.comments;
       var indexToRemove = _.indexOf(comments, comment);
@@ -225,57 +226,41 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
       }
 
       // Replace an existing comment.
-      var commentKey = utils.getCommentKey(comment);
-      var foundComment = false;
+      var indexToReplace = -1;
       _.each(record.comments, (eachComment, index) => {
-        var eachCommentKey = utils.getCommentKey(eachComment);
-        if (commentKey === eachCommentKey) {
-          record.comments[index] = comment;
-          foundComment = true;
-          return;
+        if (_.has(comment, 'id')) {
+          // If a comment is already stored in the DB, distinguishing it
+          // is is (use the ID).
+          if (comment.id === eachComment.id) {
+            indexToReplace = index;
+          }
+        } else if (comment.created_date === eachComment.created_date) {
+          // Otherwise, use the created date (which exists client side,
+          // even before its stored in the DB).
+          indexToReplace = index;
         }
       });
 
       // If there's no existing comment, add it to the list.
-      if (!foundComment) {
+      if (indexToReplace !== -1) {
+        var oldComment = record.comments[indexToReplace];
+        record.comments[indexToReplace] = comment;
+        return oldComment;
+      } else {
         record.comments.push(comment);
       }
     }
   }
 
-  // Given a comment, place it into commentMap (keyed by its row key
-  // and comment key), update its parent record and notify callers.
+  // Given a comment, update its parent record and notify callers.
   // Returns the old comment being changed.
-  function updateCommentAndNotify(comment, isDelete) {
+  function updateCommentAndNotify(comment, record, isDelete) {
     var isDelete = !_.isUndefined(isDelete) ? isDelete : false;
 
-    // Use utils.getRowKey to find the all the comments for a row
-    var rowKey = utils.getRowKey(comment);
-    var commentKey = utils.getCommentKey(comment);
-
-    // Keep the old comment around, in case we want to revert a change.
-    var comments, oldComment;
-    if (_.has(commentMap, rowKey)) {
-      comments = commentMap[rowKey];
-      if (_.has(comments, commentKey)) {
-        oldComment = comments[commentKey];
-      }
-    }
-
-    if (isDelete) {
-      // This key should exist, as we're trying to delete it.
-      delete comments[commentKey];
-    } else {
-      // Put this comment in the rowKey => comments map.
-      if (!_.has(commentMap, rowKey)) {
-        commentMap[rowKey] = {};
-      }
-
-      commentMap[rowKey][commentKey] = comment;
-    }
-
-    updateCommentInParentRecord(comment, isDelete, records);
+    var oldComment = updateCommentInParentRecord(comment, record,
+                                                 isDelete);
     notifyChange();
+
     return oldComment;
   }
 
@@ -306,7 +291,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
     );
   }
 
-  function deleteComment(comment) {
+  function deleteComment(comment, record) {
     // If a comment has no ID (e.g. it was created optimistically, and has not
     // yet been granted an ID from an HTTP response), deleting it from the server
     // has no meaning. To prevent the weird condition of a comment POSTing
@@ -316,11 +301,11 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
       return;
     }
 
-    var oldComment = updateCommentAndNotify(comment, true);
+    var oldComment = updateCommentAndNotify(comment, record, true);
     $.when(deferredCommentDelete(vcfId, comment))
       .fail(() => {
         // Undo the delete if it was a failure.
-        updateCommentAndNotify(oldComment);
+        updateCommentAndNotify(oldComment, record);
       });
   }
 
@@ -344,38 +329,38 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
     );
   }
 
-  function setComment(comment) {
+  function setComment(comment, record) {
     // Update a comment.
     // TODO(tavi) Notify on saving vs. saved, and don't simply undo the user's
     // changes without any warning.
     if (_.has(comment, 'id')) {
-      var oldComment = updateCommentAndNotify(comment);
+      var oldComment = updateCommentAndNotify(comment, record);
       $.when(deferredCommentUpdate(vcfId, comment))
         .done(response => {
           // Set this comment's last_modified_timestamp timestamp after the update.
           comment.last_modified_timestamp = response.last_modified_timestamp;
-          updateCommentAndNotify(comment);
+          updateCommentAndNotify(comment, record);
         })
         .fail(() => {
           // Undo the update if it was a failure.
-          updateCommentAndNotify(oldComment);
+          updateCommentAndNotify(oldComment, record);
 
           // TODO(tavi) If it was a failure due to clobbering, get the latest
           // comment data and inform the user (rather than a simple local undo).
         });
     } else {
       // Otherwise, create an optimistic comment.
-      updateCommentAndNotify(comment, false);
+      updateCommentAndNotify(comment, record, false);
       $.when(deferredCommentCreate(vcfId, comment))
         .done(response => {
           // Give this comment an ID, based on what was inserted.
           comment.id = response.id;
           comment.last_modified_timestamp = response.last_modified_timestamp;
-          updateCommentAndNotify(comment);
+          updateCommentAndNotify(comment, record);
         })
         .fail(() => {
           // Undo (delete) the optimistic comment if the create was a failure.
-          updateCommentAndNotify(comment, true);
+          updateCommentAndNotify(comment, record, true);
         });
     }
   }
