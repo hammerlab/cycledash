@@ -1,8 +1,10 @@
 {
   "0": {
     "alternates": "T",
+    "author_name": "Bob",
     "comment_text": "First",
     "contig": "20",
+    "created_date": "Wed, 10 Mar 2015 19:23:46 GMT", 
     "id": 0,
     "last_modified": 1418757695101313,
     "position": 61795,
@@ -10,10 +12,25 @@
     "sample_name": "NORMAL",
     "vcf_id": 1
   },
+  "3": {
+    "alternates": "T",
+    "author_name": null,
+    "comment_text": "Another First",
+    "contig": "20",
+    "created_date": "Wed, 11 Mar 2015 19:23:46 GMT", 
+    "id": 0,
+    "last_modified": 1418757695101318,
+    "position": 61795,
+    "reference": "G",
+    "sample_name": "NORMAL",
+    "vcf_id": 1
+  },
   "17": {
     "alternates": "A",
+    "author_name": "Bill",
     "comment_text": "Second",
     "contig": "20",
+    "created_date": "Wed, 12 Mar 2015 19:23:46 GMT", 
     "id": 17,
     "last_modified": 1418764556923924,
     "position": 62731,
@@ -23,8 +40,10 @@
   },
   "42": {
     "alternates": "A",
+    "author_name": null,
     "comment_text": "Third",
     "contig": "20",
+    "created_date": "Wed, 13 Mar 2015 19:23:46 GMT", 
     "id": 42,
     "last_modified": 1418757439167107,
     "position": 65900,
