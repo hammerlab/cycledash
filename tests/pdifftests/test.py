@@ -8,7 +8,7 @@ BASE = 'localhost:5001'
 
 
 class Website(Base):
-    window_size = [2000, 10000]
+    window_size = [1280, 800]
     base_url = BASE
 
     @url('/about')
@@ -23,6 +23,7 @@ class Website(Base):
 
 
 class Runs(Base):
+    window_size = [1280, 800]
     base_url = BASE
 
     def page(self, driver):
@@ -42,6 +43,7 @@ class Runs(Base):
 
 
 class Examine(Base):
+    window_size = [1280, 800]
     base_url = BASE + '/runs/1/examine'
 
     def base(self, driver):
