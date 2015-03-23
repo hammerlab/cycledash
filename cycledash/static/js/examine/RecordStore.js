@@ -57,9 +57,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
   var keyToRecordIndex = {};
 
   // Internal to RecordStore, this is a map from row key (contig +
-  // position + ...) to comment. It is *not* kept updated. Rather,
-  // its information is loaded into record objects, which become
-  // the source of truth.
+  // position + ...) to comment.
   var commentMap = {};
 
   // State for paging the server for records. Page should be reset to 0 on most
@@ -119,8 +117,8 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
   if (dispatcher)  dispatcherToken = dispatcher.register(receiver);
 
   /**
-   * Queries the backend for the set of genotypes (and associated
-   * user comments) matching the current parameters.
+   * Queries the backend for the set of genotypes matching the current
+   * parameters.
    *
    * NB: mutates store state!
    */
@@ -167,10 +165,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
         }
         hasLoaded = true;
         hasPendingRequest = false;
-
-        // Queries the backend for user comments.
-        getComments();
-
+        updateCommentsInParentRecords(records);
         notifyChange();
       })
       .fail(function([jqXHR, errorMessage, errorDetails]) {
@@ -264,14 +259,25 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
   }
 
   // Given a comment, update its parent record and notify callers.
-  // Returns the old comment being changed.
+  // Returns the old comment being changed. Also updates the
+  // internal commentMap representation.
   function updateCommentAndNotify(comment, record, isDelete) {
     var isDelete = !_.isUndefined(isDelete) ? isDelete : false;
 
     var oldComment = updateCommentInParentRecord(comment, record,
                                                  isDelete);
-    notifyChange();
 
+    // Update the internal commentMap, which we will use again to
+    // populate records with comments whenever we get new record
+    // objects (for example, after a sort).
+    var rowKey = utils.getRowKey(record);
+    if (_.has(record, 'comments')) {
+      commentMap[rowKey] = record.comments;
+    } else {
+      delete commentMap[rowKey];
+    }
+
+    notifyChange();
     return oldComment;
   }
 
