@@ -1,14 +1,15 @@
-Notes on working with image diff tests
---------------------------------------
+Notes on working with perceptual diff tests
+-------------------------------------------
 
-There are some notes in [DEVELOP.md](/DEVELOP.md) about how to run the dpxdt tests to
-check for changes. This document describes how to update and extend them.
+There are some notes in [DEVELOP.md](/DEVELOP.md) about how to run the
+perceptual diff tests to check for changes. This document describes how to
+update and extend them.
 
 CycleDash requires a PostgreSQL database to run, and a rabbitmq workqueue to
 process new inputs. For the tests to be reproducible, it needs its own
 instances of each of these.
 
-You must have postgres running to update the dpxdt tests, e.g. by running:
+You must have Postgres running to update the tests, e.g. by running:
 
     postgres -D /usr/local/var/postgres
 

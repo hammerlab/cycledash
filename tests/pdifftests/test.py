@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from seltest import url, waitfor, Base
+from seltest import url, waitfor, dontwaitfor, Base
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.action_chains import ActionChains
 
@@ -45,6 +45,7 @@ class Runs(Base):
 class Examine(Base):
     window_size = [1280, 800]
     base_url = BASE + '/runs/1/examine'
+    wait_for = {'css_selector': '.query-status', 'classes': ['good']}
 
     def base(self, driver):
         """Initial view of a fully-loaded Examine page."""
@@ -59,7 +60,7 @@ class Examine(Base):
     @waitfor('[data-attribute="info:DP"] .tooltip')
     def tooltip(self, driver):
         """Examine page showing a Normal Read Depth tooltip."""
-        dp = driver.find_element_by_css_selector('[data-attribute="info:DP"]')
+        dp = driver.find_element_by_css_selector('[data-attribute="sample:RD"]')
         hover = ActionChains(driver).move_to_element(dp)
         hover.perform()
 
@@ -81,6 +82,8 @@ class Examine(Base):
         assert btn.text.lower() == 'edit'
         btn.click()
 
+    @dontwaitfor('.query-status')
+    @waitfor('.query-status', classes=['bad'])
     def bad_query(self, driver):
         """Examine page showing a poorly formed query."""
         input = driver.find_element_by_css_selector('input[type="text"].tt-input')
