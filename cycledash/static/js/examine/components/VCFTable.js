@@ -1,6 +1,7 @@
 'use strict';
 
 var _ = require('underscore'),
+    utils = require('../utils'),
     React = require('react/addons'),
     types = require('./types'),
     $ = require('jquery'),
@@ -254,10 +255,13 @@ var VCFTableBody = React.createClass({
   render: function() {
     var selectedRecord = this.props.selectedRecord,
         rows = this.props.records.map((record, idx) => {
-          var key = record.contig + record.position + record.reference + record.alternates + record.sample_name;
+          var key = utils.getRowKey(record);
 
-          // The actual comment element should be distinguished from its parent record
-          var commentKey = key + 'comment';
+          // The actual comment box element should be distinguished
+          // from its parent record. Note: this is not the same as
+          // giving each individual comment its own key, which we
+          // also do.
+          var commentBoxKey = key + 'comment';
           var elements = [
             <VCFRecord record={record}
                        columns={this.props.columns}
@@ -268,7 +272,7 @@ var VCFTableBody = React.createClass({
           if (selectedRecord === record) {
             elements.push(
               <CommentBox record={record}
-                          key={commentKey}
+                          key={commentBoxKey}
                           igvLink={this.props.igvLink}
                           hasOpenedIGV={this.state.hasOpenedIGV}
                           didClickIGVLink={this.didClickIGVLink}

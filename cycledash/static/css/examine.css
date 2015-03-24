@@ -120,6 +120,11 @@ body {
 .vcf-table .comment-container {
   width: 600px;
 }
+.vcf-table .comment-box-head {
+  width: 600px;
+  text-align: left;
+  vertical-align: middle;
+}
 .vcf-table .comment-header {
   width: 600px;
   text-align: right;
@@ -132,6 +137,7 @@ body {
   border: 1px solid #ccc;
   white-space: pre-wrap;
   word-wrap: break-word;
+  margin-bottom: 10px;
 }
 .vcf-table .comment-text p, ul, li, pre {
   margin: 0px;
@@ -150,9 +156,19 @@ body {
   width: 600px;
   text-align: right;
 }
+.vcf-table .comment-author {
+  margin-bottom: 3px;
+  width: 300px;
+  height: 30px;
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 20px;
+  border: 1px solid #B6B6B7;
+  border-radius: 5px;
+  outline: none;
+}
 .vcf-table .dalliance-open, .vcf-table .igv-links {
-  float: left;
-  padding: 3px 0 0 21px;
+  padding: 7px 0 0 21px;
   line-height: 1.6em;
 }
 .vcf-table .dalliance-open {
@@ -327,11 +343,13 @@ dt {
   padding-right: 350px;  /* matches width of Stats Table */
   /* reference, alternates */
 }
-.twitter-typeahead {
+.typeahead-input .twitter-typeahead {
   width: 100%;
   padding-right: 20px;
 }
-.query-input, .twitter-typeahead .tt-query, .twitter-typeahead .tt-hint {
+.typeahead-input .query-input,
+.typeahead-input .twitter-typeahead .tt-query,
+.typeahead-input .twitter-typeahead .tt-hint {
   width: 100%;
   height: 40px;
   padding: 8px 12px;
@@ -407,13 +425,13 @@ dt {
   display: none;
 }
 /* Styles from http://stackoverflow.com/a/20205623/388951 */
-.tt-query {
+.typeahead-input .tt-query {
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
 }
-.tt-hint {
+.typeahead-input .tt-hint {
   color: #999
 }
-.tt-dropdown-menu {
+.typeahead-input .tt-dropdown-menu {
   min-width: 422px;
   margin-top: 12px;
   padding: 8px 0;
@@ -423,17 +441,17 @@ dt {
   border-radius: 8px;
   box-shadow: 0 5px 10px rgba(0,0,0,.2);
 }
-.tt-suggestion {
+.typeahead-input .tt-suggestion {
   padding: 3px 20px;
   font-size: 18px;
   line-height: 24px;
 }
-.tt-suggestion.tt-cursor {
+.typeahead-input .tt-suggestion.tt-cursor {
   color: #fff;
   background-color: #0097cf;
 
 }
-.tt-suggestion p {
+.typeahead-input .tt-suggestion p {
   margin: 0;
 }
 

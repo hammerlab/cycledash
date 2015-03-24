@@ -8,6 +8,7 @@
 'use strict';
 
 var _ = require('underscore'),
+    utils = require('../utils'),
     React = require('react/addons'),
     marked = require('marked');
 
@@ -38,49 +39,75 @@ var CommentBox = React.createClass({
     handleSetComment: React.PropTypes.func.isRequired,
     handleDeleteComment: React.PropTypes.func.isRequired
   },
-  handleSave: function(commentText) {
-    var newComment;
-
-    // If an old comment is provided, we clone it.
-    if (this.props.record.comment) {
-      newComment = _.clone(this.props.record.comment);
+  getHandleDelete: function(comment) {
+    var handleDeleteComment = this.props.handleDeleteComment;
+    return function() {
+      var result = window.confirm("Are you sure you want to delete this comment?");
+      if (result) {
+        handleDeleteComment(comment);
+      }
+    }
+  },
+  getHandleSaveForUpdate: function(comment) {
+    var handleSetComment = this.props.handleSetComment;
+    return function(commentText) {
+      var newComment = _.clone(comment);
       newComment.comment_text = commentText;
-    } else {
-      // Otherwise, we fashion a new comment out of the record information.
-      newComment = _.extend(
+
+      handleSetComment(newComment);
+    };
+  },
+  getHandleSaveForCreate: function(record) {
+    var handleSetComment = this.props.handleSetComment;
+    return function(commentText) {
+      var newComment = _.extend(
         _.pick(
-          this.props.record,
+          record,
           'contig',
           'position',
           'reference',
           'alternates',
           'sample_name'),
-          {'comment_text': commentText});
-    }
-
-    // Actually send the update request.
-    this.props.handleSetComment(newComment);
-  },
-  handleDelete: function() {
-    var result = window.confirm("Are you sure you want to delete this comment?");
-    if (result) {
-      this.props.handleDeleteComment(this.props.record.comment);
-    }
+        {'comment_text': commentText,
+         'user_id': 'test',
+         // Note: this is a temporary date that does not get persisted
+         // to the DB. Instead, the DB creates its own date, but this
+         // date is used for distinguishing between comments in the
+         // meantime.
+         'created_timestamp': new Date().getTime()});
+      handleSetComment(newComment);
+    };
   },
   render: function() {
-    var commentText = this.props.record.comment ?
-        this.props.record.comment.comment_text : '';
+    var comments = this.props.record.comments;
+    var commentNodes = [];
+    _.each(comments, comment => {
+      commentNodes.push(
+          <VCFComment record={this.props.record}
+                      commentText={comment.comment_text}
+                      key={utils.getCommentKey(comment)}
+                      handleSave={this.getHandleSaveForUpdate(comment)}
+                      defaultEditState={false}
+                      allowCancel={true}
+                      handleDelete={this.getHandleDelete(comment)} />
+      );
+    });
+
     return (
       <tr>
         <td colSpan={1000} className='variant-info'>
+          <VCFCommentHeader record={this.props.record}
+                            igvLink={this.props.igvLink}
+                            hasOpenedIGV={this.props.hasOpenedIGV}
+                            didClickIGVLink={this.props.didClickIGVLink}
+                            handleOpenViewer={this.props.handleOpenViewer} />
+          {commentNodes}
           <VCFComment record={this.props.record}
-                      commentText={commentText}
-                      igvLink={this.props.igvLink}
-                      hasOpenedIGV={this.props.hasOpenedIGV}
-                      didClickIGVLink={this.props.didClickIGVLink}
-                      handleOpenViewer={this.props.handleOpenViewer}
-                      handleDelete={this.handleDelete}
-                      handleSave={this.handleSave} />
+                      commentText={''}
+                      key={utils.getRowKey(this.props.record) + 'newcomment'}
+                      handleSave={this.getHandleSaveForCreate(this.props.record)}
+                      defaultEditState={true}
+                      allowCancel={false} />
         </td>
       </tr>
     );
@@ -88,22 +115,23 @@ var CommentBox = React.createClass({
 });
 
 /**
- * The VCFComment record handles state (saved comment text and edit mode) for
+ * The VCFComment handles state (saved comment text and edit mode) for
  * user comments.
  */
 var VCFComment = React.createClass({
   propTypes: {
     record: React.PropTypes.object.isRequired,
     commentText: React.PropTypes.string.isRequired,
-    igvLink: React.PropTypes.string,
-    hasOpenedIGV: React.PropTypes.bool.isRequired,
-    didClickIGVLink: React.PropTypes.func.isRequired,
-    handleOpenViewer: React.PropTypes.func.isRequired,
-    handleDelete: React.PropTypes.func.isRequired,
-    handleSave: React.PropTypes.func.isRequired
+    handleSave: React.PropTypes.func.isRequired,
+    defaultEditState: React.PropTypes.bool.isRequired,
+    allowCancel: React.PropTypes.bool.isRequired,
+
+    // handleDelete is intentionally optional. See render function.
+    handleDelete: React.PropTypes.func,
   },
   getInitialState: function() {
-    return {commentText: this.props.commentText, isEdit: false};
+    return {commentText: this.props.commentText,
+            isEdit: this.props.defaultEditState};
   },
   setCommentTextState: function(commentText) {
     // If passed no value, setCommentTextState resets the commentText.
@@ -114,43 +142,42 @@ var VCFComment = React.createClass({
 
     this.setState({commentText: commentText});
   },
+  setDefaultEditState: function() {
+    this.setState({isEdit: this.props.defaultEditState});
+  },
   setEditState: function(isEdit) {
     this.setState({isEdit: isEdit});
   },
+
   makeEditable: function() {
     this.setState({isEdit: true});
   },
   componentDidUpdate: function(prevProps, prevState) {
-    if (prevProps.commentText !== this.props.commentText) {
+    if (prevProps.commentText !==
+        this.props.commentText) {
       this.setCommentTextState();
     }
   },
   render: function() {
-    var placeHolder = 'No Comment';
-    var commentElement = this.state.isEdit ?
+    var placeHolder = 'Enter your comment here';
+
+    // handleDelete is optional, but not providing it requires the
+    // edit view.
+    var commentElement = (this.state.isEdit || !this.props.handleDelete) ?
       <VCFCommentEditor commentText={this.props.commentText}
                         placeHolder={placeHolder}
                         setCommentTextState={this.setCommentTextState}
                         setEditState={this.setEditState}
-                        handleSave={this.props.handleSave} /> :
+                        setDefaultEditState={this.setDefaultEditState}
+                        handleSave={this.props.handleSave}
+                        allowCancel={this.props.allowCancel} /> :
       <VCFCommentViewer commentText={this.props.commentText}
-                        placeHolder={placeHolder} />;
-    var commentHeader;
-    if (!this.state.isEdit) {
-      commentHeader = (
-          <VCFCommentHeader handleEdit={this.makeEditable}
-                            record={this.props.record}
-                            igvLink={this.props.igvLink}
-                            hasOpenedIGV={this.props.hasOpenedIGV}
-                            didClickIGVLink={this.props.didClickIGVLink}
-                            handleOpenViewer={this.props.handleOpenViewer}
-                            handleDelete={this.props.handleDelete} />
-      );
-    }
+                        placeHolder={placeHolder}
+                        handleDelete={this.props.handleDelete}
+                        handleEdit={this.makeEditable} />;
     return (
       <div className='comment-container'>
         {commentElement}
-        {commentHeader}
       </div>
     );
   }
@@ -162,9 +189,7 @@ var VCFCommentHeader = React.createClass({
     igvLink: React.PropTypes.string,
     hasOpenedIGV: React.PropTypes.bool.isRequired,
     didClickIGVLink: React.PropTypes.func.isRequired,
-    handleOpenViewer: React.PropTypes.func.isRequired,
-    handleEdit: React.PropTypes.func.isRequired,
-    handleDelete: React.PropTypes.func.isRequired
+    handleOpenViewer: React.PropTypes.func.isRequired
   },
   getInitialState: function() {
     // Stash the initial value to avoid surprising link swaps (see #523).
@@ -185,7 +210,7 @@ var VCFCommentHeader = React.createClass({
          <a key="jump" href={jumpLink} onClick={didClick}>(Jump)</a>];
 
     return (
-      <div className='comment-header'>
+      <div className='comment-box-header'>
         <a className='dalliance-open'
            onClick={() => {this.props.handleOpenViewer(r);}}>
           Open Pileup Viewer
@@ -195,14 +220,6 @@ var VCFCommentHeader = React.createClass({
                {igvLinks[1]}&nbsp;
                <a href="https://github.com/hammerlab/cycledash/wiki/IGV-Integration">help</a>
         </span>
-        <button className='btn btn-default btn-xs comment-button btn-danger'
-                onClick={this.props.handleDelete}>
-          Delete
-        </button>
-        <button className='btn btn-default btn-xs comment-button'
-                onClick={this.props.handleEdit}>
-          Edit
-        </button>
       </div>
     );
   }
@@ -211,7 +228,9 @@ var VCFCommentHeader = React.createClass({
 var VCFCommentViewer = React.createClass({
   propTypes: {
     commentText: React.PropTypes.string.isRequired,
-    placeHolder: React.PropTypes.string.isRequired
+    placeHolder: React.PropTypes.string.isRequired,
+    handleDelete: React.PropTypes.func.isRequired,
+    handleEdit: React.PropTypes.func.isRequired
   },
   render: function() {
     // Warning: by using this dangerouslySetInnerHTML feature, we're relying
@@ -221,15 +240,28 @@ var VCFCommentViewer = React.createClass({
 
     var markedDownText = marked(plainText);
     return (
-      <div className='form-control comment-text'
-           dangerouslySetInnerHTML={{__html: markedDownText}} />
+      <div>
+        <div className='comment-header'>
+          <button className='btn btn-default btn-xs comment-button btn-danger'
+                  onClick={this.props.handleDelete}>
+            Delete
+          </button>
+          <button className='btn btn-default btn-xs comment-button'
+                  onClick={this.props.handleEdit}>
+            Edit
+          </button>
+        </div>
+        <div className='form-control comment-text'
+             dangerouslySetInnerHTML={{__html: markedDownText}} />
+      </div>
     );
   }
 });
 
 /**
- * VCFCommentEditor represents the active editing of a comment, and it has a
- * separate state variable for updated text that is not yet saved.
+ * VCFCommentEditor represents the active editing (or creating) of a 
+ * comment, and it has a separate state variable for updated text that
+ * is not yet saved.
  */
 var VCFCommentEditor = React.createClass({
   propTypes: {
@@ -237,17 +269,23 @@ var VCFCommentEditor = React.createClass({
     placeHolder: React.PropTypes.string.isRequired,
     setCommentTextState: React.PropTypes.func.isRequired,
     setEditState: React.PropTypes.func.isRequired,
-    handleSave: React.PropTypes.func.isRequired
+    setDefaultEditState: React.PropTypes.func.isRequired,
+    handleSave: React.PropTypes.func.isRequired,
+    allowCancel: React.PropTypes.bool.isRequired
   },
   handleSaveText: function() {
-    // Create a new comment if none existed, or update the comment if it
-    // changed (creating a new comment object in both cases).
+    // If non-blank text is entered that differs from what was originally
+    // in the editor, save it.
     var newCommentText = this.state.newCommentText;
     if (newCommentText !== '' &&
         newCommentText !== this.props.commentText) {
       this.props.handleSave(newCommentText);
       this.props.setCommentTextState(newCommentText);
       this.props.setEditState(false);
+
+      // Reset the text of the textarea, so it can be used for creating
+      // yet another comment.
+      this.setState({newCommentText: ''});
       return;
     }
 
@@ -262,7 +300,7 @@ var VCFCommentEditor = React.createClass({
     var result = window.confirm("Are you sure you want to cancel this edit?");
     if (result) {
       this.props.setCommentTextState();
-      this.props.setEditState(false);
+      this.props.setDefaultEditState();
     }
   },
   getInitialState: function() {
@@ -272,22 +310,34 @@ var VCFCommentEditor = React.createClass({
     this.setState({newCommentText: event.target.value});
   },
   render: function() {
+    var buttons = [];
+    if (this.props.allowCancel) {
+      buttons.push(
+        <button className='btn btn-xs comment-button btn-default'
+                key='cancel'
+                onClick={this.handleCancelConfirm}>
+          Cancel
+        </button>
+      );
+    }
+    buttons.push(
+      <button className='btn btn-xs comment-button btn-success'
+              key='save'
+              onClick={this.handleSaveText}>
+        Save
+      </button>
+    );
     return (
       <div>
+        <input ref='author' className='comment-author' type='text'
+               placeholder='Enter your name here' />
         <textarea className='form-control comment-textarea'
-                  defaultValue={this.props.commentText}
+                  value={this.state.newCommentText}
                   placeholder={this.props.placeHolder}
                   onChange={this.handleChange}
                   ref='textArea' />
         <div className='edit-buttons'>
-          <button className='btn btn-xs comment-button btn-default'
-                  onClick={this.handleCancelConfirm}>
-            Cancel
-          </button>
-          <button className='btn btn-xs comment-button btn-success'
-                  onClick={this.handleSaveText}>
-            Save
-          </button>
+          {buttons}
         </div>
       </div>
     );

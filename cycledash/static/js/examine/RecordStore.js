@@ -185,59 +185,93 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
     loadError = null;
   }
 
-  function getRowKey(commentOrRecord) {
-    return commentOrRecord.contig +
-           commentOrRecord.position +
-           commentOrRecord.reference +
-           commentOrRecord.alternates +
-           commentOrRecord.sample_name;
-  }
-
   // Given a list of records, return a map from record key to record index, where
   // the index is added to increment.
   function generateKeyToRecordIndex(records, increment) {
     return _.reduce(records, (keyMap, record, idx) => {
-      keyMap[getRowKey(record)] = idx + increment;
+      keyMap[utils.getRowKey(record)] = idx + increment;
       return keyMap;
     }, {});
   }
 
   // Update all records with their associated comments from commentMap.
   function updateCommentsInParentRecords(records) {
-    _.each(commentMap, (comment, key) => {
+    _.each(commentMap, (comments, rowKey) => {
       // Not all comments map to record indices. Namely, comments that
       // correspond to records that have not yet loaded.
-      if (_.has(keyToRecordIndex, key)) {
-        updateCommentInParentRecord(comment, false, records);
+      if (_.has(keyToRecordIndex, rowKey)) {
+        _.each(_.values(comments), comment => {
+          updateCommentInParentRecord(comment, false, records);
+        });
       }
     });
   }
 
-  // Given a comment, put the comment into the right record (or delete it from
-  // that record).
+  // Given a comment, put the comment into the right record (or delete
+  // it from that record).
   function updateCommentInParentRecord(comment, isDelete, records) {
-    var idx = keyToRecordIndex[getRowKey(comment)];
+    // Use utils.getRowKey to find the all the comments for a row.
+    var idx = keyToRecordIndex[utils.getRowKey(comment)];
+    var record = records[idx];
     if (isDelete) {
-      delete records[idx].comment;
+      var comments = record.comments;
+      var indexToRemove = _.indexOf(comments, comment);
+      if (indexToRemove !== -1) {
+        comments.splice(indexToRemove, 1);
+      }
     } else {
-      records[idx].comment = comment;
+      if (!_.has(record, 'comments')) {
+        record.comments = [];
+      }
+
+      // Replace an existing comment.
+      var commentKey = utils.getCommentKey(comment);
+      var foundComment = false;
+      _.each(record.comments, (eachComment, index) => {
+        var eachCommentKey = utils.getCommentKey(eachComment);
+        if (commentKey === eachCommentKey) {
+          record.comments[index] = comment;
+          foundComment = true;
+          return;
+        }
+      });
+
+      // If there's no existing comment, add it to the list.
+      if (!foundComment) {
+        record.comments.push(comment);
+      }
     }
   }
 
-  // Given a comment, place it into commentMap (keyed by its row key), update its
-  // parent record and notify callers. Returns the old comment being changed.
+  // Given a comment, place it into commentMap (keyed by its row key
+  // and comment key), update its parent record and notify callers.
+  // Returns the old comment being changed.
   function updateCommentAndNotify(comment, isDelete) {
     var isDelete = !_.isUndefined(isDelete) ? isDelete : false;
-    var key = getRowKey(comment);
+
+    // Use utils.getRowKey to find the all the comments for a row
+    var rowKey = utils.getRowKey(comment);
+    var commentKey = utils.getCommentKey(comment);
 
     // Keep the old comment around, in case we want to revert a change.
-    var oldComment = commentMap[key];
+    var comments, oldComment;
+    if (_.has(commentMap, rowKey)) {
+      comments = commentMap[rowKey];
+      if (_.has(comments, commentKey)) {
+        oldComment = comments[commentKey];
+      }
+    }
 
     if (isDelete) {
-      delete commentMap[key];
+      // This key should exist, as we're trying to delete it.
+      delete comments[commentKey];
     } else {
-      // Put this comment in the ID => comment map.
-      commentMap[key] = comment;
+      // Put this comment in the rowKey => comments map.
+      if (!_.has(commentMap, rowKey)) {
+        commentMap[rowKey] = {};
+      }
+
+      commentMap[rowKey][commentKey] = comment;
     }
 
     updateCommentInParentRecord(comment, isDelete, records);
@@ -275,7 +309,9 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
   function deleteComment(comment) {
     // If a comment has no ID (e.g. it was created optimistically, and has not
     // yet been granted an ID from an HTTP response), deleting it from the server
-    // has no meaning.
+    // has no meaning. To prevent the weird condition of a comment POSTing
+    // after it gets deleted locally (and then re-appearing locally), simply
+    // do nothing in this circumstance.
     if (!_.has(comment, 'id')) {
       return;
     }
