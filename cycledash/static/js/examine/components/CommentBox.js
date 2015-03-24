@@ -48,7 +48,7 @@ var CommentBox = React.createClass({
       if (result) {
         handleDeleteComment(comment, record);
       }
-    }
+    };
   },
   getHandleSaveForUpdate: function(comment) {
     var handleSetComment = this.props.handleSetComment;
