@@ -114,7 +114,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
     // Required: lets the dispatcher know that the Store is done processing.
     return true;
   }
-  if (dispatcher) dispatcherToken = dispatcher.register(receiver);
+  if (dispatcher)  dispatcherToken = dispatcher.register(receiver);
 
   /**
    * Queries the backend for the set of genotypes matching the current
@@ -122,7 +122,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
    *
    * NB: mutates store state!
    */
-  function _updateGenotypes({append}) {
+  function updateGenotypes({append}) {
     // Example query:
     // {"range": {"contig": 1, "start": 800000, "end": 2000000},
     //  "sortBy": [{"columnName": "sample:DP", "order": "desc"},
@@ -154,9 +154,6 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
     notifyChange();  // notify of pending request
     deferredGenotypes(vcfId, query)
       .done(response => {
-        if (!_.isEqual(currentPendingQuery, query)) {
-          return;  // A subsequent request has superceded this one.
-        }
         if (append) {
           _.extend(keyToRecordIndex,
                    generateKeyToRecordIndex(response.records, records.length));
@@ -180,8 +177,6 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
         notifyChange();
       });
   }
-  var updateGenotypes =
-      _.debounce(_.throttle(_updateGenotypes, 500 /* ms */), 500 /* ms */);
 
   // Ignore all currently pending requests (presumably because there's a newer one).
   function ignorePendingRequests() {
@@ -426,8 +421,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
     }
   }
 
-  // There's no need to debounce this update -- make it so now!
-  _updateGenotypes({append: false});
+  updateGenotypes({append: false});
   getComments();
 
   function notifyChange() {

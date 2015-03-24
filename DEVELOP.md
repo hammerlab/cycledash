@@ -124,12 +124,13 @@ export TYPEKIT_URL="yourtypekitURLwithfontsincluded"
 
 ## Testing
 
-CycleDash uses [nosetests](https://nose.readthedocs.org/en/latest/) for Python tests, and [Mocha](http://mochajs.org/) for JavaScript testing.
+CycleDash uses [nosetests](https://nose.readthedocs.org/en/latest/) for Python
+tests, and [Mocha](http://mochajs.org/) for JavaScript testing.
 
 To run tests:
 
 ```
-source venv/bin/activate
+source path/to/bin/activate
 source ./tests/ENV.sh    # make sure all our environment variables are around
 nosetests tests/python   # Run Python tests
 npm test                 # Run JS tests
@@ -143,26 +144,23 @@ To run an individual JavaScript test, you can use:
 
 #### Perceptual Diff Testing
 
-CycleDash uses dpxdt for perceptual diff testing. To update the reference
-screenshots, start Postgres on your machine and run:
+CycleDash uses [seltest](https://github.com/ihodes/seltest) for perceptual
+difference testing. This means the tests operate an actual web browser and take
+screenshots of the web-app being used. To update the reference screenshots, run:
 
 ```
-source venv/bin/activate
-dpxdt update tests/pdifftests
+source path/to/bin/activate
+./tests/pdifftests/run.sh
 ```
 
-Note: You don't need to source `./ENV.sh`, and doing so may break the pdiff
-tests (if, for example, you specify a TypeKit URL in your ENV.sh).
+Running `git status` after this should indicate whether the screenshots have
+changed.
 
-Running `git status` after this should indicate whether the screenshots have changed.
+You can pass command-line options to `seltest` through `run.sh`,
+e.g. `./tests/pdifftests/run.sh -d chrome` to run with the Chrome driver, or
+`./tests/pdifftests/run.sh -c examine -f base` to filter the tests to those in
+the 'examine' class with 'base' in their name.
 
 To determine whether there are any pixels that have changed before/after, and to
-generate a perceptual diff that will make it clear where the changes are, use
-the following command:
-
-**Note**: you will need to have [imagemagick](http://www.imagemagick.org/) installed for the following command to
-succeed.
-
-```
-dpxdt test tests/pdifftests
-```
+generate a perceptual diff that will make it clear where the changes are, you
+can use [webdiff](https://github.com/danvk/webdiff): `git webdiff`.

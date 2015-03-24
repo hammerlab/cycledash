@@ -11,3 +11,4 @@ bundled.js
 .bundled.js
 cycledash/static/lib/
 coverage.html
+tests/pdifftests/log.txt
