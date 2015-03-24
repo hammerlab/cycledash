@@ -460,8 +460,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
     }
   }
 
-  // There's no need to debounce this update -- make it so now!
-  _updateGenotypes({append: false});
+  updateGenotypes({append: false});
   getComments();
 
   function notifyChange() {

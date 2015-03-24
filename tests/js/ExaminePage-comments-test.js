@@ -115,9 +115,7 @@ describe('ExaminePage Comments', function() {
 
   function stubDialogs() {
     // Stub out confirm dialogs.
-    if (_.has(window, 'confirm')) {
-      sinonSandbox.stub(window, 'confirm', _.constant(true));
-    }
+    sinonSandbox.stub(window, 'confirm', _.constant(true));
   }
 
   it('should get, modify, create and delete', function() {
