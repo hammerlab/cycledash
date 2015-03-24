@@ -8,7 +8,7 @@ BASE = 'localhost:5001'
 
 
 class Website(Base):
-    window_size = [1280, 800]
+    window_size = [1800, 800]
     base_url = BASE
 
     @url('/about')
@@ -23,7 +23,7 @@ class Website(Base):
 
 
 class Runs(Base):
-    window_size = [1280, 800]
+    window_size = [1800, 800]
     base_url = BASE
 
     def page(self, driver):
@@ -43,7 +43,7 @@ class Runs(Base):
 
 
 class Examine(Base):
-    window_size = [1280, 800]
+    window_size = [1800, 800]
     base_url = BASE + '/runs/1/examine'
     wait_for = {'css_selector': '.query-status', 'classes': ['good']}
 
@@ -51,7 +51,7 @@ class Examine(Base):
         """Initial view of a fully-loaded Examine page."""
         pass
 
-    @waitfor('tr:first-child td:nth-child(18)', text='0')
+    @waitfor('tr:first-child td:nth-child(20)', text='0')
     def sorted(self, driver):
         """Examine page sorted by decreasing Normal Read Depth."""
         rd = driver.find_element_by_css_selector('[data-attribute="sample:RD"] a')

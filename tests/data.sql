@@ -12,17 +12,18 @@ SET client_min_messages = warning;
 SET search_path = public, pg_catalog;
 
 --
--- Data for Name: projects; Type: TABLE DATA; Schema: public; Owner: isaachodes
+-- Data for Name: projects; Type: TABLE DATA; Schema: public; Owner: tavi
 --
 
 COPY projects (id, name, notes) FROM stdin;
 1	PT 5656	This is a project. This is a note.
 2	Noteless	\N
+3	TEST PROJECT	\N
 \.
 
 
 --
--- Data for Name: bams; Type: TABLE DATA; Schema: public; Owner: isaachodes
+-- Data for Name: bams; Type: TABLE DATA; Schema: public; Owner: tavi
 --
 
 COPY bams (id, project_id, name, normal, notes, tissues, resection_date, uri) FROM stdin;
@@ -31,14 +32,14 @@ COPY bams (id, project_id, name, normal, notes, tissues, resection_date, uri) FR
 
 
 --
--- Name: bams_id_seq; Type: SEQUENCE SET; Schema: public; Owner: isaachodes
+-- Name: bams_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tavi
 --
 
 SELECT pg_catalog.setval('bams_id_seq', 1, true);
 
 
 --
--- Data for Name: vcfs; Type: TABLE DATA; Schema: public; Owner: isaachodes
+-- Data for Name: vcfs; Type: TABLE DATA; Schema: public; Owner: tavi
 --
 
 COPY vcfs (id, created_at, tumor_bam_id, normal_bam_id, project_id, caller_name, validation_vcf, notes, uri, vcf_header, extant_columns, genotype_count, "precision", recall, f1score) FROM stdin;
@@ -48,7 +49,7 @@ COPY vcfs (id, created_at, tumor_bam_id, normal_bam_id, project_id, caller_name,
 
 
 --
--- Data for Name: genotypes; Type: TABLE DATA; Schema: public; Owner: isaachodes
+-- Data for Name: genotypes; Type: TABLE DATA; Schema: public; Owner: tavi
 --
 
 COPY genotypes (vcf_id, sample_name, contig, "position", id, reference, alternates, filters, quality, "annotations:gene_names", "info:AA", "info:AC", "info:AF", "info:AN", "info:BQ", "info:CIGAR", "info:DB", "info:DP", "info:H2", "info:H3", "info:MQ", "info:MQ0", "info:NS", "info:SB", "info:SOMATIC", "info:VALIDATED", "info:1000G", "info:IMPRECISE", "info:NOVEL", "info:END", "info:SVTYPE", "info:SVLEN", "info:CIPOS", "info:CIEND", "info:MEINFO", "info:METRANS", "info:DGVID", "info:DBVARID", "info:DBRIP", "info:MATEID", "info:PARID", "info:EVENT", "info:CILEN", "info:DPADJ", "info:CN", "info:CNADJ", "info:CICN", "info:CICNADJ", "sample:GT", "sample:DP", "sample:FT", "sample:GL", "sample:GLE", "sample:PL", "sample:GP", "sample:GQ", "sample:HQ", "sample:PS", "sample:PQ", "sample:EC", "sample:MQ", "sample:CN", "sample:CNQ", "sample:CNL", "sample:NQ", "sample:HAP", "sample:AHAP", "info:STR", "info:CIPOS95", "info:EVTYPE", "info:PSUP", "info:PRIN", "info:SRSUP", "info:SUP", "sample:PE", "sample:SR", "sample:SUP", "info:QSS", "info:QSS_NT", "info:SGT", "info:TQSS", "info:TQSS_NT", "info:NT", "sample:FDP", "sample:SDP", "sample:SUBDP", "sample:AU", "sample:CU", "sample:GU", "sample:TU", "info:SS", "info:SSC", "info:GPV", "info:SPV", "sample:RD", "sample:AD", "sample:FREQ", "sample:DP4", "sample:IGT", "sample:BCOUNT", "sample:JGQ", "sample:VAQ", "sample:AMQ", "info:NDP", "info:NAC", "info:DDP", "info:DAC", "sample:FA", "info:ABQ", "info:AMQ", "info:AGQ", "sample:ABQ", "sample:AGQ", "info:VAF", "info:DPR") FROM stdin;
@@ -81,14 +82,14 @@ COPY genotypes (vcf_id, sample_name, contig, "position", id, reference, alternat
 
 
 --
--- Name: projects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: isaachodes
+-- Name: projects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tavi
 --
 
-SELECT pg_catalog.setval('projects_id_seq', 2, true);
+SELECT pg_catalog.setval('projects_id_seq', 4, true);
 
 
 --
--- Data for Name: task_states; Type: TABLE DATA; Schema: public; Owner: isaachodes
+-- Data for Name: task_states; Type: TABLE DATA; Schema: public; Owner: tavi
 --
 
 COPY task_states (id, vcf_id, type, task_id, state) FROM stdin;
@@ -98,32 +99,35 @@ COPY task_states (id, vcf_id, type, task_id, state) FROM stdin;
 
 
 --
--- Name: task_states_id_seq; Type: SEQUENCE SET; Schema: public; Owner: isaachodes
+-- Name: task_states_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tavi
 --
 
 SELECT pg_catalog.setval('task_states_id_seq', 2, true);
 
 
 --
--- Data for Name: user_comments; Type: TABLE DATA; Schema: public; Owner: isaachodes
+-- Data for Name: user_comments; Type: TABLE DATA; Schema: public; Owner: tavi
 --
 
-COPY user_comments (id, vcf_id, sample_name, contig, "position", reference, alternates, comment_text, last_modified) FROM stdin;
-1	1	NORMAL	20	61795	G	T	This is a comment on the second row!	2015-03-11 23:33:33.951753
-2	1	NORMAL	20	65900	G	A	*This* is a comment with [Markdown](http://daringfireball.net/projects/markdown/syntax).	2015-03-11 23:34:18.19118
-3	1	TUMOR	20	61795	G	T	*This* is a comment on the first variant with [Markdown](http://daringfireball.net/projects/markdown/syntax).\n	2015-03-12 15:30:20.570952
+COPY user_comments (id, vcf_id, sample_name, contig, "position", reference, alternates, comment_text, author_name, created, last_modified) FROM stdin;
+1	1	NORMAL	20	61795	G	T	This is a comment on the second row!	\N	2015-03-24 15:29:09.615967	2015-03-11 23:33:33.951753
+2	1	NORMAL	20	65900	G	A	*This* is a comment with [Markdown](http://daringfireball.net/projects/markdown/syntax).	\N	2015-03-24 15:29:09.615967	2015-03-11 23:34:18.19118
+3	1	TUMOR	20	61795	G	T	*This* is a comment on the first variant with [Markdown](http://daringfireball.net/projects/markdown/syntax).\n	\N	2015-03-24 15:29:09.615967	2015-03-12 15:30:20.570952
+4	1	NORMAL	20	61795	G	T	This is another comment on the second row!	\N	2015-03-24 17:40:44.984191	2015-03-24 17:40:44.984191
+6	1	TUMOR	20	61795	G	T	This is a comment without Markdown by Bob!	Bob	2015-03-24 17:46:40.962213	2015-03-24 17:46:40.962213
+5	1	TUMOR	20	61795	G	T	This is a comment without Markdown!	\N	2015-03-24 17:43:23.497883	2015-03-24 17:43:23.497883
 \.
 
 
 --
--- Name: user_comments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: isaachodes
+-- Name: user_comments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tavi
 --
 
-SELECT pg_catalog.setval('user_comments_id_seq', 3, true);
+SELECT pg_catalog.setval('user_comments_id_seq', 6, true);
 
 
 --
--- Name: vcfs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: isaachodes
+-- Name: vcfs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tavi
 --
 
 SELECT pg_catalog.setval('vcfs_id_seq', 2, true);
