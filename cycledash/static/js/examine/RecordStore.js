@@ -119,8 +119,8 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
   if (dispatcher)  dispatcherToken = dispatcher.register(receiver);
 
   /**
-   * Queries the backend for the set of genotypes matching the current
-   * parameters.
+   * Queries the backend for the set of genotypes (and associated
+   * user comments) matching the current parameters.
    *
    * NB: mutates store state!
    */
@@ -167,7 +167,10 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
         }
         hasLoaded = true;
         hasPendingRequest = false;
-        updateCommentsInParentRecords(records);
+
+        // Queries the backend for user comments.
+        getComments();
+
         notifyChange();
       })
       .fail(function([jqXHR, errorMessage, errorDetails]) {
@@ -215,16 +218,19 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
   // original.
   function updateCommentInParentRecord(comment, record, isDelete) {
     if (isDelete) {
-      var comments = record.comments;
-      var indexToRemove = _.indexOf(comments, comment);
+      var indexToRemove = _.indexOf(record.comments, comment);
+      var oldComment = record.comments[indexToRemove];
+
       if (indexToRemove !== -1) {
-        comments.splice(indexToRemove, 1);
+        record.comments.splice(indexToRemove, 1);
       }
 
       // If there are no comments left, we don't need a comments list.
-      if (_.isEmpty(comments)) {
+      if (_.isEmpty(record.comments)) {
         delete record.comments;
       }
+
+      return oldComment;
     } else {
       if (!_.has(record, 'comments')) {
         record.comments = [];
@@ -448,7 +454,8 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
     }
   }
 
-  updateGenotypes({append: false});
+  // There's no need to debounce this update -- make it so now!
+  _updateGenotypes({append: false});
   getComments();
 
   function notifyChange() {
