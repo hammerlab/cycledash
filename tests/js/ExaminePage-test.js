@@ -101,7 +101,7 @@ describe('ExaminePage', function() {
     // Make sure all 19 columns are here.
     var totalColumns = Utils.findInComponent(
         '.vcf-table thead tr:nth-child(2) th', examine).length;
-    assert.equal(totalColumns, 19);
+    assert.equal(totalColumns, 21);
 
     var columnAttributes = Utils.findInComponent(
         '.vcf-table thead tr:nth-child(2) th', examine).map(function(el) {

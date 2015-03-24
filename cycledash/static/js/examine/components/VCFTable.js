@@ -98,7 +98,9 @@ var VCFTableHeader = React.createClass({
             </th>,
             <th key='ref' className='ref'>REF</th>,
             <th key='arrow' className='arrow'>→</th>,
-            <th key='alt' className='alt'>ALT</th>
+            <th key='alt' className='alt'>ALT</th>,
+            <th key='quality' className='quality'>quality</th>,
+            <th key='filters' className='filters'>filters</th>
         ];
 
     _.each(this.props.columns, (columns, topLevelColumnName) => {
@@ -326,6 +328,12 @@ var VCFRecord = React.createClass({
       <td key='arrow' className='arrow'>→</td>,
       <td key='alt' className='alt' title={this.props.record.alternates}>
         {this.props.record.alternates}
+      </td>,
+      <td key='quality' className='quality' title={this.props.record.quality}>
+        {this.props.record.quality}
+      </td>,
+      <td key='filters' className='filters' title={this.props.record.filters}>
+        {this.props.record.filters}
       </td>
     ];
     _.each(this.props.columns, (columns, topLevelColumnName) => {
