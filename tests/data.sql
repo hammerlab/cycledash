@@ -18,7 +18,6 @@ SET search_path = public, pg_catalog;
 COPY projects (id, name, notes) FROM stdin;
 1	PT 5656	This is a project. This is a note.
 2	Noteless	\N
-3	TEST PROJECT	\N
 \.
 
 

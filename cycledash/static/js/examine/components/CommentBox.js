@@ -191,7 +191,7 @@ var VCFComment = React.createClass({
   },
   getInitialState: function() {
     return {commentText: this.props.commentText,
-            isEdit: this.props.defaultEditState};
+            isEditing: this.props.defaultEditState};
   },
   setCommentTextState: function(commentText) {
     // If passed no value, setCommentTextState resets the commentText.
@@ -203,14 +203,14 @@ var VCFComment = React.createClass({
     this.setState({commentText: commentText});
   },
   setDefaultEditState: function() {
-    this.setState({isEdit: this.props.defaultEditState});
+    this.setState({isEditing: this.props.defaultEditState});
   },
-  setEditState: function(isEdit) {
-    this.setState({isEdit: isEdit});
+  setEditState: function(isEditing) {
+    this.setState({isEditing: isEditing});
   },
 
   makeEditable: function() {
-    this.setState({isEdit: true});
+    this.setState({isEditing: true});
   },
   componentDidUpdate: function(prevProps, prevState) {
     if (prevProps.commentText !==
@@ -222,16 +222,12 @@ var VCFComment = React.createClass({
     var placeHolder = 'Enter your comment here';
     // Only use "Anonymous" in the viewer; the editor should just be
     // blank in that case.
-    var authorNameOrAnonymous = this.props.authorName ?
-        this.props.authorName :
-        'Anonymous';
-    var authorNameOrBlank = this.props.authorName ?
-        this.props.authorName :
-        '';
+    var authorNameOrAnonymous = this.props.authorName || 'Anonymous';
+    var authorNameOrBlank = this.props.authorName || '';
 
     // handleDelete is optional, but not providing it requires the
     // edit view.
-    var commentElement = (this.state.isEdit || !this.props.handleDelete) ?
+    var commentElement = (this.state.isEditing || !this.props.handleDelete) ?
       <VCFCommentEditor commentText={this.props.commentText}
                         authorName={authorNameOrBlank}
                         saveLocalAuthorName={this.props.saveLocalAuthorName}

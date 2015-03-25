@@ -76,15 +76,7 @@ function getCommentIdFromPath(path) {
 // however our HTTP GET response needs to key comments by row key (as is
 // done in comments.py).
 function getCommentResponse(commentDatabase) {
-  var obj = {};
-  _.each(commentDatabase, comment => {
-    var rowKey = utils.getRowKey(comment);
-    if (!_.has(obj, rowKey)) {
-      obj[rowKey] = [];
-    }
-    obj[rowKey].push(comment);
-  });
-  return {comments: obj};
+  return {comments: _.groupBy(commentDatabase, utils.getRowKey)};
 }
 
 function isFailingPath(type, path, failingPaths) {
