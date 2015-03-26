@@ -65,7 +65,7 @@ def create_comment(vcf_id, conn, user_comments, data):
             reference=data[cols.reference.name],
             alternates=data[cols.alternates.name],
             comment_text=data[cols.comment_text.name],
-            author_name=null_or_value(cols.author_name.name, data))
+            author_name=data.get(cols.author_name.name))
     result = conn.execute(stmt)
     if result.rowcount > 0:
         one_result = result.fetchone()
@@ -194,8 +194,7 @@ def update_comment(comment_id, conn, user_comments, data):
         user_comments.c.id == comment_id).returning(
             user_comments.c.last_modified).values(
                 comment_text=data[user_comments.c.comment_text.name],
-                author_name=null_or_value(
-                    user_comments.c.author_name.name, data),
+                author_name=data.get(user_comments.c.author_name.name),
 
                 # Update the last_modified timestamp, now that we're actually
                 # making a modification.
@@ -258,14 +257,12 @@ def date_as_int(dt):
     return int(delta.total_seconds() * (10**6))
 
 
-def null_or_value(key, d):
-    return None if key not in d else d[key]
-
-
 def convert_col_value(name, value, user_comments):
     """Do any column-specific value conversions."""
     if name == user_comments.c.last_modified.name:
-        value = date_as_int(value)
+        return date_as_int(value)
+    if name == user_comments.c.created.name:
+        return value.isoformat()
     return value
 
 
@@ -273,8 +270,8 @@ def col_name_val_to_response(col_name_to_val, user_comments):
     """Converts a dictionary of DB column names to values into a proper
     response (JSON keys to converted values)."""
     response = {
-        convert_col_name(name, user_comments): \
-        convert_col_value(name, col_name_to_val[name], user_comments)
+        convert_col_name(name, user_comments): convert_col_value(
+            name, col_name_to_val[name], user_comments)
         for name in col_name_to_val
     }
     return response

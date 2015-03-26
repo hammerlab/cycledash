@@ -213,48 +213,38 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
   // original.
   function updateCommentInParentRecord(comment, record, isDelete) {
     if (isDelete) {
-      var indexToRemove = _.indexOf(record.comments, comment);
-      var oldComment = record.comments[indexToRemove];
-
-      if (indexToRemove !== -1) {
-        record.comments.splice(indexToRemove, 1);
-      }
+      record.comments = _.without(records.comments, comment);
 
       // If there are no comments left, we don't need a comments list.
       if (_.isEmpty(record.comments)) {
         delete record.comments;
       }
 
-      return oldComment;
+      return comment;
     } else {
       if (!_.has(record, 'comments')) {
         record.comments = [];
       }
 
-      // Replace an existing comment.
-      var indexToReplace = -1;
-      _.each(record.comments, (eachComment, index) => {
-        if (_.has(comment, 'id')) {
-          // If a comment is already stored in the DB, distinguishing it
-          // is is (use the ID).
-          if (comment.id === eachComment.id) {
-            indexToReplace = index;
-          }
-        } else if (comment.created_date === eachComment.created_date) {
-          // Otherwise, use the created date (which exists client side,
-          // even before its stored in the DB).
-          indexToReplace = index;
-        }
-      });
+      // If a comment is already stored in the DB, find it by ID.
+      var oldComment;
+      if (_.has(comment, 'id')) {
+        oldComment = _.findWhere(record.comments, {id: comment.id});
+      } else {
+        oldComment = _.findWhere(record.comments,
+                                 {created_date: comment.created_date});
+      }
 
-      // If there's no existing comment, add it to the list.
-      if (indexToReplace !== -1) {
-        var oldComment = record.comments[indexToReplace];
+      // Replace an existing comment.
+      if (oldComment) {
+        // This should never be -1 based on the logic above.
+        var indexToReplace = _.indexOf(record.comments, oldComment);
         record.comments[indexToReplace] = comment;
         return oldComment;
-      } else {
-        record.comments.push(comment);
       }
+
+      // If there's no existing comment, add it to the list.
+      record.comments.push(comment);
     }
   }
 
@@ -331,9 +321,8 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
       dataSource,
       '/runs/' + vcfId + '/comments/' + comment.id,
       'PUT',
-      {'comment_text': comment.comment_text,
-       'author_name': comment.author_name,
-       'last_modified_timestamp': comment.last_modified_timestamp}
+      _.pick(comment,
+             'comment_text', 'author_name', 'last_modified_timestamp')
     );
   }
 

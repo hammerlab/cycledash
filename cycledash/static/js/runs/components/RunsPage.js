@@ -1,7 +1,7 @@
 'use strict';
 var React = require('react'),
     forms = require('./forms'),
-    LatestComments = require('./comment').LatestComments,
+    LatestComments = require('../../comments/components/comment').LatestComments,
     _ = require('underscore'),
     moment = require('moment'),
     utils = require('../../examine/utils');

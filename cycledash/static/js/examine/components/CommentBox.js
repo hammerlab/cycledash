@@ -11,7 +11,11 @@ var _ = require('underscore'),
     utils = require('../utils'),
     React = require('react/addons'),
     marked = require('marked'),
-    humanize = require('humanize');
+    moment = require('moment'),
+    store = require('store');
+
+// Currently used to write comment author names to local storage.
+var LOCAL_STORAGE_AUTHOR_KEY = 'CYCLEDASH_AUTHORNAME';
 
 /**
  * Use markdown for comments, and set appropriate flags to:
@@ -87,34 +91,13 @@ var CommentBox = React.createClass({
       handleSetComment(newComment, record);
     };
   },
-  getLocalStorageAuthorKey: function() {
-    return 'CYCLEDASH_AUTHORNAME';
-  },
   getLocalAuthorName: function() {
-    if (this.supportsLocalStorage()) {
-      var authorName = localStorage.getItem(
-        this.getLocalStorageAuthorKey());
-      if (authorName) {
-        return authorName;
-      }
-    }
-    return '';
+    return store.enabled ? store.get(LOCAL_STORAGE_AUTHOR_KEY, '') : '';
   },
   saveLocalAuthorName: function(authorName) {
-    if (this.supportsLocalStorage()) {
-      if (localStorage.getItem(
-        this.getLocalStorageAuthorKey()) !== authorName) {
-        localStorage.setItem(this.getLocalStorageAuthorKey(),
-                             authorName);
-      }
-    }
-  },
-  // Taken from http://diveintohtml5.info/storage.html
-  supportsLocalStorage: function() {
-    try {
-      return 'localStorage' in window && window['localStorage'] !== null;
-    } catch (e) {
-      return false;
+    if (store.enabled &&
+        store.get(LOCAL_STORAGE_AUTHOR_KEY, '') !== authorName) {
+      store.set(LOCAL_STORAGE_AUTHOR_KEY, authorName);
     }
   },
   getTimezoneOffsetMillis: function() {
@@ -124,28 +107,22 @@ var CommentBox = React.createClass({
   render: function() {
     var comments = this.props.record.comments;
     var timezoneOffset = this.getTimezoneOffsetMillis();
-
-    var commentNodes = [];
-    _.each(_.sortBy(comments, comment => {
-      return new Date(comment.created_date).getTime();
-    }), comment => {
+    var commentNodes = _.sortBy(comments, comment => {
+      new Date(comment.created_date).getTime();
+    }).map(comment => {
       // Add the offset to get local time
-      var created_timestamp_millis = new Date(comment.created_date).
+      var createdTimestampMillis = new Date(comment.created_date).
           getTime() + timezoneOffset;
-      var created_timestamp_seconds = Math.floor(
-        created_timestamp_millis / 1000);
-      commentNodes.push(
-          <VCFComment record={this.props.record}
+      return <VCFComment record={this.props.record}
                       commentText={comment.comment_text}
-                      key={utils.getRowKey(this.props.record) + String(created_timestamp_millis)}
+                      key={utils.getRowKey(this.props.record) + String(createdTimestampMillis)}
                       handleSave={this.getHandleSaveForUpdate(comment)}
-                      defaultEditState={false}
-                      allowCancel={true}
+                      startInEditState={false}
+                      cancelable={true}
                       saveLocalAuthorName={this.saveLocalAuthorName}
                       authorName={comment.author_name}
-                      createdString={humanize.relativeTime(created_timestamp_seconds)}
-                      handleDelete={this.getHandleDelete(comment)} />
-      );
+                      createdString={moment(createdTimestampMillis).fromNow()}
+                      handleDelete={this.getHandleDelete(comment)} />;
     });
 
     return (
@@ -161,8 +138,8 @@ var CommentBox = React.createClass({
                       commentText={''}
                       key={utils.getRowKey(this.props.record) + 'newcomment'}
                       handleSave={this.getHandleSaveForCreate()}
-                      defaultEditState={true}
-                      allowCancel={false}
+                      startInEditState={true}
+                      cancelable={false}
                       saveLocalAuthorName={this.saveLocalAuthorName}
                       authorName={this.getLocalAuthorName()}/>
         </td>
@@ -180,8 +157,8 @@ var VCFComment = React.createClass({
     record: React.PropTypes.object.isRequired,
     commentText: React.PropTypes.string.isRequired,
     handleSave: React.PropTypes.func.isRequired,
-    defaultEditState: React.PropTypes.bool.isRequired,
-    allowCancel: React.PropTypes.bool.isRequired,
+    startInEditState: React.PropTypes.bool.isRequired,
+    cancelable: React.PropTypes.bool.isRequired,
     saveLocalAuthorName:React.PropTypes.func.isRequired,
 
     // Optional arguments.
@@ -191,7 +168,7 @@ var VCFComment = React.createClass({
   },
   getInitialState: function() {
     return {commentText: this.props.commentText,
-            isEditing: this.props.defaultEditState};
+            isEditing: this.props.startInEditState};
   },
   setCommentTextState: function(commentText) {
     // If passed no value, setCommentTextState resets the commentText.
@@ -202,11 +179,11 @@ var VCFComment = React.createClass({
 
     this.setState({commentText: commentText});
   },
-  setDefaultEditState: function() {
-    this.setState({isEditing: this.props.defaultEditState});
+  setStartingEditState: function() {
+    this.setState({isEditing: this.props.startInEditState});
   },
   setEditState: function(isEditing) {
-    this.setState({isEditing: isEditing});
+    this.setState({isEditing});
   },
 
   makeEditable: function() {
@@ -234,9 +211,9 @@ var VCFComment = React.createClass({
                         placeHolder={placeHolder}
                         setCommentTextState={this.setCommentTextState}
                         setEditState={this.setEditState}
-                        setDefaultEditState={this.setDefaultEditState}
+                        setStartingEditState={this.setStartingEditState}
                         handleSave={this.props.handleSave}
-                        allowCancel={this.props.allowCancel} /> :
+                        cancelable={this.props.cancelable} /> :
       <VCFCommentViewer commentText={this.props.commentText}
                         authorName={authorNameOrAnonymous}
                         createdString={this.props.createdString}
@@ -346,9 +323,9 @@ var VCFCommentEditor = React.createClass({
     placeHolder: React.PropTypes.string.isRequired,
     setCommentTextState: React.PropTypes.func.isRequired,
     setEditState: React.PropTypes.func.isRequired,
-    setDefaultEditState: React.PropTypes.func.isRequired,
+    setStartingEditState: React.PropTypes.func.isRequired,
     handleSave: React.PropTypes.func.isRequired,
-    allowCancel: React.PropTypes.bool.isRequired
+    cancelable: React.PropTypes.bool.isRequired
   },
   handleSaveText: function() {
     // If non-blank text is entered that differs from what was originally
@@ -385,7 +362,7 @@ var VCFCommentEditor = React.createClass({
     var result = window.confirm("Are you sure you want to cancel this edit?");
     if (result) {
       this.props.setCommentTextState();
-      this.props.setDefaultEditState();
+      this.props.setStartingEditState();
     }
   },
   getInitialState: function() {
@@ -400,7 +377,7 @@ var VCFCommentEditor = React.createClass({
   },
   render: function() {
     var buttons = [];
-    if (this.props.allowCancel) {
+    if (this.props.cancelable) {
       buttons.push(
         <button className='btn btn-xs comment-button btn-default'
                 key='cancel'
