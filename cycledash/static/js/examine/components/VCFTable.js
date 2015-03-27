@@ -314,7 +314,8 @@ var VCFRecord = React.createClass({
     return val === null ? '-' : String(val);
   },
   render: function() {
-    var hasComments = _.has(this.props.record, 'comments');
+    var hasComments = _.has(this.props.record, 'comments') &&
+        this.props.record.comments.length > 0;
     var commentBubbleClass = React.addons.classSet({
       'comment-bubble': hasComments
     });

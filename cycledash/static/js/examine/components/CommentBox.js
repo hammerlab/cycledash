@@ -15,7 +15,6 @@ var _ = require('underscore'),
     store = require('store');
 
 // Currently used to write comment author names to local storage.
-var LOCAL_STORAGE_AUTHOR_KEY = 'CYCLEDASH_AUTHORNAME';
 
 /**
  * Use markdown for comments, and set appropriate flags to:
@@ -44,6 +43,7 @@ var CommentBox = React.createClass({
     handleSetComment: React.PropTypes.func.isRequired,
     handleDeleteComment: React.PropTypes.func.isRequired
   },
+  LOCAL_STORAGE_AUTHOR_KEY: 'CYCLEDASH_AUTHORNAME',
   getHandleDelete: function(comment) {
     var handleDeleteComment = this.props.handleDeleteComment;
     var record = this.props.record;
@@ -92,12 +92,12 @@ var CommentBox = React.createClass({
     };
   },
   getLocalAuthorName: function() {
-    return store.enabled ? store.get(LOCAL_STORAGE_AUTHOR_KEY, '') : '';
+    return store.enabled ? store.get(this.LOCAL_STORAGE_AUTHOR_KEY, '') : '';
   },
   saveLocalAuthorName: function(authorName) {
     if (store.enabled &&
-        store.get(LOCAL_STORAGE_AUTHOR_KEY, '') !== authorName) {
-      store.set(LOCAL_STORAGE_AUTHOR_KEY, authorName);
+        store.get(this.LOCAL_STORAGE_AUTHOR_KEY, '') !== authorName) {
+      store.set(this.LOCAL_STORAGE_AUTHOR_KEY, authorName);
     }
   },
   getTimezoneOffsetMillis: function() {
