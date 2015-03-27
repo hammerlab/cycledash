@@ -213,7 +213,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
   // original.
   function updateCommentInParentRecord(comment, record, isDelete) {
     if (isDelete) {
-      record.comments = _.without(records.comments, comment);
+      record.comments = _.without(record.comments, comment);
 
       // If there are no comments left, we don't need a comments list.
       if (_.isEmpty(record.comments)) {
