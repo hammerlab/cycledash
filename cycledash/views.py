@@ -46,15 +46,15 @@ def list_runs():
 
 
 @app.route('/tasks/<vcf_id>', methods=['GET', 'DELETE'])
-def get_tasks(run_id):
+def get_tasks(vcf_id):
     if request.method == 'GET':
-        tasks = cycledash.tasks.get_tasks(run_id)
+        tasks = cycledash.tasks.get_tasks(vcf_id)
         if request_wants_json():
             return jsonify({'tasks': tasks})
         else:
             return render_template('tasks.html', tasks=tasks)
     elif request.method == 'DELETE':
-        cycledash.tasks.delete_tasks(run_id)
+        cycledash.tasks.delete_tasks(vcf_id)
         return success_response()
 
 
