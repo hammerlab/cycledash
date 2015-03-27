@@ -167,19 +167,19 @@ describe('ExaminePage Comments', function() {
 
     // Delete the second comment.
     clickCommentButton('Delete');
-    assert.equal(3, getNumComments());
+    assert.equal(4, getNumComments());
     assert(!_.has(commentDatabase, '17'));
 
     // Make a new comment in place of the second comment.
     changeCommentText('New Comment');
     clickCommentButton('Save');
-    assert.equal(4, getNumComments());
+    assert.equal(5, getNumComments());
     assert.equal('New Comment', commentText());
     assert.equal('New Comment', commentDatabase['43'].comment_text);
 
     // Delete the added comment.
     clickCommentButton('Delete');
-    assert.equal(3, getNumComments());
+    assert.equal(4, getNumComments());
     assert(!_.has(commentDatabase, '43'));
   });
 
@@ -202,11 +202,11 @@ describe('ExaminePage Comments', function() {
     clickCommentButton('Save');
     assert.equal('Second', commentText());
     assert.equal('Second', commentDatabase['17'].comment_text);
-    assert.equal(4, getNumComments());
+    assert.equal(5, getNumComments());
     clickCommentButton('Delete');
     assert.equal('Second', commentText());
     assert.equal('Second', commentDatabase['17'].comment_text);
-    assert.equal(4, getNumComments());
+    assert.equal(5, getNumComments());
 
     // Make a new comment, save it, and check that the fake DB was *not*
     // updated. (We can't delete it, because the comment will revert
@@ -216,6 +216,6 @@ describe('ExaminePage Comments', function() {
     changeCommentText('New Comment');
     clickCommentButton('Save');
     assert.equal(null, commentText());
-    assert.equal(4, getNumComments());
+    assert.equal(5, getNumComments());
   });
 });

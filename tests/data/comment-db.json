@@ -25,6 +25,19 @@
     "sample_name": "NORMAL",
     "vcf_id": 1
   },
+  "4": {
+    "alternates": "T",
+    "author_name": null,
+    "comment_text": "And Another First",
+    "contig": "20",
+    "created_date": "2015-03-11T19:09:49.170964",
+    "id": 4,
+    "last_modified": 1418757695101318,
+    "position": 61795,
+    "reference": "G",
+    "sample_name": "NORMAL",
+    "vcf_id": 1
+  },
   "17": {
     "alternates": "A",
     "author_name": "Bill",

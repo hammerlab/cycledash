@@ -113,9 +113,13 @@ var CommentBox = React.createClass({
       // Add the offset to get local time
       var createdTimestampMillis = new Date(comment.created_date).
           getTime() + timezoneOffset;
+      var rowKey = utils.getRowKey(this.props.record);
+      // Prevent react key collisions
+      var reactKey = _.has(comment, 'id') ?
+          rowKey + comment.id : rowKey + String(createdTimestampMillis);
       return <VCFComment record={this.props.record}
                       commentText={comment.comment_text}
-                      key={utils.getRowKey(this.props.record) + String(createdTimestampMillis)}
+                      key={reactKey}
                       handleSave={this.getHandleSaveForUpdate(comment)}
                       startInEditState={false}
                       cancelable={true}
