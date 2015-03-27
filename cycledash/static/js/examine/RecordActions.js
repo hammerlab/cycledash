@@ -49,16 +49,18 @@ function getRecordActions(dispatcher) {
         isOpen
       });
     },
-    setComment: function(comment) {
+    setComment: function(comment, record) {
       dispatcher.dispatch({
         actionType: ACTION_TYPES.SET_COMMENT,
-        comment
+        comment,
+        record
       });
     },
-    deleteComment: function(comment) {
+    deleteComment: function(comment, record) {
       dispatcher.dispatch({
         actionType: ACTION_TYPES.DELETE_COMMENT,
-        comment
+        comment,
+        record
       });
     }
   };

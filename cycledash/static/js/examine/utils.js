@@ -46,7 +46,6 @@ function makeIGVLink(run, igvHttpfsUrl) {
       `&file=${fileParam}&name=${nameParam}`;
 }
 
-
 /**
  * Extracts a flat list of column names from the uber-columns object.
  * This can be used as a list of CQL column names.
@@ -59,5 +58,13 @@ function extractFlatColumnList(columns) {
   return ['reference', 'alternates', 'contig', 'position'].concat(columnNames);
 }
 
+function getRowKey(record) {
+  return record.contig +
+    record.position +
+    record.reference +
+    record.alternates +
+    record.sample_name;
+}
 
-module.exports = { getIn, juxt, makeIGVLink, extractFlatColumnList };
+module.exports = { getIn, juxt, makeIGVLink, extractFlatColumnList,
+                   getRowKey };

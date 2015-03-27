@@ -5,6 +5,8 @@
       <a href="/">Runs</a>
       {% if active == 'examine' %} &raquo;
       <span class="{{ 'active' if active == 'examine' else '' }}">Examine</span>
+      {% elif active == 'comments' %} &raquo;
+      <span class="{{ 'active' if active == 'comments' else '' }}">Comments</span>
       {% endif %}
     </li>
     <li class="{{ 'active' if active == 'about' else '' }}">

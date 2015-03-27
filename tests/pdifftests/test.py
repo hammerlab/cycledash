@@ -51,7 +51,7 @@ class Examine(Base):
         """Initial view of a fully-loaded Examine page."""
         pass
 
-    @waitfor('tr:first-child td:nth-child(18)', text='0')
+    @waitfor('tr:first-child td:nth-child(20)', text='0')
     def sorted(self, driver):
         """Examine page sorted by decreasing Normal Read Depth."""
         rd = driver.find_element_by_css_selector('[data-attribute="sample:RD"] a')
@@ -60,6 +60,7 @@ class Examine(Base):
     @waitfor('[data-attribute="info:DP"] .tooltip')
     def tooltip(self, driver):
         """Examine page showing a Normal Read Depth tooltip."""
+
         dp = driver.find_element_by_css_selector('[data-attribute="sample:RD"]')
         hover = ActionChains(driver).move_to_element(dp)
         hover.perform()

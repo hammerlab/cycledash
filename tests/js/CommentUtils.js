@@ -1,7 +1,8 @@
 'use strict';
 var _ = require('underscore'),
     fs = require('fs'),
-    DataUtils = require('./DataUtils');
+    DataUtils = require('./DataUtils'),
+    utils = require('../../cycledash/static/js/examine/utils');
 
 /**
  * Fake for jQuery's $.ajax() which uses DataUtils.makeFakeServer(...) to
@@ -75,15 +76,7 @@ function getCommentIdFromPath(path) {
 // however our HTTP GET response needs to key comments by row key (as is
 // done in comments.py).
 function getCommentResponse(commentDatabase) {
-  function getRowKey(commentOrRecord) {
-    return commentOrRecord.contig +
-           commentOrRecord.position +
-           commentOrRecord.reference +
-           commentOrRecord.alternates +
-           commentOrRecord.sample_name;
-  }
-
-  return {comments: _.object(_.map(commentDatabase, c => [getRowKey(c), c]))};
+  return {comments: _.groupBy(commentDatabase, utils.getRowKey)};
 }
 
 function isFailingPath(type, path, failingPaths) {

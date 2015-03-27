@@ -24,7 +24,7 @@ ul.comments .run-id a {
 ul.comments .location {
   padding-left: 7px;
 }
-ul.comments .summary {
+ul.comments .summary-container {
   padding-left: 20px;
   max-width: 200px;
 }

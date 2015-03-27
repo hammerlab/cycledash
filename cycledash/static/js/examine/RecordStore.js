@@ -105,10 +105,10 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
         updateGenotypes({append: false});
         break;
       case ACTION_TYPES.SET_COMMENT:
-        setComment(action.comment);
+        setComment(action.comment, action.record);
         break;
       case ACTION_TYPES.DELETE_COMMENT:
-        deleteComment(action.comment);
+        deleteComment(action.comment, action.record);
         break;
     }
     // Required: lets the dispatcher know that the Store is done processing.
@@ -185,62 +185,82 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
     loadError = null;
   }
 
-  function getRowKey(commentOrRecord) {
-    return commentOrRecord.contig +
-           commentOrRecord.position +
-           commentOrRecord.reference +
-           commentOrRecord.alternates +
-           commentOrRecord.sample_name;
-  }
-
   // Given a list of records, return a map from record key to record index, where
   // the index is added to increment.
   function generateKeyToRecordIndex(records, increment) {
     return _.reduce(records, (keyMap, record, idx) => {
-      keyMap[getRowKey(record)] = idx + increment;
+      keyMap[utils.getRowKey(record)] = idx + increment;
       return keyMap;
     }, {});
   }
 
   // Update all records with their associated comments from commentMap.
   function updateCommentsInParentRecords(records) {
-    _.each(commentMap, (comment, key) => {
+    _.each(commentMap, (comments, rowKey) => {
       // Not all comments map to record indices. Namely, comments that
       // correspond to records that have not yet loaded.
-      if (_.has(keyToRecordIndex, key)) {
-        updateCommentInParentRecord(comment, false, records);
+      if (_.has(keyToRecordIndex, rowKey)) {
+        var idx = keyToRecordIndex[rowKey];
+        _.each(comments, comment => {
+          updateCommentInParentRecord(comment, records[idx], false);
+        });
       }
     });
   }
 
-  // Given a comment, put the comment into the right record (or delete it from
-  // that record).
-  function updateCommentInParentRecord(comment, isDelete, records) {
-    var idx = keyToRecordIndex[getRowKey(comment)];
+  // Given a comment, put the comment into the right record (or delete
+  // it from that record). If a comment was replaced, return the
+  // original.
+  function updateCommentInParentRecord(comment, record, isDelete) {
     if (isDelete) {
-      delete records[idx].comment;
+      record.comments = _.without(record.comments, comment);
+      return comment;
     } else {
-      records[idx].comment = comment;
+      if (!_.has(record, 'comments')) {
+        record.comments = [];
+      }
+
+      // If a comment is already stored in the DB, find it by ID.
+      var oldComment;
+      if (_.has(comment, 'id')) {
+        oldComment = _.findWhere(record.comments, {id: comment.id});
+      } else {
+        oldComment = _.findWhere(record.comments,
+                                 {created_date: comment.created_date});
+      }
+
+      // Replace an existing comment.
+      if (oldComment) {
+        // This should never be -1 based on the logic above.
+        var indexToReplace = _.indexOf(record.comments, oldComment);
+        record.comments[indexToReplace] = comment;
+        return oldComment;
+      }
+
+      // If there's no existing comment, add it to the list.
+      record.comments.push(comment);
     }
   }
 
-  // Given a comment, place it into commentMap (keyed by its row key), update its
-  // parent record and notify callers. Returns the old comment being changed.
-  function updateCommentAndNotify(comment, isDelete) {
+  // Given a comment, update its parent record and notify callers.
+  // Returns the old comment being changed. Also updates the
+  // internal commentMap representation.
+  function updateCommentAndNotify(comment, record, isDelete) {
     var isDelete = !_.isUndefined(isDelete) ? isDelete : false;
-    var key = getRowKey(comment);
 
-    // Keep the old comment around, in case we want to revert a change.
-    var oldComment = commentMap[key];
+    var oldComment = updateCommentInParentRecord(comment, record,
+                                                 isDelete);
 
-    if (isDelete) {
-      delete commentMap[key];
+    // Update the internal commentMap, which we will use again to
+    // populate records with comments whenever we get new record
+    // objects (for example, after a sort).
+    var rowKey = utils.getRowKey(record);
+    if (_.has(record, 'comments')) {
+      commentMap[rowKey] = record.comments;
     } else {
-      // Put this comment in the ID => comment map.
-      commentMap[key] = comment;
+      delete commentMap[rowKey];
     }
 
-    updateCommentInParentRecord(comment, isDelete, records);
     notifyChange();
     return oldComment;
   }
@@ -272,19 +292,21 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
     );
   }
 
-  function deleteComment(comment) {
+  function deleteComment(comment, record) {
     // If a comment has no ID (e.g. it was created optimistically, and has not
     // yet been granted an ID from an HTTP response), deleting it from the server
-    // has no meaning.
+    // has no meaning. To prevent the weird condition of a comment POSTing
+    // after it gets deleted locally (and then re-appearing locally), simply
+    // do nothing in this circumstance.
     if (!_.has(comment, 'id')) {
       return;
     }
 
-    var oldComment = updateCommentAndNotify(comment, true);
+    var oldComment = updateCommentAndNotify(comment, record, true);
     $.when(deferredCommentDelete(vcfId, comment))
       .fail(() => {
         // Undo the delete if it was a failure.
-        updateCommentAndNotify(oldComment);
+        updateCommentAndNotify(oldComment, record);
       });
   }
 
@@ -293,8 +315,8 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
       dataSource,
       '/runs/' + vcfId + '/comments/' + comment.id,
       'PUT',
-      {'comment_text': comment.comment_text,
-       'last_modified_timestamp': comment.last_modified_timestamp}
+      _.pick(comment,
+             'comment_text', 'author_name', 'last_modified_timestamp')
     );
   }
 
@@ -307,38 +329,38 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
     );
   }
 
-  function setComment(comment) {
+  function setComment(comment, record) {
     // Update a comment.
     // TODO(tavi) Notify on saving vs. saved, and don't simply undo the user's
     // changes without any warning.
     if (_.has(comment, 'id')) {
-      var oldComment = updateCommentAndNotify(comment);
+      var oldComment = updateCommentAndNotify(comment, record);
       $.when(deferredCommentUpdate(vcfId, comment))
         .done(response => {
           // Set this comment's last_modified_timestamp timestamp after the update.
           comment.last_modified_timestamp = response.last_modified_timestamp;
-          updateCommentAndNotify(comment);
+          updateCommentAndNotify(comment, record);
         })
         .fail(() => {
           // Undo the update if it was a failure.
-          updateCommentAndNotify(oldComment);
+          updateCommentAndNotify(oldComment, record);
 
           // TODO(tavi) If it was a failure due to clobbering, get the latest
           // comment data and inform the user (rather than a simple local undo).
         });
     } else {
       // Otherwise, create an optimistic comment.
-      updateCommentAndNotify(comment, false);
+      updateCommentAndNotify(comment, record, false);
       $.when(deferredCommentCreate(vcfId, comment))
         .done(response => {
           // Give this comment an ID, based on what was inserted.
           comment.id = response.id;
           comment.last_modified_timestamp = response.last_modified_timestamp;
-          updateCommentAndNotify(comment);
+          updateCommentAndNotify(comment, record);
         })
         .fail(() => {
           // Undo (delete) the optimistic comment if the create was a failure.
-          updateCommentAndNotify(comment, true);
+          updateCommentAndNotify(comment, record, true);
         });
     }
   }

@@ -1,4 +1,5 @@
 """API for user comments."""
+from collections import defaultdict
 from datetime import datetime
 from flask import jsonify, request
 from functools import wraps, partial
@@ -51,8 +52,8 @@ def user_comments_db(f=None, use_transaction=False):
 
 @user_comments_db
 def create_comment(vcf_id, conn, user_comments, data):
-    """Create a user comment for this VCF ID, and return the created comment ID
-    and last_modified_timestamp as a response.
+    """Create a user comment for this VCF ID, and return the created 
+    comment ID and last_modified_timestamp as a response.
     """
     cols = user_comments.c
     stmt = user_comments.insert().returning(
@@ -63,7 +64,8 @@ def create_comment(vcf_id, conn, user_comments, data):
             position=data[cols.position.name],
             reference=data[cols.reference.name],
             alternates=data[cols.alternates.name],
-            comment_text=data[cols.comment_text.name])
+            comment_text=data[cols.comment_text.name],
+            author_name=data.get(cols.author_name.name))
     result = conn.execute(stmt)
     if result.rowcount > 0:
         one_result = result.fetchone()
@@ -81,19 +83,28 @@ def get_vcf_comments(vcf_id, conn, user_comments, data):
     """Return all user comments in the following format:
     {
       "comments": {
-        "<row_key STRING>": {
-          "alternates": "<STRING>",
-          "comment_text": "<STRING>",
-          "contig": "<STRING>",
-          "last_modified_timestamp": <DATETIME>,
-          "id": <INT>,
-          "position": <INT>,
-          "reference": "<STRING>",
-          "sample_name": "<STRING>",
-          "vcf_id": <INT>
+        "<row_key STRING>":
+           [
+             {
+              "alternates": "<STRING>",
+              "author_name": "<STRING>",
+              "comment_text": "<STRING>",
+              "contig": "<STRING>",
+              "created_date": <DATETIME>,
+              "last_modified_timestamp": <INT>,
+              "id": <INT>,
+              "position": <INT>,
+              "reference": "<STRING>",
+              "sample_name": "<STRING>",
+              "vcf_id": <INT>
+            },
+            {
+              "alternates": "<STRING>",
+              ...
+            }
+          ]
         },
         "<row_key>": {
-          "alternates": "<STRING>",
           ...
         },
     """
@@ -103,11 +114,11 @@ def get_vcf_comments(vcf_id, conn, user_comments, data):
     results = conn.execute(stmt)
 
     # Turn results into a dictionary
-    results_map = {
-        get_row_key(comment, user_comments): col_name_val_to_response(
-            comment, user_comments)
-        for comment in [dict(result) for result in results]
-    }
+    results_map = defaultdict(list)
+    for comment in [dict(result) for result in results]:
+        row_key = get_row_key(comment, user_comments)
+        results_map[row_key].append(col_name_val_to_response(
+            comment, user_comments))
 
     response = {'comments': results_map}
     return jsonify(response)
@@ -121,16 +132,22 @@ def get_last_comments(n=5):
 
 
 def get_row_key(comment, table):
-    """Each variant row should have a unique row key, and we key our JSON
-    comment represention by this value. Also see getRowKey in RecordStore.js.
+    """Each VCF row should have a unique key, and we key rows in our
+    JSON comment represention by this value. Also see getRowKey in
+    RecordStore.js.
     """
-    return '%s%d%s%s%s' % (
-        comment[table.c.contig.name],
-        comment[table.c.position.name],
-        comment[table.c.reference.name],
-        comment[table.c.alternates.name],
-        comment[table.c.sample_name.name]
-    )
+    cols = [table.c.contig.name,
+            table.c.position.name,
+            table.c.reference.name,
+            table.c.alternates.name,
+            table.c.sample_name.name]
+    return get_key(comment, cols, table)
+
+
+def get_key(comment, cols, table):
+    values = [str(convert_col_value(col, comment[col], table)) \
+               for col in cols]
+    return ''.join(values)
 
 
 @user_comments_db(use_transaction=True)
@@ -156,7 +173,9 @@ def delete_comment(comment_id, conn, user_comments, data):
 @user_comments_db(use_transaction=True)
 def update_comment(comment_id, conn, user_comments, data):
     """To update a comment, format PUT data as:
-    {"comment_text": "<comment text>", "last_modified_timestamp": <DATETIME>}
+    {"comment_text": "<STRING>",
+     "author_name": "<STRING>",
+     "last_modified_timestamp": <DATETIME>}
 
     Here, timestamp represents the timestamp of the comment as last retrieved
     from the DB. It allows us to ensure that multiple API updates don't
@@ -175,6 +194,7 @@ def update_comment(comment_id, conn, user_comments, data):
         user_comments.c.id == comment_id).returning(
             user_comments.c.last_modified).values(
                 comment_text=data[user_comments.c.comment_text.name],
+                author_name=data.get(user_comments.c.author_name.name),
 
                 # Update the last_modified timestamp, now that we're actually
                 # making a modification.
@@ -195,7 +215,9 @@ def is_stale(comment_id, conn, user_comments, data):
     """
     current_last_modified = get_last_modified_timestamp(
         comment_id, conn, user_comments)
-    comment_last_modified = int(data[convert_col_name(user_comments.c.last_modified.name)])
+    comment_last_modified = int(data[convert_col_name(
+        user_comments.c.last_modified.name,
+        user_comments)])
     return current_last_modified != comment_last_modified
 
 
@@ -219,10 +241,12 @@ def get_last_modified_timestamp(comment_id, conn, user_comments):
         return None
 
 
-def convert_col_name(name):
+def convert_col_name(name, user_comments):
     """Map columns in the DB with keys in the JSON response."""
-    if name == 'last_modified':
+    if name == user_comments.c.last_modified.name:
         return 'last_modified_timestamp'
+    if name == user_comments.c.created.name:
+        return 'created_date'
     return name
 
 
@@ -236,7 +260,9 @@ def date_as_int(dt):
 def convert_col_value(name, value, user_comments):
     """Do any column-specific value conversions."""
     if name == user_comments.c.last_modified.name:
-        value = date_as_int(value)
+        return date_as_int(value)
+    if name == user_comments.c.created.name:
+        return value.isoformat()
     return value
 
 
@@ -244,8 +270,8 @@ def col_name_val_to_response(col_name_to_val, user_comments):
     """Converts a dictionary of DB column names to values into a proper
     response (JSON keys to converted values)."""
     response = {
-        convert_col_name(name): convert_col_value(name, col_name_to_val[name],
-                                                  user_comments)
+        convert_col_name(name, user_comments): convert_col_value(
+            name, col_name_to_val[name], user_comments)
         for name in col_name_to_val
     }
     return response

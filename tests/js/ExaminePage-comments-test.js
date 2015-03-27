@@ -47,7 +47,7 @@ describe('ExaminePage Comments', function() {
       created_at: '',
       uri: '/tests/js/data/snv.vcf'
     };
-  var igvHttpfsUrl = 'http://example.com/';
+    var igvHttpfsUrl = 'http://example.com/';
 
     var dispatcher = new Dispatcher();
     var recordActions = RecordActions.getRecordActions(dispatcher);
@@ -59,17 +59,23 @@ describe('ExaminePage Comments', function() {
                    vcf={run} comparableVcfs={[]} />);
   }
 
-  function commentText() {
+  // Get text for the nth comment (0-indexed) in the row
+  function commentText(n) {
+    if (_.isUndefined(n)) {
+      n = 0;
+    }
+
     var comments = Utils.findInComponent(
-        '.vcf-table .variant-info div p', examine);
-    assert.ok(comments.length <= 1);
-    return comments.length === 1 ? comments[0].textContent : null;
+      '.vcf-table .variant-info div p', examine);
+    assert.ok(comments.length > n || comments.length === 0);
+    return comments.length > n ? comments[n].textContent : null;
   }
 
+  // Click the nth row (0-indexed)
   function clickRow(n) {
     var rows = Utils.findInComponent('.vcf-table tbody tr', examine);
-    assert.ok(rows.length >= n);
-    TestUtils.Simulate.click(rows[n - 1]);
+    assert.ok(rows.length > n);
+    TestUtils.Simulate.click(rows[n]);
   }
 
   // Initially, to ensure that indexing into <tr> elements is valid, make
@@ -79,22 +85,33 @@ describe('ExaminePage Comments', function() {
     clickRow(n);
   }
 
-  function clickCommentButton(buttonText) {
+  // Click the button with buttonText for the nth comment (0-indexed)
+  // in the row
+  function clickCommentButton(buttonText, n) {
+    if (_.isUndefined(n)) {
+      n = 0;
+    }
+
     var buttons = Utils.findInComponent(
         '.vcf-table .variant-info button', examine);
     assert.ok(buttons.length > 0);
     var buttonsWithText = buttons.filter(function(button) {
       return button.textContent === buttonText;
     });
-    assert.equal(1, buttonsWithText.length);
-    TestUtils.Simulate.click(buttonsWithText[0]);
+    assert.ok(buttonsWithText.length > n);
+    TestUtils.Simulate.click(buttonsWithText[n]);
   }
 
-  function changeCommentText(commentText) {
+  // Change the comment text for the nth comment (0-indexed) in the row
+  function changeCommentText(commentText, n) {
+    if (_.isUndefined(n)) {
+      n = 0;
+    }
+
     var textAreas = Utils.findInComponent(
         '.vcf-table .variant-info div textarea', examine);
-    assert.equal(1, textAreas.length);
-    TestUtils.Simulate.change(textAreas[0], {target: {value: commentText}});
+    assert.ok(textAreas.length > n);
+    TestUtils.Simulate.change(textAreas[n], {target: {value: commentText}});
   }
 
   function getNumComments() {
@@ -121,25 +138,26 @@ describe('ExaminePage Comments', function() {
     assert.equal(null, commentText());
 
     // Click on the records with comments.
-    resetAndClickRow(1);
+    resetAndClickRow(0);
     assert.equal('First', commentText());
-    resetAndClickRow(3);
+    assert.equal('Another First', commentText(1));
+    resetAndClickRow(2);
     assert.equal('Second', commentText());
-    resetAndClickRow(10);
+    resetAndClickRow(9);
     assert.equal('Third', commentText());
 
     // Click on a record without a comment.
-    resetAndClickRow(2);
-    assert.equal('No Comment', commentText());
+    resetAndClickRow(1);
+    assert.equal(null, commentText());
 
     // Select and deselect a record.
-    resetAndClickRow(1);
+    resetAndClickRow(0);
     assert.equal('First', commentText());
-    clickRow(1);
+    clickRow(0);
     assert.equal(null, commentText());
 
     // Edit the second comment, save it, and check that the fake DB was updated.
-    resetAndClickRow(3);
+    resetAndClickRow(2);
     assert.equal('Second', commentText());
     clickCommentButton('Edit');
     changeCommentText('Edited Comment');
@@ -149,20 +167,19 @@ describe('ExaminePage Comments', function() {
 
     // Delete the second comment.
     clickCommentButton('Delete');
-    assert.equal(2, getNumComments());
+    assert.equal(4, getNumComments());
     assert(!_.has(commentDatabase, '17'));
 
     // Make a new comment in place of the second comment.
-    clickCommentButton('Edit');
     changeCommentText('New Comment');
     clickCommentButton('Save');
-    assert.equal(3, getNumComments());
+    assert.equal(5, getNumComments());
     assert.equal('New Comment', commentText());
     assert.equal('New Comment', commentDatabase['43'].comment_text);
 
     // Delete the added comment.
     clickCommentButton('Delete');
-    assert.equal(2, getNumComments());
+    assert.equal(4, getNumComments());
     assert(!_.has(commentDatabase, '43'));
   });
 
@@ -178,35 +195,27 @@ describe('ExaminePage Comments', function() {
 
     // Edit the second comment, save it, and check that the fake DB was *not*
     // updated. Then try to delete it.
-    resetAndClickRow(3);
+    resetAndClickRow(2);
     assert.equal('Second', commentText());
     clickCommentButton('Edit');
     changeCommentText('Edited Comment');
     clickCommentButton('Save');
     assert.equal('Second', commentText());
     assert.equal('Second', commentDatabase['17'].comment_text);
-    assert.equal(3, getNumComments());
+    assert.equal(5, getNumComments());
     clickCommentButton('Delete');
     assert.equal('Second', commentText());
     assert.equal('Second', commentDatabase['17'].comment_text);
-    assert.equal(3, getNumComments());
+    assert.equal(5, getNumComments());
 
     // Make a new comment, save it, and check that the fake DB was *not*
-    // updated. Then try to modify it and delete it.
-    resetAndClickRow(4);
-    assert.equal('No Comment', commentText());
-    clickCommentButton('Edit');
+    // updated. (We can't delete it, because the comment will revert
+    // to edit mode, which doesn't have "Delete".)
+    resetAndClickRow(3);
+    assert.equal(null, commentText());
     changeCommentText('New Comment');
     clickCommentButton('Save');
-    assert.equal('No Comment', commentText());
-    assert.equal(3, getNumComments());
-    clickCommentButton('Edit');
-    changeCommentText('Edited');
-    clickCommentButton('Save');
-    assert.equal('No Comment', commentText());
-    assert.equal(3, getNumComments());
-    clickCommentButton('Delete');
-    assert.equal('No Comment', commentText());
-    assert.equal(3, getNumComments());
+    assert.equal(null, commentText());
+    assert.equal(5, getNumComments());
   });
 });
