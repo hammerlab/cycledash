@@ -224,11 +224,7 @@ var VCFComment = React.createClass({
                         placeHolder={placeHolder}
                         handleDelete={this.props.handleDelete}
                         handleEdit={this.makeEditable} />;
-    return (
-      <div className='comment-container'>
-        {commentElement}
-      </div>
-    );
+    return commentElement;
   }
 });
 
@@ -267,7 +263,7 @@ var VCFCommentHeader = React.createClass({
         <span className='igv-links'>
           IGV: {igvLinks[0]}&nbsp;
                {igvLinks[1]}&nbsp;
-               <a href="https://github.com/hammerlab/cycledash/wiki/IGV-Integration">help</a>
+               <a href="https://github.com/hammerlab/cycledash/wiki/IGV-Integration" className="igv-help" title="IGV Help"></a>
         </span>
       </div>
     );
@@ -291,23 +287,17 @@ var VCFCommentViewer = React.createClass({
 
     var markedDownText = marked(plainText);
     return (
-      <div>
+      <div className='comment-view-container'>
         <div className='comment-header'>
           <span className='comment-by'>
             Comment by <b>{this.props.authorName}</b>, {this.props.createdString}
           </span>
           <span className='edit-buttons'>
-            <button className='btn btn-default btn-xs comment-button btn-danger'
-                    onClick={this.props.handleDelete}>
-              Delete
-            </button>
-            <button className='btn btn-default btn-xs comment-button'
-                    onClick={this.props.handleEdit}>
-              Edit
-            </button>
+            <a className='comment-edit' title='Edit Comment' href='#' onClick={this.props.handleEdit}></a>
+            <a className='comment-delete' title='Delete Comment' href='#' onClick={this.props.handleDelete}></a>
           </span>
         </div>
-        <div className='form-control comment-text'
+        <div className='comment-text'
              dangerouslySetInnerHTML={{__html: markedDownText}} />
       </div>
     );
@@ -383,7 +373,7 @@ var VCFCommentEditor = React.createClass({
     var buttons = [];
     if (this.props.cancelable) {
       buttons.push(
-        <button className='btn btn-xs comment-button btn-default'
+        <button className='btn btn-xs comment-button btn-default comment-cancel'
                 key='cancel'
                 onClick={this.handleCancelConfirm}>
           Cancel
@@ -391,15 +381,15 @@ var VCFCommentEditor = React.createClass({
       );
     }
     buttons.push(
-      <button className='btn btn-xs comment-button btn-success'
+      <button className='btn btn-xs comment-button btn-success comment-save'
               key='save'
               onClick={this.handleSaveText}>
         Save
       </button>
     );
     return (
-      <div>
-        <input className='comment-author'
+      <div className='comment-edit-container'>
+        <input className='form-control comment-author'
                type='text'
                value={this.state.newAuthorName}
                placeholder='Enter your name here'
