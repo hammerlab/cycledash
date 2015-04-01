@@ -108,7 +108,7 @@ var CommentBox = React.createClass({
     var comments = this.props.record.comments;
     var timezoneOffset = this.getTimezoneOffsetMillis();
     var commentNodes = _.sortBy(comments, comment => {
-      new Date(comment.created_date).getTime();
+      return new Date(comment.created_date).getTime();
     }).map(comment => {
       // Add the offset to get local time
       var createdTimestampMillis = new Date(comment.created_date).
