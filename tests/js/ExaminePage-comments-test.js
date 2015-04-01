@@ -102,6 +102,19 @@ describe('ExaminePage Comments', function() {
     TestUtils.Simulate.click(buttonsWithText[n]);
   }
 
+  // Click the link with class buttonClass for the nth comment
+  // (0-indexed) in the row
+  function clickCommentLinkClass(linkClass, n) {
+    if (_.isUndefined(n)) {
+      n = 0;
+    }
+
+    var links = Utils.findInComponent(
+        '.vcf-table .variant-info a.' + linkClass, examine);
+    assert.ok(links.length > n);
+    TestUtils.Simulate.click(links[n]);
+  }
+
   // Change the comment text for the nth comment (0-indexed) in the row
   function changeCommentText(commentText, n) {
     if (_.isUndefined(n)) {
@@ -159,14 +172,14 @@ describe('ExaminePage Comments', function() {
     // Edit the second comment, save it, and check that the fake DB was updated.
     resetAndClickRow(2);
     assert.equal('Second', commentText());
-    clickCommentButton('Edit');
+    clickCommentLinkClass('comment-edit');
     changeCommentText('Edited Comment');
     clickCommentButton('Save');
     assert.equal('Edited Comment', commentText());
     assert.equal('Edited Comment', commentDatabase['17'].comment_text);
 
     // Delete the second comment.
-    clickCommentButton('Delete');
+    clickCommentLinkClass('comment-delete');
     assert.equal(4, getNumComments());
     assert(!_.has(commentDatabase, '17'));
 
@@ -178,7 +191,7 @@ describe('ExaminePage Comments', function() {
     assert.equal('New Comment', commentDatabase['43'].comment_text);
 
     // Delete the added comment.
-    clickCommentButton('Delete');
+    clickCommentLinkClass('comment-delete');
     assert.equal(4, getNumComments());
     assert(!_.has(commentDatabase, '43'));
   });
@@ -197,13 +210,13 @@ describe('ExaminePage Comments', function() {
     // updated. Then try to delete it.
     resetAndClickRow(2);
     assert.equal('Second', commentText());
-    clickCommentButton('Edit');
+    clickCommentLinkClass('comment-edit');
     changeCommentText('Edited Comment');
     clickCommentButton('Save');
     assert.equal('Second', commentText());
     assert.equal('Second', commentDatabase['17'].comment_text);
     assert.equal(5, getNumComments());
-    clickCommentButton('Delete');
+    clickCommentLinkClass('comment-delete');
     assert.equal('Second', commentText());
     assert.equal('Second', commentDatabase['17'].comment_text);
     assert.equal(5, getNumComments());

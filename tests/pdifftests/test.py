@@ -79,8 +79,7 @@ class Examine(Base):
         """Examine page showing a comment in edit mode."""
         row = driver.find_element_by_css_selector('tbody tr')
         row.click()
-        btn = driver.find_elements_by_css_selector('.comment-button')[1]
-        assert btn.text.lower() == 'edit'
+        btn = driver.find_elements_by_css_selector('.comment-edit')[1]
         btn.click()
 
     @dontwaitfor('.query-status')
