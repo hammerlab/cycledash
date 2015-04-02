@@ -55,10 +55,10 @@ var Comment = React.createClass({
     return `/runs/${c.vcf_id}/examine?query=${c.contig}:${c.position}-${1+c.position}`;
   },
   render: function() {
-    // Add the offset to get local time
-    var timezoneOffset = new Date().getTimezoneOffset() * 60 * 1000;
-    var comment = this.props.comment,
-        relativeDate = moment(new Date(comment.created)).add(timezoneOffset).fromNow();
+    var comment = this.props.comment;
+    // moment uses the local timezone by default (converting the
+    // value, which starts in UTC, to that timezone)
+    var relativeDate = moment(comment.created).fromNow();
     var authorName = comment.author_name ?
         comment.author_name.slice(0, 15) : 'Anonymous';
     return (

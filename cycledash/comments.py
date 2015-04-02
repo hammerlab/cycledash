@@ -4,6 +4,7 @@ from datetime import datetime
 from flask import jsonify, request
 from functools import wraps, partial
 from sqlalchemy import exc, select, func, desc
+from pytz import utc
 
 from common.helpers import tables, CRUDError
 from cycledash import db
@@ -253,7 +254,10 @@ def convert_col_name(name, user_comments):
 def date_as_int(dt):
     """Get dt represented as microseconds since 1970. jsonify will strip out
     microseconds, so we use this simpler format."""
-    delta = dt - datetime.fromtimestamp(0)
+    # Since dt is a "timezoned" date, the other variable must also be
+    # Otherwise, we'd get:
+    # TypeError: can't subtract offset-naive and offset-aware datetimes
+    delta = dt - datetime.fromtimestamp(0, tz=utc)
     return int(delta.total_seconds() * (10**6))
 
 

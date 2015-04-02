@@ -68,11 +68,8 @@ var CommentBox = React.createClass({
   getHandleSaveForCreate: function() {
     var handleSetComment = this.props.handleSetComment;
     var record = this.props.record;
-    var timezoneOffset = this.getTimezoneOffsetMillis();
     return function(commentText, authorName) {
       // Subtract the offset to get GMT (to match what's in the DB)
-      var createdDate = new Date(new Date().getTime() -
-                                 timezoneOffset);
       var newComment = _.extend(
         _.pick(
           record,
@@ -85,9 +82,9 @@ var CommentBox = React.createClass({
          'author_name': authorName,
          // Note: this is a temporary date that does not get persisted
          // to the DB. Instead, the DB creates its own date, but this
-         // date is used for distinguishing between comments in the
-         // meantime.
-         'created_date': createdDate});
+         // date string is used for distinguishing between comments in
+         // the  meantime. (UTC, because DB dates are UTC.)
+         'created_date': moment.utc().format()});
       handleSetComment(newComment, record);
     };
   },
@@ -100,23 +97,19 @@ var CommentBox = React.createClass({
       store.set(this.LOCAL_STORAGE_AUTHOR_KEY, authorName);
     }
   },
-  getTimezoneOffsetMillis: function() {
-    var timezoneOffset = new Date().getTimezoneOffset();
-    return timezoneOffset * 60 * 1000;
-  },
   render: function() {
     var comments = this.props.record.comments;
-    var timezoneOffset = this.getTimezoneOffsetMillis();
     var commentNodes = _.sortBy(comments, comment => {
       return new Date(comment.created_date).getTime();
     }).map(comment => {
-      // Add the offset to get local time
-      var createdTimestampMillis = new Date(comment.created_date).
-          getTime() + timezoneOffset;
-      var rowKey = utils.getRowKey(this.props.record);
+      // moment uses the local timezone by default (converting the
+      // value, which starts in UTC, to that timezone)
+      var createdString = moment(comment.created_date).fromNow();
       // Prevent react key collisions
+      var rowKey = utils.getRowKey(this.props.record);
       var reactKey = _.has(comment, 'id') ?
-          rowKey + comment.id : rowKey + String(createdTimestampMillis);
+          rowKey + comment.id :
+          rowKey + String(comment.created_date.getTime());
       return <VCFComment record={this.props.record}
                       commentText={comment.comment_text}
                       key={reactKey}
@@ -125,7 +118,7 @@ var CommentBox = React.createClass({
                       cancelable={true}
                       saveLocalAuthorName={this.saveLocalAuthorName}
                       authorName={comment.author_name}
-                      createdString={moment(createdTimestampMillis).fromNow()}
+                      createdString={createdString}
                       handleDelete={this.getHandleDelete(comment)} />;
     });
 
