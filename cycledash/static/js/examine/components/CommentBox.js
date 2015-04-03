@@ -67,6 +67,7 @@ var CommentBox = React.createClass({
   },
   getHandleSaveForCreate: function() {
     var handleSetComment = this.props.handleSetComment;
+    var getGranularUnixSeconds = this.getGranularUnixSeconds;
     var record = this.props.record;
     return function(commentText, authorName) {
       // Subtract the offset to get GMT (to match what's in the DB)
@@ -82,11 +83,18 @@ var CommentBox = React.createClass({
          'author_name': authorName,
          // Note: this is a temporary date that does not get persisted
          // to the DB. Instead, the DB creates its own date, but this
-         // date string is used for distinguishing between comments in
-         // the  meantime. (UTC, because DB dates are UTC.)
-         'created_date': moment.utc().format()});
+         // timestamp is used for distinguishing between comments in
+         // the meantime.
+         'created_timestamp': getGranularUnixSeconds(moment())});
       handleSetComment(newComment, record);
     };
+  },
+  getGranularUnixSeconds: function(momentObject) {
+    // There does not appear to be an easy way to get seconds since
+    // epoch with millisecond granularity using moment. We want
+    // millisecond granularity client-side to avoid collisions.
+    // (We already have sub-second granularity on the server-side.)
+    return momentObject.valueOf() / 1000.0;
   },
   getLocalAuthorName: function() {
     return store.enabled ? store.get(this.LOCAL_STORAGE_AUTHOR_KEY, '') : '';
@@ -99,27 +107,27 @@ var CommentBox = React.createClass({
   },
   render: function() {
     var comments = this.props.record.comments;
-    var commentNodes = _.sortBy(comments, comment => {
-      return new Date(comment.created_date).getTime();
-    }).map(comment => {
-      // moment uses the local timezone by default (converting the
-      // value, which starts in UTC, to that timezone)
-      var createdString = moment(comment.created_date).fromNow();
-      // Prevent react key collisions
-      var rowKey = utils.getRowKey(this.props.record);
-      var reactKey = _.has(comment, 'id') ?
-          rowKey + comment.id :
-          rowKey + String(comment.created_date.getTime());
-      return <VCFComment record={this.props.record}
-                      commentText={comment.comment_text}
-                      key={reactKey}
-                      handleSave={this.getHandleSaveForUpdate(comment)}
-                      startInEditState={false}
-                      cancelable={true}
-                      saveLocalAuthorName={this.saveLocalAuthorName}
-                      authorName={comment.author_name}
-                      createdString={createdString}
-                      handleDelete={this.getHandleDelete(comment)} />;
+    var commentNodes = _.sortBy(comments, 'created_timestamp').map(
+      comment => {
+        // moment uses the local timezone by default (converting the
+        // value, which starts as a UNIX timestamp, to that timezone)
+        var createdString = moment.unix(comment.created_timestamp).fromNow();
+        // Prevent react key collisions
+        var rowKey = utils.getRowKey(this.props.record);
+        var reactKey = _.has(comment, 'id') ?
+            rowKey + comment.id :
+            rowKey + String(this.getGranularUnixSeconds(moment(
+              comment.created_timestamp)));
+        return <VCFComment record={this.props.record}
+                           commentText={comment.comment_text}
+                           key={reactKey}
+                           handleSave={this.getHandleSaveForUpdate(comment)}
+                           startInEditState={false}
+                           cancelable={true}
+                           saveLocalAuthorName={this.saveLocalAuthorName}
+                           authorName={comment.author_name}
+                           createdString={createdString}
+                           handleDelete={this.getHandleDelete(comment)} />;
     });
 
     return (
