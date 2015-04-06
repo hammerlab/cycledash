@@ -45,8 +45,8 @@ CREATE TABLE user_comments (
        alternates TEXT,
        comment_text TEXT NOT NULL,
        author_name TEXT,
-       created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-       last_modified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+       created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+       last_modified TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE task_states (

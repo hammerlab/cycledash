@@ -4,6 +4,8 @@ from datetime import datetime
 from flask import jsonify, request
 from functools import wraps, partial
 from sqlalchemy import exc, select, func, desc
+from pytz import utc
+from bunch import Bunch
 
 from common.helpers import tables, CRUDError
 from cycledash import db
@@ -14,8 +16,8 @@ from cycledash.helpers import (prepare_request_data, success_response,
 def get_all_comments():
     """Return a list of all comments."""
     with tables(db, 'user_comments') as (con, user_comments):
-        q = select(user_comments.c).order_by(
-            desc(user_comments.c.last_modified))
+        cols = get_user_comments_cols(user_comments)
+        q = select(cols.values()).order_by(desc(cols.created))
         return [dict(c) for c in con.execute(q).fetchall()]
 
 
@@ -55,7 +57,7 @@ def create_comment(vcf_id, conn, user_comments, data):
     """Create a user comment for this VCF ID, and return the created 
     comment ID and last_modified_timestamp as a response.
     """
-    cols = user_comments.c
+    cols = get_user_comments_cols(user_comments)
     stmt = user_comments.insert().returning(
         cols.id, cols.last_modified).values(
             vcf_id=vcf_id,
@@ -70,8 +72,8 @@ def create_comment(vcf_id, conn, user_comments, data):
     if result.rowcount > 0:
         one_result = result.fetchone()
         col_name_to_val = {
-            user_comments.c.id.name: one_result[0],
-            user_comments.c.last_modified.name: one_result[1]
+            cols.id.name: one_result[0],
+            cols.last_modified.name: one_result[1]
         }
         return jsonify(col_name_val_to_response(col_name_to_val, user_comments))
     else:
@@ -108,9 +110,8 @@ def get_vcf_comments(vcf_id, conn, user_comments, data):
           ...
         },
     """
-    # .c represents all columns
-    stmt = select(user_comments.c).where(
-        user_comments.c.vcf_id == vcf_id)
+    cols = get_user_comments_cols(user_comments)
+    stmt = select(cols.values()).where(cols.vcf_id == vcf_id)
     results = conn.execute(stmt)
 
     # Turn results into a dictionary
@@ -126,8 +127,9 @@ def get_vcf_comments(vcf_id, conn, user_comments, data):
 
 def get_last_comments(n=5):
     with tables(db, 'user_comments') as (con, user_comments):
-        q = select(user_comments.c).order_by(
-            desc(user_comments.c.last_modified)).limit(n)
+        cols = get_user_comments_cols(user_comments)
+        q = select(cols.values()).order_by(
+            desc(cols.created)).limit(n)
         return [dict(c) for c in con.execute(q).fetchall()]
 
 
@@ -141,13 +143,7 @@ def get_row_key(comment, table):
             table.c.reference.name,
             table.c.alternates.name,
             table.c.sample_name.name]
-    return get_key(comment, cols, table)
-
-
-def get_key(comment, cols, table):
-    values = [str(convert_col_value(col, comment[col], table)) \
-               for col in cols]
-    return ''.join(values)
+    return ''.join([str(comment[col]) for col in cols])
 
 
 @user_comments_db(use_transaction=True)
@@ -162,7 +158,8 @@ def delete_comment(comment_id, conn, user_comments, data):
     if is_stale(comment_id, conn, user_comments, data):
         return stale_error_response()
 
-    stmt = user_comments.delete(user_comments.c.id == comment_id)
+    cols = get_user_comments_cols(user_comments)
+    stmt = user_comments.delete(cols.id == comment_id)
     result = conn.execute(stmt)
     if result.rowcount > 0:
         return success_response()
@@ -190,11 +187,12 @@ def update_comment(comment_id, conn, user_comments, data):
     if is_stale(comment_id, conn, user_comments, data):
         return stale_error_response()
 
+    cols = get_user_comments_cols(user_comments)
     stmt = user_comments.update().where(
-        user_comments.c.id == comment_id).returning(
-            user_comments.c.last_modified).values(
-                comment_text=data[user_comments.c.comment_text.name],
-                author_name=data.get(user_comments.c.author_name.name),
+        cols.id == comment_id).returning(
+            cols.last_modified).values(
+                comment_text=data[cols.comment_text.name],
+                author_name=data.get(cols.author_name.name),
 
                 # Update the last_modified timestamp, now that we're actually
                 # making a modification.
@@ -204,7 +202,7 @@ def update_comment(comment_id, conn, user_comments, data):
         updated_timestamp = result.fetchone()[0]
 
         # Return the updated last_modified_timestamp
-        col_name_to_val = {user_comments.c.last_modified.name: updated_timestamp}
+        col_name_to_val = {cols.last_modified.name: updated_timestamp}
         return jsonify(col_name_val_to_response(col_name_to_val, user_comments))
     else:
         raise CRUDError('No Rows', 'No comment was updated')
@@ -215,7 +213,7 @@ def is_stale(comment_id, conn, user_comments, data):
     """
     current_last_modified = get_last_modified_timestamp(
         comment_id, conn, user_comments)
-    comment_last_modified = int(data[convert_col_name(
+    comment_last_modified = float(data[convert_col_name(
         user_comments.c.last_modified.name,
         user_comments)])
     return current_last_modified != comment_last_modified
@@ -231,12 +229,12 @@ def stale_error_response():
 def get_last_modified_timestamp(comment_id, conn, user_comments):
     """Retrieve the last modified timestamp for this comment ID, or
     None if it cannot be retrieved for whatever reason."""
-    stmt = select([user_comments.c.last_modified]).where(
-        user_comments.c.id == comment_id)
+    cols = get_user_comments_cols(user_comments)
+    stmt = select([cols.last_modified]).where(cols.id == comment_id)
     try:
         result = conn.execute(stmt)
         if result.rowcount > 0:
-            return date_as_int(result.fetchone()[0])
+            return result.fetchone()[0]
     except exc.SQLAlchemyError:
         return None
 
@@ -246,32 +244,27 @@ def convert_col_name(name, user_comments):
     if name == user_comments.c.last_modified.name:
         return 'last_modified_timestamp'
     if name == user_comments.c.created.name:
-        return 'created_date'
+        return 'created_timestamp'
     return name
 
 
-def date_as_int(dt):
-    """Get dt represented as microseconds since 1970. jsonify will strip out
-    microseconds, so we use this simpler format."""
-    delta = dt - datetime.fromtimestamp(0)
-    return int(delta.total_seconds() * (10**6))
-
-
-def convert_col_value(name, value, user_comments):
-    """Do any column-specific value conversions."""
-    if name == user_comments.c.last_modified.name:
-        return date_as_int(value)
-    if name == user_comments.c.created.name:
-        return value.isoformat()
-    return value
+def get_user_comments_cols(user_comments):
+    """Creates a Bunch (dot-accessible dict) of user_comments columns,
+    where created and last_modified are replaced with functions that
+    calculate seconds.microseconds since epoch.
+    """
+    new_cols = Bunch(user_comments.c)
+    for col in [new_cols.created, new_cols.last_modified]:
+        new_cols[col.name] = func.date_part(
+            'epoch', col).label(col.name)
+    return new_cols
 
 
 def col_name_val_to_response(col_name_to_val, user_comments):
     """Converts a dictionary of DB column names to values into a proper
     response (JSON keys to converted values)."""
     response = {
-        convert_col_name(name, user_comments): convert_col_value(
-            name, col_name_to_val[name], user_comments)
+        convert_col_name(name, user_comments): col_name_to_val[name]
         for name in col_name_to_val
     }
     return response

@@ -67,12 +67,10 @@ var CommentBox = React.createClass({
   },
   getHandleSaveForCreate: function() {
     var handleSetComment = this.props.handleSetComment;
+    var getGranularUnixSeconds = this.getGranularUnixSeconds;
     var record = this.props.record;
-    var timezoneOffset = this.getTimezoneOffsetMillis();
     return function(commentText, authorName) {
       // Subtract the offset to get GMT (to match what's in the DB)
-      var createdDate = new Date(new Date().getTime() -
-                                 timezoneOffset);
       var newComment = _.extend(
         _.pick(
           record,
@@ -85,11 +83,15 @@ var CommentBox = React.createClass({
          'author_name': authorName,
          // Note: this is a temporary date that does not get persisted
          // to the DB. Instead, the DB creates its own date, but this
-         // date is used for distinguishing between comments in the
-         // meantime.
-         'created_date': createdDate});
+         // timestamp is used for distinguishing between comments in
+         // the meantime.
+         'created_timestamp': getGranularUnixSeconds(moment())});
       handleSetComment(newComment, record);
     };
+  },
+  getGranularUnixSeconds: function(momentObject) {
+    // moment does not appear to provide this functionality.
+    return momentObject.valueOf() / 1000.0;
   },
   getLocalAuthorName: function() {
     return store.enabled ? store.get(this.LOCAL_STORAGE_AUTHOR_KEY, '') : '';
@@ -100,33 +102,29 @@ var CommentBox = React.createClass({
       store.set(this.LOCAL_STORAGE_AUTHOR_KEY, authorName);
     }
   },
-  getTimezoneOffsetMillis: function() {
-    var timezoneOffset = new Date().getTimezoneOffset();
-    return timezoneOffset * 60 * 1000;
-  },
   render: function() {
     var comments = this.props.record.comments;
-    var timezoneOffset = this.getTimezoneOffsetMillis();
-    var commentNodes = _.sortBy(comments, comment => {
-      return new Date(comment.created_date).getTime();
-    }).map(comment => {
-      // Add the offset to get local time
-      var createdTimestampMillis = new Date(comment.created_date).
-          getTime() + timezoneOffset;
-      var rowKey = utils.getRowKey(this.props.record);
-      // Prevent react key collisions
-      var reactKey = _.has(comment, 'id') ?
-          rowKey + comment.id : rowKey + String(createdTimestampMillis);
-      return <VCFComment record={this.props.record}
-                      commentText={comment.comment_text}
-                      key={reactKey}
-                      handleSave={this.getHandleSaveForUpdate(comment)}
-                      startInEditState={false}
-                      cancelable={true}
-                      saveLocalAuthorName={this.saveLocalAuthorName}
-                      authorName={comment.author_name}
-                      createdString={moment(createdTimestampMillis).fromNow()}
-                      handleDelete={this.getHandleDelete(comment)} />;
+    var commentNodes = _.sortBy(comments, 'created_timestamp').map(
+      comment => {
+        // moment uses the local timezone by default (converting the
+        // value, which starts as a UNIX timestamp, to that timezone)
+        var createdString = moment.unix(comment.created_timestamp).fromNow();
+        // Prevent react key collisions
+        var rowKey = utils.getRowKey(this.props.record);
+        var reactKey = _.has(comment, 'id') ?
+            rowKey + comment.id :
+            rowKey + String(this.getGranularUnixSeconds(
+              moment(comment.created_timestamp)));
+        return <VCFComment record={this.props.record}
+                           commentText={comment.comment_text}
+                           key={reactKey}
+                           handleSave={this.getHandleSaveForUpdate(comment)}
+                           startInEditState={false}
+                           cancelable={true}
+                           saveLocalAuthorName={this.saveLocalAuthorName}
+                           authorName={comment.author_name}
+                           createdString={createdString}
+                           handleDelete={this.getHandleDelete(comment)} />;
     });
 
     return (

@@ -226,7 +226,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
         oldComment = _.findWhere(record.comments, {id: comment.id});
       } else {
         oldComment = _.findWhere(record.comments,
-                                 {created_date: comment.created_date});
+                                 {created_timestamp: comment.created_timestamp});
       }
 
       // Replace an existing comment.

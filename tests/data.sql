@@ -109,12 +109,12 @@ SELECT pg_catalog.setval('task_states_id_seq', 2, true);
 --
 
 COPY user_comments (id, vcf_id, sample_name, contig, "position", reference, alternates, comment_text, author_name, created, last_modified) FROM stdin;
-1	1	NORMAL	20	61795	G	T	This is a comment on the second row!	\N	2015-03-24 15:29:09.615967	2015-03-11 23:33:33.951753
-2	1	NORMAL	20	65900	G	A	*This* is a comment with [Markdown](http://daringfireball.net/projects/markdown/syntax).	\N	2015-03-24 15:29:09.615967	2015-03-11 23:34:18.19118
-3	1	TUMOR	20	61795	G	T	*This* is a comment on the first variant with [Markdown](http://daringfireball.net/projects/markdown/syntax).\n	\N	2015-03-24 15:29:09.615967	2015-03-12 15:30:20.570952
-4	1	NORMAL	20	61795	G	T	This is another comment on the second row!	\N	2015-03-24 17:40:44.984191	2015-03-24 17:40:44.984191
-6	1	TUMOR	20	61795	G	T	This is a comment without Markdown by Bob!	Bob	2015-03-24 17:46:40.962213	2015-03-24 17:46:40.962213
-5	1	TUMOR	20	61795	G	T	This is a comment without Markdown!	\N	2015-03-24 17:43:23.497883	2015-03-24 17:43:23.497883
+1	1	NORMAL	20	61795	G	T	This is a comment on the second row!	\N	2015-03-24 15:29:09.615967+00	2015-03-11 23:33:33.951753+00
+2	1	NORMAL	20	65900	G	A	*This* is a comment with [Markdown](http://daringfireball.net/projects/markdown/syntax).	\N	2015-03-24 15:29:09.615967+00	2015-03-11 23:34:18.19118+00
+3	1	TUMOR	20	61795	G	T	*This* is a comment on the first variant with [Markdown](http://daringfireball.net/projects/markdown/syntax).\n	\N	2015-03-24 15:29:09.615967+00	2015-03-12 15:30:20.570952+00
+4	1	NORMAL	20	61795	G	T	This is another comment on the second row!	\N	2015-03-24 17:40:44.984191+00	2015-03-24 17:40:44.984191+00
+6	1	TUMOR	20	61795	G	T	This is a comment without Markdown by Bob!	Bob	2015-03-24 17:46:40.962213+00	2015-03-24 17:46:40.962213+00
+5	1	TUMOR	20	61795	G	T	This is a comment without Markdown!	\N	2015-03-24 17:43:23.497883+00	2015-03-24 17:43:23.497883+00
 \.
 
 
