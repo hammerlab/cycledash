@@ -90,10 +90,7 @@ var CommentBox = React.createClass({
     };
   },
   getGranularUnixSeconds: function(momentObject) {
-    // There does not appear to be an easy way to get seconds since
-    // epoch with millisecond granularity using moment. We want
-    // millisecond granularity client-side to avoid collisions.
-    // (We already have sub-second granularity on the server-side.)
+    // moment does not appear to provide this functionality.
     return momentObject.valueOf() / 1000.0;
   },
   getLocalAuthorName: function() {
@@ -116,8 +113,8 @@ var CommentBox = React.createClass({
         var rowKey = utils.getRowKey(this.props.record);
         var reactKey = _.has(comment, 'id') ?
             rowKey + comment.id :
-            rowKey + String(this.getGranularUnixSeconds(moment(
-              comment.created_timestamp)));
+            rowKey + String(this.getGranularUnixSeconds(
+              moment(comment.created_timestamp)));
         return <VCFComment record={this.props.record}
                            commentText={comment.comment_text}
                            key={reactKey}
