@@ -1,5 +1,5 @@
 export PORT=5000
-export DATABASE_URI='postgres:///cycledash:cycledash@localhost/cycledash'
+export DATABASE_URI='postgres:///cycledash'
 export CELERY_BACKEND='db+sqlite:///celery.db'
 export CELERY_BROKER='amqp://localhost'
 export WEBHDFS_USER=username
