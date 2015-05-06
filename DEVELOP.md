@@ -15,8 +15,8 @@ This is for a Mac install. Other OSs will have similar procedures (using e.g. ap
 
 ```bash
 brew install Python                #brew will install the latest Python 2.7.9, which includes pip
-brew install postgres				
-brew install rabbitmq				
+brew install postgres
+brew install rabbitmq
 pip install virtualenv
 ```
 
@@ -38,9 +38,9 @@ source venv/bin/activate
 ```
 
 
-### 3. Create your ENV.sh file
+### 3. Create your `ENV.sh` file
 
-You will need to generate an ENV.sh file using 'make initenv'. ENV.sh contains environment variables that need to be exported. You may need to tweak some settings for your installation.
+You will need to generate an `ENV.sh` file using 'make initenv'. `ENV.sh` contains environment variables that need to be exported. You may need to tweak some settings for your installation.
 
 ```
 make initenv
@@ -66,9 +66,8 @@ You can iterate more quickly on JavaScript with the following:
 
 ```
 npm install gulp -g     # Make sure you have gulp installed.
-gulp                    # Compile the JS and start the automatic 
-						# compiler and live-reloader.
-                        
+gulp                    # Compile the JS and start the automatic
+                        # compiler and live-reloader.
 ```
 
 To regenerate the `bundled.js` file without using the live reloader, run:
@@ -86,7 +85,7 @@ npm install
 gulp dalliance
 ```
 
-Run `gulp peg` to update the PEG.js generated grammar after modifying CQL.
+Run `gulp peg` to update the `PEG.js` generated grammar after modifying CQL.
 
 Run `gulp prod` to update all of the above (BioDalliance, PEG.js grammar, etc.)
 
@@ -126,7 +125,7 @@ name*.
 
 ### Python
 
-If `USE_RELOADER` is True in your ENV.sh, then you'll get automatic
+If `USE_RELOADER` is True in your `ENV.sh`, then you'll get automatic
 code-reloading with the Flask server and JS/CSS reloading via livereload and
 gulp's livereload plugin.
 
