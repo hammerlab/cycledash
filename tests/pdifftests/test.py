@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from seltest import url, waitfor, dontwaitfor, Base
+from seltest import url, waitfor, dontwaitfor, Base, hide
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.action_chains import ActionChains
 
@@ -16,6 +16,7 @@ class Website(Base):
         """The about/API documentation page."""
         pass
 
+    @hide('span.time')
     @url('/comments')
     def comments(self, driver):
         """Initial view of the comments page."""
@@ -26,15 +27,18 @@ class Runs(Base):
     window_size = [1280, 800]
     base_url = BASE
 
+    @hide('span.time')
     def page(self, driver):
         """Initial view of the runs page."""
         pass
 
+    @hide('span.time')
     def info(self, driver):
         """Showing an expanded run row and information."""
         run = driver.find_element_by_css_selector('tr.run')
         run.click()
 
+    @hide('span.time')
     def bams(self, driver):
         """Showing the list of BAMs in a project."""
         bam_btn_sel = 'div.project:last-child .project-stats a:first-child'
