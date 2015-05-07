@@ -73,12 +73,14 @@ var ExaminePage = React.createClass({
     this.props.recordActions.deleteComment(comment, record);
   },
   render: function() {
-    var state = this.state, props = this.props;
+    var state = this.state,
+        props = this.props,
+        run = props.vcf;
     return (
       <div className="examine-page">
         <StatsSummary hasLoaded={state.hasLoaded}
                       stats={state.stats} />
-        <ExamineInformation run={props.vcf}/>
+        <ExamineInformation run={run}/>
         {props.comparableVcfs ?
          <VCFValidation vcfs={props.comparableVcfs}
                         selectedVcfId={state.selectedVcfId}
@@ -89,7 +91,7 @@ var ExaminePage = React.createClass({
                   loadError={state.loadError}
                   query={state.query}
                   handleQueryChange={this.handleQueryChange} />
-        <Downloads query={state.query} run_id={props.vcf.id} />
+        <Downloads query={state.query} run_id={run.id} />
         <VCFTable ref="vcfTable"
                   hasLoaded={state.hasLoaded}
                   records={state.records}
@@ -105,9 +107,9 @@ var ExaminePage = React.createClass({
                   handleOpenViewer={this.handleOpenViewer}
                   handleSetComment={this.handleSetComment}
                   handleDeleteComment={this.handleDeleteComment} />
-        <BioDalliance vcfPath={props.vcf.uri}
-                      normalBamPath={props.vcf.normal_bam_uri}
-                      tumorBamPath={props.vcf.tumor_bam_uri}
+        <BioDalliance vcfPath={run.uri}
+                      normalBamPath={run.normal_bam && run.normal_bam.uri}
+                      tumorBamPath={run.tumor_bam && run.tumor_bam.uri}
                       igvHttpfsUrl={props.igvHttpfsUrl}
                       selectedRecord={state.selectedRecord}
                       isOpen={state.isViewerOpen}
