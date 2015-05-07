@@ -21,9 +21,15 @@ class CollisionError(Exception):
 def get_vcf(vcf_id):
     """Return a vcf with a given ID, and the spec and list of contigs for that
     run for use by the /examine page."""
-    with tables(db, 'vcfs') as (con, vcfs):
-        q = select(vcfs.c).where(vcfs.c.id == vcf_id)
-        vcf = dict(con.execute(q).fetchone())
+    projects = cycledash.projects.get_projects_tree_dict()
+    vcf = None
+    for project in projects:
+        for this_vcf in project['vcfs']:
+            if this_vcf['id'] == vcf_id:
+                vcf = this_vcf
+                break
+    if not vcf:
+        return None
     vcf['spec'] = genotypes.spec(vcf_id)
     vcf['contigs'] = genotypes.contigs(vcf_id)
     return vcf
@@ -31,9 +37,10 @@ def get_vcf(vcf_id):
 
 def get_related_vcfs(vcf):
     """Return a list of vcfs in the same project as vcf."""
+    project_id = vcf['project']['id']
     with tables(db, 'vcfs') as (con, vcfs):
         q = select(vcfs.c).where(
-            vcfs.c.project_id == vcf['project_id']).where(
+            vcfs.c.project_id == project_id).where(
                 vcfs.c.id != vcf['id'])
         vcfs = [dict(v) for v in con.execute(q).fetchall()]
     return vcfs

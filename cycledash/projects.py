@@ -104,7 +104,7 @@ def set_and_verify_project_id_on(data):
             raise voluptuous.Invalid('no project with id {}'.format(project_id))
 
 
-def _get_projects_tree():
+def get_projects_tree_dict():
     """Return a list of all projects, with their respective vcfs and bams.
 
     { "projects": [
@@ -167,9 +167,9 @@ def _join_task_states(vcfs):
 
 def get_projects_tree():
     if request_wants_json():
-        vcfs = _get_projects_tree()
+        vcfs = get_projects_tree_dict()
         return jsonify({'runs': vcfs})
     elif 'text/html' in request.accept_mimetypes:
-        vcfs = _get_projects_tree()
+        vcfs = get_projects_tree_dict()
         comments = cycledash.comments.get_last_comments()
         return render_template('runs.html', last_comments=comments, runs=vcfs)
