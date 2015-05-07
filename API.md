@@ -7,7 +7,7 @@ JSON should be POSTed to <tt>/runs</tt> with following fields:
 #### Required
 
 <dl class="dl-horizontal">
-  <dt>vcfUri</dt>
+  <dt>uri</dt>
   <dd>
     The path on HDFS where the VCF can be found.
     (e.g. <tt>/users/cycledasher/pt-123.vcf</tt>)
