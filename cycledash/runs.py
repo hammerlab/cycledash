@@ -6,11 +6,11 @@ import config
 from cycledash import db, validations, genotypes
 from cycledash.helpers import (prepare_request_data, error_response,
                                get_id_where, get_where, request_wants_json)
-import cycledash.tasks
+import cycledash.bams
 import cycledash.comments
 import cycledash.projects
 
-from common.helpers import tables, CRUDError, find
+from common.helpers import tables, CRUDError
 import workers.runner
 
 
@@ -21,15 +21,10 @@ class CollisionError(Exception):
 def get_vcf(vcf_id):
     """Return a vcf with a given ID, and the spec and list of contigs for that
     run for use by the /examine page."""
-    projects = cycledash.projects.get_projects_tree_dict()
-    vcf = None
-    for project in projects:
-        for this_vcf in project['vcfs']:
-            if this_vcf['id'] == vcf_id:
-                vcf = this_vcf
-                break
-    if not vcf:
-        return None
+    with tables(db, 'vcfs') as (con, vcfs):
+        q = select(vcfs.c).where(vcfs.c.id == vcf_id)
+        vcf = dict(con.execute(q).fetchone())
+    cycledash.bams.attach_bams_to_vcfs([vcf])
     vcf['spec'] = genotypes.spec(vcf_id)
     vcf['contigs'] = genotypes.contigs(vcf_id)
     return vcf
@@ -37,10 +32,9 @@ def get_vcf(vcf_id):
 
 def get_related_vcfs(vcf):
     """Return a list of vcfs in the same project as vcf."""
-    project_id = vcf['project']['id']
     with tables(db, 'vcfs') as (con, vcfs):
         q = select(vcfs.c).where(
-            vcfs.c.project_id == project_id).where(
+            vcfs.c.project_id == vcf['project_id']).where(
                 vcfs.c.id != vcf['id'])
         vcfs = [dict(v) for v in con.execute(q).fetchall()]
     return vcfs

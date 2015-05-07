@@ -9,6 +9,7 @@ from cycledash import db
 import cycledash.tasks
 import cycledash.validations
 import cycledash.comments
+import cycledash.bams
 from cycledash.helpers import (prepare_request_data, error_response,
                                request_wants_json, get_where, get_id_where)
 
@@ -104,7 +105,7 @@ def set_and_verify_project_id_on(data):
             raise voluptuous.Invalid('no project with id {}'.format(project_id))
 
 
-def get_projects_tree_dict():
+def _get_projects_tree():
     """Return a list of all projects, with their respective vcfs and bams.
 
     { "projects": [
@@ -133,17 +134,14 @@ def get_projects_tree_dict():
         q = select(projects.c)
         projects = [dict(b) for b in con.execute(q).fetchall()]
 
+        cycledash.bams.attach_bams_to_vcfs(vcfs)
+
         for vcf in vcfs:
-            normal_bam_id = vcf.get('normal_bam_id')
-            tumor_bam_id = vcf.get('tumor_bam_id')
             project_id = vcf.get('project_id')
 
             vcf['project'] = dict(find(projects,
                                        lambda x: x.get('id') == project_id) or {})
-            vcf['tumor_bam'] = dict(find(bams,
-                                         lambda x: x.get('id') == tumor_bam_id) or {})
-            vcf['normal_bam'] = dict(find(bams,
-                                          lambda x: x.get('id') == normal_bam_id) or {})
+
         _join_task_states(vcfs)
 
         for project in projects:
@@ -167,9 +165,9 @@ def _join_task_states(vcfs):
 
 def get_projects_tree():
     if request_wants_json():
-        vcfs = get_projects_tree_dict()
+        vcfs = _get_projects_tree()
         return jsonify({'runs': vcfs})
     elif 'text/html' in request.accept_mimetypes:
-        vcfs = get_projects_tree_dict()
+        vcfs = _get_projects_tree()
         comments = cycledash.comments.get_last_comments()
         return render_template('runs.html', last_comments=comments, runs=vcfs)
