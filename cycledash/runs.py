@@ -6,11 +6,11 @@ import config
 from cycledash import db, validations, genotypes
 from cycledash.helpers import (prepare_request_data, error_response,
                                get_id_where, get_where, request_wants_json)
-import cycledash.tasks
+import cycledash.bams
 import cycledash.comments
 import cycledash.projects
 
-from common.helpers import tables, CRUDError, find
+from common.helpers import tables, CRUDError
 import workers.runner
 
 
@@ -24,6 +24,7 @@ def get_vcf(vcf_id):
     with tables(db, 'vcfs') as (con, vcfs):
         q = select(vcfs.c).where(vcfs.c.id == vcf_id)
         vcf = dict(con.execute(q).fetchone())
+    cycledash.bams.attach_bams_to_vcfs([vcf])
     vcf['spec'] = genotypes.spec(vcf_id)
     vcf['contigs'] = genotypes.contigs(vcf_id)
     return vcf

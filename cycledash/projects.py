@@ -9,6 +9,7 @@ from cycledash import db
 import cycledash.tasks
 import cycledash.validations
 import cycledash.comments
+import cycledash.bams
 from cycledash.helpers import (prepare_request_data, error_response,
                                request_wants_json, get_where, get_id_where)
 
@@ -133,17 +134,14 @@ def _get_projects_tree():
         q = select(projects.c)
         projects = [dict(b) for b in con.execute(q).fetchall()]
 
+        cycledash.bams.attach_bams_to_vcfs(vcfs)
+
         for vcf in vcfs:
-            normal_bam_id = vcf.get('normal_bam_id')
-            tumor_bam_id = vcf.get('tumor_bam_id')
             project_id = vcf.get('project_id')
 
             vcf['project'] = dict(find(projects,
                                        lambda x: x.get('id') == project_id) or {})
-            vcf['tumor_bam'] = dict(find(bams,
-                                         lambda x: x.get('id') == tumor_bam_id) or {})
-            vcf['normal_bam'] = dict(find(bams,
-                                          lambda x: x.get('id') == normal_bam_id) or {})
+
         _join_task_states(vcfs)
 
         for project in projects:

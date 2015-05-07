@@ -106,15 +106,17 @@ def bam(bam_id):
  ## Examine ##
 #############
 
-@app.route('/runs/<run_id>/examine')
+@app.route('/runs/<int:run_id>/examine')
 def examine(run_id):
     vcf = cycledash.runs.get_vcf(run_id)
+    if not vcf:
+        return error_response('Invalid run', 'Invalid run: %s' % run_id)
     return render_template('examine.html',
                            vcf=vcf,
                            vcfs=cycledash.runs.get_related_vcfs(vcf))
 
 
-@app.route('/runs/<run_id>/genotypes')
+@app.route('/runs/<int:run_id>/genotypes')
 def genotypes(run_id):
     gts = cycledash.genotypes.get(run_id, json.loads(request.args.get('q')))
     return jsonify(gts)
@@ -138,7 +140,7 @@ def comments(vcf_id):
         return cycledash.comments.get_vcf_comments(vcf_id)
 
 
-@app.route('/runs/<run_id>/comments/<comment_id>', methods=['PUT', 'DELETE'])
+@app.route('/runs/<int:run_id>/comments/<comment_id>', methods=['PUT', 'DELETE'])
 def comment(run_id, comment_id):
     if request.method == 'PUT':
         return cycledash.comments.update_comment(comment_id)
@@ -152,7 +154,7 @@ def comment(run_id, comment_id):
 
 VCF_FILENAME = 'cycledash-run-{}.vcf'
 
-@app.route('/runs/<run_id>/download')
+@app.route('/runs/<int:run_id>/download')
 def download_vcf(run_id):
     query = json.loads(request.args.get('query'))
     genotypes = cycledash.genotypes.genotypes_for_records(run_id, query)
