@@ -15,6 +15,7 @@ var LOCAL_IGV_HOST = 'localhost:60151';
  */
 function getIn(obj, path) {
   for (var i = 0; i < path.length; i++) {
+    if (_.isNull(obj) || _.isUndefined(obj)) return null;
     obj = obj[path[i]];
   }
   return obj;

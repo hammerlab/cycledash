@@ -308,13 +308,14 @@ var RunLabels = React.createClass({
                       .object()
                       .value();
     var labelTypes = [
-      ['tumor_bam_id', 'tumor', 'Has an associated tumor BAM'],
-      ['normal_bam_id', 'normal', 'Has an associated normal BAM'],
-      ['run', '', 'Has a running worker task'],
-      ['fail', '', 'Has a failed worker task']
+      [['tumor_bam' , 'name'], null, 'Tumor BAM'],
+      [['normal_bam', 'name'], null, 'Normal BAM'],
+      [['run'], '', 'Has a running worker task'],
+      [['fail'], '', 'Has a failed worker task']
     ];
     var labels = labelTypes.map(function([key, text, title]) {
-      if (run[key] || taskStates[key]) {
+      if (utils.getIn(run, key) || utils.getIn(taskStates, key)) {
+        text = _.isNull(text) ? utils.getIn(run, key) : text;
         return (
           <span className={`label label-info ${key}`} title={title} key={key}>
             {text}
