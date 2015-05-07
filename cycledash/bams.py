@@ -19,14 +19,14 @@ def attach_bams_to_vcfs(vcfs):
     with tables(db, 'bams') as (con, bams):
         q = select(bams.c)
         bams = [dict(b) for b in con.execute(q).fetchall()]
-        for vcf in vcfs:
-            normal_bam_id = vcf.get('normal_bam_id')
-            tumor_bam_id = vcf.get('tumor_bam_id')
+    for vcf in vcfs:
+        normal_bam_id = vcf.get('normal_bam_id')
+        tumor_bam_id = vcf.get('tumor_bam_id')
 
-            vcf['tumor_bam'] = (
-                dict(find(bams, lambda x: x.get('id') == tumor_bam_id) or {}))
-            vcf['normal_bam'] = (
-                dict(find(bams, lambda x: x.get('id') == normal_bam_id) or {}))
+        vcf['tumor_bam'] = (
+            dict(find(bams, lambda x: x.get('id') == tumor_bam_id) or {}))
+        vcf['normal_bam'] = (
+            dict(find(bams, lambda x: x.get('id') == normal_bam_id) or {}))
 
 
 def get_bam(bam_id):
