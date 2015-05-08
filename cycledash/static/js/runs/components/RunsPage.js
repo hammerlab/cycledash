@@ -307,21 +307,23 @@ var RunLabels = React.createClass({
                       .map(x => [x, true])
                       .object()
                       .value();
-    var labelTypes = [
-      ['tumor_bam_id', 'tumor', 'Has an associated tumor BAM'],
-      ['normal_bam_id', 'normal', 'Has an associated normal BAM'],
-      ['run', '', 'Has a running worker task'],
-      ['fail', '', 'Has a failed worker task']
+    var labelSpecs = [
+      {path: ['tumor_bam' , 'name'], usePathValue: true, title: 'Tumor BAM'},
+      {path: ['normal_bam', 'name'], usePathValue: true, title: 'Normal BAM'},
+      {path: ['run'], title: 'Has a running worker task', cssClass: 'run'},
+      {path: ['fail'], title: 'Has a failed worker task', cssClass: 'fail'}
     ];
-    var labels = labelTypes.map(function([key, text, title]) {
-      if (run[key] || taskStates[key]) {
-        return (
-          <span className={`label label-info ${key}`} title={title} key={key}>
-            {text}
-          </span>
-        );
-      }
-    });
+    var labels = labelSpecs.map(
+      function({path, usePathValue, title, cssClass}) {
+        var value = utils.getIn(run, path) || utils.getIn(taskStates, path);
+        if (value) {
+          return (
+            <span className={`label label-info ${cssClass}`} title={title} key={path.join('-')}>
+              {usePathValue ? value : ''}
+            </span>
+          );
+        }
+      });
     return (
         <td className='labels'>
           {labels}
