@@ -28,3 +28,4 @@ pylint==1.4.1
 humanize==0.5.1
 pyensembl==0.5.13
 bunch==1.0.1
+mock==1.0.1

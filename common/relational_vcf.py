@@ -133,10 +133,10 @@ def vcf_to_csv(vcfdata, columns, filename, **kwargs):
 
 def insert_csv(filename, tablename, engine):
     """Insert the relations in the CSV filename into table, using engine."""
-    with engine.raw_connection() as raw:
-        cur = raw.cursor()
-        cur.execute("COPY {} FROM '{}' WITH (FORMAT csv);".format(tablename, filename))
-        raw.commit()
+    raw = engine.raw_connection()
+    cur = raw.cursor()
+    cur.execute("COPY {} FROM '{}' WITH (FORMAT csv);".format(tablename, filename))
+    raw.commit()
 
 
 def insert_genotypes_with_copy(vcfreader, engine, **kwargs):

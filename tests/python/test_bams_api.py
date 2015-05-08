@@ -9,7 +9,7 @@ from test_projects_api import create_project_with_name
 
 
 def create_bam_with_name(project_id, name):
-    with tables(db, 'bams') as (con, bams):
+    with tables(db.engine, 'bams') as (con, bams):
         res = bams.insert(
             {'name': name,
              'project_id': project_id,
@@ -27,7 +27,7 @@ class TestBamsAPI(object):
         self.project = create_project_with_name(self.PROJECT_NAME)
 
     def tearDown(self):
-        with tables(db, 'projects', 'bams') as (con, projects, bams):
+        with tables(db.engine, 'projects', 'bams') as (con, projects, bams):
             bams.delete(bams.c.name == self.BAM_NAME).execute()
             projects.delete(projects.c.name == self.PROJECT_NAME).execute()
 

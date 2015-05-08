@@ -7,7 +7,7 @@ from common.helpers import tables
 
 
 def create_project_with_name(name):
-    with tables(db, 'projects') as (con, projects):
+    with tables(db.engine, 'projects') as (con, projects):
         res = projects.insert({'name': name}).returning(*projects.c).execute()
         return dict(res.fetchone())
 
@@ -21,7 +21,7 @@ class TestProjectAPI(object):
         self.app = app.test_client()
 
     def tearDown(self):
-        with tables(db, 'projects') as (con, projects):
+        with tables(db.engine, 'projects') as (con, projects):
             res = projects.delete(projects.c.name == self.PROJECT_NAME).execute()
 
     def test_create_project(self):
