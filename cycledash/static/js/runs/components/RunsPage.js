@@ -310,7 +310,7 @@ var RunLabels = React.createClass({
     var labelSpecs = [
       {path: ['tumor_bam' , 'name'], usePathValue: true, title: 'Tumor BAM'},
       {path: ['normal_bam', 'name'], usePathValue: true, title: 'Normal BAM'},
-      {path: ['run'], title: 'Has atitle: running worker task', cssClass: 'run'},
+      {path: ['run'], title: 'Has a running worker task', cssClass: 'run'},
       {path: ['fail'], title: 'Has a failed worker task', cssClass: 'fail'}
     ];
     var labels = labelSpecs.map(

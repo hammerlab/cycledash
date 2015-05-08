@@ -74,11 +74,13 @@ class Examine(Base):
         """Examine page showing a filtered view."""
         pass
 
+    @hide('span.time')
     def comments_view(self, driver):
         """Examine page showing a comment in view mode."""
         row = driver.find_element_by_css_selector('tbody tr')
         row.click()
 
+    @hide('span.time')
     def comments_edit(self, driver):
         """Examine page showing a comment in edit mode."""
         row = driver.find_element_by_css_selector('tbody tr')

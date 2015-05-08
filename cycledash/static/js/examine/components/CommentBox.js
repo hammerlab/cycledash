@@ -288,7 +288,7 @@ var VCFCommentViewer = React.createClass({
       <div className='comment-view-container'>
         <div className='comment-header'>
           <span className='comment-by'>
-            Comment by <b>{this.props.authorName}</b>, {this.props.createdString}
+            Comment by <b>{this.props.authorName}</b>, <span className='time'>{this.props.createdString}</span>
           </span>
           <span className='edit-buttons'>
             <a className='comment-edit' title='Edit Comment' href='#' onClick={this.props.handleEdit}></a>
