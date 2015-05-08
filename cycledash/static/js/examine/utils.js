@@ -9,7 +9,8 @@ var LOCAL_IGV_HOST = 'localhost:60151';
 
 
 /**
- * Returns the value in object found at path.
+ * Returns the value in object found at path. If the path doesn't exist, null is
+ * returned.
  *
  * e.g. obj = {a: [0, {b: 'Whoa'}, 2]}, path = ['a', 1, 'b'] => 'Whoa'.
  */
