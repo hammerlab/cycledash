@@ -28,8 +28,7 @@ virtualenv venv                    # Initialize a new virtual environment.
 source venv/bin/activate           # Activate your virtual environment.
 pip install -r requirements.txt    # Install python requirements into virtualenv
 npm install                        # Install JS requirements from package.json
-make initenv                       # Initialize environment file.
-$EDITOR ENV.sh                     # Fill in values. (see Step #3)
+
 ```
 
 After the initial setup, the only command you'll need to run is:
@@ -43,7 +42,8 @@ source venv/bin/activate
 You will need to generate an `ENV.sh` file using 'make initenv'. `ENV.sh` contains environment variables that need to be exported. You may need to tweak some settings for your installation.
 
 ```
-make initenv
+make initenv                       # Initialize environment file.
+$EDITOR ENV.sh                     # Fill in values.
 ```
 
 
