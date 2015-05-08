@@ -30,7 +30,7 @@ def spec(vcf_id):
     SAMPLE: {attrA: ...},
     ANNOTATIONS: {attrA: ...}}
     """
-    with tables(db, 'vcfs') as (con, vcfs):
+    with tables(db.engine, 'vcfs') as (con, vcfs):
         q = (select([vcfs.c.vcf_header, vcfs.c.extant_columns])
                     .where(vcfs.c.id == vcf_id))
         res = con.execute(q).fetchone()
@@ -51,7 +51,7 @@ def samples(vcf_id):
 @forever.memoize
 def contigs(vcf_id):
     """Return a sorted list of contig names found in the given vcf."""
-    with tables(db, 'genotypes') as (con, genotypes):
+    with tables(db.engine, 'genotypes') as (con, genotypes):
         q = (select([genotypes.c.contig])
              .where(genotypes.c.vcf_id == vcf_id)
              .group_by(genotypes.c.contig)
@@ -85,7 +85,7 @@ def get(vcf_id, query, with_stats=True):
     """
     query = _annotate_query_with_types(query, spec(vcf_id))
     compare_to_vcf_id = query.get('compareToVcfId')
-    with tables(db, 'genotypes') as (con, g):
+    with tables(db.engine, 'genotypes') as (con, g):
         if compare_to_vcf_id:
             # We consider a genotype validated if a truth genotype exists at its
             # location (contig/position) with the same ref/alts.  This isn't
@@ -126,7 +126,7 @@ def calculate_stats(vcf_id, truth_vcf_id, query):
        truth_vcf_id: the truth_vcf being validated against.
        query: the query object.
     """
-    with tables(db, 'genotypes') as (con, genotypes):
+    with tables(db.engine, 'genotypes') as (con, genotypes):
         # The number of records being displayed:
         count_q = select([func.count()]).where(genotypes.c.vcf_id == vcf_id)
         count_q = _add_filters(count_q, genotypes, query.get('filters'))
@@ -149,7 +149,7 @@ def genotype_statistics(query, vcf_id, truth_vcf_id, count, total_count):
     if not truth_vcf_id:
         return stats
 
-    with tables(db, 'genotypes') as (con, genotypes):
+    with tables(db.engine, 'genotypes') as (con, genotypes):
         g, gt = genotypes.alias(), genotypes.alias()
         joined_q = join(g, gt, and_(g.c.contig == gt.c.contig,
                                     g.c.position == gt.c.position,
@@ -187,7 +187,7 @@ def genotypes_for_records(vcf_id, query):
     vcf.model._Records and then written to a VCF file.
     """
     query = _annotate_query_with_types(query, spec(vcf_id))
-    with tables(db, 'genotypes') as (con, gt):
+    with tables(db.engine, 'genotypes') as (con, gt):
         keyfunc = func.concat(
             gt.c.contig, ':', cast(gt.c.position, types.Unicode), '::',
             gt.c.reference, '->', gt.c.alternates)
@@ -441,6 +441,6 @@ def _whitelist_query_filters(query, ok_fields=['reference', 'alternates']):
 
 
 def _get_vcf_by_id(vcf_id):
-    with tables(db, 'vcfs') as (con, vcfs):
+    with tables(db.engine, 'vcfs') as (con, vcfs):
         vcf = con.execute(select([vcfs]).where(vcfs.c.id == vcf_id)).fetchone()
     return dict(vcf)

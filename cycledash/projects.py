@@ -15,7 +15,7 @@ from cycledash.helpers import (prepare_request_data, error_response,
 
 
 def get_project(project_id):
-    with tables(db, 'projects') as (con, projects):
+    with tables(db.engine, 'projects') as (con, projects):
         q = select(projects.c).where(projects.c.id == project_id)
         project = con.execute(q).fetchone()
     if project:
@@ -27,7 +27,7 @@ def get_project(project_id):
 
 def get_projects():
     """Return list of projects ordered by recency."""
-    with tables(db, 'projects') as (con, projects):
+    with tables(db.engine, 'projects') as (con, projects):
         q = select(projects.c).order_by(desc(projects.c.id))
         return jsonify({'projects': [dict(r) for r in con.execute(q).fetchall()]})
 
@@ -41,7 +41,7 @@ def create_project():
         errors = [str(err) for err in e.errors]
         return error_response('Project validation', errors)
     try:
-        with tables(db, 'projects') as (con, projects):
+        with tables(db.engine, 'projects') as (con, projects):
             result = projects.insert(data).returning(*projects.c).execute()
             project = dict(result.fetchone())
     except Exception as e:
@@ -62,7 +62,7 @@ def update_project(project_id):
         errors = [str(err) for err in e.errors]
         return error_response('Project validation', errors)
     try:
-        with tables(db, 'projects') as (con, projects):
+        with tables(db.engine, 'projects') as (con, projects):
             result = projects.update().where(
                 projects.c.id == project_id).values(
                     **data).returning(*projects.c).execute()
@@ -81,7 +81,7 @@ def delete_project(project_id):
     """Delete project and return the project, or None if no project
     was deleted.
     """
-    with tables(db, 'projects') as (con, projects):
+    with tables(db.engine, 'projects') as (con, projects):
         result = projects.delete(
             projects.c.id == project_id).returning(*projects.c).execute()
     if result.rowcount > 0:
@@ -117,7 +117,7 @@ def _get_projects_tree():
       ]}, ...
     ]}
     """
-    with tables(db, 'vcfs', 'user_comments', 'bams', 'projects') as \
+    with tables(db.engine, 'vcfs', 'user_comments', 'bams', 'projects') as \
          (con, vcfs, user_comments, bams, projects):
         joined = (vcfs
             .outerjoin(user_comments, vcfs.c.id == user_comments.c.vcf_id))

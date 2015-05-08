@@ -68,7 +68,7 @@ def get_where(table_name, db, **kwargs):
 
     kwargs is a dict of column_name: column_value.
     """
-    with tables(db, table_name) as (_, table):
+    with tables(db.engine, table_name) as (_, table):
         q = table.select()
         for key, val in kwargs.iteritems():
             q = q.where(table.c.__getattr__(key) == val)

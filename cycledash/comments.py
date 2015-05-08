@@ -15,7 +15,7 @@ from cycledash.helpers import (prepare_request_data, success_response,
 
 def get_all_comments():
     """Return a list of all comments."""
-    with tables(db, 'user_comments') as (con, user_comments):
+    with tables(db.engine, 'user_comments') as (con, user_comments):
         cols = get_user_comments_cols(user_comments)
         q = select(cols.values()).order_by(desc(cols.created))
         return [dict(c) for c in con.execute(q).fetchall()]
@@ -31,7 +31,7 @@ def user_comments_db(f=None, use_transaction=False):
         return partial(user_comments_db, use_transaction=use_transaction)
     @wraps(f)
     def wrapper(*args, **kwargs):
-        with tables(db, 'user_comments') as (conn, user_comments):
+        with tables(db.engine, 'user_comments') as (conn, user_comments):
             use_transaction = True
             data = prepare_request_data(request)
             transaction = conn.begin() if use_transaction else None
@@ -126,7 +126,7 @@ def get_vcf_comments(vcf_id, conn, user_comments, data):
 
 
 def get_last_comments(n=5):
-    with tables(db, 'user_comments') as (con, user_comments):
+    with tables(db.engine, 'user_comments') as (con, user_comments):
         cols = get_user_comments_cols(user_comments)
         q = select(cols.values()).order_by(
             desc(cols.created)).limit(n)

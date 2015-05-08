@@ -5,16 +5,16 @@ import sqlalchemy
 
 
 @contextmanager
-def tables(database, *table_names):
+def tables(engine, *table_names):
     """A context manager yielding a tuple of the database connection and
     whichever tables were requested by name from the db.
 
     Use:
         with tables(db, 'vcfs', 'genotypes') as (con, vcfs, genotypes):
             ...
-      Where vcfs and genotypes are tables in the provided db.
+        Where vcfs and genotypes are tables in the provided db.
     """
-    with database.engine.connect() as connection:
+    with engine.connect() as connection:
         metadata = sqlalchemy.MetaData(bind=connection)
         metadata.reflect()
         yield tuple([connection] + [metadata.tables[t] for t in table_names])

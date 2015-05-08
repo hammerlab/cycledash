@@ -16,7 +16,7 @@ import workers.indexer
 
 def attach_bams_to_vcfs(vcfs):
     """Attaches tumor_bam and normal_bam to all the VCFs."""
-    with tables(db, 'bams') as (con, bams):
+    with tables(db.engine, 'bams') as (con, bams):
         q = select(bams.c)
         bams = [dict(b) for b in con.execute(q).fetchall()]
     for vcf in vcfs:
@@ -41,7 +41,7 @@ def get_bam(bam_id):
 
 def get_bams():
     """Return json list of BAMs ordered by recency."""
-    with tables(db, 'bams') as (con, bams):
+    with tables(db.engine, 'bams') as (con, bams):
         q = select(bams.c).order_by(desc(bams.c.id))
         return jsonify({'bams': [dict(r) for r in con.execute(q).fetchall()]})
 
@@ -66,7 +66,7 @@ def create_bam():
         return error_response('Project not found', str(e))
 
     try:
-        with tables(db, 'bams') as (con, bams):
+        with tables(db.engine, 'bams') as (con, bams):
             result = bams.insert(data).returning(*bams.c).execute()
             bam = dict(result.fetchone())
     except Exception as e:
@@ -92,7 +92,7 @@ def update_bam(bam_id):
         errors = [str(err) for err in e.errors]
         return error_response('BAM validation', errors)
     try:
-        with tables(db, 'bams') as (con, bams):
+        with tables(db.engine, 'bams') as (con, bams):
             result = bams.update().where(
                 bams.c.id == bam_id).values(
                     **data).returning(*bams.c).execute()
@@ -112,7 +112,7 @@ def delete_bam(bam_id):
     """Delete BAM and return the BAM, or error if no BAM
     was deleted.
     """
-    with tables(db, 'bams') as (con, bams):
+    with tables(db.engine, 'bams') as (con, bams):
         result = bams.delete(
             bams.c.id == bam_id).returning(*bams.c).execute()
     if result.rowcount > 0:

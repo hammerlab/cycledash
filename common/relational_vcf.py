@@ -133,12 +133,10 @@ def vcf_to_csv(vcfdata, columns, filename, **kwargs):
 
 def insert_csv(filename, tablename, engine):
     """Insert the relations in the CSV filename into table, using engine."""
-    raw = engine.raw_connection()
-    cur = raw.cursor()
-    cur.execute("COPY {} FROM '{}' WITH (FORMAT csv);".format(tablename, filename))
-    cur.close()
-    raw.commit()
-    return cur
+    with engine.raw_connection() as raw:
+        cur = raw.cursor()
+        cur.execute("COPY {} FROM '{}' WITH (FORMAT csv);".format(tablename, filename))
+        raw.commit()
 
 
 def insert_genotypes_with_copy(vcfreader, engine, **kwargs):
@@ -161,14 +159,13 @@ def insert_genotypes_with_copy(vcfreader, engine, **kwargs):
 
     Optimized via COPY from a temporary CSV.
     """
-    con = engine.connect()
-    meta = sqlalchemy.MetaData(bind=con)
-    meta.reflect()
-    table = meta.tables.get('genotypes')
-    table_cols = columns(table)
-    filename = vcf_to_csv(vcfreader, table_cols, None, **kwargs)
-    insert_csv(filename, 'genotypes', engine)
-    con.close()
+    with engine.connect() as con:
+        meta = sqlalchemy.MetaData(bind=con)
+        meta.reflect()
+        table = meta.tables.get('genotypes')
+        table_cols = columns(table)
+        filename = vcf_to_csv(vcfreader, table_cols, None, **kwargs)
+        insert_csv(filename, 'genotypes', engine)
 
 
 def vcf_format(val):

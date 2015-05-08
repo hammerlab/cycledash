@@ -18,10 +18,13 @@ Steps:
 """
 from contextlib import contextmanager
 import csv
+import sqlalchemy
 from sqlalchemy import select, Table, Column
 from sqlalchemy.types import Text, Integer
 
 import config
+
+from common.helpers import tables
 
 from workers.shared import (worker, DATABASE_URI, TEMPORARY_DIR,
                             initialize_database, temp_csv,
@@ -39,56 +42,53 @@ def annotate(self, vcf_id):
 
     EnsemblRelease(config.ENSEMBL_RELEASE).install()  # Only runs the first time for this release.
 
-    _, connection, metadata = initialize_database(DATABASE_URI)
-    with close_and_discard(connection):
-        gene_names = get_gene_names(
-            connection, metadata, vcf_id,
-            ensembl_release_num=config.ENSEMBL_RELEASE)
+    engine = sqlalchemy.create_engine(DATABASE_URI)
+    with tables(engine, 'genotypes') as (con, genotypes):
+        metadata = sqlalchemy.MetaData(bind=con)
+        metadata.reflect()
+        gene_names = get_gene_names(genotypes, vcf_id, config.ENSEMBL_RELEASE)
 
-        # Open file for both writing (the gene annotations) and reading that
-        # out to Postgres
-        with temp_csv(mode='r+', tmp_dir=TEMPORARY_DIR) as csv_file:
-            # Don't use commas as a delim, as commas are part of gene_names
-            csv.writer(csv_file, delimiter='\t').writerows(gene_names)
+        tmp_table = Table('gene_annotations',
+                          metadata,
+                          Column('contig', Text, nullable=False),
+                          Column('position', Integer, nullable=False),
+                          Column('gene_names', Text, nullable=True),
+                          prefixes=['TEMPORARY'])
+        try:
+            tmp_table.create()
+            write_to_table_via_csv(tmp_table, rows=gene_names, connection=con)
+            # Add gene names from temp table to genotypes.
+            (genotypes.update()
+             .where(genotypes.c.contig == tmp_table.c.contig)
+             .where(genotypes.c.position == tmp_table.c.position)
+             .where(genotypes.c.vcf_id == vcf_id)
+             .values(
+                 {'annotations:gene_names': tmp_table.c.gene_names}
+             )).execute()
+        finally:
+            con.execute("DISCARD TEMP")
 
-            # Back to the beginning of the file
-            csv_file.seek(0, 0)
-
-            with connection.connection.cursor() as cursor:
-                tmp_table = Table('gene_annotations',
-                    metadata,
-                    Column('contig', Text, nullable=False),
-                    Column('position', Integer, nullable=False),
-                    Column('gene_names', Text, nullable=True),
-                    prefixes=['TEMPORARY'])
-                tmp_table.create()
-
-                cursor.copy_from(csv_file, sep='\t', null='',
-                    table=tmp_table.name)
-                connection.connection.commit()
-
-                # Join genotypes with the temporary table created above
-                genotypes = metadata.tables.get('genotypes')
-                genotypes.update().where(
-                    genotypes.c.contig == tmp_table.c.contig).where(
-                    genotypes.c.position == tmp_table.c.position).where(
-                    genotypes.c.vcf_id == vcf_id).values(
-                        {'annotations:gene_names': tmp_table.c.gene_names}
-                    ).execute()
-
-                # Update the list of extant columns for the UI
-                update_extant_columns(metadata, connection, vcf_id)
+        # We've added annotations:gene_names, so update the columns to display.
+        update_extant_columns(metadata, con, vcf_id)
 
 
-def get_gene_names(connection, metadata, vcf_id, ensembl_release_num):
+def write_to_table_via_csv(table, rows, connection):
+    with temp_csv(mode='r+', tmp_dir=TEMPORARY_DIR) as csv_file:
+        # Don't use commas as a delim, as commas are part of gene_names.
+        csv.writer(csv_file, delimiter='\t').writerows(rows)
+        csv_file.seek(0, 0)
+        connection.connection.cursor().copy_from(csv_file, sep='\t', null='',
+                                                 table=table.name)
+        connection.connection.commit()
+
+
+def get_gene_names(genotypes, vcf_id, ensembl_release_num):
     """Get contig and position data from the genotypes table, and look up
     each (contig, position) in Ensembl. Return a list of the form:
     [[contig, position, "NAME,NAME,..."], [contig...], ...]
     """
-    genotypes = metadata.tables.get('genotypes')
-    stmt = select([genotypes.c.contig, genotypes.c.position]).where(
-        genotypes.c.vcf_id == vcf_id)
-    results = connection.execute(stmt)
+    results = select([genotypes.c.contig, genotypes.c.position]).where(
+        genotypes.c.vcf_id == vcf_id).execute()
 
     # TODO(tavi) Read the Ensembl release from the VCF.
     # TODO(tavi) Workers should prefetch Ensembl data.
@@ -105,15 +105,3 @@ def get_gene_names(connection, metadata, vcf_id, ensembl_release_num):
         gene_names.append([contig, position, gene_name_str])
 
     return gene_names
-
-
-@contextmanager
-def close_and_discard(connection):
-    """Discard any temporary tables before closing a connection."""
-    try:
-        yield connection
-    finally:
-        try:
-            connection.execute("DISCARD TEMP")
-        finally:
-            connection.close()
