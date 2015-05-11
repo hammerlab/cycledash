@@ -21,7 +21,7 @@ class CollisionError(Exception):
 def get_vcf(vcf_id):
     """Return a vcf with a given ID, and the spec and list of contigs for that
     run for use by the /examine page."""
-    with tables(db, 'vcfs') as (con, vcfs):
+    with tables(db.engine, 'vcfs') as (con, vcfs):
         q = select(vcfs.c).where(vcfs.c.id == vcf_id)
         vcf = dict(con.execute(q).fetchone())
     cycledash.bams.attach_bams_to_vcfs([vcf])
@@ -32,7 +32,7 @@ def get_vcf(vcf_id):
 
 def get_related_vcfs(vcf):
     """Return a list of vcfs in the same project as vcf."""
-    with tables(db, 'vcfs') as (con, vcfs):
+    with tables(db.engine, 'vcfs') as (con, vcfs):
         q = select(vcfs.c).where(
             vcfs.c.project_id == vcf['project_id']).where(
                 vcfs.c.id != vcf['id'])
@@ -62,7 +62,7 @@ def create_vcf():
     except voluptuous.Invalid as e:
         return error_response('BAM not found', str(e)), 404
 
-    with tables(db, 'vcfs') as (con, vcfs_table):
+    with tables(db.engine, 'vcfs') as (con, vcfs_table):
         try:
             _ensure_no_existing_vcf(vcfs_table, run['uri'])
         except CollisionError as e:
@@ -73,6 +73,16 @@ def create_vcf():
     workers.runner.start_workers_for_vcf_id(vcf_id)
 
     return redirect(url_for('list_runs'))
+
+
+def restart_failed_tasks_for(vcf_id):
+    with tables(db.engine, 'task_states') as (con, tasks):
+        q = (tasks.delete()
+             .where(tasks.c.vcf_id == vcf_id)
+             .where(tasks.c.state == 'FAILURE')
+             .returning(tasks.c.type))
+        names = [r[0] for r in q.execute().fetchall()]
+    workers.runner.restart_failed_tasks(names, vcf_id)
 
 
 def _set_or_verify_bam_id_on(run, bam_type):

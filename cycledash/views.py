@@ -58,6 +58,12 @@ def get_tasks(vcf_id):
         return success_response()
 
 
+@app.route('/tasks/<vcf_id>/restart', methods=['POST'])
+def restart_tasks(vcf_id):
+    cycledash.runs.restart_failed_tasks_for(vcf_id)
+    return success_response()
+
+
   ##############
  ## Projects ##
 ##############

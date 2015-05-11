@@ -18,6 +18,9 @@
     <button id='delete' class='btn btn-danger'>
       Delete these tasks
     </button>
+    <button id='restart' class='btn btn-default'>
+      Restart these tasks
+    </button>
   </section>
 </main>
 
@@ -28,6 +31,19 @@ $(function() {
       $.ajax({
         url: window.location,
         type: 'DELETE'
+      }).done(function() {
+        window.location = '/runs';
+      }).fail(function(e) {
+        console.error(e);
+        alert('Something went wrong. ' +  e);
+      })
+    }
+  });
+  $('#restart').on('click', function(e) {
+    if (window.confirm('Are you sure you want to restart all failed tasks?')) {
+      $.ajax({
+        url: window.location + '/restart',
+        type: 'POST'
       }).done(function() {
         window.location = '/runs';
       }).fail(function(e) {
