@@ -193,7 +193,6 @@ var RunsTable = React.createClass({
           <tr>
             <th></th>
             <th className='caller-name'>Caller Name</th>
-            <th className='dataset'>Dataset</th>
             <th className='date'>Submitted On</th>
             <th className='num-variants'>Variants</th>
             <th></th>
@@ -225,7 +224,6 @@ var RunRow = React.createClass({
           <a className='btn btn-default btn-xs' href={'/runs/' + run.id + '/examine'} ref='link'>Examine</a>
         </td>
         <td className='caller-name'>{run.caller_name}</td>
-        <td className='dataset'>{run.dataset_name}</td>
         <td className='date' title={run.created_at}>{moment(new Date(run.created_at)).format('YYYY-MM-DD')}</td>
         <td className='num-variants' title={run.genotype_count}>{run.genotype_count}</td>
         <RunLabels run={run} />
@@ -266,7 +264,7 @@ var RunDescriptionRow = React.createClass({
           });
     return (
       <tr className='info'>
-        <td colSpan='7'>
+        <td colSpan='6'>
           <dl className='dl-horizontal'>
             {descriptions}
             {tasks}
