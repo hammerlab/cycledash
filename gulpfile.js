@@ -6,7 +6,8 @@ var _ = require('underscore'),
     reactify = require('reactify'),
     source = require('vinyl-source-stream'),
     uglifyify = require('uglifyify'),
-    watchify = require('watchify');
+    watchify = require('watchify'),
+    sass = require('gulp-sass');
 
 
 var PATHS = {
@@ -17,7 +18,7 @@ var PATHS = {
   ],
   dest: './cycledash/static/js/dist/',  // Where the compiled JS bundle will go
   js: ['cycledash/static/js/*.js'],  // All of the JS files we want to watch for changes
-  css: ['./cycledash/static/css/*.css'],  // The CSS we want to watch for changes
+  sass: ['./cycledash/static/scss/*.scss'],  // The SASS we want to watch for changes
   pegGrammar: './grammars/querylanguage.pegjs',
   polyfills: [
     './node_modules/es5-shim/es5-shim.min.js',
@@ -53,17 +54,19 @@ gulp.task('js', function() {
   rebundle();
   bundler.on('update', rebundle);
 });
-
-// Notifies livereload server to reload the browser when CSS changes.
-gulp.task('css', function() {
-  livereload.changed();
+ 
+gulp.task('sass', function () {
+    gulp.src('./cycledash/static/scss/*.scss')
+        .pipe(sass().on('error', sass.logError))
+        .pipe(gulp.dest('./cycledash/static/css'));
+        livereload.changed();
 });
 
-// Starts the livereload server and runs the 'js' and 'css' tasks, above.
+// Starts the livereload server and runs the 'js' and 'sass' tasks, above.
 gulp.task('watch', function() {
   livereload.listen();
   gulp.watch(PATHS.js, ['js']);
-  gulp.watch(PATHS.css, ['css']);
+  gulp.watch(PATHS.sass, ['sass']);
 });
 
 // Task which builds the production-ready JS.
@@ -110,10 +113,10 @@ gulp.task('staticlibs', function() {
 
 // Default task which compiles the JS and then watches the JS and CSS for
 // changes.
-gulp.task('default', ['watch', 'js']);
+gulp.task('default', ['watch', 'js', 'sass']);
 
 // Build production resources and copy them into the serving directory.
-gulp.task('prod', ['peg', 'build', 'staticlibs']);
+gulp.task('prod', ['peg', 'build', 'staticlibs', 'sass']);
 
 gulp.task('help', function() {
   console.log([
