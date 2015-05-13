@@ -3,6 +3,7 @@
 var React = require('react'),
     $ = require('jquery'),
     _ = require('underscore');
+// Someday: pileup = require('pileup');
 
 require('jquery-mousewheel')($);
 
@@ -45,7 +46,7 @@ var BioDalliance = React.createClass({
         <a href='#' className="close-button" onClick={this.handleClose}>✕</a>
         <a href='#' className="left-button" onClick={this.handleLeft}>←</a>
         <a href='#' className="right-button" onClick={this.handleRight}>→</a>
-        <div id="svgHolder" />
+        <div ref="pileupElement" id="svgHolder" />
       </div>
     );
   },
@@ -69,30 +70,33 @@ var BioDalliance = React.createClass({
   lazilyCreateDalliance: function() {
     if (this.browser) return;
 
-    var vcfSource = (name, path) => {
-      var source = {
-        name: name,
-        tier_type: 'memstore',
-        payload: 'vcf'
-      };
-      source.uri = this.hdfsUrl(path);
-      return source;
-    };
+    var vcfSource = (name, path) => ({
+      name: name,
+      viz: pileup.viz.variants(),
+      data: pileup.formats.vcf({
+        url: this.hdfsUrl(path)
+      })
+    });
 
-    var bamSource = (name, path, chunks) => ({
-        name: name,
-        bamURI: this.hdfsUrl(path),
-        tier_type: 'bam',
-        style: bamStyle,
-        className: 'pileup',
-        indexChunks: chunks
+    var bamSource = (name, cssClass, path, chunks) => ({
+      name: name,
+      cssClass: cssClass,
+      viz: pileup.viz.pileup(),
+      data: pileup.formats.bam({
+        url: this.hdfsUrl(path),
+        indexUrl: this.hdfsUrl(path + '.bai'),
+        // TODO: indexChunks: chunks
+      })
     });
 
     var sources = [
         {
           name: 'Genome',
-          twoBitURI: 'http://www.biodalliance.org/datasets/hg19.2bit',
-          tier_type: 'sequence'
+          viz: pileup.viz.genome(),
+          isReference: true,
+          data: pileup.formats.twoBit({
+            url: 'http://www.biodalliance.org/datasets/hg19.2bit'
+          })
         },
         vcfSource('Run VCF', this.props.vcfPath)
     ];
@@ -101,42 +105,30 @@ var BioDalliance = React.createClass({
     }
 
     if (this.props.normalBamPath) {
-      sources.push(bamSource('Normal', this.props.normalBamPath, this.state.normalBaiChunks));
+      sources.push(bamSource('Normal', 'normal', this.props.normalBamPath, this.state.normalBaiChunks));
     }
     if (this.props.tumorBamPath) {
-      sources.push(bamSource('Tumor', this.props.tumorBamPath, this.state.tumorBaiChunks));
+      sources.push(bamSource('Tumor', 'tumor', this.props.tumorBamPath, this.state.tumorBaiChunks));
     }
 
-    // BioDalliance steals these events. We just want default browser behavior.
-    var guardian = new EventGuardian(HTMLDivElement, ['mousewheel', 'MozMousePixelScroll']);
+    var pileupEl = this.refs.pileupElement.getDOMNode();
 
-    this.browser = new Browser({
-        chr:       '20',  // random position -- it will be changed.
-        viewStart: 2684736 - 50,
-        viewEnd:   2684736 + 50,
-
-        noSourceCSS: true,
-        uiPrefix: document.location.protocol + '//' + document.location.host + '/static/lib/dalliance/',
-        noPersist: true,
-
-        coordSystem: {
-          speciesName: 'Human',
-          taxon: 9606,
-          auth: 'NCBI',
-          version: '37',
-          ucscName: 'hg19'
-        },
-
-        sources: sources,
-
-        initListeners: function() {
-          guardian.destroy();
-        }
-      });
+    this.browser = pileup.create(pileupEl, {
+      range: {
+        contig: '20',  // random position -- it will be changed.
+        start:  2684736 - 50,
+        stop:   2684736 + 50
+      },
+      tracks: sources
+    });
   },
   panToSelection: function() {
     var rec = this.props.selectedRecord;
-    this.browser.setLocation(rec.contig, rec.position - 25, rec.position + 25);
+    this.browser.setRange({
+      contig: rec.contig,
+      start: rec.position - 25,
+      stop: rec.position + 25
+    });
   },
   update: function() {
     if (this.props.isOpen && this.props.selectedRecord) {
@@ -170,113 +162,17 @@ var BioDalliance = React.createClass({
   componentDidMount: function() {
     this.fetchIndexChunks();
     this.update();
-
-    $(this.refs.inspector.getDOMNode()).on('mousewheel.biodalliance', (e) => {
-      var $target = $(e.target);
-      var $tiers = $target.parents('.tier.pileup');
-      if ($tiers.length === 0) {
-        e.preventDefault();
-      }
-    }).on('mousewheel.biodalliance', '.tier.pileup', (e, d) => {
-      // See http://stackoverflow.com/q/5802467/388951
-      var t = $(e.currentTarget);
-      if (d > 0 && t.scrollTop() === 0) {
-        e.preventDefault();
-      } else {
-        if (d < 0 && (t.scrollTop() == t.get(0).scrollHeight - t.innerHeight())) {
-          e.preventDefault();
-        }
-      }
-    });
-
-    // This uses a capture-phase event listener so that it gets informed of ESC
-    // key presses before BioDalliance, which will capture them. We only want
-    // to bypass the usual event bubbling system for ESC, not for arrow keys.
-    window.addEventListener('keydown', (e) => {
-      if (!this.props.isOpen || !this.props.selectedRecord) return;
-      var isDallianceActive = $(document.activeElement).is('.dalliance');
-
-      if (e.which == 27 /* esc */) {
-        e.preventDefault();
-        this.props.handleClose();
-      }
-
-      if (isDallianceActive) return;
-      if (e.which == 37 /* left arrow */) {
-        this.handleLeft(e);
-      } else if (e.which == 39 /* right arrow */) {
-        this.handleRight(e);
-      }
-    }, true /* capture */);
   },
   componentDidUpdate: function() {
     this.update();
   },
   componentWillUnmount: function() {
-    $(this.props.inspector.getDOMNode()).off('mousewheel.biodalliance');
   },
   shouldComponentUpdate: function(nextProps, nextState) {
     return ((nextProps.isOpen != this.props.isOpen) ||
             (nextProps.selectedRecord != this.props.selectedRecord));
   },
 });
-
-
-// Block any attempt to listen to a set of events on a type of element.
-// This is a hack to tame badly-behaved libraries.
-var EventGuardian = function(elementClass, inputEvents) {
-  var events = JSON.parse(JSON.stringify(inputEvents));
-
-  this.elementClass_ = elementClass;
-  var realListener = this.elementClass_.prototype.addEventListener;
-  this.elementClass_.prototype.addEventListener = function(name, meth, useCapture) {
-    if (events.indexOf(name) >= 0) {
-      return;
-    }
-    return realListener.call(this, name, meth, useCapture);
-  };
-
-  this.realListener = realListener;
-};
-
-EventGuardian.prototype.destroy = function() {
-  this.elementClass_.prototype.addEventListener = this.realListener_;
-};
-
-
-// Style for visualizing BAM reads.
-var bamStyle = [
-  {
-    "zoom": "low",
-    "style": {
-      "glyph": "__NONE",
-    }
-  },
-  {
-    "zoom": "medium",
-    "style": {
-      "glyph": "__NONE",
-    },
-  },
-  {
-    "type": "bam",
-    "zoom": "high",
-    "style": {
-      "glyph": "__SEQUENCE",
-      "_minusColor": "lightgray",
-      "_plusColor": "lightgray",
-      "HEIGHT": 8,
-      "BUMP": true,
-      "LABEL": false,
-      "ZINDEX": 20,
-      "__INSERTIONS": "no",
-      "__SEQCOLOR": "mismatch"  // "mismatch-all" will label all bases
-    },
-    "_typeRE": {},
-    "_labelRE": {},
-    "_methodRE": {}
-  }
-];
 
 
 module.exports = BioDalliance;

@@ -106,14 +106,13 @@ gulp.task('staticlibs', function() {
     .pipe(ext_replace('.scss', '.min.css'))
     .pipe(gulp.dest('./cycledash/static/lib/bootstrap/scss'));
 
-  // BioDalliance
-  gulp.src('./node_modules/dalliance/{css,fonts,img,help}/*.*',
-           {base: './node_modules/dalliance'})
-    .pipe(gulp.dest('./cycledash/static/lib/dalliance'));
-
-  gulp.src('./node_modules/dalliance/build/*.js',
-           {base: './node_modules/dalliance/build'})
-    .pipe(gulp.dest('./cycledash/static/lib/dalliance'));
+  // pileup.js
+  gulp.src('./node_modules/pileup/style/*.*',
+           {base: './node_modules/pileup/style'})
+     .pipe(gulp.dest('./cycledash/static/lib/pileup.js'));
+  gulp.src('./node_modules/pileup/build/*.js',
+           {base: './node_modules/pileup/build'})
+    .pipe(gulp.dest('./cycledash/static/lib/pileup.js'));
 });
 
 

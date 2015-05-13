@@ -19,7 +19,7 @@
     "d3": true,
     "_": true,
     "$": true,
-    "Browser": true,
+    "pileup": true,
     "React": true,
     // We don't set "node: true" to capture certain issues, e.g. console.log
     // statements. These globals make up for that.
