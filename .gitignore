@@ -12,3 +12,5 @@ bundled.js
 cycledash/static/lib/
 coverage.html
 tests/pdifftests/log.txt
+cycledash/static/css/
+.sass-cache
