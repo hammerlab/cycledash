@@ -1,6 +1,10 @@
 {% extends "layouts/layout.html" %}
 {%- from 'macros/nav.html' import nav -%}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
+
 {% block body %}
 {{ nav("comments") }}
 <main id="comments"></main>

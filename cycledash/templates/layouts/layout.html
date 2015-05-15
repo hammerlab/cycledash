@@ -12,7 +12,6 @@
 
     {% block bootstrap %}
     <script src="/static/lib/bootstrap/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="/static/lib/bootstrap/css/bootstrap.min.css">
     {% endblock %}
 
     {% if config['USE_RELOADER'] %}
@@ -30,9 +29,6 @@
     <script type="text/javascript" src={{config['TYPEKIT_URL']}}></script>
     <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
     {% endif %}
-
-    <link rel="stylesheet" href="/static/css/style.css">
-    <link rel="stylesheet" href="/static/css/header.css">
     {% block head %}{% endblock %}
   </head>
 

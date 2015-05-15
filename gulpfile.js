@@ -7,7 +7,8 @@ var _ = require('underscore'),
     source = require('vinyl-source-stream'),
     uglifyify = require('uglifyify'),
     watchify = require('watchify'),
-    sass = require('gulp-sass');
+    sass = require('gulp-sass'),
+    ext_replace = require('gulp-ext-replace');
 
 
 var PATHS = {
@@ -100,6 +101,11 @@ gulp.task('staticlibs', function() {
            {base: './node_modules/bootstrap/dist'})
     .pipe(gulp.dest('./cycledash/static/lib/bootstrap'));
 
+  // Change bootstrap.min.css to bootstrap.min.scss
+  gulp.src('./cycledash/static/lib/bootstrap/css/bootstrap.min.css')
+    .pipe(ext_replace('.scss', '.min.css'))
+    .pipe(gulp.dest('./cycledash/static/lib/bootstrap/scss'));
+
   // BioDalliance
   gulp.src('./node_modules/dalliance/{css,fonts,img,help}/*.*',
            {base: './node_modules/dalliance'})
@@ -109,6 +115,8 @@ gulp.task('staticlibs', function() {
            {base: './node_modules/dalliance/build'})
     .pipe(gulp.dest('./cycledash/static/lib/dalliance'));
 });
+
+
 
 
 // Default task which compiles the JS and then watches the JS and CSS for
