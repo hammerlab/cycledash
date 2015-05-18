@@ -365,17 +365,8 @@ table.vcf-table {
   margin: 0 5%;
   padding: 10px;
 }
-.dalliance-root {
-  max-height: 80000px !important;
-}
-.dalliance .tier-holder {
-  overflow-y: hidden;
-}
-.dalliance .tier.pileup {
+.pileup {
   border-top: 1px solid black;
-  overflow-y: auto;
-  max-height: 300px;
-  min-height: 300px;
 }
 @media(max-height:1000px) {
   .variant-inspector {

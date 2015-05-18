@@ -1,7 +1,7 @@
 "use strict";
 
 var React = require('react'),
-    BioDalliance = require('./BioDalliance'),
+    PileupViewer = require('./PileupViewer'),
     StatsSummary = require('./StatsSummary'),
     VCFTable = require('./VCFTable'),
     QueryBox = require('./QueryBox'),
@@ -107,7 +107,7 @@ var ExaminePage = React.createClass({
                   handleOpenViewer={this.handleOpenViewer}
                   handleSetComment={this.handleSetComment}
                   handleDeleteComment={this.handleDeleteComment} />
-        <BioDalliance vcfPath={run.uri}
+        <PileupViewer vcfPath={run.uri}
                       normalBamPath={run.normal_bam && run.normal_bam.uri}
                       tumorBamPath={run.tumor_bam && run.tumor_bam.uri}
                       igvHttpfsUrl={props.igvHttpfsUrl}
