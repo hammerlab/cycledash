@@ -1,11 +1,8 @@
 "use strict";
 
 var React = require('react'),
-    $ = require('jquery'),
     _ = require('underscore');
 // Someday: pileup = require('pileup');
-
-require('jquery-mousewheel')($);
 
 // Indicator value that the BAI chunks are still loading.
 var CHUNKS_LOADING = 'loading',
