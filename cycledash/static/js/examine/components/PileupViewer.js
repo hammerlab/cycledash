@@ -11,7 +11,7 @@ require('jquery-mousewheel')($);
 var CHUNKS_LOADING = 'loading',
     CHUNKS_NOT_AVAILABLE = null;
 
-var BioDalliance = React.createClass({
+var PileupViewer = React.createClass({
   propTypes: {
     isOpen: React.PropTypes.bool,
     // Currently selected variant, or null for no selection.
@@ -175,4 +175,4 @@ var BioDalliance = React.createClass({
 });
 
 
-module.exports = BioDalliance;
+module.exports = PileupViewer;
