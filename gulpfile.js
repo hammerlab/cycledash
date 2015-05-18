@@ -8,7 +8,8 @@ var _ = require('underscore'),
     uglifyify = require('uglifyify'),
     watchify = require('watchify'),
     sass = require('gulp-sass'),
-    ext_replace = require('gulp-ext-replace');
+    ext_replace = require('gulp-ext-replace'),
+    es = require('event-stream');
 
 
 var PATHS = {
@@ -56,8 +57,8 @@ gulp.task('js', function() {
   bundler.on('update', rebundle);
 });
  
-gulp.task('sass', function () {
-    gulp.src('./cycledash/static/scss/*.scss')
+gulp.task('sass', ['staticlibs'], function () {
+  return gulp.src('./cycledash/static/scss/*.scss')
         .pipe(sass().on('error', sass.logError))
         .pipe(gulp.dest('./cycledash/static/css'))
         .pipe(livereload({ auto: false }));
@@ -85,34 +86,37 @@ gulp.task('build', function() {
 });
 
 gulp.task('peg', function() {
-  gulp.src(PATHS.pegGrammar)
+  return gulp.src(PATHS.pegGrammar)
       .pipe(peg().on('error', console.error))
       .pipe(gulp.dest('./cycledash/static/lib'));
 });
 
 gulp.task('staticlibs', function() {
-  // jQuery
-  gulp.src('./node_modules/jquery/dist/*.{js,map}',
-           {base: './node_modules/jquery/dist'})
-    .pipe(gulp.dest('./cycledash/static/lib/jquery'));
+  // These subtasks all run in parallel.
+  return es.merge([
+    // jQuery
+    gulp.src('./node_modules/jquery/dist/*.{js,map}',
+             {base: './node_modules/jquery/dist'})
+      .pipe(gulp.dest('./cycledash/static/lib/jquery')),
 
-  // Bootstrap
-  gulp.src('./node_modules/bootstrap/dist/**/*',
-           {base: './node_modules/bootstrap/dist'})
-    .pipe(gulp.dest('./cycledash/static/lib/bootstrap'));
+    // Bootstrap
+    gulp.src('./node_modules/bootstrap/dist/**/*',
+             {base: './node_modules/bootstrap/dist'})
+      .pipe(gulp.dest('./cycledash/static/lib/bootstrap')),
 
-  // Change bootstrap.min.css to bootstrap.min.scss
-  gulp.src('./cycledash/static/lib/bootstrap/css/bootstrap.min.css')
-    .pipe(ext_replace('.scss', '.min.css'))
-    .pipe(gulp.dest('./cycledash/static/lib/bootstrap/scss'));
+    // Change bootstrap.min.css to bootstrap.min.scss
+    gulp.src('./cycledash/static/lib/bootstrap/css/bootstrap.min.css')
+      .pipe(ext_replace('.scss', '.min.css'))
+      .pipe(gulp.dest('./cycledash/static/lib/bootstrap/scss')),
 
-  // pileup.js
-  gulp.src('./node_modules/pileup/style/*.*',
-           {base: './node_modules/pileup/style'})
-     .pipe(gulp.dest('./cycledash/static/lib/pileup.js'));
-  gulp.src('./node_modules/pileup/build/*.js',
-           {base: './node_modules/pileup/build'})
-    .pipe(gulp.dest('./cycledash/static/lib/pileup.js'));
+    // pileup.js
+    gulp.src('./node_modules/pileup/style/*.*',
+             {base: './node_modules/pileup/style'})
+       .pipe(gulp.dest('./cycledash/static/lib/pileup.js')),
+    gulp.src('./node_modules/pileup/build/*.js',
+             {base: './node_modules/pileup/build'})
+      .pipe(gulp.dest('./cycledash/static/lib/pileup.js'))
+  ]);
 });
 
 
