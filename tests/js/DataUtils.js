@@ -77,8 +77,8 @@ function makeFakeServer(vcfPath, handleCommentPath) {
       contigs = getContigs(vcfData),
       records = getRecords(vcfData);
 
-  var GENOTYPES_URL = '/runs/1/genotypes';
-  var COMMENTS_URL = '/runs/1/comments';
+  var GENOTYPES_URL = '/api/runs/1/genotypes';
+  var COMMENTS_URL = '/api/runs/1/comments';
   var ajax = function(path, type, data, callback, failCallback) {
     if (path.slice(0, GENOTYPES_URL.length) === GENOTYPES_URL) {
       callback({

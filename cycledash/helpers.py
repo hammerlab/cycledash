@@ -1,12 +1,15 @@
 """Module containing helper methods for the app in general."""
+import functools
+import json
 import os
 import re
 
 from cycledash import db
-
-from common.helpers import tables
+from common.helpers import tables, from_epoch
 
 from flask import jsonify, request
+import flask.ext.restful, flask.ext.restful.fields
+import voluptuous
 from werkzeug.utils import secure_filename
 
 
@@ -24,12 +27,34 @@ def underscorize(value):
     return res.lower()
 
 
-def underscorize_keys(value):
+def camelcase(value):
+    """Returns camelCased version of a under_scored string.
+
+    Raises ValueError if a value other than a string is passed.
+    """
+    parts = value.split('_')
+    parts = [p.capitalize() for p in parts]
+    cameled = ''.join(parts)
+    return cameled[0].lower() + cameled[1:]
+
+
+def underscorize_dict(value):
     """Return a dictionary with all keys and sub-keys underscorized.
     """
-    return {underscorize(key): underscorize_keys(val)
-            if type(val) is dict else val
+    return {underscorize(key): underscorize_dict(val)
+            if isinstance(val, dict) else val
             for key, val in value.iteritems()}
+
+
+def camelcase_dict(value):
+    """Return a dictionary with all keys and sub-keys camelCased.
+    """
+    if isinstance(value, list):
+        return [camelcase_dict(o) for o in value]
+    elif isinstance(value, dict):
+        return {camelcase(key): camelcase_dict(val)
+                for key, val in value.iteritems()}
+    return value
 
 
 def parsimonious_dict(d):
@@ -56,10 +81,10 @@ def prepare_request_data(request):
     a list is of length 0, it is removed. If it is of length 1, it is
     deconstructed. All keys are "underscorized" from camelCase.
     """
-    data = dict(request.json or request.form)
+    data = dict(request.json or request.form or json.loads(request.data))
     simplified_dict = parsimonious_dict(data)
     stringval_dict = remove_empty_strings(simplified_dict)
-    return underscorize_keys(stringval_dict)
+    return underscorize_dict(stringval_dict)
 
 
 def get_where(table_name, db, **kwargs):
@@ -71,10 +96,10 @@ def get_where(table_name, db, **kwargs):
     with tables(db.engine, table_name) as (_, table):
         q = table.select()
         for key, val in kwargs.iteritems():
-            q = q.where(table.c.__getattr__(key) == val)
+            q = q.where(table.c[key] == val)
         obj = q.execute().fetchone()
-        if obj:
-            return dict(obj)
+    if obj:
+        return dict(obj)
 
 
 def get_id_where(table_name, db, **kwargs):
@@ -133,3 +158,64 @@ def request_wants_json():
     best = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     return (best == 'application/json' and
         request.accept_mimetypes[best] > request.accept_mimetypes['text/html'])
+
+
+def marshal_with(fields, envelope=None):
+    """Wraps flast-restful's marshal_with to transform the returned object to
+    have camelCased keys."""
+    def decorator(f):
+        @functools.wraps(f)
+        def wrapper(*args, **kwargs):
+            marshalled = flask.ext.restful.marshal_with(fields, envelope=envelope)(f)
+            resp = marshalled(*args, **kwargs)
+            if isinstance(resp, tuple):
+                return (camelcase_dict(resp[0]), resp[1], resp[2])
+            else:
+                return camelcase_dict(resp)
+        return wrapper
+    return decorator
+
+
+def validate_with(schema):
+    """Wraps a get/post/put/delete method in a Flask-restful Resource, and
+    validates the request body with the given Voluptuous schema. If it passed,
+    sets `validated_body` on the request object, else abort(400) with helpful
+    error messages.
+    """
+    def decorator(f):
+        @functools.wraps(f)
+        def wrapper(*args, **kwargs):
+            if not (request.json or request.data or request.form):
+                flask.ext.restful.abort(400, message='Validation error.',
+                                        errors=['No data provided.'])
+            try:
+                data = schema(prepare_request_data(request))
+            except voluptuous.MultipleInvalid as err:
+                flask.ext.restful.abort(400,
+                                        message='Validation error.',
+                                        errors=[str(e) for e in err.errors])
+            setattr(request, 'validated_body', data)
+            return f(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
+def abort_if_none_for(obj_name):
+    def abort_if_none(obj, obj_id):
+        """Abort request with a 404 if object is None."""
+        if obj is None:
+            flask.ext.restful.abort(
+                404,
+                message='No {} with id={} found.'.format(obj_name, obj_id))
+        else:
+            return obj
+    return abort_if_none
+
+
+class CollisionError(Exception):
+    pass
+
+
+class EpochField(flask.ext.restful.fields.Raw):
+    def format(self, value):
+        return from_epoch(value)

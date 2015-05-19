@@ -59,8 +59,8 @@ var CommentBox = React.createClass({
     var record = this.props.record;
     return function(commentText, authorName) {
       var newComment = _.clone(comment);
-      newComment.comment_text = commentText;
-      newComment.author_name = authorName;
+      newComment.commentText = commentText;
+      newComment.authorName = authorName;
 
       handleSetComment(newComment, record);
     };
@@ -72,20 +72,19 @@ var CommentBox = React.createClass({
     return function(commentText, authorName) {
       // Subtract the offset to get GMT (to match what's in the DB)
       var newComment = _.extend(
-        _.pick(
-          record,
-          'contig',
-          'position',
-          'reference',
-          'alternates',
-          'sample_name'),
-        {'comment_text': commentText,
-         'author_name': authorName,
+        _.pick(record,
+               'contig',
+               'position',
+               'reference',
+               'alternates',
+               'sample_name'),
+        {'commentText': commentText,
+         'authorName': authorName,
          // Note: this is a temporary date that does not get persisted
          // to the DB. Instead, the DB creates its own date, but this
          // timestamp is used for distinguishing between comments in
          // the meantime.
-         'created_timestamp': getGranularUnixSeconds(moment())});
+         'created': getGranularUnixSeconds(moment())});
       handleSetComment(newComment, record);
     };
   },
@@ -104,25 +103,25 @@ var CommentBox = React.createClass({
   },
   render: function() {
     var comments = this.props.record.comments;
-    var commentNodes = _.sortBy(comments, 'created_timestamp').map(
+    var commentNodes = _.sortBy(comments, 'created').map(
       comment => {
         // moment uses the local timezone by default (converting the
         // value, which starts as a UNIX timestamp, to that timezone)
-        var createdString = moment.unix(comment.created_timestamp).fromNow();
+        var createdString = moment.unix(comment.created).fromNow();
         // Prevent react key collisions
         var rowKey = utils.getRowKey(this.props.record);
         var reactKey = _.has(comment, 'id') ?
             rowKey + comment.id :
             rowKey + String(this.getGranularUnixSeconds(
-              moment(comment.created_timestamp)));
+              moment(comment.created)));
         return <VCFComment record={this.props.record}
-                           commentText={comment.comment_text}
+                           commentText={comment.commentText}
                            key={reactKey}
                            handleSave={this.getHandleSaveForUpdate(comment)}
                            startInEditState={false}
                            cancelable={true}
                            saveLocalAuthorName={this.saveLocalAuthorName}
-                           authorName={comment.author_name}
+                           authorName={comment.authorName}
                            createdString={createdString}
                            handleDelete={this.getHandleDelete(comment)} />;
     });

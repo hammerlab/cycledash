@@ -1,5 +1,6 @@
 """General helper function module."""
 from contextlib import contextmanager
+from datetime import datetime
 
 import sqlalchemy
 
@@ -63,3 +64,9 @@ def find(iterable, pred):
     for x in iterable:
         if pred(x):
             return x
+
+
+def from_epoch(dt):
+    """Return the epoch time representation of a datetime object, `dt`."""
+    epoch = datetime(1970, 1, 1, tzinfo=dt.tzinfo)
+    return (dt - epoch).total_seconds()

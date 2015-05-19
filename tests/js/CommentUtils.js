@@ -1,8 +1,7 @@
 'use strict';
 var _ = require('underscore'),
     fs = require('fs'),
-    DataUtils = require('./DataUtils'),
-    utils = require('../../cycledash/static/js/examine/utils');
+    DataUtils = require('./DataUtils');
 
 /**
  * Fake for jQuery's $.ajax() which uses DataUtils.makeFakeServer(...) to
@@ -32,21 +31,21 @@ function makeFakeCommentServer(vcfPath, commentDatabaseJSONPath, failingPaths) {
         var newCommentId = getMaxAttribute(commentDatabase, 'id') + 1,
             newLastModified = 1; // We are not currently testing last_modified.
         commentDatabase[newCommentId] = _.extend({}, data, {
-          vcf_id: 1,
+          vcfId: 1,
           id: newCommentId,
-          last_modified: newLastModified
+          lastModified: newLastModified
         });
         callback({
           id: newCommentId,
-          last_modified_timestamp: newLastModified
+          lastModified: newLastModified
         });
       } else if (type === 'PUT') {
         var id = getCommentIdFromPath(path);
         var newLastModified = 1; // We are not currently testing last_modified.
-        commentDatabase[id].comment_text = data.comment_text;
-        commentDatabase[id].last_modified = newLastModified;
+        commentDatabase[id].commentText = data.commentText;
+        commentDatabase[id].lastModified = newLastModified;
         callback({
-          last_modified_timestamp: newLastModified
+          lastModified: newLastModified
         });
       } else if (type === 'DELETE') {
         var commentId = getCommentIdFromPath(path);
@@ -72,11 +71,19 @@ function getCommentIdFromPath(path) {
   return pathParts[pathParts.length - 1];
 }
 
+function getRowKey(comment) {
+  return comment.contig +
+    comment.position +
+    comment.reference +
+    comment.alternates +
+    comment.sampleName;
+}
+
 // We represent the database of comments as an object keyed by comment ID,
 // however our HTTP GET response needs to key comments by row key (as is
 // done in comments.py).
 function getCommentResponse(commentDatabase) {
-  return {comments: _.groupBy(commentDatabase, utils.getRowKey)};
+  return {comments: _.groupBy(commentDatabase, getRowKey)};
 }
 
 function isFailingPath(type, path, failingPaths) {

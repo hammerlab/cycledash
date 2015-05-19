@@ -1,23 +1,45 @@
 """Methods for working with Celery task states."""
-
-from sqlalchemy import select
 from collections import defaultdict
+from sqlalchemy import select
+from flask.ext.restful import abort, Resource, fields
 
-from common.helpers import tables, CRUDError
+from common.helpers import tables
+from cycledash.helpers import marshal_with
 from cycledash import db
 from workers.shared import update_tasks_table, worker
+import workers.runner
 
 
-def get_tasks(run_id):
-    """Returns a list of all tasks associated with a run."""
-    with tables(db.engine, 'task_states') as (con, tasks):
-        q = (select([tasks.c.task_id, tasks.c.type, tasks.c.state])
-            .where(tasks.c.vcf_id == run_id))
-        return [{'type': _simplify_type(typ),
-                 'state': state,
-                 # pylint: disable=too-many-function-args
-                 'traceback': worker.AsyncResult(task_id).traceback}
-                for task_id, typ, state in con.execute(q).fetchall()]
+task_fields = {
+    'state': fields.String,
+    'traceback': fields.String,
+    'type': fields.String
+}
+
+
+class TaskList(Resource):
+    @marshal_with(task_fields, envelope='tasks')
+    def get(self, run_id):
+        with tables(db.engine, 'task_states') as (con, tasks):
+            q = (select([tasks.c.task_id, tasks.c.type, tasks.c.state])
+                 .where(tasks.c.vcf_id == run_id))
+            return [{'type': _simplify_type(typ),
+                     'state': state,
+                     # pylint: disable=too-many-function-args
+                     'traceback': worker.AsyncResult(task_id).traceback}
+                    for task_id, typ, state in con.execute(q).fetchall()]
+
+    @marshal_with(task_fields, envelope='tasks')
+    def delete(self, run_id):
+        with tables(db.engine, 'tasks') as (con, tasks):
+            q = tasks.delete(tasks.c.vcf_id == run_id).returning(*tasks.c)
+            return [dict(t) for t in q.execute().fetchall()]
+
+
+class TasksRestart(Resource):
+    def post(self, run_id):
+        restart_failed_tasks_for(run_id)
+        return {'message': 'Restarting failed tasks (run_id={})'.format(run_id)}
 
 
 def _simplify_type(typ):
@@ -25,13 +47,17 @@ def _simplify_type(typ):
     return '.'.join(typ.split('.')[1:-1])
 
 
-def delete_tasks(run_id):
-    """Delete all tasks associated with a run."""
+def restart_failed_tasks_for(vcf_id):
     with tables(db.engine, 'task_states') as (con, tasks):
-        stmt = tasks.delete(tasks.c.vcf_id == run_id)
-        result = con.execute(stmt)
-        if result.rowcount == 0:
-            raise CRUDError('No Rows', 'No tasks were deleted')
+        q = (tasks.delete()
+             .where(tasks.c.vcf_id == vcf_id)
+             .where(tasks.c.state == 'FAILURE')
+             .returning(tasks.c.type))
+        names = [r[0] for r in q.execute().fetchall()]
+        print 'NAMES:'
+        print names
+        print 'NAMES ^^^'
+    workers.runner.restart_failed_tasks(names, vcf_id)
 
 
 def all_non_success_tasks():

@@ -11,151 +11,117 @@ import voluptuous
 from common.relational_vcf import genotypes_to_file
 from common.helpers import tables
 
-from cycledash import app, db
+from cycledash import app, db, api
 from cycledash.helpers import (prepare_request_data, error_response,
                                success_response, get_secure_unique_filename,
-                               request_wants_json)
+                               request_wants_json, camelcase_dict, from_epoch)
 import cycledash.genotypes
 import cycledash.comments
 import cycledash.runs
 import cycledash.tasks
 import cycledash.bams
 import cycledash.projects
+from workers.shared import worker
 
 
-  ###########
- ## About ##
-###########
+######################
+# Cycledash JSON API #
+######################
+
+# All paths prefixed with /api/ (cf. __init__.py)
+api.add_resource(cycledash.runs.RunList, '/runs',
+                 endpoint='api:runlist')
+api.add_resource(cycledash.runs.Run, '/runs/<int:run_id>',
+                 endpoint='api:run')
+
+api.add_resource(cycledash.projects.ProjectList, '/projects',
+                 endpoint='api:projectlist')
+api.add_resource(cycledash.projects.Project, '/projects/<int:project_id>',
+                 endpoint='api:project')
+
+api.add_resource(cycledash.bams.BamList, '/bams',
+                 endpoint='api:bamlist')
+api.add_resource(cycledash.bams.Bam, '/bams/<int:bam_id>',
+                 endpoint='api:bam')
+
+api.add_resource(cycledash.tasks.TaskList,
+                 '/runs/<int:run_id>/tasks',
+                 endpoint='api:tasks')
+api.add_resource(cycledash.tasks.TasksRestart,
+                 '/runs/<int:run_id>/tasks/restart',
+                 endpoint='api:tasksrestart')
+
+api.add_resource(cycledash.comments.CommentList,
+                 '/runs/<int:run_id>/comments',
+                 endpoint='api:commentlist')
+api.add_resource(cycledash.comments.Comment,
+                 '/runs/<int:run_id>/comments/<int:comment_id>',
+                 endpoint='api:comment')
+api.add_resource(cycledash.comments.CommentsForVcf,
+                 '/runs/<int:run_id>/comments/byrow',
+                 endpoint='api:commentsforvcf')
+
+api.add_resource(cycledash.genotypes.Genotypes,
+                 '/runs/<int:run_id>/genotypes',
+                 endpoint='api:genotypes')
+
+
+##############
+# HTML Views #
+##############
+
+@app.route('/')
+def home():
+    runs = cycledash.projects.get_projects_tree()
+    comments = cycledash.comments.get_last_comments(n=5)
+    return render_template('runs.html', last_comments=comments, runs=runs)
 
 @app.route('/about')
 def about():
     return render_template('about.html')
 
-
-  ##########
- ## Runs ##
-##########
-
-@app.route('/', methods=['POST', 'GET'])
-@app.route('/runs', methods=['POST', 'GET'])
-def list_runs():
-    if request.method == 'POST':
-        return cycledash.runs.create_vcf()
-    elif request.method == 'GET':
-        return cycledash.projects.get_projects_tree()
-
-
-@app.route('/tasks/<vcf_id>', methods=['GET', 'DELETE'])
-def get_tasks(vcf_id):
-    if request.method == 'GET':
-        tasks = cycledash.tasks.get_tasks(vcf_id)
-        if request_wants_json():
-            return jsonify({'tasks': tasks})
-        else:
-            return render_template('tasks.html', tasks=tasks)
-    elif request.method == 'DELETE':
-        cycledash.tasks.delete_tasks(vcf_id)
-        return success_response()
-
-
-@app.route('/tasks/<vcf_id>/restart', methods=['POST'])
-def restart_tasks(vcf_id):
-    cycledash.runs.restart_failed_tasks_for(vcf_id)
-    return success_response()
-
-
-  ##############
- ## Projects ##
-##############
-
-@app.route('/projects', methods=['POST', 'GET'])
-def projects():
-    if request.method == 'POST':
-        return cycledash.projects.create_project()
-    elif request.method == 'GET':
-        return cycledash.projects.get_projects()
-
-
-@app.route('/projects/<project_id>', methods=['PUT', 'GET', 'DELETE'])
-def project(project_id):
-    if request.method == 'PUT':
-        return cycledash.projects.update_project(project_id)
-    elif request.method == 'GET':
-        return cycledash.projects.get_project(project_id)
-    elif request.method == 'DELETE':
-        return cycledash.projects.delete_project(project_id)
-
-
-  ##########
- ## BAMs ##
-##########
-
-@app.route('/bams', methods=['POST', 'GET'])
-def bams():
-    if request.method == 'POST':
-        return cycledash.bams.create_bam()
-    elif request.method == 'GET':
-        return cycledash.bams.get_bams()
-
-
-@app.route('/bams/<bam_id>', methods=['PUT', 'GET', 'DELETE'])
-def bam(bam_id):
-    if request.method == 'PUT':
-        return cycledash.bams.update_bam(bam_id)
-    elif request.method == 'GET':
-        return cycledash.bams.get_bam(bam_id)
-    elif request.method == 'DELETE':
-        return cycledash.bams.delete_bam(bam_id)
-
-
-  #############
- ## Examine ##
-#############
+@app.route('/runs/<int:run_id>/tasks')
+def tasks(run_id):
+    with tables(db.engine, 'task_states') as (con, tasks):
+        tasks = select([tasks.c.task_id, tasks.c.type, tasks.c.state]).where(
+            tasks.c.vcf_id == run_id)
+        tasks = [{'type': cycledash.tasks._simplify_type(typ),
+                  'state': state,
+                  # pylint: disable=too-many-function-args
+                  'traceback': worker.AsyncResult(task_id).traceback}
+                 for task_id, typ, state in tasks.execute().fetchall()]
+    return render_template('tasks.html', tasks=tasks)
 
 @app.route('/runs/<int:run_id>/examine')
 def examine(run_id):
-    vcf = cycledash.runs.get_vcf(run_id)
-    if not vcf:
+    with tables(db.engine, 'vcfs') as (con, runs):
+        q = select(runs.c).where(runs.c.id == run_id)
+        run = q.execute().fetchone()
+    if not run:
         return error_response('Invalid run', 'Invalid run: %s' % run_id)
+    else:
+        run = dict(run)
+        # TODO: make spec and contigs their own API calls? => Change JS that
+        #       relies on this.
+        # TODO: this will error out if the workers haven't run yet
+        run['spec'] = cycledash.genotypes.spec(run_id)
+        run['contigs'] = cycledash.genotypes.contigs(run_id)
     return render_template('examine.html',
-                           vcf=vcf,
-                           vcfs=cycledash.runs.get_related_vcfs(vcf))
-
-
-@app.route('/runs/<int:run_id>/genotypes')
-def genotypes(run_id):
-    gts = cycledash.genotypes.get(run_id, json.loads(request.args.get('q')))
-    return jsonify(gts)
-
-
-  ##############
- ## Comments ##
-##############
+                           vcf=run,
+                           vcfs=cycledash.runs.get_related_vcfs(run))
 
 @app.route('/comments')
-def all_comments():
-    return render_template('comments.html',
-                           comments=cycledash.comments.get_all_comments())
+def comments():
+    with tables(db.engine, 'user_comments') as (con, comments):
+        comments = comments.select().order_by(desc(comments.c.id))
+        comments = [camelcase_dict(dict(c))
+                    for c in comments.execute().fetchall()]
+        comments = cycledash.comments.epochify_comments(comments)
+    return render_template('comments.html', comments=comments)
 
 
-@app.route('/runs/<vcf_id>/comments', methods=['GET', 'POST'])
-def comments(vcf_id):
-    if request.method == 'POST':
-        return cycledash.comments.create_comment(vcf_id)
-    elif request.method == 'GET':
-        return cycledash.comments.get_vcf_comments(vcf_id)
-
-
-@app.route('/runs/<int:run_id>/comments/<comment_id>', methods=['PUT', 'DELETE'])
-def comment(run_id, comment_id):
-    if request.method == 'PUT':
-        return cycledash.comments.update_comment(comment_id)
-    elif request.method == 'DELETE':
-        return cycledash.comments.delete_comment(comment_id)
-
-
-  ##########################
- ## VCFs Upload/Download ##
+##########################
+## VCFs Upload/Download ##
 ##########################
 
 VCF_FILENAME = 'cycledash-run-{}.vcf'
@@ -177,7 +143,7 @@ def download_vcf(run_id):
 
 
 @app.route('/upload', methods=['POST'])
-def upload():
+def upload_vcf():
     """Write the uploaded file to a temporary directory and return its path."""
     f = request.files['file']
     if not f:

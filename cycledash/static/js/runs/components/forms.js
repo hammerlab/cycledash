@@ -24,7 +24,7 @@ var NewRunForm = React.createClass({
   render: function() {
     var props = this.props;
     return (
-        <form method='POST' action='/runs' className='run-form'>
+      <form method='POST' action='/api/runs' className='run-form'>
         <h3>New Run</h3>
         <TextInput label='Tumor BAM URI:' name='tumorBamUri'
                    completions={props.bamUris}
@@ -33,7 +33,7 @@ var NewRunForm = React.createClass({
                    completions={props.bamUris}
                    placeholder='/data/dream/normal.chr20.bam' />
 
-        <TextInput label='Variant Caller Name:' name='variantCallerName'
+        <TextInput label='Variant Caller Name:' name='callerName'
                    placeholder='Guacamole::Somatic' />
 
         <TextInput label='VCF Path:' name='uri'
@@ -45,7 +45,7 @@ var NewRunForm = React.createClass({
 
         <div className='form-group run-form-notes'>
           <label>Notes, Config, Params:</label>
-          <textarea className='form-control' rows='8' name='params'
+          <textarea className='form-control' rows='8' name='notes'
                     placeholder='Notes, parameters, etc.'></textarea>
         </div>
 
@@ -61,7 +61,7 @@ var NewBAMForm = React.createClass({
   },
   render: function() {
     return (
-        <form method='POST' action='/bams' className='bam-form'>
+      <form method='POST' action='/api/bams' className='bam-form'>
         <h3>New BAM</h3>
 
         <TextInput label='Name:' name='name' required={true}
@@ -96,7 +96,7 @@ var NewProjectForm = React.createClass({
   },
   render: function() {
     return (
-      <form method='POST' action='/projects' className='project-form'>
+      <form method='POST' action='/api/projects' className='project-form'>
         <h2>
           <button className='close' type='button'
                   onClick={this.props.handleClose}>&times;</button>

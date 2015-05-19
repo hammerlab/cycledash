@@ -52,27 +52,27 @@ var Comment = React.createClass({
     comment: React.PropTypes.object.isRequired
   },
   urlForComment: function(c) {
-    return `/runs/${c.vcf_id}/examine?query=${c.contig}:${c.position}-${1+c.position}`;
+    return `/runs/${c.vcfId}/examine?query=${c.contig}:${c.position}-${1+c.position}`;
   },
   render: function() {
     var comment = this.props.comment;
     // moment uses the local timezone by default (converting the
     // value, which starts as a UNIX timestamp, to that timezone)
     var relativeDate = moment.unix(comment.created).fromNow();
-    var authorName = comment.author_name ?
-        comment.author_name.slice(0, 15) : 'Anonymous';
+    var authorName = comment.authorName ?
+        comment.authorName.slice(0, 15) : 'Anonymous';
     return (
         <li>
           <span className='run-id'>
-          <a href={`/runs/${comment.vcf_id}/examine`}>Run {comment.vcf_id}</a>
+          <a href={`/runs/${comment.vcfId}/examine`}>Run {comment.vcfId}</a>
           </span>
           <a className='location' href={this.urlForComment(comment)}>
             {comment.contig}:{comment.position}
           </a>
           <span className='summary-container'>
-            <b>{authorName}</b>: <span className='summary'>{comment.comment_text.slice(0, 45)}</span>
+            <b>{authorName}</b>: <span className='summary'>{comment.commentText.slice(0, 45)}</span>
           </span>
-          <span className='time' title={comment.last_modified}>{relativeDate}</span>
+          <span className='time' title={comment.lastModified}>{relativeDate}</span>
         </li>
     );
   }

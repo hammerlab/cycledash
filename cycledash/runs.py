@@ -1,88 +1,125 @@
-from flask import request, jsonify, redirect, render_template, url_for
+from flask import request
+from flask.ext.restful import abort, Resource, fields
 from sqlalchemy import select, desc, func
 import voluptuous
 
-import config
-from cycledash import db, validations, genotypes
-from cycledash.helpers import (prepare_request_data, error_response,
-                               get_id_where, get_where, request_wants_json)
+from cycledash import db, genotypes
+from cycledash.helpers import (get_id_where, get_where, abort_if_none_for,
+                               validate_with, marshal_with)
 import cycledash.bams
-import cycledash.comments
 import cycledash.projects
-
-from common.helpers import tables, CRUDError
+from cycledash.validations import CreateRun, UpdateRun, expect_one_of
+from common.helpers import tables
 import workers.runner
 
 
-class CollisionError(Exception):
-    pass
+run_fields = {
+    'id': fields.Integer,
+
+    'extant_columns': fields.String,
+    'uri': fields.String,
+    'caller_name': fields.String,
+    'genotype_count': fields.Integer,
+    'created_at': fields.DateTime(dt_format='iso8601'),
+    'notes': fields.String,
+    'vcf_header': fields.String,
+
+    # TODO: change to show these instead of *_id
+    # 'project': fields.Raw,
+    # 'normal_bam': fields.Raw,
+    # 'tumor_bam': fields.Raw,
+
+    'project_id': fields.Raw,
+    'normal_bam_id': fields.Raw,
+    'tumor_bam_id': fields.Raw,
+}
+
+# Used because on GET /runs/<id> we want the spec and contig, too [for now].
+thick_run_fields = dict(
+    run_fields, spec=fields.Raw, contigs=fields.List(fields.String))
 
 
-def get_vcf(vcf_id):
-    """Return a vcf with a given ID, and the spec and list of contigs for that
-    run for use by the /examine page."""
-    with tables(db.engine, 'vcfs') as (con, vcfs):
-        q = select(vcfs.c).where(vcfs.c.id == vcf_id)
-        vcf = dict(con.execute(q).fetchone())
-    cycledash.bams.attach_bams_to_vcfs([vcf])
-    vcf['spec'] = genotypes.spec(vcf_id)
-    vcf['contigs'] = genotypes.contigs(vcf_id)
-    return vcf
+class RunList(Resource):
+    @marshal_with(run_fields, envelope='runs')
+    def get(self):
+        """Get list of all runs in order of recency."""
+        with tables(db.engine, 'vcfs') as (con, runs):
+            q = select(runs.c).order_by(desc(runs.c.id))
+            return [r for r in q.execute().fetchall()]
 
+    @validate_with(CreateRun)
+    @marshal_with(run_fields)
+    def post(self):
+        """Create a new run.
 
-def get_related_vcfs(vcf):
-    """Return a list of vcfs in the same project as vcf."""
-    with tables(db.engine, 'vcfs') as (con, vcfs):
-        q = select(vcfs.c).where(
-            vcfs.c.project_id == vcf['project_id']).where(
-                vcfs.c.id != vcf['id'])
-        vcfs = [dict(v) for v in con.execute(q).fetchall()]
-    return vcfs
-
-
-def create_vcf():
-    """Create a new vcf, inserting it into the vcfs table and starting workers.
-
-    This raises an exception if anything goes wrong.
-    """
-    try:
-        run = validations.CreateRun((prepare_request_data(request)))
-        project_attr = validations.expect_one_of(run, 'project_name', 'project_id')
-    except voluptuous.MultipleInvalid as err:
-        return error_response('Run validation', [str(e) for e in err.errors])
-
-    try:
-        cycledash.projects.set_and_verify_project_id_on(run)
-    except voluptuous.Invalid as e:
-        return error_response('Project not found', str(e)), 404
-
-    try:
-        _set_or_verify_bam_id_on(run, bam_type='normal')
-        _set_or_verify_bam_id_on(run, bam_type='tumor')
-    except voluptuous.Invalid as e:
-        return error_response('BAM not found', str(e)), 404
-
-    with tables(db.engine, 'vcfs') as (con, vcfs_table):
+        This will import the VCF's genotypes into the database in a worker, as
+        well as annotate it with gene names.
+        """
+        run = request.validated_body
         try:
-            _ensure_no_existing_vcf(vcfs_table, run['uri'])
-        except CollisionError as e:
-            return error_response('VCF already submitted', str(e))
+            expect_one_of(request.validated_body, 'project_name', 'project_id')
+        except voluptuous.MultipleInvalid as e:
+            errors = [str(err) for err in e.errors]
+            abort(409, message='Validation error', errors=errors)
+        try:
+            cycledash.projects.set_and_verify_project_id_on(run)
+        except voluptuous.Invalid as e:
+            abort(404, message='Project not found.', errors=[str(e)])
+        try:
+            _set_or_verify_bam_id_on(run, bam_type='normal')
+            _set_or_verify_bam_id_on(run, bam_type='tumor')
+        except voluptuous.Invalid as e:
+            abort(404, message='BAM not found.', errors=[str(e)])
 
-        vcf_id = _insert_vcf(run, vcfs_table, con)
+        with tables(db.engine, 'vcfs') as (con, runs):
+            run = runs.insert(
+                request.validated_body).returning(*runs.c).execute().fetchone()
+        workers.runner.start_workers_for_vcf_id(run['id'])
+        return run, 201
 
-    workers.runner.start_workers_for_vcf_id(vcf_id)
 
-    return redirect(url_for('list_runs'))
+class Run(Resource):
+    @marshal_with(thick_run_fields)
+    def get(self, run_id):
+        """Return a vcf with a given ID."""
+        with tables(db.engine, 'vcfs') as (con, runs):
+            q = select(runs.c).where(runs.c.id == run_id)
+            run = dict(_abort_if_none(q.execute().fetchone(), run_id))
+        cycledash.bams.attach_bams_to_vcfs([run])
+        return run
+
+    @validate_with(UpdateRun)
+    @marshal_with(run_fields)
+    def put(self, run_id):
+        """Update the run by its ID."""
+        with tables(db.engine, 'vcfs') as (con, runs):
+            q = runs.update(runs.c.id == run_id).values(
+                **request.validated_body
+            ).returning(*runs.c)
+            return dict(_abort_if_none(q.execute().fetchone(), run_id))
+
+    @marshal_with(run_fields)
+    def delete(self, run_id):
+        """Delete a run by its ID."""
+        with tables(db.engine, 'vcfs') as (con, runs):
+            q = (runs.delete()
+                 .where(runs.c.id == run_id)
+                 .returning(*runs.c))
+            # TODO: unattach BAMs and projects before deleting?
+            # TODO: cascade tasks & genotypes deletion?
+            return dict(_abort_if_none(q.execute().fetchone(), run_id))
 
 
-def restart_failed_tasks_for(vcf_id):
-    with tables(db.engine, 'task_states') as (con, tasks):
-        q = (tasks.delete()
-             .where(tasks.c.vcf_id == vcf_id)
-             .where(tasks.c.state == 'FAILURE')
-             .returning(tasks.c.type))
-        names = [r[0] for r in q.execute().fetchall()]
-    workers.runner.restart_failed_tasks(names, vcf_id)
+_abort_if_none = abort_if_none_for('run')
+
+
+def get_related_vcfs(run):
+    """Return a list of vcfs in the same project as vcf."""
+    with tables(db.engine, 'vcfs') as (con, runs):
+        q = select(runs.c).where(
+            runs.c.project_id == run['project_id']).where(
+                runs.c.id != run['id'])
+        return [dict(r) for r in q.execute().fetchall()]
 
 
 def _set_or_verify_bam_id_on(run, bam_type):
@@ -104,53 +141,3 @@ def _set_or_verify_bam_id_on(run, bam_type):
                 'bam with uri "{}" does not exist'.format(run[uri_key]))
         run[id_key] = bam_id
         del run[uri_key]
-
-
-def _ensure_no_existing_vcf(vcfs_table, vcf_uri):
-    """Ensures no other VCFs with the same path. Raises if this isn't so."""
-    if not _vcf_exists(vcfs_table, vcf_uri):
-        return
-    if config.ALLOW_VCF_OVERWRITES:
-        was_deleted = _delete_vcf(vcfs_table, vcf_uri)
-        if not was_deleted:
-            raise CRUDError('Rows should have been deleted if we are '
-                            'deleting a VCF that exists')
-    else:
-        raise CollisionError(
-            'VCF already exists with URI {}'.format(vcf_uri))
-
-
-def _insert_vcf(run, vcfs_table, connection):
-    """Insert a new row in the vcfs table, if it's not there already."""
-    if _vcf_exists(vcfs_table, run['uri']):
-        return None
-    record = {
-        'uri': run['uri'],
-        'caller_name': run.get('variant_caller_name'),
-        'normal_bam_id': run.get('normal_bam_id'),
-        'tumor_bam_id': run.get('tumor_bam_id'),
-        'notes': run.get('params'),
-        'project_id': run.get('project_id'),
-        'vcf_header': '(pending)',
-    }
-    vcfs_table.insert(record).execute()
-    return _get_vcf_id(connection, run['uri'])
-
-
-def _get_vcf_id(connection, uri):
-    """Return id from vcfs table for the vcf corresponding to the given run."""
-    query = "SELECT * FROM vcfs WHERE uri = '" + uri + "'"
-    return connection.execute(query).first().id
-
-
-def _delete_vcf(vcfs_table, uri):
-    """Delete VCFs with this URI, and return True if rows were deleted."""
-    result = vcfs_table.delete().where(vcfs_table.c.uri == uri).execute()
-    return result.rowcount > 0
-
-
-def _vcf_exists(vcfs_table, uri):
-    """Return True if the VCF exists in the vcfs table, else return False."""
-    q = select([vcfs_table.c.id]).where(vcfs_table.c.uri == uri)
-    result = q.execute()
-    return result.rowcount > 0
