@@ -245,9 +245,6 @@ var VCFTableBody = React.createClass({
     });
   },
   getInitialState: () => ({hasOpenedIGV: false}),
-  didClickIGVLink: function() {
-    this.setState({hasOpenedIGV: true});
-  },
   componentWillUnmount: function() {
     $(window).off('scroll.vcftable');
     $(this.refs.lazyload.getDOMNode()).off('click');
@@ -274,8 +271,6 @@ var VCFTableBody = React.createClass({
               <CommentBox record={record}
                           key={commentBoxKey}
                           igvLink={this.props.igvLink}
-                          hasOpenedIGV={this.state.hasOpenedIGV}
-                          didClickIGVLink={this.didClickIGVLink}
                           handleOpenViewer={this.props.handleOpenViewer}
                           handleSetComment={this.props.handleSetComment}
                           handleDeleteComment={this.props.handleDeleteComment} />

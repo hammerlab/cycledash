@@ -43,8 +43,6 @@ describe('IGV Links', function() {
     var componentProps = _.extend({
       record: records[0],
       igvLink: 'http://localhost:1234/load?file=foo&genome=hg38',
-      hasOpenedIGV: false,
-      didClickIGVLink: _.noop,
       handleOpenViewer: _.noop,
       handleSetComment: _.noop,
       handleDeleteComment: _.noop
@@ -69,39 +67,8 @@ describe('IGV Links', function() {
     });
 
     var links = getIGVLinks(commentBox);
-    assert.equal(2, getIGVLinks(commentBox).length);
+    assert.equal(1, getIGVLinks(commentBox).length);
     assertContains('Load', links[0].textContent);
     assertContains('/load', links[0].href);
-    assertContains('Jump', links[1].textContent);
-    assert.equal('http://localhost:1234/goto?locus=20:61795', links[1].href);
-  });
-
-  it('should swap to jump/reload after a click', function() {
-    var commentBox = renderCommentBox({
-      selectedRow: 0,
-      hasOpenedIGV: false
-    });
-
-    // The links don't change initially.
-    commentBox.setProps({
-      hasOpenedIGV: true
-    });
-    var links = getIGVLinks(commentBox);
-    assert.equal(2, getIGVLinks(commentBox).length);
-    assertContains('Load', links[0].textContent);
-    assertContains('/load', links[0].href);
-    assertContains('Jump', links[1].textContent);
-    assertContains('/goto', links[1].href);
-
-    // But after changing a record, they do.
-    commentBox.setProps({
-      selectedRow: 1
-    });
-    links = getIGVLinks(commentBox);
-    assert.equal(2, getIGVLinks(commentBox).length);
-    assertContains('Jump', links[0].textContent);
-    assertContains('/goto', links[0].href);
-    assertContains('Reload', links[1].textContent);
-    assertContains('/load', links[1].href);
   });
 });
