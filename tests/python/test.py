@@ -26,7 +26,6 @@ def test_camelcase():
         "camel_bi1g_cases_run1": "camelBi1gCasesRun1"
     }
     for example, expected in underscored_to_cameled_expectations.items():
-        print example, expected, camelcase(example)
         assert camelcase(example) == expected
 
 

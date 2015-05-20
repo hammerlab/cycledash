@@ -5,7 +5,7 @@ import os
 import re
 
 from cycledash import db
-from common.helpers import tables, from_epoch
+from common.helpers import tables, to_epoch
 
 from flask import jsonify, request
 import flask.ext.restful, flask.ext.restful.fields
@@ -19,6 +19,8 @@ RE_CAMELCASE_2 = re.compile('([a-z]+[0-9]+)([A-Z])')
 
 def underscorize(value):
     """Returns underscored version of a camelCase string.
+
+    e.g. camelCase => camel_case
 
     Raises ValueError if a value other than a string is passed.
     """
@@ -40,6 +42,8 @@ def camelcase(value):
 
 def underscorize_dict(value):
     """Return a dictionary with all keys and sub-keys underscorized.
+
+    e.g. camelCase => camel_case
     """
     return {underscorize(key): underscorize_dict(val)
             if isinstance(val, dict) else val
@@ -47,8 +51,7 @@ def underscorize_dict(value):
 
 
 def camelcase_dict(value):
-    """Return a dictionary with all keys and sub-keys camelCased.
-    """
+    """Return a dictionary with all keys and sub-keys camelCased."""
     if isinstance(value, list):
         return [camelcase_dict(o) for o in value]
     elif isinstance(value, dict):
@@ -161,7 +164,7 @@ def request_wants_json():
 
 
 def marshal_with(fields, envelope=None):
-    """Wraps flast-restful's marshal_with to transform the returned object to
+    """Wraps flask-restful's marshal_with to transform the returned object to
     have camelCased keys."""
     def decorator(f):
         @functools.wraps(f)
@@ -218,4 +221,4 @@ class CollisionError(Exception):
 
 class EpochField(flask.ext.restful.fields.Raw):
     def format(self, value):
-        return from_epoch(value)
+        return to_epoch(value)

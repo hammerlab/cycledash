@@ -4,7 +4,7 @@ import nose
 import json
 
 from cycledash import app, db
-from common.helpers import tables, from_epoch
+from common.helpers import tables, to_epoch
 
 from test_projects_api import create_project_with_name
 from test_runs_api import create_run_with_uri
@@ -86,7 +86,7 @@ class TestCommentsAPI(object):
         r = self.app.put('/api/runs/{}/comments/{}'.format(self.run['id'], comment['id']),
                          data=json.dumps({'commentText': new_text,
                                           'authorName': new_author,
-                                          'last_modified': from_epoch(comment['last_modified'])}))
+                                          'last_modified': to_epoch(comment['last_modified'])}))
         assert r.status_code == 200
         assert json.loads(r.data)['id'] == comment['id']
         assert json.loads(r.data)['commentText'] == new_text
@@ -103,14 +103,14 @@ class TestCommentsAPI(object):
         now = datetime.datetime.now()
         r = self.app.put('/api/runs/{}/comments/{}'.format(self.run['id'], comment['id']),
                          data=json.dumps({'commentText': 'blah',
-                                          'lastModified': from_epoch(now)}))
+                                          'lastModified': to_epoch(now)}))
         assert r.status_code == 409
         assert 'out of date' in json.loads(r.data)['message']
 
     def test_delete_comment(self):
         comment = create_comment_with_text(self.run['id'], 'some text')
         r = self.app.delete('/api/runs/{}/comments/{}'.format(self.run['id'], comment['id']),
-                            data=json.dumps({'lastModified': from_epoch(comment['last_modified'])}))
+                            data=json.dumps({'lastModified': to_epoch(comment['last_modified'])}))
         assert r.status_code == 200
         assert json.loads(r.data)['id'] == comment['id']
         r = self.app.get('/api/runs/{}/comments/{}'.format(self.run['id'], comment['id']))
@@ -126,6 +126,6 @@ class TestCommentsAPI(object):
         comment = create_comment_with_text(self.run['id'], 'some text')
         now = datetime.datetime.now()
         r = self.app.delete('/api/runs/{}/comments/{}'.format(self.run['id'], comment['id']),
-                         data=json.dumps({'lastModified': from_epoch(now)}))
+                         data=json.dumps({'lastModified': to_epoch(now)}))
         assert r.status_code == 409
         assert 'out of date' in json.loads(r.data)['message']

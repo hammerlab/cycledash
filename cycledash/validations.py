@@ -1,3 +1,4 @@
+"""Schemas for validating API requests."""
 import json
 
 from voluptuous import (Schema, All, Any, Required, Length, Range, truth,

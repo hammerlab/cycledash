@@ -16,13 +16,12 @@ var React = require('react'),
 })(); // from ../examine/components/QueryBox.js
 
 // This instruments a form to submit via AJAX.
-// if the form successfully submit, the page will refresh.
+// if the form successfully submits, the page will refresh.
 // If there is an error, the error message is shown in an alert.
 function ajaxifyForm(form) {
   $(form).submit(function(evt) {
     evt.preventDefault();
-    var inputs = $(form).find('input').toArray();
-    inputs = inputs.concat($(form).find('textarea').toArray());
+    var inputs = $(form).find('input, textarea').toArray();
     var requestData = _.reduce(inputs, (req, input) => {
       if (input.value.length > 0) {
         req[input.name] = input.value;

@@ -5,7 +5,7 @@ import json
 
 from flask import request
 import flask.ext.restful as restful
-from flask.ext.restful import abort, Resource, fields, marshal_with
+from flask.ext.restful import Resource
 from sqlalchemy import (select, func, types, cast, join, outerjoin, asc, desc,
                         and_, Integer, Float, String)
 from sqlalchemy.sql import text

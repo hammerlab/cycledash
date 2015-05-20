@@ -66,7 +66,7 @@ def find(iterable, pred):
             return x
 
 
-def from_epoch(dt):
+def to_epoch(dt):
     """Return the epoch time representation of a datetime object, `dt`."""
     epoch = datetime(1970, 1, 1, tzinfo=dt.tzinfo)
     return (dt - epoch).total_seconds()

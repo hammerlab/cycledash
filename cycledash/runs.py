@@ -24,14 +24,9 @@ run_fields = {
     'notes': fields.String,
     'vcf_header': fields.String,
 
-    # TODO: change to show these instead of *_id
-    # 'project': fields.Raw,
-    # 'normal_bam': fields.Raw,
-    # 'tumor_bam': fields.Raw,
-
-    'project_id': fields.Raw,
-    'normal_bam_id': fields.Raw,
-    'tumor_bam_id': fields.Raw,
+    'project_id': fields.Integer,
+    'normal_bam_id': fields.Integer,
+    'tumor_bam_id': fields.Integer
 }
 
 # Used because on GET /runs/<id> we want the spec and contig, too [for now].

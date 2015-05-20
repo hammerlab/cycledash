@@ -3,7 +3,7 @@
 set -o errexit
 
 . ./tests/ENV.sh
-nosetests tests/python
+./scripts/run-python-tests.sh
 
 ./scripts/run-js-tests.sh
 echo 'Running tests in reverse...'

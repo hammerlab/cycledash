@@ -4,7 +4,7 @@ from flask import jsonify, request
 from flask.ext.restful import abort, Resource, fields
 from sqlalchemy import select, func, desc
 
-from common.helpers import tables, from_epoch
+from common.helpers import tables, to_epoch
 from cycledash import db
 from cycledash.helpers import (prepare_request_data, success_response,
                                validate_with, abort_if_none_for, EpochField,
@@ -105,14 +105,14 @@ def get_vcf_comments(vcf_id):
 
     {
       "comments": {
-        "<row_key STRING>": [<comment>, ...],
+        "<row_key STRING>": [<comment_fields>, ...],
         "<row_key STRING>": [...], ...
       }
     }
     """
     def _row_key(comment, table):
         cols = ['contig', 'position', 'reference', 'alternates', 'sample_name']
-        return ''.join([str(comment[col]) for col in cols])
+        return ':'.join([str(comment[col]) for col in cols])
 
     with tables(db.engine, 'user_comments') as (conn, user_comments):
         cols = user_comments.c
@@ -121,8 +121,8 @@ def get_vcf_comments(vcf_id):
         results_map = defaultdict(list)
         for comment in (dict(c) for c in results):
             row_key = _row_key(comment, user_comments)
-            comment['last_modified'] = from_epoch(comment['last_modified'])
-            comment['created'] = from_epoch(comment['created'])
+            comment['last_modified'] = to_epoch(comment['last_modified'])
+            comment['created'] = to_epoch(comment['created'])
             comment = camelcase_dict(comment)
             results_map[row_key].append(comment)
     return {'comments': results_map}
@@ -141,8 +141,8 @@ def get_last_comments(n=5):
 def epochify_comments(comments):
     """Sets `lastModified` and `created` to be epoch time instead of iso8061."""
     for c in comments:
-        c['lastModified'] = from_epoch(c['lastModified'])
-        c['created'] = from_epoch(c['created'])
+        c['lastModified'] = to_epoch(c['lastModified'])
+        c['created'] = to_epoch(c['created'])
     return comments
 
 
@@ -150,7 +150,7 @@ def _ensure_not_out_of_date(comment, last_modified):
     """Assert that the comment has the same last_modified time,
     otherwise abort(409).
     """
-    current_time = from_epoch(comment['last_modified'])
+    current_time = to_epoch(comment['last_modified'])
     if current_time != last_modified:
         abort(409, message=('Comment id={} is out of date.'
                             .format(comment['id'])),

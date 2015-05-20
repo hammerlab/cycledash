@@ -38,7 +38,7 @@ class TestProjectAPI(object):
         r = self.app.post('/api/projects',
                           data=json.dumps({'name': self.PROJECT_NAME}))
         assert r.status_code == 409
-        assert "duplicate key" in json.loads(r.data)['errors'][0]
+        assert 'duplicate key' in json.loads(r.data)['errors'][0]
 
     def test_create_project_without_name(self):
         r = self.app.post('/api/projects',

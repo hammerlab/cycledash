@@ -72,11 +72,11 @@ function getCommentIdFromPath(path) {
 }
 
 function getRowKey(comment) {
-  return comment.contig +
-    comment.position +
-    comment.reference +
-    comment.alternates +
-    comment.sampleName;
+  return [comment.contig,
+          comment.position,
+          comment.reference,
+          comment.alternates,
+          comment.sampleName].join(':');
 }
 
 // We represent the database of comments as an object keyed by comment ID,
