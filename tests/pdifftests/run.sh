@@ -2,6 +2,8 @@
 
 source tests/ENV.sh
 
+source tests/create-test-db.sh
+
 python run.py > tests/pdifftests/log.txt 2>&1 &
 RUN_PID=$!
 echo pid of test server is $RUN_PID
