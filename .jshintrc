@@ -25,7 +25,8 @@
     // statements. These globals make up for that.
     "require": true,
     "module": true,
-    "global": true
+    "global": true,
+    "console": true
   },
   "maxerr": 100000
 }
