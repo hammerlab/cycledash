@@ -102,7 +102,7 @@ gulp prod
 
 ### 7. Run RabbitMQ (and keep it running)
 
-To test the workers locally, you'll need to install and run rabbitmq 
+To test the workers locally, you'll need to install and run rabbitmq
 during development. For example, on Mac OS X, you can do this via:
 
 ```
@@ -139,9 +139,9 @@ To run tests:
 
 ```
 source path/to/bin/activate
-source ./tests/ENV.sh    # make sure all our environment variables are around
-nosetests tests/python   # Run Python tests
-npm test                 # Run JS tests
+source ./tests/ENV.sh           # make sure all our environment variables are around
+./scripts/run-python-tests.sh   # Run Python tests
+./scripts/run-js-tests.sh       # Run JS tests
 ```
 
 To run an individual JavaScript test, you can use:

@@ -2,7 +2,7 @@
 
 ### VCFs
 
-JSON should be POSTed to <tt>/runs</tt> with following fields:
+JSON should be POSTed to <tt>/api/runs</tt> with following fields:
 
 #### Required
 
@@ -44,7 +44,7 @@ JSON should be POSTed to <tt>/runs</tt> with following fields:
 
 ### Projects
 
-JSON should be POSTed to <tt>/projects</tt> with following fields:
+JSON should be POSTed to <tt>/api/projects</tt> with following fields:
 
 #### Required
 
@@ -64,7 +64,7 @@ JSON should be POSTed to <tt>/projects</tt> with following fields:
 
 ### BAMs
 
-JSON should be POSTed to <tt>/bams</tt> with following fields:
+JSON should be POSTed to <tt>/api/bams</tt> with following fields:
 
 #### Required
 

@@ -61,11 +61,11 @@ function extractFlatColumnList(columns) {
 }
 
 function getRowKey(record) {
-  return record.contig +
-    record.position +
-    record.reference +
-    record.alternates +
-    record.sample_name;
+  return [record.contig,
+          record.position,
+          record.reference,
+          record.alternates,
+          record.sample_name].join(':');
 }
 
 module.exports = { getIn, juxt, makeIGVLink, extractFlatColumnList,

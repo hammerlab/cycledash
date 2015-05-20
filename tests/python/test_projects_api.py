@@ -25,12 +25,9 @@ class TestProjectAPI(object):
             res = projects.delete(projects.c.name == self.PROJECT_NAME).execute()
 
     def test_create_project(self):
-        r = self.app.post('/projects',
+        r = self.app.post('/api/projects',
                           data=json.dumps({'name': self.PROJECT_NAME,
-                                           'notes': self.NOTES}),
-                          headers={'content-type': 'application/json',
-                                   'accept': 'application/json'})
-
+                                           'notes': self.NOTES}))
         assert r.status_code == 201
         assert isinstance(json.loads(r.data)['id'], int)
         assert json.loads(r.data)['name'] == self.PROJECT_NAME
@@ -38,31 +35,20 @@ class TestProjectAPI(object):
 
     def test_create_duplicate_project_name(self):
         create_project_with_name(self.PROJECT_NAME)
-        r = self.app.post('/projects',
-                          data=json.dumps({'name': self.PROJECT_NAME}),
-                          headers={'content-type': 'application/json',
-                                   'accept': 'application/json'})
-
-        assert r.status_code == 400
-        assert "Could not create project" in json.loads(r.data)['error']
+        r = self.app.post('/api/projects',
+                          data=json.dumps({'name': self.PROJECT_NAME}))
+        assert r.status_code == 409
+        assert 'duplicate key' in json.loads(r.data)['errors'][0]
 
     def test_create_project_without_name(self):
-        r = self.app.post('/projects',
-                          data=json.dumps({'notes': 'anything'}),
-                          headers={'content-type': 'application/json',
-                                   'accept': 'application/json'})
-
+        r = self.app.post('/api/projects',
+                          data=json.dumps({'notes': 'anything'}))
         assert r.status_code == 400
-        assert 'Project validation' in json.loads(r.data)['error']
-        assert 'required key not provided' in r.data
-        assert 'name' in json.loads(r.data)['message'][0]
+        assert "required key not provided @ data['name']" == json.loads(r.data)['errors'][0]
 
     def test_get_project(self):
         project = create_project_with_name(self.PROJECT_NAME)
-        r = self.app.get('/projects/{}'.format(project['id']),
-                         headers={'content-type': 'application/json',
-                                  'accept': 'application/json'})
-
+        r = self.app.get('/api/projects/{}'.format(project['id']))
         assert r.status_code == 200
         assert json.loads(r.data)['id'] == project['id']
         assert json.loads(r.data)['name'] == project['name']
@@ -71,12 +57,8 @@ class TestProjectAPI(object):
 
     def test_get_projects(self):
         project = create_project_with_name(self.PROJECT_NAME)
-        r = self.app.get('/projects',
-                         headers={'content-type': 'application/json',
-                                  'accept': 'application/json'})
-
+        r = self.app.get('/api/projects')
         projects = json.loads(r.data)['projects']
-
         assert r.status_code == 200
         assert isinstance(projects, list)
         assert projects[0]['name'] == self.PROJECT_NAME
@@ -84,11 +66,8 @@ class TestProjectAPI(object):
 
     def test_update_project(self):
         project = create_project_with_name(self.PROJECT_NAME)
-        r = self.app.put('/projects/{}'.format(project['id']),
-                         data=json.dumps({'notes': self.NEW_NOTES}),
-                         headers={'content-type': 'application/json',
-                                  'accept': 'application/json'})
-
+        r = self.app.put('/api/projects/{}'.format(project['id']),
+                         data=json.dumps({'notes': self.NEW_NOTES}))
         assert r.status_code == 200
         assert json.loads(r.data)['id'] == project['id']
         assert json.loads(r.data)['name'] == self.PROJECT_NAME
@@ -97,16 +76,9 @@ class TestProjectAPI(object):
 
     def test_delete_project(self):
         project = create_project_with_name(self.PROJECT_NAME)
-        r = self.app.delete('/projects/{}'.format(project['id']),
-                            headers={'content-type': 'application/json',
-                                     'accept': 'application/json'})
-
+        r = self.app.delete('/api/projects/{}'.format(project['id']))
         assert r.status_code == 200
         assert json.loads(r.data)['id'] == project['id']
         assert json.loads(r.data)['name'] == self.PROJECT_NAME
-
-        r = self.app.get('/projects/{}'.format(project['id']),
-                         headers={'content-type': 'application/json',
-                                  'accept': 'application/json'})
-
+        r = self.app.get('/api/projects/{}'.format(project['id']))
         assert r.status_code == 404

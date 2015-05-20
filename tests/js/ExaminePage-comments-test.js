@@ -42,9 +42,8 @@ describe('ExaminePage Comments', function() {
       id: 1,
       spec: fakeServer.spec,
       contigs: fakeServer.contigs,
-      caller_name: 'test',
-      dataset_name: 'test',
-      created_at: '',
+      callerName: 'test',
+      createdAt: '',
       uri: '/tests/js/data/snv.vcf'
     };
     var igvHttpfsUrl = 'http://example.com/';
@@ -176,7 +175,7 @@ describe('ExaminePage Comments', function() {
     changeCommentText('Edited Comment');
     clickCommentButton('Save');
     assert.equal('Edited Comment', commentText());
-    assert.equal('Edited Comment', commentDatabase['17'].comment_text);
+    assert.equal('Edited Comment', commentDatabase['17'].commentText);
 
     // Delete the second comment.
     clickCommentLinkClass('comment-delete');
@@ -188,7 +187,7 @@ describe('ExaminePage Comments', function() {
     clickCommentButton('Save');
     assert.equal(5, getNumComments());
     assert.equal('New Comment', commentText());
-    assert.equal('New Comment', commentDatabase['43'].comment_text);
+    assert.equal('New Comment', commentDatabase['43'].commentText);
 
     // Delete the added comment.
     clickCommentLinkClass('comment-delete');
@@ -198,9 +197,9 @@ describe('ExaminePage Comments', function() {
 
   it('should undo actions when server fails', function() {
     examine = renderExamine({
-      'PUT': ['/runs/1/comments/17'],
-      'POST': ['/runs/1/comments'],
-      'DELETE': ['/runs/1/comments/17']
+      'PUT': ['/api/runs/1/comments/17'],
+      'POST': ['/api/runs/1/comments'],
+      'DELETE': ['/api/runs/1/comments/17']
     });
     stubDialogs();
 
@@ -214,11 +213,11 @@ describe('ExaminePage Comments', function() {
     changeCommentText('Edited Comment');
     clickCommentButton('Save');
     assert.equal('Second', commentText());
-    assert.equal('Second', commentDatabase['17'].comment_text);
+    assert.equal('Second', commentDatabase['17'].commentText);
     assert.equal(5, getNumComments());
     clickCommentLinkClass('comment-delete');
     assert.equal('Second', commentText());
-    assert.equal('Second', commentDatabase['17'].comment_text);
+    assert.equal('Second', commentDatabase['17'].commentText);
     assert.equal(5, getNumComments());
 
     // Make a new comment, save it, and check that the fake DB was *not*

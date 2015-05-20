@@ -268,7 +268,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
   function deferredComments(vcfId) {
     return callbackToPromise(
       dataSource,
-      '/runs/' + vcfId + '/comments',
+      '/api/runs/' + vcfId + '/comments/byrow',
       'GET'
     );
   }
@@ -277,7 +277,6 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
     $.when(deferredComments(vcfId))
       .done(response => {
         commentMap = response.comments;
-
         updateCommentsInParentRecords(records);
         notifyChange();
       });
@@ -286,9 +285,9 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
   function deferredCommentDelete(vcfId, comment) {
     return callbackToPromise(
       dataSource,
-      '/runs/' + vcfId + '/comments/' + comment.id,
+      '/api/runs/' + vcfId + '/comments/' + comment.id,
       'DELETE',
-      {'last_modified_timestamp': comment.last_modified_timestamp}
+      {'lastModified': comment.lastModified}
     );
   }
 
@@ -313,19 +312,20 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
   function deferredCommentUpdate(vcfId, comment) {
     return callbackToPromise(
       dataSource,
-      '/runs/' + vcfId + '/comments/' + comment.id,
+      '/api/runs/' + vcfId + '/comments/' + comment.id,
       'PUT',
-      _.pick(comment,
-             'comment_text', 'author_name', 'last_modified_timestamp')
+      _.pick(comment, 'lastModified', 'commentText', 'authorName')
     );
   }
 
   function deferredCommentCreate(vcfId, comment) {
     return callbackToPromise(
       dataSource,
-      '/runs/' + vcfId + '/comments',
+      '/api/runs/' + vcfId + '/comments',
       'POST',
-      comment
+      _.pick(comment,
+             'contig', 'position', 'sample_name',
+             'commentText', 'authorName', 'reference', 'alternates')
     );
   }
 
@@ -337,8 +337,8 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
       var oldComment = updateCommentAndNotify(comment, record);
       $.when(deferredCommentUpdate(vcfId, comment))
         .done(response => {
-          // Set this comment's last_modified_timestamp timestamp after the update.
-          comment.last_modified_timestamp = response.last_modified_timestamp;
+          // Set this comment's lastModified timestamp after the update.
+          comment.lastModified = response.lastModified;
           updateCommentAndNotify(comment, record);
         })
         .fail(() => {
@@ -355,7 +355,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
         .done(response => {
           // Give this comment an ID, based on what was inserted.
           comment.id = response.id;
-          comment.last_modified_timestamp = response.last_modified_timestamp;
+          comment.lastModified = response.lastModified;
           updateCommentAndNotify(comment, record);
         })
         .fail(() => {
@@ -455,7 +455,7 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
     var queryString = encodeURIComponent(JSON.stringify(query));
     return callbackToPromise(
       dataSource,
-      '/runs/' + vcfId + '/genotypes?q=' + queryString,
+      '/api/runs/' + vcfId + '/genotypes?q=' + queryString,
       'GET'
     );
   }

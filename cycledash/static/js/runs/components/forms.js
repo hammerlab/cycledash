@@ -1,7 +1,8 @@
 'use strict';
 var React = require('react'),
     d3 = require('d3'),
-    $ = require('jquery');
+    $ = require('jquery'),
+    _ = require('underscore');
 
 
 // Hack to make typeahead.js use the correct jQuery.
@@ -14,6 +15,31 @@ var React = require('react'),
   window.jQuery = oldJQuery;
 })(); // from ../examine/components/QueryBox.js
 
+// This instruments a form to submit via AJAX.
+// if the form successfully submits, the page will refresh.
+// If there is an error, the error message is shown in an alert.
+function ajaxifyForm(form) {
+  $(form).submit(function(evt) {
+    evt.preventDefault();
+    var inputs = $(form).find('input, textarea').toArray();
+    var requestData = _.reduce(inputs, (req, input) => {
+      if (input.value.length > 0) {
+        req[input.name] = input.value;
+      }
+      return req;
+    }, {});
+    $.ajax({
+      url: form.action,
+      type: form.method || 'GET',
+      data: requestData
+    }).done(() => {
+      window.location.reload();
+    }).error(e => {
+      window.alert(e.responseText);
+    });
+    return false;
+  });
+}
 
 var NewRunForm = React.createClass({
   propTypes: {
@@ -21,10 +47,13 @@ var NewRunForm = React.createClass({
     bamUris: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     projectName: React.PropTypes.string.isRequired
   },
+  componentDidMount: function() {
+    ajaxifyForm(this.refs.runForm.getDOMNode());
+  },
   render: function() {
     var props = this.props;
     return (
-        <form method='POST' action='/runs' className='run-form'>
+      <form method='POST' action='/api/runs' className='run-form' ref='runForm'>
         <h3>New Run</h3>
         <TextInput label='Tumor BAM URI:' name='tumorBamUri'
                    completions={props.bamUris}
@@ -33,7 +62,7 @@ var NewRunForm = React.createClass({
                    completions={props.bamUris}
                    placeholder='/data/dream/normal.chr20.bam' />
 
-        <TextInput label='Variant Caller Name:' name='variantCallerName'
+        <TextInput label='Variant Caller Name:' name='callerName'
                    placeholder='Guacamole::Somatic' />
 
         <TextInput label='VCF Path:' name='uri'
@@ -45,7 +74,7 @@ var NewRunForm = React.createClass({
 
         <div className='form-group run-form-notes'>
           <label>Notes, Config, Params:</label>
-          <textarea className='form-control' rows='8' name='params'
+          <textarea className='form-control' rows='8' name='notes'
                     placeholder='Notes, parameters, etc.'></textarea>
         </div>
 
@@ -59,9 +88,12 @@ var NewBAMForm = React.createClass({
   propTypes: {
     projectName: React.PropTypes.string.isRequired
   },
+  componentDidMount: function() {
+    ajaxifyForm(this.refs.bamForm.getDOMNode());
+  },
   render: function() {
     return (
-        <form method='POST' action='/bams' className='bam-form'>
+      <form method='POST' action='/api/bams' className='bam-form' ref='bamForm'>
         <h3>New BAM</h3>
 
         <TextInput label='Name:' name='name' required={true}
@@ -94,9 +126,12 @@ var NewProjectForm = React.createClass({
   propTypes: {
     handleClose: React.PropTypes.func.isRequired,
   },
+  componentDidMount: function() {
+    ajaxifyForm(this.refs.projectForm.getDOMNode());
+  },
   render: function() {
     return (
-      <form method='POST' action='/projects' className='project-form'>
+      <form method='POST' action='/api/projects' className='project-form' ref='projectForm'>
         <h2>
           <button className='close' type='button'
                   onClick={this.props.handleClose}>&times;</button>

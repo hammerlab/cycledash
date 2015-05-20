@@ -1,7 +1,7 @@
 import nose
 
 from common.helpers import order
-from cycledash.helpers import underscorize
+from cycledash.helpers import underscorize, camelcase
 from common.relational_vcf import vcf_to_csv
 
 
@@ -13,8 +13,20 @@ def test_underscorize():
         "camelC": "camel_c",
         "CamelBI1GCasesRun1": "camel_bi1g_cases_run1"
     }
-    for example, expected in camel_to_underscored_expectations.iteritems():
+    for example, expected in camel_to_underscored_expectations.items():
         assert underscorize(example) == expected
+
+
+def test_camelcase():
+    underscored_to_cameled_expectations = {
+        "camel_case": "camelCase",
+        "http_request": "httpRequest",
+        "camel_http1": "camelHttp1",
+        "camel_c": "camelC",
+        "camel_bi1g_cases_run1": "camelBi1gCasesRun1"
+    }
+    for example, expected in underscored_to_cameled_expectations.items():
+        assert camelcase(example) == expected
 
 
 def test_vcf_to_csv():

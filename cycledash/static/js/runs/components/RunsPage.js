@@ -258,7 +258,7 @@ var RunDescriptionRow = React.createClass({
         tasks = this.state.tasks.map(
           function({type, state}, i) {
             var stateEl = state == 'FAILURE' ?
-                <a href={`/tasks/${run.id}`}>{state}</a> : state;
+                <a href={`/runs/${run.id}/tasks`}>{state}</a> : state;
             return [<dt key={'tdt'+i}>{type}</dt>,
                     <dd key={'tdd'+i}>{stateEl}</dd>];
           });
@@ -275,7 +275,7 @@ var RunDescriptionRow = React.createClass({
   },
   componentDidMount: function() {
     $.ajax({
-      url: `/tasks/${this.props.run.id}`,
+      url: `/api/runs/${this.props.run.id}/tasks`,
       dataType: "json",
       contentType: "application/json;charset=utf-8",
     })

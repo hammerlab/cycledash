@@ -8,12 +8,12 @@ from common.helpers import tables
 from test_projects_api import create_project_with_name
 
 
-def create_bam_with_name(project_id, name):
+def create_bam_with_name(project_id, name, uri='hdfs://testbam.bam'):
     with tables(db.engine, 'bams') as (con, bams):
         res = bams.insert(
             {'name': name,
              'project_id': project_id,
-             'uri': 'hdfs://testbam.bam'}).returning(*bams.c).execute()
+             'uri': uri}).returning(*bams.c).execute()
         return dict(res.fetchone())
 
 
@@ -35,18 +35,15 @@ class TestBamsAPI(object):
     def test_create_bam(self):
         NOTES = 'random notes'
         TISSUES = 'left ovary etc'
-        r = self.app.post('/bams',
+        r = self.app.post('/api/bams',
                           data=json.dumps({'name': self.BAM_NAME,
                                            'notes': NOTES,
                                            'tissues': TISSUES,
                                            'uri': self.PATH,
-                                           'project_id': self.project['id']}),
-                          headers={'content-type': 'application/json',
-                                   'accept': 'application/json'})
-
+                                           'projectId': self.project['id']}))
         assert r.status_code == 201
         assert isinstance(json.loads(r.data)['id'], int)
-        assert json.loads(r.data)['project_id'] == self.project['id']
+        assert json.loads(r.data)['projectId'] == self.project['id']
         assert json.loads(r.data)['name'] == self.BAM_NAME
         assert json.loads(r.data)['tissues'] == TISSUES
         assert json.loads(r.data)['notes'] == NOTES
@@ -54,48 +51,36 @@ class TestBamsAPI(object):
 
     @mock.patch('workers.indexer.index.delay', lambda *args, **kwargs: True)
     def test_create_bam_with_project_name(self):
-        r = self.app.post('/bams',
+        r = self.app.post('/api/bams',
                           data=json.dumps({'name': self.BAM_NAME,
                                            'uri': self.PATH,
-                                           'project_name': self.project['name']}),
-                          headers={'content-type': 'application/json',
-                                   'accept': 'application/json'})
-
+                                           'projectName': self.project['name']}))
         assert r.status_code == 201
         assert isinstance(json.loads(r.data)['id'], int)
-        assert json.loads(r.data)['project_id'] == self.project['id']
+        assert json.loads(r.data)['projectId'] == self.project['id']
         assert json.loads(r.data)['name'] == self.BAM_NAME
         assert json.loads(r.data)['uri'] == self.PATH
 
     def test_create_bam_without_project(self):
-        r = self.app.post('/bams',
+        r = self.app.post('/api/bams',
                           data=json.dumps({'name': self.BAM_NAME,
-                                           'uri': self.PATH}),
-                          headers={'content-type': 'application/json',
-                                   'accept': 'application/json'})
-
-        assert r.status_code == 400
-        assert 'BAM validation' in json.loads(r.data)['error']
-        assert 'project' in json.loads(r.data)['message'][0]
+                                           'uri': self.PATH}))
+        assert r.status_code == 409
+        assert 'is required' in json.loads(r.data)['errors'][0]
+        assert 'Validation error' in json.loads(r.data)['message']
 
     def test_create_bam_with_nonexistent_project(self):
-        r = self.app.post('/bams',
+        r = self.app.post('/api/bams',
                           data=json.dumps({'name': self.BAM_NAME,
                                            'uri': self.PATH,
-                                           'project_id': 10000000000000000000}),
-                          headers={'content-type': 'application/json',
-                                   'accept': 'application/json'})
-
-        assert r.status_code == 400
-        assert 'not found' in json.loads(r.data)['error']
+                                           'projectId': 1000000000}))
+        assert r.status_code == 404
+        assert 'not found' in json.loads(r.data)['message']
 
     def test_get_bam(self):
         bam = create_bam_with_name(self.project['id'], self.BAM_NAME)
 
-        r = self.app.get('/bams/{}'.format(bam['id']),
-                headers={'content-type': 'application/json',
-                         'accept': 'application/json'})
-
+        r = self.app.get('/api/bams/{}'.format(bam['id']))
         assert r.status_code == 200
         assert json.loads(r.data)['id'] == bam['id']
         assert json.loads(r.data)['name'] == bam['name']
@@ -103,13 +88,9 @@ class TestBamsAPI(object):
 
     def test_get_bams(self):
         bam = create_bam_with_name(self.project['id'], self.BAM_NAME)
-        r = self.app.get('/bams',
-                         headers={'content-type': 'application/json',
-                                  'accept': 'application/json'})
-
-        assert r.status_code == 200
-
+        r = self.app.get('/api/bams')
         bams = json.loads(r.data)['bams']
+        assert r.status_code == 200
         assert isinstance(bams, list)
         assert bams[0]['name'] == bam['name']
 
@@ -118,11 +99,8 @@ class TestBamsAPI(object):
         bam = create_bam_with_name(self.project['id'], self.BAM_NAME)
 
         NEW_NOTES = 'these are new BAM notes'
-        r = self.app.put('/bams/{}'.format(bam['id']),
-                         data=json.dumps({'notes': NEW_NOTES}),
-                         headers={'content-type': 'application/json',
-                                  'accept': 'application/json'})
-
+        r = self.app.put('/api/bams/{}'.format(bam['id']),
+                         data=json.dumps({'notes': NEW_NOTES}))
         assert r.status_code == 200
         assert json.loads(r.data)['id'] == bam['id']
         assert json.loads(r.data)['name'] == bam['name']
@@ -131,16 +109,9 @@ class TestBamsAPI(object):
 
     def test_delete_bam(self):
         bam = create_bam_with_name(self.project['id'], self.BAM_NAME)
-        r = self.app.delete('/bams/{}'.format(bam['id']),
-                            headers={'content-type': 'application/json',
-                                     'accept': 'application/json'})
-
+        r = self.app.delete('/api/bams/{}'.format(bam['id']))
         assert r.status_code == 200
         assert json.loads(r.data)['id'] == bam['id']
         assert json.loads(r.data)['name'] == bam['name']
-
-        r = self.app.get('/bams/{}'.format(bam['id']),
-                         headers={'content-type': 'application/json',
-                                  'accept': 'application/json'})
-
+        r = self.app.get('/api/bams/{}'.format(bam['id']))
         assert r.status_code == 404
