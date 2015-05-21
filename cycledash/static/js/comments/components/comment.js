@@ -24,10 +24,10 @@ var LatestComments = React.createClass({
   },
   render: function() {
     return (
-      <div className='comments'>
-        <h4>Last {this.props.comments.length} Comments</h4>
+      <div className='container'>
+        <h4>Last {this.props.comments.length} Comments
+        <a href='/comments' className='all-comments'>(See all)</a></h4>
         <Comments comments={this.props.comments} />
-        <a href='/comments' className='all-comments'>See all…</a>
       </div>
     );
   }
@@ -40,9 +40,9 @@ var Comments = React.createClass({
   render: function() {
     var comments = this.props.comments.map(c => <Comment comment={c} key={c.id} />);
     return (
-      <ul className='comments'>
+      <table className='comments'>
         {comments}
-      </ul>
+      </table>
     );
   }
 });
@@ -62,18 +62,22 @@ var Comment = React.createClass({
     var authorName = comment.authorName ?
         comment.authorName.slice(0, 15) : 'Anonymous';
     return (
-        <li>
-          <span className='run-id'>
-          <a href={`/runs/${comment.vcfId}/examine`}>Run {comment.vcfId}</a>
-          </span>
-          <a className='location' href={this.urlForComment(comment)}>
-            {comment.contig}:{comment.position}
-          </a>
-          <span className='summary-container'>
-            <b>{authorName}</b>: <span className='summary'>{comment.commentText.slice(0, 45)}</span>
-          </span>
-          <span className='time' title={comment.lastModified}>{relativeDate}</span>
-        </li>
+        <tr>
+          <td className='location'>
+            <a className='run-id' href={`/runs/${comment.vcfId}/examine`}>Run {comment.vcfId}</a>
+            <a className='location' href={this.urlForComment(comment)}>
+              {comment.contig}:{comment.position}
+            </a>
+          </td>
+          <td className='summary-container'>
+            <span>
+              <span className='author-name'>{authorName}</span><span className='summary'>{comment.commentText.slice(0, 45)}</span>
+            </span>
+          </td>
+          <td className='time'>
+            <span title={comment.lastModified}>{relativeDate}</span>
+          </td>
+        </tr>
     );
   }
 });

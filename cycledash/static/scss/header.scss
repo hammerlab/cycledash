@@ -1,18 +1,15 @@
 nav.navigation {
-  font-size: 12px;
-  position: absolute;
-  top: 0; left: 0; right: 0;
+  padding: 0.25em 0;
   background: #fefefe;
   border-bottom: 1px solid rgba(0, 0, 0, 0.2);
 }
 nav.navigation ul {
-  margin: 0;
-  padding: 0;
-  display: inline;
+  @extend .container;
+  margin-bottom: 0;
 }
 nav.navigation li {
   display: inline-block;
-  padding: 2px 11px;
+  padding: 0 1em 0 0;
 }
 nav.navigation a {
   color: black;

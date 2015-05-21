@@ -53,32 +53,39 @@ var NewRunForm = React.createClass({
   render: function() {
     var props = this.props;
     return (
-      <form method='POST' action='/api/runs' className='run-form' ref='runForm'>
-        <h3>New Run</h3>
-        <TextInput label='Tumor BAM URI:' name='tumorBamUri'
-                   completions={props.bamUris}
-                   placeholder='/data/dream/tumor.chr20.bam' />
-        <TextInput label='Normal BAM URI:' name='normalBamUri'
-                   completions={props.bamUris}
-                   placeholder='/data/dream/normal.chr20.bam' />
-
-        <TextInput label='Variant Caller Name:' name='callerName'
-                   placeholder='Guacamole::Somatic' />
-
-        <TextInput label='VCF Path:' name='uri'
-                   placeholder='/data/somevcf.vcf'
-                   required={true}
-                   uploadable={true} uploadPath={'/upload'} />
-
-        <input type='hidden' value={this.props.projectName} name='projectName' />
-
-        <div className='form-group run-form-notes'>
-          <label>Notes, Config, Params:</label>
-          <textarea className='form-control' rows='8' name='notes'
-                    placeholder='Notes, parameters, etc.'></textarea>
+      <form method='POST' action='/api/runs' className='add-form' ref='runForm'>
+        <div className='row'>
+          <h3>New Run</h3>
+          <div className='add-form-input-half'>
+            <TextInput label='Tumor BAM URI:' name='tumorBamUri'
+                       completions={props.bamUris}
+                       placeholder='/data/dream/tumor.chr20.bam' />
+          </div>                   
+          <div className='add-form-input-half'>
+            <TextInput label='Normal BAM URI:' name='normalBamUri'
+                       completions={props.bamUris}
+                       placeholder='/data/dream/normal.chr20.bam' />
+          </div>                 
+          <div className='add-form-input-half'>
+            <TextInput label='Variant Caller Name:' name='callerName'
+                       placeholder='Guacamole::Somatic' />
+          </div>                   
+          <div className='add-form-input-half'>
+            <TextInput label='VCF Path:' name='uri'
+                       placeholder='/data/somevcf.vcf'
+                       required={true}
+                       uploadable={true} uploadPath={'/upload'} />
+          </div>
+          <input type='hidden' value={this.props.projectName} name='projectName' />
+          <div className='form-group add-form-input-full'>
+            <label>Notes, Config, Params:</label>
+            <textarea className='form-control add-form-notes' rows='8' name='notes'
+                      placeholder='Notes, parameters, etc.'></textarea>
+          </div>
+          <div className='form-group add-form-input-full'>
+            <button type='submit' className='btn btn-success btn-block'>Submit New Run</button>
+          </div>
         </div>
-
-        <button type='submit' className='btn btn-success btn-block'>Submit New Run</button>
       </form>
     );
   }
@@ -93,30 +100,37 @@ var NewBAMForm = React.createClass({
   },
   render: function() {
     return (
-      <form method='POST' action='/api/bams' className='bam-form' ref='bamForm'>
-        <h3>New BAM</h3>
+      <form method='POST' action='/api/bams' className='add-form' ref='bamForm'>
+        <div className='row'>
+          <h3>New BAM</h3>
+          <div className='add-form-input-half'>
+            <TextInput label='Name:' name='name' required={true}
+                       placeholder='...' />
+          </div>
+          <div className='add-form-input-half'>
+            <TextInput label='Tissues:' name='tissues'
+                       placeholder='Left Ovary' />
+          </div>
+          <div className='add-form-input-half'>
+            <TextInput label='Resection Date:' name='resectionDate'
+                       placeholder='2015-08-14' />
+          </div>
+          <div className='add-form-input-half'>
+            <TextInput label='BAM URI:' name='uri'
+                       required={true}
+                       placeholder='hdfs:///data/somebam.bam' />
+          </div>
 
-        <TextInput label='Name:' name='name' required={true}
-                   placeholder='...' />
-        <TextInput label='Tissues:' name='tissues'
-                   placeholder='Left Ovary' />
-
-        <TextInput label='Resection Date:' name='resectionDate'
-                   placeholder='2015-08-14' />
-
-        <TextInput label='BAM URI:' name='uri'
-                   required={true}
-                   placeholder='hdfs:///data/somebam.bam' />
-
-        <input type='hidden' value={this.props.projectName} name='projectName' />
-
-        <div className='form-group bam-form-notes'>
-          <label>Notes:</label>
-          <textarea className='form-control' rows='8' name='notes'
-                    placeholder='Notes on the procedure, sample, alignment, etc.'></textarea>
+          <input type='hidden' value={this.props.projectName} name='projectName' />
+          <div className='form-group add-form-input-full'>
+            <label>Notes:</label>
+            <textarea className='form-control add-form-notes' rows='8' name='notes'
+                      placeholder='Notes on the procedure, sample, alignment, etc.'></textarea>
+          </div>
+          <div className='form-group add-form-input-full'>
+            <button type='submit' className='btn btn-success btn-block'>Submit New BAM</button>
+          </div>
         </div>
-
-        <button type='submit' className='btn btn-success btn-block'>Submit New BAM</button>
       </form>
     );
   }
@@ -131,21 +145,24 @@ var NewProjectForm = React.createClass({
   },
   render: function() {
     return (
-      <form method='POST' action='/api/projects' className='project-form' ref='projectForm'>
-        <h2>
-          <button className='close' type='button'
-                  onClick={this.props.handleClose}>&times;</button>
-        </h2>
-        <h3>New Project</h3>
-
-        <TextInput label='Project Name:' name='name' placeholder='PT01234' required={true} />
-        <div className='form-group project-form-notes'>
-          <label>Notes</label>
-          <textarea className='form-control' rows='3' name='notes'
-                    placeholder='Notes etc.'></textarea>
+      <form method='POST' action='/api/projects' className='add-form' ref='projectForm'>
+        <div className='row'>
+          <h3>New Project
+            <button className='close' type='button'
+            onClick={this.props.handleClose}>&times;</button>
+          </h3>
+            <div className='add-form-input-full'>
+              <TextInput label='Project Name:' name='name' placeholder='PT01234' required={true} />
+            </div>
+            <div className='form-group add-form-input-full'>
+              <label>Notes</label>
+              <textarea className='form-control add-form-notes' rows='3' name='notes'
+                        placeholder='Notes etc.'></textarea>
+            </div>
+            <div className='form-group add-form-input-full'>
+              <button type='submit' className='btn btn-success btn-block'>Submit New Project</button>
+            </div>
         </div>
-
-        <button type='submit' className='btn btn-success btn-block'>Submit New Project</button>
       </form>
     );
   }
