@@ -82,7 +82,7 @@ var PileupViewer = React.createClass({
       data: pileup.formats.bam({
         url: this.hdfsUrl(path),
         indexUrl: this.hdfsUrl(path + '.bai'),
-        // TODO: indexChunks: chunks
+        indexChunks: chunks
       })
     });
 
