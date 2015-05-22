@@ -90,18 +90,22 @@ def tasks(run_id):
 
 @app.route('/runs/<int:run_id>/examine')
 def examine(run_id):
-    with tables(db.engine, 'vcfs') as (con, runs):
+    with tables(db.engine, 'vcfs', 'bams') as (con, runs, bams):
         q = select(runs.c).where(runs.c.id == run_id)
         run = q.execute().fetchone()
-    if not run:
-        return error_response('Invalid run', 'Invalid run: %s' % run_id)
-    else:
-        run = dict(run)
-        # TODO: make spec and contigs their own API calls? => Change JS that
-        #       relies on this.
-        # TODO: this will error out if the workers haven't run yet
-        run['spec'] = cycledash.genotypes.spec(run_id)
-        run['contigs'] = cycledash.genotypes.contigs(run_id)
+        if not run:
+            return error_response('Invalid run', 'Invalid run: %s' % run_id)
+        else:
+            run = dict(run)
+            run['spec'] = cycledash.genotypes.spec(run_id)
+            run['contigs'] = cycledash.genotypes.contigs(run_id)
+            # Ideally we could use e.g. cycledash.bams.Bam.get(bam_id)
+            for bam_type in ['normal', 'tumor']:
+                bam_id = run[bam_type + '_bam_id']
+                bam = bams.select(bams.c.id == bam_id).execute().fetchone()
+                if bam:
+                    run[bam_type + '_bam'] = dict(bam)
+                    del run[bam_type + '_bam_id']
     return render_template('examine.html',
                            vcf=run,
                            vcfs=cycledash.runs.get_related_vcfs(run))
