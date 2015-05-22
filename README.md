@@ -15,7 +15,7 @@ SQL-like syntax to filter down to variants based on attributes of the genotype
 (e.g. DP or GQ), their position in the genome (e.g. `X:1500000-3000000`), or
 other annotations added by CycleDash workers (e.g. the gene a variant falls in).
 
-We embed the [BioDalliance](http://www.biodalliance.org/) pileup viewer within
+We embed the [pileup.js](https://github.com/hammerlab/pileup.js) pileup viewer within
 this page, allowing users to explore the pileup at a variant's location.
 
 
