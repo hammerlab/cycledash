@@ -1,57 +1,81 @@
 @import '../lib/bootstrap/scss/bootstrap';
 @import 'header';
 
+html {
+  font-size: 16px;
+}
 body {
-  padding: 11px;
+  font-size: 1em;
   font-family: "freight-sans-pro", verdana, helvetica, sans-serif;
 }
-main { margin-top: 78px; }
+main { 
+  @extend .container;
+}
 pre, tt { font-family: "inconsolata", monospace; }
 table td { font-family: helvetica, arial, sans-serif; }
-section {
-  width: 800px;
-  margin: auto;
-}
 img.cycle { float: right; }
+.btn {
+  font-family: "freight-sans-pro", verdana, helvetica, sans-serif;
+}
+dd, dt {
+  margin-bottom: 0.25em;
+}
 
-/* Comment list styling */
-ul.comments {
-  list-style: none;
+/*------[ Comments ]------*/
+table.comments {
+  @extend .col-md-6;
+  margin: 1em 0;
+  font-size: 0.875em;
+  td {
+    vertical-align: top;
+    font-family: "freight-sans-pro", verdana, helvetica, sans-serif;  
+    padding: 0.5em 1em;
+  }
 }
-ul.comments .run-id {
+a.all-comments {
+  font-size: 0.875em;
+  color: #adadad;
+  padding-left: 0.5em;
+}
+.author-name {
   font-weight: bold;
+  &:after {
+    content: ': ';
+    font-weight: normal;
+  }
 }
-ul.comments .run-id a {
-  color: black;
+.comments .run-id {
+  padding-right: 0.5em;
+  color: #000;
 }
-ul.comments .location {
-  padding-left: 7px;
+.comments .position {
+  font-family: "inconsolata", monospace;
 }
-ul.comments .summary-container {
-  padding-left: 20px;
-  max-width: 200px;
+.comments .summary-container {
+  width: 50%;
 }
-ul.comments .summary:before {
+.comments .summary:before {
   content: '“';
-  font-size: 19px;
-  padding-right: 5px;
+  color: #adadad;
 }
-ul.comments .summary:after {
+.comments .summary:after {
   content: '”';
-  font-size: 19px;
-  padding-left: 5px;
+  color: #adadad;
 }
-ul.comments .time {
-  float: right;
-  padding-right: 19px;
+.comments .time {
+  text-align: right;
 }
 .form-group.required .control-label:after {
   content:"*";
   color:red;
 }
-
 section#api-docs > section {
   margin: 31px 0 87px 0;
   padding: 0 67px;
   border-left: 7px solid #e4e4e4;
+}
+
+/*------[ Table Styling ]------*/
+.table {
+  font-size: 0.875em; /* 14/16 */
 }

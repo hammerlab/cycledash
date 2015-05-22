@@ -70,9 +70,9 @@ var RunsPage = React.createClass({
         </h1>
         {this.state.displayProjectForm ? newProjectForm : null}
         <LatestComments comments={this.props.comments} />
-        <h5>
+        <h5 className='filter-runs'>
         Filter runs by project name:&nbsp;&nbsp;
-          <select value={this.state.projectFilter}
+          <select className='select-project-filter' value={this.state.projectFilter}
                   onChange={this.handleProjectFilter}>
             {projectOptions}
           </select>
@@ -136,7 +136,7 @@ var ProjectTable = React.createClass({
     }
     return (
       <div className='project'>
-        <div className='project-header'>
+      <div className='project-header'>
         <h2 title={this.props.project_id}>{this.props.name === 'null' ? 'No Project' : this.props.name}</h2>
           <div className='project-stats'>
             <div>

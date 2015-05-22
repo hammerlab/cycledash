@@ -246,10 +246,10 @@ var VCFCommentHeader = React.createClass({
     // The links are worded differently depending on previous actions.
     var didClick = this.props.didClickIGVLink;
     var igvLinks = this.state.initialHasOpenedIgv ?
-        [<a key="jump" href={jumpLink} onClick={didClick}>Jump to Locus</a>,
-         <a key="load" href={loadIGVLink} onClick={didClick}>(reload)</a>] :
-        [<a key="load" href={loadIGVLink} onClick={didClick}>Load at Locus</a>,
-         <a key="jump" href={jumpLink} onClick={didClick}>(Jump)</a>];
+        [<a key="jump" className='igv-load' href={jumpLink} onClick={didClick}>Jump to Locus</a>,
+         <a key="load" className='igv-load' href={loadIGVLink} onClick={didClick}>Reload</a>] :
+        [<a key="load" className='igv-load' href={loadIGVLink} onClick={didClick}>Load at Locus</a>,
+         <a key="jump" className='igv-load' href={jumpLink} onClick={didClick}>Jump</a>];
 
     return (
       <div className='comment-box-header'>
@@ -257,11 +257,11 @@ var VCFCommentHeader = React.createClass({
            onClick={() => {this.props.handleOpenViewer(r);}}>
           Open Pileup Viewer
         </a>
-        <span className='igv-links'>
-          IGV: {igvLinks[0]}&nbsp;
-               {igvLinks[1]}&nbsp;
-               <a href="https://github.com/hammerlab/cycledash/wiki/IGV-Integration" className="igv-help" title="IGV Help"></a>
-        </span>
+        <div className='igv-links'>
+          {igvLinks[0]}
+          {igvLinks[1]}
+          <a href="https://github.com/hammerlab/cycledash/wiki/IGV-Integration" className="igv-help" title="IGV Help"></a>
+        </div>
       </div>
     );
   }
@@ -284,18 +284,20 @@ var VCFCommentViewer = React.createClass({
 
     var markedDownText = marked(plainText);
     return (
-      <div className='comment-view-container'>
-        <div className='comment-header'>
-          <span className='comment-by'>
-            Comment by <b>{this.props.authorName}</b>, <span className='time'>{this.props.createdString}</span>
-          </span>
-          <span className='edit-buttons'>
-            <a className='comment-edit' title='Edit Comment' href='#' onClick={this.props.handleEdit}></a>
-            <a className='comment-delete' title='Delete Comment' href='#' onClick={this.props.handleDelete}></a>
-          </span>
+      <div className='row'>
+        <div className='comment-view-container'>
+          <div className='comment-header'>
+            <span className='comment-by'>
+              Comment by <b>{this.props.authorName}</b>, <span className='time'>{this.props.createdString}</span>
+            </span>
+            <span className='edit-buttons'>
+              <a className='comment-edit' title='Edit Comment' href='#' onClick={this.props.handleEdit}></a>
+              <a className='comment-delete' title='Delete Comment' href='#' onClick={this.props.handleDelete}></a>
+            </span>
+          </div>
+          <div className='comment-text'
+               dangerouslySetInnerHTML={{__html: markedDownText}} />
         </div>
-        <div className='comment-text'
-             dangerouslySetInnerHTML={{__html: markedDownText}} />
       </div>
     );
   }
@@ -370,7 +372,7 @@ var VCFCommentEditor = React.createClass({
     var buttons = [];
     if (this.props.cancelable) {
       buttons.push(
-        <button className='btn btn-xs comment-button btn-default comment-cancel'
+        <button className='btn btn-link comment-button btn-default comment-cancel'
                 key='cancel'
                 onClick={this.handleCancelConfirm}>
           Cancel
@@ -378,26 +380,28 @@ var VCFCommentEditor = React.createClass({
       );
     }
     buttons.push(
-      <button className='btn btn-xs comment-button btn-success comment-save'
+      <button className='btn comment-button btn-success comment-save'
               key='save'
               onClick={this.handleSaveText}>
         Save
       </button>
     );
     return (
-      <div className='comment-edit-container'>
-        <input className='form-control comment-author'
-               type='text'
-               value={this.state.newAuthorName}
-               placeholder='Enter your name here'
-               onChange={this.handleAuthorChange} />
-        <textarea className='form-control comment-textarea'
-                  value={this.state.newCommentText}
-                  placeholder={this.props.placeHolder}
-                  onChange={this.handleTextChange}
-                  ref='textArea' />
-        <div className='save-buttons'>
-          {buttons}
+      <div className='row'>
+        <div className='comment-edit-container'>
+          <input className='form-control comment-author'
+                 type='text'
+                 value={this.state.newAuthorName}
+                 placeholder='Enter your name here'
+                 onChange={this.handleAuthorChange} />
+          <textarea className='form-control comment-textarea'
+                    value={this.state.newCommentText}
+                    placeholder={this.props.placeHolder}
+                    onChange={this.handleTextChange}
+                    ref='textArea' />
+          <div className='save-buttons'>
+            {buttons}
+          </div>
         </div>
       </div>
     );

@@ -101,7 +101,7 @@ describe('IGV Links', function() {
     assert.equal(2, getIGVLinks(commentBox).length);
     assertContains('Jump', links[0].textContent);
     assertContains('/goto', links[0].href);
-    assertContains('reload', links[1].textContent);
+    assertContains('Reload', links[1].textContent);
     assertContains('/load', links[1].href);
   });
 });

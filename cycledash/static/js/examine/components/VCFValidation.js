@@ -18,13 +18,14 @@ var VCFValidation = React.createClass({
     var vcfs = [{id: null, uri: '---'}].concat(this.props.vcfs)
         .map(v => <option value={v.id} key={v.uri}>{v.uri}</option>);
     return (
-      <div id='vcf-validations'>
-        Compare to:
-        <select onChange={this.handleSelect}
-                value={this.props.compareToVcfId}>
-          {vcfs}
-        </select>
-      </div>
+      <dl className='dl-horizontal vcf-validations'>
+        <dt>Compare to</dt>
+        <dd>
+          <select onChange={this.handleSelect} value={this.props.compareToVcfId}>
+            {vcfs}
+          </select>
+        </dd>
+      </dl>
     );
   }
 });

@@ -1,85 +1,42 @@
 @import 'style';
 
-main {
-  width: 800px;
-  margin: auto;
-  margin-top: 41px;
-}
 #new-project {
   float: right;
 }
 
-/* Run Form */
-form.run-form {
-  margin: 57px auto 55px auto;
-  max-width: 800px;
-  height: 340px;
+.select-project-filter {
+  @extend .form-control;
+  display: inline-block;
+  width: 27em;
 }
-form.run-form .form-control {
-  color: black;
-}
-form.run-form .form-control::-webkit-input-placeholder {
-  color: #adadad;
-}
-form.run-form .form-control::-moz-placeholder {
-  color: #adadad;
-}
-form.run-form input {
-  width: 380px;
-}
-form.run-form .run-form-notes {
-  position: relative;
-  top: -296px;
-  left: 400px;
-  width: 400px;
-}
-form.run-form .run-form-notes textarea {
-  height: 182px;
-}
-form.run-form input[name=uri] {
-  width: 800px;
-}
-form.run-form button[type=submit] {
-  position: relative;
-  top: -217px;
+.filter-runs {
+  margin: 3em 0 2em 0;
 }
 
-/* BAM Form */
-form.bam-form {
-  margin: 57px auto 55px auto;
-  max-width: 800px;
-  height: 340px;
+/*------[ Add Form ]------*/
+form.add-form {
+  @extend .container;
+  background: #f4f4f4;
+  border: 1px solid #ddd;
+  box-shadow: inset 0 0 10px #ddd;
+  border-radius: 3px;
+  margin: 1em 0;
+  h3 {
+    @extend .container;
+    margin: 15px 0;
+  }
 }
-form.bam-form .form-control {
-  color: black;
+.add-form-input-half {
+  @extend .col-md-6;
 }
-form.bam-form .form-control::-webkit-input-placeholder {
-  color: #adadad;
+.add-form-input-full {
+  @extend .col-md-12;
 }
-form.bam-form .form-control::-moz-placeholder {
-  color: #adadad;
-}
-form.bam-form input {
-  width: 380px;
-}
-form.bam-form .bam-form-notes {
-  position: relative;
-  top: -296px;
-  left: 400px;
-  width: 400px;
-}
-form.bam-form .bam-form-notes textarea {
-  height: 182px;
-}
-form.bam-form input[name=uri] {
-  width: 800px;
-}
-form.bam-form button[type=submit] {
-  position: relative;
-  top: -217px;
+.add-form-notes {
+  height: 8em;  
 }
 
-/* Projects */
+/*------[ Projects ]------*/
 div.project-header h2 {
   margin: 0;
 }
@@ -88,13 +45,14 @@ div.project-header .notes {
   width: 480px;
   float: right;
 }
-div.project-header .add {
-  float: left;
-  width: 160px;
-  margin: 17px 0;
-}
 div.project-header .add button {
-  margin-right: 11px;
+  margin-right: 1em;
+}
+div.project-header .add {
+  margin-top: 1em;
+}
+div.project-header .add {
+  margin-top: 1em;
 }
 div.project-header div.project-stats {
   font-size: 1.2em;
@@ -113,42 +71,20 @@ div.project-header div.project-stats div {
   width: 100%;
 }
 div.project {
-  margin: 77px 0;
+  margin: 0 0 5em 0;
 }
 div.project a {
   cursor: pointer;
 }
-div.project tbody {
-  height: 100px;
-  width: 500px;
-  overflow: auto;
-}
 
-/* Last comments list: */
-div.comments {
-  margin: 29px 0;
-}
-h4.last-comments {
- margin-bottom: 5px;
-}
-a.all-comments {
-  font-size: 14px;
-  color: #adadad;
-}
-
-/* LastComments */
-div.comments {
-  margin-left: 1;
-}
-
-/* Runs table: */
-#runs tbody tr {
+/*------[ Runs Table ]------*/
+.runs tbody tr {
   cursor: pointer;
 }
-#runs tbody tr:hover {
+.runs tbody tr:hover {
   background: #F6FAFC;
 }
-#runs tr.info>td {
+.runs tr.info>td {
   background: rgb(247, 252, 253);
 }
 input.selector {
@@ -156,11 +92,6 @@ input.selector {
 }
 td .label {
   margin: 0 3px 0 3px;
-}
-td span.run-id {
-  color: #D5D9D9;
-  margin-right: 11px;
-  font-size: 0.92em;
 }
 .runs .label.fail, .runs .label.run {
   background: none;
@@ -195,7 +126,7 @@ td.comments {
   white-space: nowrap;
 }
 
-/* drag and drop file upload */
+/*------[ Drag and Drop File Upload ]------*/
 main#runs .receiving-drag.uploadable {
   background: rgb(247, 252, 253);
 }
@@ -203,7 +134,7 @@ main#runs .dragging-over .uploadable {
   border: 2px dashed #777;
 }
 
-/* autocomplete styling */
+/*------[ Autocomplete Styling ]------*/
 main#runs .twitter-typeahead, .tt-hint { width: 100%; }
 main#runs .tt-dropdown-menu {
     width: 422px;

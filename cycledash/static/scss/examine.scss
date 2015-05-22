@@ -1,9 +1,9 @@
 @import 'style';
 
-/* ExaminePage */
+/*------[ Examine Page ]------*/
 h1 small {
-  font-size: 17px;
-  margin-left: 17px;
+  font-size: 1em;
+  margin-left: 1em;
   color: #B0B0B0;
 }
 
@@ -12,39 +12,22 @@ a, a:hover {
   color: #000;
   text-decoration: none;
 }
-body {
-  font-size: 16px;
-  line-height: 1;
-  margin: 8px;
-}
 
-/* VCFTable */
+/*------[ VCF Table ]------*/
 .vcf-table {
-  padding-top: 20px;
+  @extend .table, .table-striped, .table-condensed;
 }
 .vcf-table th {
-  font-size: 19px;
+  text-transform: capitalize;
   position: relative;
   white-space: nowrap;
 }
+.vcf-table.table>tbody>tr>td {
+  border-top: none;
+}
 .vcf-table th.arrow,
 .vcf-table td.arrow {
-  width: 20px;
-  max-width: 20px;
-  padding: 0;
-  margin: 0;
-}
-.vcf-table th.ref,
-.vcf-table td.ref,
-.vcf-table th.alt,
-.vcf-table td.alt {
-  width: 100px;
-  max-width: 100px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.vcf-table th.tag {
-  width: 5px;
+  text-align: center;
 }
 .vcf-table th.ref,
 .vcf-table td.ref {
@@ -56,9 +39,8 @@ body {
   padding-left: 0;
   text-align: left;
 }
-.vcf-table th.uber-column {
-  border-left: 1px solid #bbb;
-}
+
+/*------[ Tooltip ]------*/
 .vcf-table .tooltip {
   display: none;
   word-wrap: break-word;
@@ -115,49 +97,38 @@ body {
 .vcf-table .variant-info {
   border-top: 1px solid #ddd;
   border-bottom: 1px solid #ddd;
-  padding: 8px;
+  padding: 1em;
   background: rgb(247, 252, 253);
   text-align: left;
 }
+
+/*------[ Comments ]------*/
 .vcf-table .comment-edit-container, .vcf-table .comment-view-container {
-  width: 700px;
-  margin: 10px 5px;
+  @extend .col-md-6;
+  margin: 1em 0 0 0;
 }
 .vcf-table .comment-edit-container {
   border-radius: 3px;
-  border: 1px solid #ccc;
-  padding: 5px;
-  background-color: #fff;
 }
 .vcf-table .comment-box-header {
-  width: 700px;
   text-align: left;
-  height: 18px;
 }
 .vcf-table .comment-header {
-  width: 700px;
-  height: 35px;
-  padding-top: 2px;
-  text-align: right;
+  @extend .clearfix;
+  padding: 0.5em;
   background-color: #f5f5f5;
   border: 1px solid #ccc;
   border-radius: 3px 3px 0px 0px;
   color: #666;
 }
 .vcf-table .comment-text {
-  clear: both;
-  width: 100%;
-  height: auto;
-  min-height: 70px;
-  font-size: 14px;
-  line-height: 1.42857143;
   background-color: #fff;
   border: 1px solid #ccc;
   border-top: 0px;
   white-space: pre-wrap;
   word-wrap: break-word;
   border-radius: 0px 0px 3px 3px;
-  padding: 10px;
+  padding: 0.5em;
 }
 .vcf-table .comment-text p, ul, li, pre {
   margin: 0px;
@@ -170,57 +141,41 @@ body {
   height: 100px;
   background-color: #f5f5f5;
   border-radius: 3px;
+  padding: 0.5em;
 }
 .vcf-table .comment-textarea:focus {
   background-color: #fff;
 }
-.vcf-table .comment-button {
-  margin: 6px 0px 6px 6px;
-}
 .vcf-table .edit-buttons {
   float: right;
-  padding: 0px;
-  margin-top: 5px;
-  margin-right: 5px;
+}
+.vcf-table .comment-delete, .vcf-table .comment-edit {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  opacity: 0.7;
 }
 .vcf-table .comment-delete {
-  width: 20px;
-  height: 20px;
   background: url(/static/img/delete-comment-noun_16505_cc.svg);
   background-size: 20px 20px;
-  opacity: 0.7;
-  display: inline-block;
-  margin-left: 5px;
+  margin-left: 0.75em;
   margin-bottom: -1px;
 }
 .vcf-table .comment-edit {
-  width: 20px;
-  height: 20px;
   background: url(/static/img/edit-comment-noun_8070_cc.svg);
   background-size: 22px 22px;
-  opacity: 0.7;
-  display: inline-block;
-}
-.vcf-table .comment-cancel, .vcf-table .comment-save {
-  margin-bottom: 0px;
 }
 .vcf-table .comment-by {
   float: left;
-  margin-top: 10px;
-  margin-left: 10px;
 }
 .vcf-table .save-buttons {
   width: 100%;
   text-align: right;
-  padding: 0px;
-  margin: 0px;
+  margin-top: 0.5em;
 }
 .vcf-table .comment-author {
-  margin-bottom: 3px;
-  width: 300px;
-  height: 30px;
-  padding: 8px 12px;
-  font-size: 14px;
+  margin-bottom: 0.25em;
+  padding: 0.5em;
   line-height: 20px;
   border: 1px solid #B6B6B7;
   border-radius: 3px;
@@ -230,24 +185,26 @@ body {
 .vcf-table .comment-author:focus {
   background-color: #fff;
 }
-.vcf-table .dalliance-open, .vcf-table .igv-links {
-  padding: 7px 0 0 21px;
-  line-height: 1.6em;
-}
 .vcf-table .dalliance-open {
-  background: url(/static/img/magnifying-glass-noun_907.svg) no-repeat 2px 6px;
+  @extend .btn, .btn-default;
+  background: #fff url(/static/img/magnifying-glass-noun_907.svg) no-repeat 8px 8px;
   cursor: pointer;
   background-size: 15px 15px;
+  padding-left: 2.25em;
 }
 .vcf-table .igv-links {
-  background: url(/static/img/igv32x32.jpg) no-repeat 2px 3px;
-  background-size: 16px 16px;
-  margin-left: 10px;
-  height: 16px;
+  margin-left: 1em;
+  display: inline-block;
+}
+.vcf-table .igv-load {
+  @extend .btn, .btn-default;
+  margin-right: 0.5em;
+  &:before {
+    content: 'IGV: ';
+  }
 }
 .vcf-table .igv-help {
   margin-bottom: -4px;
-  margin-left: 4px;
   width: 18px;
   height: 18px;
   background: url(/static/img/question-mark-noun_61692.svg);
@@ -261,6 +218,8 @@ body {
 .vcf-table tr.selected {
   background: rgb(254, 255, 207);
 }
+
+/*------[ Table Headers ]------*/
 .vcf-table th .sort {
   cursor: pointer;
 }
@@ -273,6 +232,7 @@ body {
 .vcf-table th .sorting-by.desc:before {
   content: ' ↓';
 }
+
 .vcf-table td.pos {
   font-family: "inconsolata", monospace;
 }
@@ -282,30 +242,18 @@ body {
   width: 15px;
   height: 15px;
   display: inline-block;
-  margin-right: 2px;
-}
-.vcf-table td, .vcf-table th {
-  text-align: center;
-  padding: 3px 13px;
+  margin-right: 0.15em;
 }
 .vcf-table td {
-  border: none;
-  font-size: 13px;
   white-space: nowrap;
   max-width: 95px;
   text-overflow: ellipsis;
   overflow-x: hidden;
 }
-table.vcf-table {
-  border-collapse: collapse;
-  width: 100%;
-}
 
-/* StatsSummary */
+/*------[ Stats Summary ]------*/
 #stats-container {
-  margin-top: 23px;
-  width: 350px;
-  float: right;
+  @extend .col-md-4;
   border: 1px solid #B6B6B7;
   border-radius: 3px;
 }
@@ -338,7 +286,7 @@ table.vcf-table {
   padding: 3px 0;
 }
 
-/* BioDalliance */
+/*------[ BioDalliance ]------*/
 .variant-inspector {
   position: fixed;
   left: 0;
@@ -378,43 +326,33 @@ table.vcf-table {
   }
 }
 
-/* VCFValidation */
-#vcf-validations {
-  margin: 11px;
+/*------[ VCFValidation ]------*/
+.vcf-validations select {
+  @extend .form-control;
 }
-#vcf-validations select {
-  width: 500px;
-  margin-left: 13px;
-}
-
-/* ExamineInformation */
-.examine-information {
-  max-width: 600px;
-  margin-top: 17px;
-}
-dt,dd { line-height: 1.4; }
-dd { margin-left: 140px; }
-dt {
-  font-weight: 700;
-  float: left;
-  width: 120px;
-  clear: left;
-  text-align: right;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.examine-header {
+  @extend .container;
+  margin-bottom: 2em;
+  margin-top: 20px;
 }
 
-/* CQL Typeahead */
+/*------[ Examine Information ]------*/
+.examine-info-container {
+  @extend .col-md-8;
+}
+.examine-cql {
+  @extend .col-md-12;
+  float:none;
+  margin-bottom: 1em;
+}
+
+/*------[ CQL Typeahead ]------*/
 .query-container * { box-sizing: border-box; }
 .typeahead-input {
   position: relative;
-  padding-right: 350px;  /* matches width of Stats Table */
-  /* reference, alternates */
 }
 .typeahead-input .twitter-typeahead {
   width: 100%;
-  padding-right: 20px;
 }
 .typeahead-input .query-input,
 .typeahead-input .twitter-typeahead .tt-query,
@@ -477,7 +415,7 @@ dt {
   position: absolute;
   top: 50%;
   margin-top: -10px;
-  right: 375px;  /* width of Stats Table + 25px */
+  right: 10px;
   width: 20px;
   height: 20px;
   background: url(/static/img/question-mark-noun_61692.svg);
@@ -524,13 +462,11 @@ dt {
   margin: 0;
 }
 
-/* Downloads */
+/*------[ Download VCF ]------*/
 a.download-vcf {
-  color: #6d6d6d;
-  font-size: 0.92em;
-  text-decoration: none;
-  padding-left: 38px;
-  background: url(/static/img/download-noun_4501.svg) no-repeat 11px 2px;
+  @extend .btn, .btn-default, .btn-xs;
+  margin-left: 180px; /* from .dl-horizontal dd */
+  padding-left: 2.25em;
+  background: url(/static/img/download-noun_4501.svg) no-repeat 5px 2px;
   background-size: 15px 15px;
-  opacity: 0.55;
 }

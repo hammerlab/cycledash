@@ -11,10 +11,10 @@ var ExamineInformation = React.createClass({
     var run = this.props.run;
     return (
         <div className="examine-information">
-          <dl>
+          <dl className='dl-horizontal'>
             <dt>VCF URI</dt> <dd>{run.uri}</dd>
             <dt>Caller</dt> <dd>{run.caller_name}</dd>
-            <dt>Submitted At</dt> <dd>{run.created_at}</dd>
+            <dt>Submitted</dt> <dd>{run.created_at}</dd>
           </dl>
         </div>
     );
