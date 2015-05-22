@@ -151,7 +151,7 @@ var PileupViewer = React.createClass({
           }).fail((jqXHR, error, textStatus) => {
             this.setState(_.object([propName], [CHUNKS_NOT_AVAILABLE]));
             if (textStatus != 'Not Found') {
-              throw `Invalid bai.json file ${chunkPath} ${error} ${textStatus}`;
+              console.warn(`Invalid bai.json file ${chunkPath} ${error} ${textStatus}`);
             }
           });
       });

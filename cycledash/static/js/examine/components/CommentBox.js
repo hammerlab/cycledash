@@ -37,8 +37,6 @@ var CommentBox = React.createClass({
   propTypes: {
     record: React.PropTypes.object.isRequired,
     igvLink: React.PropTypes.string,
-    hasOpenedIGV: React.PropTypes.bool.isRequired,
-    didClickIGVLink: React.PropTypes.func.isRequired,
     handleOpenViewer: React.PropTypes.func.isRequired,
     handleSetComment: React.PropTypes.func.isRequired,
     handleDeleteComment: React.PropTypes.func.isRequired
@@ -131,8 +129,6 @@ var CommentBox = React.createClass({
         <td colSpan={1000} className='variant-info'>
           <VCFCommentHeader record={this.props.record}
                             igvLink={this.props.igvLink}
-                            hasOpenedIGV={this.props.hasOpenedIGV}
-                            didClickIGVLink={this.props.didClickIGVLink}
                             handleOpenViewer={this.props.handleOpenViewer} />
           {commentNodes}
           <VCFComment record={this.props.record}
@@ -229,8 +225,6 @@ var VCFCommentHeader = React.createClass({
   propTypes: {
     record: React.PropTypes.object.isRequired,
     igvLink: React.PropTypes.string,
-    hasOpenedIGV: React.PropTypes.bool.isRequired,
-    didClickIGVLink: React.PropTypes.func.isRequired,
     handleOpenViewer: React.PropTypes.func.isRequired
   },
   getInitialState: function() {
@@ -240,16 +234,7 @@ var VCFCommentHeader = React.createClass({
   render: function() {
     var r = this.props.record,
         locusParam = `locus=${r.contig}:${r.position}`,
-        loadIGVLink = this.props.igvLink + '&' + locusParam,
-        jumpLink = loadIGVLink.replace(/\/load.*/, '/goto?') + locusParam;
-
-    // The links are worded differently depending on previous actions.
-    var didClick = this.props.didClickIGVLink;
-    var igvLinks = this.state.initialHasOpenedIgv ?
-        [<a key="jump" className='igv-load' href={jumpLink} onClick={didClick}>Jump to Locus</a>,
-         <a key="load" className='igv-load' href={loadIGVLink} onClick={didClick}>Reload</a>] :
-        [<a key="load" className='igv-load' href={loadIGVLink} onClick={didClick}>Load at Locus</a>,
-         <a key="jump" className='igv-load' href={jumpLink} onClick={didClick}>Jump</a>];
+        loadIGVLink = this.props.igvLink + '&' + locusParam;
 
     return (
       <div className='comment-box-header'>
@@ -258,8 +243,7 @@ var VCFCommentHeader = React.createClass({
           Open Pileup Viewer
         </a>
         <div className='igv-links'>
-          {igvLinks[0]}
-          {igvLinks[1]}
+          <a className='igv-load' href={loadIGVLink}>Load in IGV</a>
           <a href="https://github.com/hammerlab/cycledash/wiki/IGV-Integration" className="igv-help" title="IGV Help"></a>
         </div>
       </div>
