@@ -56,26 +56,18 @@ var NewRunForm = React.createClass({
       <form method='POST' action='/api/runs' className='add-form' ref='runForm'>
         <div className='row'>
           <h3>New Run</h3>
-          <div className='add-form-input-half'>
             <TextInput label='Tumor BAM URI:' name='tumorBamUri'
                        completions={props.bamUris}
                        placeholder='/data/dream/tumor.chr20.bam' />
-          </div>                   
-          <div className='add-form-input-half'>
             <TextInput label='Normal BAM URI:' name='normalBamUri'
                        completions={props.bamUris}
                        placeholder='/data/dream/normal.chr20.bam' />
-          </div>                 
-          <div className='add-form-input-half'>
             <TextInput label='Variant Caller Name:' name='callerName'
                        placeholder='Guacamole::Somatic' />
-          </div>                   
-          <div className='add-form-input-half'>
             <TextInput label='VCF Path:' name='uri'
                        placeholder='/data/somevcf.vcf'
                        required={true}
                        uploadable={true} uploadPath={'/upload'} />
-          </div>
           <input type='hidden' value={this.props.projectName} name='projectName' />
           <div className='form-group add-form-input-full'>
             <label>Notes, Config, Params:</label>
@@ -103,24 +95,15 @@ var NewBAMForm = React.createClass({
       <form method='POST' action='/api/bams' className='add-form' ref='bamForm'>
         <div className='row'>
           <h3>New BAM</h3>
-          <div className='add-form-input-half'>
             <TextInput label='Name:' name='name' required={true}
                        placeholder='...' />
-          </div>
-          <div className='add-form-input-half'>
             <TextInput label='Tissues:' name='tissues'
                        placeholder='Left Ovary' />
-          </div>
-          <div className='add-form-input-half'>
             <TextInput label='Resection Date:' name='resectionDate'
                        placeholder='2015-08-14' />
-          </div>
-          <div className='add-form-input-half'>
             <TextInput label='BAM URI:' name='uri'
                        required={true}
                        placeholder='hdfs:///data/somebam.bam' />
-          </div>
-
           <input type='hidden' value={this.props.projectName} name='projectName' />
           <div className='form-group add-form-input-full'>
             <label>Notes:</label>
@@ -151,9 +134,7 @@ var NewProjectForm = React.createClass({
             <button className='close' type='button'
             onClick={this.props.handleClose}>&times;</button>
           </h3>
-            <div className='add-form-input-full'>
-              <TextInput label='Project Name:' name='name' placeholder='PT01234' required={true} />
-            </div>
+            <TextInput label='Project Name:' name='name' placeholder='PT01234' required={true} />
             <div className='form-group add-form-input-full'>
               <label>Notes</label>
               <textarea className='form-control add-form-notes' rows='3' name='notes'
@@ -267,7 +248,7 @@ var TextInput = React.createClass({
       'form-control': true
     });
     var divClasses = React.addons.classSet({required: this.props.required,
-                                            'form-group': true});
+                                            'form-group add-form-input-half': true});
     return (
         <div className={divClasses}>
           <label className='control-label'>{this.props.label}</label>

@@ -327,7 +327,7 @@ a, a:hover {
 }
 
 /*------[ VCFValidation ]------*/
-#vcf-validations select {
+.vcf-validations select {
   @extend .form-control;
 }
 .examine-header {
