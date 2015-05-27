@@ -1,4 +1,5 @@
 @import '../lib/bootstrap/scss/bootstrap';
+@import 'variables';
 @import 'header';
 
 html {
@@ -34,7 +35,7 @@ table.comments {
 }
 a.all-comments {
   font-size: 0.875em;
-  color: #adadad;
+  color: $color-text-dim;
   padding-left: 0.5em;
 }
 .author-name {
@@ -46,7 +47,7 @@ a.all-comments {
 }
 .comments .run-id {
   padding-right: 0.5em;
-  color: #000;
+  color: $color-text;
 }
 .comments .position {
   font-family: "inconsolata", monospace;
@@ -56,26 +57,32 @@ a.all-comments {
 }
 .comments .summary:before {
   content: '“';
-  color: #adadad;
+  color: $color-text-dim;
 }
 .comments .summary:after {
   content: '”';
-  color: #adadad;
+  color: $color-text-dim;
 }
 .comments .time {
   text-align: right;
 }
 .form-group.required .control-label:after {
   content:"*";
-  color:red;
+  color: $color-red;
 }
 section#api-docs > section {
   margin: 31px 0 87px 0;
   padding: 0 67px;
-  border-left: 7px solid #e4e4e4;
+  border-left: 7px solid $color-border-light;
 }
 
 /*------[ Table Styling ]------*/
 .table {
   font-size: 0.875em; /* 14/16 */
+}
+.table tbody tr {
+  cursor: pointer;
+}
+.table tbody tr:hover {
+  background: $color-bg-hover;
 }
