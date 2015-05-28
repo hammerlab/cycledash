@@ -4,12 +4,12 @@
 h1 small {
   font-size: 1em;
   margin-left: 1em;
-  color: #B0B0B0;
+  color: $color-text-dim;
 }
 
 /* Override some Bootstrap defaults */
 a, a:hover {
-  color: #000;
+  color: $color-text;
   text-decoration: none;
 }
 
@@ -45,15 +45,15 @@ a, a:hover {
   display: none;
   word-wrap: break-word;
   white-space: normal;
-  border-radius: 3px;
+  border-radius: $radius;
   position: absolute;
   top: 110%;
   right: -72px;
-  background: white;
-  border: 1px solid #B6B6B7;
+  background: $color-white;
+  border: 1px solid $color-border-light;
   width: 250px;
   font-size: 12px;
-  font-color: #3d3d3d;
+  font-color: $color-text;
   z-index: 1000;
   opacity: 100; /* This is needed to override Bootstrap. */
   line-height: 1; /* This is needed to override Bootstrap. */
@@ -84,21 +84,21 @@ a, a:hover {
 }
 .vcf-table .tooltip:after {
   border-color: rgba(255, 255, 255, 0);
-  border-bottom-color: #ffffff;
+  border-bottom-color: $color-white;
   border-width: 10px;
   margin-left: -10px;
 }
 .vcf-table .tooltip:before {
-  border-color: rgba(52, 52, 52, 0);
-  border-bottom-color: #B6B6B7;
+  border-color: rgba(51, 51, 51, 0);
+  border-bottom-color: $color-border-light;
   border-width: 11px;
   margin-left: -11px;
 }
 .vcf-table .variant-info {
-  border-top: 1px solid #ddd;
-  border-bottom: 1px solid #ddd;
+  border-top: 1px solid $color-border-light;
+  border-bottom: 1px solid $color-border-light;
   padding: 1em;
-  background: rgb(247, 252, 253);
+  background: $color-bg-expanded;
   text-align: left;
 }
 
@@ -108,7 +108,7 @@ a, a:hover {
   margin: 1em 0 0 0;
 }
 .vcf-table .comment-edit-container {
-  border-radius: 3px;
+  border-radius: $radius;
 }
 .vcf-table .comment-box-header {
   text-align: left;
@@ -116,18 +116,18 @@ a, a:hover {
 .vcf-table .comment-header {
   @extend .clearfix;
   padding: 0.5em;
-  background-color: #f5f5f5;
-  border: 1px solid #ccc;
-  border-radius: 3px 3px 0px 0px;
+  background-color: $color-white-smoke;
+  border: 1px solid $color-border-light;
+  border-radius: $radius $radius 0px 0px;
   color: #666;
 }
 .vcf-table .comment-text {
-  background-color: #fff;
-  border: 1px solid #ccc;
+  background-color: $color-white;
+  border: 1px solid $color-border-light;
   border-top: 0px;
   white-space: pre-wrap;
   word-wrap: break-word;
-  border-radius: 0px 0px 3px 3px;
+  border-radius: 0px 0px $radius $radius;
   padding: 0.5em;
 }
 .vcf-table .comment-text p, ul, li, pre {
@@ -139,12 +139,11 @@ a, a:hover {
 .vcf-table .comment-textarea {
   width: 100%;
   height: 100px;
-  background-color: #f5f5f5;
-  border-radius: 3px;
+  background-color: $color-white-smoke;
   padding: 0.5em;
 }
 .vcf-table .comment-textarea:focus {
-  background-color: #fff;
+  background-color: $color-white;
 }
 .vcf-table .edit-buttons {
   float: right;
@@ -177,17 +176,15 @@ a, a:hover {
   margin-bottom: 0.25em;
   padding: 0.5em;
   line-height: 20px;
-  border: 1px solid #B6B6B7;
-  border-radius: 3px;
   outline: none;
-  background-color: #f9f9f9;
+  background-color: $color-white-smoke;
 }
 .vcf-table .comment-author:focus {
-  background-color: #fff;
+  background-color: $color-white;
 }
 .vcf-table .dalliance-open {
   @extend .btn, .btn-default;
-  background: #fff url(/static/img/magnifying-glass-noun_907.svg) no-repeat 8px 8px;
+  background: $color-white url(/static/img/magnifying-glass-noun_907.svg) no-repeat 8px 8px;
   cursor: pointer;
   background-size: 15px 15px;
   padding-left: 2.25em;
@@ -199,9 +196,6 @@ a, a:hover {
 .vcf-table .igv-load {
   @extend .btn, .btn-default;
   margin-right: 0.5em;
-  &:before {
-    content: 'IGV: ';
-  }
 }
 .vcf-table .igv-help {
   margin-bottom: -4px;
@@ -212,11 +206,8 @@ a, a:hover {
   opacity: 0.55;
   display: inline-block;
 }
-.vcf-table tbody tr:nth-child(even) {
-  background: rgb(245, 245, 245);
-}
 .vcf-table tr.selected {
-  background: rgb(254, 255, 207);
+  background: $color-bg-hover!important;
 }
 
 /*------[ Table Headers ]------*/
@@ -254,12 +245,12 @@ a, a:hover {
 /*------[ Stats Summary ]------*/
 #stats-container {
   @extend .col-md-4;
-  border: 1px solid #B6B6B7;
-  border-radius: 3px;
+  border: 1px solid $color-border-light;
+  border-radius: $radius;
 }
 #stats-container .precision-recall {
   padding: 13px 0px;
-  border-bottom: 1px solid #B6B6B7;
+  border-bottom: 1px solid $color-border-light;
 }
 #stats-container table {
   border-collapse: collapse;
@@ -293,7 +284,7 @@ a, a:hover {
   right: 0;
   height: 850px;
   bottom: 0;
-  background-color: white;
+  background-color: $color-white;
 }
 .variant-inspector .close-button, .variant-inspector .right-button {
   float: right;
@@ -308,13 +299,13 @@ a, a:hover {
 #svgHolder {
   position: relative;
   bottom: 0;
-  border: 1px solid #B6B6B7;
+  border: 1px solid $color-border-light;
   overflow-y: auto;
   margin: 0 5%;
   padding: 10px;
 }
 .pileup {
-  border-top: 1px solid black;
+  border-top: 1px solid #000;
 }
 @media(max-height:1000px) {
   .variant-inspector {
@@ -362,8 +353,8 @@ a, a:hover {
   padding: 8px 12px;
   font-size: 22px;
   line-height: 30px;
-  border: 1px solid #B6B6B7;
-  border-radius: 5px;
+  border: 1px solid $color-border-light;
+  border-radius: $radius;
   outline: none;
   padding-right: 27px;  /* 20px for .cql-help + padding */
   padding-left: 37px;  /* 18px for .query-status + padding */
@@ -383,7 +374,7 @@ a, a:hover {
   line-height: 1.43;
 }
 .query-status.good {
-  background: rgb(125, 236, 182);
+  background: $color-status-success;
   border-radius: 20px;
 }
 .query-status.good:before {
@@ -391,10 +382,10 @@ a, a:hover {
   position: relative;
   left: 3px;
   bottom: 2px;
-  color: white;
+  color: $color-white;
 }
 .query-status.bad {
-  background: rgb(243, 45, 45);
+  background: $color-status-error;
   border-radius: 1px;
 }
 .query-status.bad:before {
@@ -403,7 +394,7 @@ a, a:hover {
   left: 3px;
   bottom: 11px;
   font-size: 1.5em;
-  color: white;
+  color: $color-white;
 }
 .query-status.loading {
   background: url(/static/img/loader.gif) no-repeat;
@@ -423,10 +414,10 @@ a, a:hover {
   opacity: 0.55;
 }
 .server-error {
-  color: red;
+  color: $color-status-error;
 }
 .tt-hint {
-  color: gray;
+  color: $color-text-dim;
 }
 .error-message {
   display: none;
@@ -436,16 +427,16 @@ a, a:hover {
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
 }
 .typeahead-input .tt-hint {
-  color: #999
+  color: $color-text-dim;
 }
 .typeahead-input .tt-dropdown-menu {
   min-width: 422px;
   margin-top: 12px;
   padding: 8px 0;
-  background-color: #fff;
-  border: 1px solid #ccc;
+  background-color: $color-white;
+  border: 1px solid $color-border-light;
   border: 1px solid rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
+  border-radius: $radius;
   box-shadow: 0 5px 10px rgba(0,0,0,.2);
 }
 .typeahead-input .tt-suggestion {
@@ -454,8 +445,8 @@ a, a:hover {
   line-height: 24px;
 }
 .typeahead-input .tt-suggestion.tt-cursor {
-  color: #fff;
-  background-color: #0097cf;
+  background-color: $color-bg-hover;
+  cursor: pointer;
 
 }
 .typeahead-input .tt-suggestion p {

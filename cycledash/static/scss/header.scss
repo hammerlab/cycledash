@@ -1,7 +1,9 @@
+@import 'variables';
+
 nav.navigation {
   padding: 0.25em 0;
-  background: #fefefe;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  background: $color-white-smoke;
+  border-bottom: 1px solid $color-border-light;
 }
 nav.navigation ul {
   @extend .container;

@@ -16,10 +16,10 @@
 /*------[ Add Form ]------*/
 form.add-form {
   @extend .container;
-  background: #f4f4f4;
-  border: 1px solid #ddd;
-  box-shadow: inset 0 0 10px #ddd;
-  border-radius: 3px;
+  background: $color-white-smoke;
+  border: 1px solid $color-border-light;
+  box-shadow: inset 0 0 10px $color-border-light;
+  border-radius: $radius;
   margin: 1em 0;
   h3 {
     @extend .container;
@@ -61,7 +61,7 @@ div.project-header div.project-stats {
   top: -1.51em;
 }
 div.project-header div.project-stats a.selected-pivot {
-  color: #3d3d3d;
+  color: $color-text;
   cursor: default;
 }
 div.project-header div.project-stats a.selected-pivot:hover {
@@ -78,14 +78,11 @@ div.project a {
 }
 
 /*------[ Runs Table ]------*/
-.runs tbody tr {
-  cursor: pointer;
+.runs-table {
+  @extend .table;
 }
-.runs tbody tr:hover {
-  background: #F6FAFC;
-}
-.runs tr.info>td {
-  background: rgb(247, 252, 253);
+main#runs .runs-table tr.info > td {
+  background-color: $color-bg-expanded;
 }
 input.selector {
   margin-right: 13px;
@@ -93,18 +90,18 @@ input.selector {
 td .label {
   margin: 0 3px 0 3px;
 }
-.runs .label.fail, .runs .label.run {
+.runs-table .label.fail, .runs-table .label.run {
   background: none;
   display: inline-block;
   width: 16px;
   height: 16px;
 }
-.runs .label.fail::after {
-  color: red;
+.runs-table .label.fail::after {
+  color: $color-status-error;
   content: 'x';
 }
-.runs .label.run::after {
-  color: blue;
+.runs-table .label.run::after {
+  color: $color-blue;
   content: '…';
 }
 span.comment-bubble {
@@ -122,34 +119,34 @@ td.comments {
   text-align: right;
   white-space: nowrap;
 }
-.runs .run-id, .runs .date {
+.runs-table .run-id, .runs-table .date {
   white-space: nowrap;
 }
 
 /*------[ Drag and Drop File Upload ]------*/
 main#runs .receiving-drag.uploadable {
-  background: rgb(247, 252, 253);
+  background: $color-blue-light;
 }
 main#runs .dragging-over .uploadable {
-  border: 2px dashed #777;
+  border: 2px dashed $color-blue;
 }
 
 /*------[ Autocomplete Styling ]------*/
 main#runs .twitter-typeahead, .tt-hint { width: 100%; }
 main#runs .tt-dropdown-menu {
-    width: 422px;
-    margin-top: 12px;
-    padding: 8px 0;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    box-shadow: 0 5px 10px rgba(0,0,0,.2);
+  width: 422px;
+  margin-top: 12px;
+  padding: 8px 0;
+  background-color: $color-white;
+  border: 1px solid $color-border-light;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: $radius;
+  box-shadow: 0 5px 10px rgba(0,0,0,.2);
 }
 main#runs .tt-suggestion {
-    padding: 3px 20px;
+  padding: 3px 20px;
 }
 main#runs .tt-suggestion.tt-cursor {
-  color: #fff;
-  background-color: #0097cf;
+  background-color: $color-bg-hover;
+  cursor: pointer;
 }

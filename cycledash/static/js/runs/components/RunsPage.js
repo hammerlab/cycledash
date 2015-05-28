@@ -188,7 +188,7 @@ var RunsTable = React.createClass({
       return rows;
     });
     return (
-      <table className='runs table'>
+      <table className='runs-table'>
         <thead>
           <tr>
             <th></th>
