@@ -11,7 +11,7 @@
 <script type="text/javascript" src="/static/js/dist/bundled.js"></script>
 <script>
  window.renderRunPage(document.getElementById('runs'),
-                      {{ runs | tojson }},
+                      {{ project_trees | tojson }},
                       {{ last_comments | tojson }});
 </script>
 {% endblock %}
