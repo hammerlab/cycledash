@@ -68,9 +68,10 @@ api.add_resource(cycledash.genotypes.Genotypes,
 
 @app.route('/')
 def home():
-    runs = cycledash.projects.get_projects_tree()
+    project_trees = cycledash.projects.get_projects_tree()
     comments = cycledash.comments.get_last_comments(n=5)
-    return render_template('runs.html', last_comments=comments, runs=runs)
+    return render_template('runs.html', last_comments=comments,
+                           project_trees=project_trees)
 
 @app.route('/about')
 def about():
