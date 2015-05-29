@@ -21,6 +21,11 @@ from common.helpers import tables
 
 @worker.task(bind=True)
 def extract(self, vcf_id):
+    register_running_task(self, vcf_id)
+    return _extract(vcf_id)
+
+
+def _extract(vcf_id):
     """Extract the genotypes from an on-disk or HDFS VCF and insert into the DB.
 
     This also fills in a few fields in the vcfs table which aren't available
@@ -28,7 +33,6 @@ def extract(self, vcf_id):
 
     Returns the vcf_id, or False if an error occurred.
     """
-    register_running_task(self, vcf_id)
     engine = sqlalchemy.create_engine(DATABASE_URI)
     with tables(engine, 'vcfs') as (con, vcfs_table):
         metadata = sqlalchemy.MetaData(bind=con)
