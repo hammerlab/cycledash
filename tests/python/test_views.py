@@ -5,6 +5,7 @@ import nose.tools as asserts
 
 from cycledash import app, db
 from common.helpers import tables, find
+from helpers import delete_tables
 import cycledash.views
 
 from test_projects_api import create_project_with_name
@@ -38,12 +39,7 @@ class TestViews(object):
             self.run = dict(res.fetchone())
 
     def tearDown(self):
-        with tables(db.engine, 'projects', 'bams', 'vcfs', 'user_comments') \
-             as (con, projects, bams, runs, comments):
-            comments.delete().execute()
-            runs.delete().execute()
-            bams.delete().execute()
-            projects.delete().execute()
+        delete_tables(db.engine, 'user_comments', 'vcfs', 'bams', 'projects')
         self.ctx.pop()
         mocked.reset_mock()
 
