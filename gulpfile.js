@@ -59,7 +59,7 @@ gulp.task('js', function() {
  
 gulp.task('sass', ['staticlibs'], function () {
   return gulp.src('./cycledash/static/scss/*.scss')
-        .pipe(sass().on('error', sass.logError))
+        .pipe(sass.sync().on('error', sass.logError))
         .pipe(gulp.dest('./cycledash/static/css'))
         .pipe(livereload({ auto: false }));
 });
