@@ -26,10 +26,10 @@ $(function() {
   $('#restart').on('click', function(e) {
     if (window.confirm('Are you sure you want to restart all failed tasks?')) {
       $.ajax({
-        url: window.location + '/restart',
+        url: '/api/runs/{{run_id}}/tasks/restart',
         type: 'POST'
       }).done(function() {
-        window.location = '/runs';
+        window.location = '/';
       }).fail(function(e) {
         console.error(e);
         alert('Something went wrong. ' +  e);
