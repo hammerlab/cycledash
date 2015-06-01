@@ -87,7 +87,7 @@ def tasks(run_id):
                   # pylint: disable=too-many-function-args
                   'traceback': worker.AsyncResult(task_id).traceback}
                  for task_id, typ, state in tasks.execute().fetchall()]
-    return render_template('tasks.html', tasks=tasks)
+    return render_template('tasks.html', tasks=tasks, run_id=run_id)
 
 @app.route('/runs/<int:run_id>/examine')
 def examine(run_id):
