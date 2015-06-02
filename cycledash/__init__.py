@@ -10,7 +10,6 @@ def initialize_application():
     _configure_application(app)
     _configure_logging(app)
     _configure_templates(app)
-    _configure_error_handling(app)
 
     return app
 
@@ -41,15 +40,9 @@ def _configure_templates(app):
         return humanize.naturalday(time)
 
 
-def _configure_error_handling(app):
-    @app.errorhandler(404)
-    def json_404(e):
-        return jsonify({'message': "{} not found.".format(request.url)}), 404
-
-
 app = initialize_application()
 db = SQLAlchemy(app)
-api = restful.Api(app, prefix='/api')
+api = restful.Api(app, prefix='/api', catch_all_404s=True)
 
 
 import cycledash.views
