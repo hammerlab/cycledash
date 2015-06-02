@@ -149,6 +149,7 @@ var ProjectTable = React.createClass({
               </a>
             </div>
           </div>
+          <p className='notes'>{this.props.notes}</p>
           <div className='add'>
             <button onClick={() => { this.displayRunForm(false); this.displayBAMForm(!this.state.displayBAMForm); }}
                     type='button' className='btn btn-default btn-xs'>
@@ -159,7 +160,6 @@ var ProjectTable = React.createClass({
               Add Run
             </button>
           </div>
-          <p className='notes'>{this.props.notes}</p>
         </div>
         {this.state.displayRunForm ? newRunForm : null}
         {this.state.displayBAMForm ? newBAMForm : null}

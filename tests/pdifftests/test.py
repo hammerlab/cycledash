@@ -44,6 +44,20 @@ class Runs(Base):
         bams = driver.find_element_by_css_selector(bam_btn_sel)
         bams.click()
 
+    @hide('span.time')
+    def add_bam(self, driver):
+        """Showing the Add BAM form."""
+        add_bam_btn_sel = 'div.project:last-child .add button:first-child'
+        add_bam = driver.find_element_by_css_selector(add_bam_btn_sel)
+        add_bam.click()
+
+    @hide('span.time')
+    def add_run(self, driver):
+        """Showing the Add Run form."""
+        add_run_btn_sel = 'div.project:last-child .add button:last-child'
+        add_run = driver.find_element_by_css_selector(add_run_btn_sel)
+        add_run.click()
+
 class Tasks(Base):
     window_size = [1280, 800]
     base_url = BASE + '/runs/1/tasks'
