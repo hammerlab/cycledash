@@ -57,27 +57,35 @@ var RunsPage = React.createClass({
         }.bind(this)).value();
     var newProjectForm = <forms.NewProjectForm handleClose={() => this.setDisplayProjectForm(false)} />;
     return (
-      <div onDragOver={this.createDragOverHandler(true)}
-           onDragLeave={this.createDragOverHandler(false)}
-           className={this.state.draggingOver ? 'dragging-over' : ''}>
-        <h1>
-          Data Directory
-          {!this.state.displayProjectForm ?
-           <button className='btn btn-default' id='new-project'
-                   onClick={() => this.setDisplayProjectForm(true)}>
-             New Project
-           </button> : null}
-        </h1>
-        {this.state.displayProjectForm ? newProjectForm : null}
-        <LatestComments comments={this.props.comments} />
-        <h5 className='filter-runs'>
-        Filter runs by project name:&nbsp;&nbsp;
-          <select className='select-project-filter' value={this.state.projectFilter}
-                  onChange={this.handleProjectFilter}>
-            {projectOptions}
-          </select>
-        </h5>
-        {projectTables}
+      <div className="row">
+        <div onDragOver={this.createDragOverHandler(true)}
+             onDragLeave={this.createDragOverHandler(false)}
+             className={this.state.draggingOver ? 'dragging-over container' : 'container'}>
+          <div className="projects-page-header">
+            <h1>
+              Projects
+              {!this.state.displayProjectForm ?
+               <button className='btn btn-primary' id='new-project'
+                       onClick={() => this.setDisplayProjectForm(true)}>
+                 New Project
+               </button> : null}
+            </h1>
+            {this.state.displayProjectForm ? newProjectForm : null}
+            
+            <h5 className='filter-runs'>
+            Filter runs by project name:&nbsp;&nbsp;
+              <select className='select-project-filter' value={this.state.projectFilter}
+                      onChange={this.handleProjectFilter}>
+                {projectOptions}
+              </select>
+            </h5>
+          </div>
+          <div className="projects-table">
+            {projectTables}
+          </div>
+          <LatestComments comments={this.props.comments} />
+        </div>
+        
       </div>
     );
   }
@@ -152,11 +160,11 @@ var ProjectTable = React.createClass({
           <p className='notes'>{this.props.notes}</p>
           <div className='add'>
             <button onClick={() => { this.displayRunForm(false); this.displayBAMForm(!this.state.displayBAMForm); }}
-                    type='button' className='btn btn-default btn-xs'>
+                    type='button' className='btn btn-primary btn-xs'>
               Add BAM
             </button>
             <button onClick={() => { this.displayBAMForm(false); this.displayRunForm(!this.state.displayRunForm); }}
-                    type='button' className='btn btn-default btn-xs'>
+                    type='button' className='btn btn-primary btn-xs'>
               Add Run
             </button>
           </div>

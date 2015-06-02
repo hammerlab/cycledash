@@ -37,6 +37,19 @@ form.add-form {
 }
 
 /*------[ Projects ]------*/
+.projects-container {
+  @extend .col-md-9;
+  // background-color: darken($color-blue-light, 5%);
+}
+.projects-page-header {
+  // @extend.container;
+ border-bottom: 1px solid darken(#E0E7E8, 15%);
+ // background-color: $color-blue-light;
+ margin-bottom: 2em;
+}
+.projects-table {
+  @extend .col-md-9;
+}
 div.project-header h2 {
   margin: 0;
 }
@@ -66,7 +79,12 @@ div.project-header div.project-stats div {
   width: 100%;
 }
 div.project {
-  margin: 0 0 5em 0;
+  background-color: #fefefe;
+  background-color: $color-blue-light;
+  margin: 0 0 2em 0;
+  padding: 1em;
+  border-radius: $radius;
+  box-shadow: 1px 1px 1px 0px darken(#E0E7E8, 15%);
 }
 div.project a {
   cursor: pointer;
@@ -96,7 +114,7 @@ td .label {
   content: 'x';
 }
 .runs-table .label.run::after {
-  color: $color-blue;
+  color: $color-blue-sinai;
   content: '…';
 }
 span.comment-bubble {
@@ -123,7 +141,7 @@ main#runs .receiving-drag.uploadable {
   background: $color-blue-light;
 }
 main#runs .dragging-over .uploadable {
-  border: 2px dashed $color-blue;
+  border: 2px dashed $color-blue-sinai;
 }
 
 /*------[ Autocomplete Styling ]------*/

@@ -24,7 +24,7 @@ var LatestComments = React.createClass({
   },
   render: function() {
     return (
-      <div className='container'>
+      <div className='recent-comments-container'>
         <h4>Last {this.props.comments.length} Comments
         <a href='/comments' className='all-comments'>(See all)</a></h4>
         <Comments comments={this.props.comments} />
@@ -40,9 +40,9 @@ var Comments = React.createClass({
   render: function() {
     var comments = this.props.comments.map(c => <Comment comment={c} key={c.id} />);
     return (
-      <table className='comments'>
+      <ul className='recent-comments-list comments'>
         {comments}
-      </table>
+      </ul>
     );
   }
 });
@@ -62,22 +62,17 @@ var Comment = React.createClass({
     var authorName = comment.authorName ?
         comment.authorName.slice(0, 15) : 'Anonymous';
     return (
-        <tr>
-          <td className='location'>
-            <a className='run-id' href={`/runs/${comment.vcfId}/examine`}>Run {comment.vcfId}</a>
-            <a className='location' href={this.urlForComment(comment)}>
-              {comment.contig}:{comment.position}
-            </a>
-          </td>
-          <td className='summary-container'>
-            <span>
-              <span className='author-name'>{authorName}</span><span className='summary'>{comment.commentText.slice(0, 45)}</span>
-            </span>
-          </td>
-          <td className='time'>
+        <li>
+          <div className='author-name'>{authorName}</div>
+          <a className='run-id' href={`/runs/${comment.vcfId}/examine`}>Run {comment.vcfId}</a>
+          <a className='location' href={this.urlForComment(comment)}>
+            {comment.contig}:{comment.position}
+          </a>
+          <div className='summary'>{comment.commentText.slice(0, 45)}</div>
+          <div className='time'>
             <span title={comment.lastModified}>{relativeDate}</span>
-          </td>
-        </tr>
+          </div>
+        </li>
     );
   }
 });

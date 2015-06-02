@@ -8,6 +8,9 @@ html {
 body {
   font-size: 1em;
   font-family: "freight-sans-pro", verdana, helvetica, sans-serif;
+  background-color: $color-blue-light;
+  background-color: darken($color-blue-light, 5%);
+  background-color: #E0E7E8;
 }
 main { 
   @extend .container;
@@ -21,18 +24,60 @@ img.cycle { float: right; }
 dd, dt {
   margin-bottom: 0.25em;
 }
-
-/*------[ Comments ]------*/
-table.comments {
-  @extend .col-md-6;
-  margin: 1em 0;
-  font-size: 0.875em;
-  td {
-    vertical-align: top;
-    font-family: "freight-sans-pro", verdana, helvetica, sans-serif;  
-    padding: 0.5em 1em;
+.btn-primary {
+  background-color: darken($color-fuchsia-sinai, 5%);
+  color: $color-white;
+  border-color: $color-black;
+  &:hover, &:active, &:focus {
+    background-color: darken($color-fuchsia-sinai, 15%);
+    color: $color-white-smoke;
   }
 }
+.btn-default {
+  background-color: lighten($color-blue-sinai, 45%);
+  border-color: lighten($color-blue-sinai, 20%);
+
+}
+a {
+  color: $color-link;
+}
+.btn-add-file {
+  @extend .btn, .btn-primary, .btn-xs;
+}
+/*------[ Comments ]------*/
+.recent-comments-container {
+  @extend .col-md-3;
+  h4 {
+    margin-top: 20px;
+  }
+  // background-color: darken($color-blue-light, 5%);
+}
+.recent-comments-list {
+  @extend .clearfix;
+  padding: 0;
+  list-style: none;
+  li {
+    // background-color: white;
+    // float: left;
+    padding: 1em;
+    margin: 0.5em 0;
+    // border-left: 1px solid darken($color-blue-light, 10%);
+    border-top: 1px solid darken(#E0E7E8, 15%);
+    &:first-child {
+      border-top: none;
+    }
+  }
+}
+// table.comments {
+//   @extend .col-md-6;
+//   margin: 1em 0;
+//   font-size: 0.875em;
+//   td {
+//     vertical-align: top;
+//     font-family: "freight-sans-pro", verdana, helvetica, sans-serif;  
+//     padding: 0.5em 1em;
+//   }
+// }
 a.all-comments {
   font-size: 0.875em;
   color: $color-text-dim;
@@ -40,20 +85,15 @@ a.all-comments {
 }
 .author-name {
   font-weight: bold;
-  &:after {
-    content: ': ';
-    font-weight: normal;
-  }
 }
 .comments .run-id {
   padding-right: 0.5em;
-  color: $color-text;
 }
 .comments .position {
   font-family: "inconsolata", monospace;
 }
-.comments .summary-container {
-  width: 50%;
+.comments .summary {
+  padding: 0.5em 0;
 }
 .comments .summary:before {
   content: '“';
@@ -65,6 +105,8 @@ a.all-comments {
 }
 .comments .time {
   text-align: right;
+  font-size: 0.875em;
+  color: $color-text-dim;
 }
 .form-group.required .control-label:after {
   content:"*";
