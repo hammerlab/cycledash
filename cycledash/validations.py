@@ -16,7 +16,7 @@ def expect_one_of(dct, *args):
     error_string = '{}'.format(args[0])
     for arg in args[1:]:
         error_string += ' or {}'.format(arg)
-    error_string += 'is required'
+    error_string += ' is required'
     error = Invalid(error_string)
     raise MultipleInvalid(errors=[error])
 
