@@ -85,12 +85,12 @@ class TestGenotypeExtractorWorker(object):
                     return getattr(sample.data, attr)
                 return get_from_variant
             pyvcf_getters = [get_sample_data('GT'),
-                                   get_sample_data('GQ'),
-                                   get_sample_data('DP'),
-                                   get_sample_data('RD'),
-                                   get_sample_data('AD'),
-                                   get_sample_data('FREQ'),
-                                   lambda v: tuple(get_sample_data('DP4')(v))]
+                             get_sample_data('GQ'),
+                             get_sample_data('DP'),
+                             get_sample_data('RD'),
+                             get_sample_data('AD'),
+                             get_sample_data('FREQ'),
+                             lambda v: tuple(get_sample_data('DP4')(v))]
             db_variant_getters = [lambda v: v['sample:GT'],
                                   # GQ is actually None on all variants in snv.vcf
                                   lambda v: int(v['sample:GQ']) if v['sample:GQ'] else None,
