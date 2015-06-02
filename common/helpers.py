@@ -66,6 +66,11 @@ def find(iterable, pred):
             return x
 
 
+def pick(obj, *keys):
+    """Return an object with only the key/vals with key name in `keys`."""
+    return {key: obj[key] for key in keys}
+
+
 def to_epoch(dt):
     """Return the epoch time representation of a datetime object, `dt`."""
     epoch = datetime(1970, 1, 1, tzinfo=dt.tzinfo)

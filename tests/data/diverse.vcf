@@ -1,0 +1,24 @@
+##fileformat=VCFv4.2
+##source=CycledashTest
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total depth of quality bases">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">
+##FORMAT=<ID=RD,Number=1,Type=Integer,Description="Depth of reference-supporting bases (reads1)">
+##FORMAT=<ID=AD,Number=1,Type=Integer,Description="Depth of variant-supporting bases (reads2)">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	normal tumor
+chrX	2	.	G	C	.	PASS	DP=54	DP:RD:AD	32:19:12	37:13:17
+chr2	1	.	C	A	.	PASS	DP=74	DP:RD:AD	45:20:13	40:12:19
+chr1	1	.	G	T	.	PASS	DP=78	DP:RD:AD	67:33:1	42:18:19
+chr1	2	.	G	T	.	PASS	DP=78	DP:RD:AD	67:33:1	42:18:19
+chr1	10	.	G	T	.	PASS	DP=78	DP:RD:AD	67:33:1	42:18:19
+chr1	11	.	G	T	.	PASS	DP=78	DP:RD:AD	67:33:1	42:18:19
+chr1	21	.	G	T	.	PASS	DP=78	DP:RD:AD	67:33:1	42:18:19
+chr20	123	.	T	A	.	PASS	DP=12	DP:RD:AD	30:28:15	56:32:14
+chrY	7	.	C	T	.	PASS	DP=89	DP:RD:AD	12:2:19	33:14:19
+chrY	17	.	A	T	.	PASS	DP=79	DP:RD:AD	21:3:19	32:23:20
+chrY	19	.	G	A	.	PASS	DP=69	DP:RD:AD	13:4:13	56:15:12
+chrY	21	.	G	T	.	PASS	DP=59	DP:RD:AD	10:67:14	45:14:21
+chrY	1	.	T	A	.	PASS	DP=49	DP:RD:AD	11:19:19	91:13:21
+chr23	1	.	T	G	.	PASS	DP=90	DP:RD:AD	99:21:9	73:21:22
+GT05182	1	.	T	G	.	PASS	DP=90	DP:RD:AD	99:21:9	73:21:22
+chr11	163	.	G	A	.	PASS	DP=12	DP:RD:AD	30:28:15	56:32:14
+chr10	17	.	T	G	.	PASS	DP=18	DP:RD:AD	30:28:15	56:32:14
