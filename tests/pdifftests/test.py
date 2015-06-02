@@ -22,7 +22,6 @@ class Website(Base):
         """Initial view of the comments page."""
         pass
 
-
 class Runs(Base):
     window_size = [1280, 800]
     base_url = BASE
@@ -45,6 +44,13 @@ class Runs(Base):
         bams = driver.find_element_by_css_selector(bam_btn_sel)
         bams.click()
 
+class Tasks(Base):
+    window_size = [1280, 800]
+    base_url = BASE + '/runs/1/tasks'
+
+    def page(self, driver):
+        """Tasks view for a particular run."""
+        pass
 
 class Examine(Base):
     window_size = [1280, 800]
