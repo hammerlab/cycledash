@@ -1,6 +1,7 @@
 $color-black: #333;
 $color-blue-sinai: #1CABE1;
 $color-blue-light: #eff6f7;
+$color-blue-medium: #E0E7E8;
 $color-gray-light: #ccc;
 $color-gray-medium: #adadad;
 $color-green: #5cb85c;
@@ -11,6 +12,8 @@ $color-yellow-light: #feffcf;
 $color-fuchsia-sinai: #C3167B;
 
 ////////////////////////////////
+
+$color-bg-body: $color-blue-medium;
 
 $color-bg-hover: $color-blue-light;
 $color-bg-expanded: $color-blue-light;
@@ -23,7 +26,7 @@ $color-text-dim: $color-gray-medium;
 
 $color-link: $color-blue-sinai;
 
-$color-border-light: $color-gray-light;
+$color-border-light: darken($color-bg-body, 15%);
 
 
 $radius: 4px;

@@ -6,7 +6,7 @@ var React = require('react'),
     moment = require('moment'),
     utils = require('../../examine/utils');
 
-var NO_FILTER = '----';
+var NO_FILTER = 'All projects';
 
 
 var RunsPage = React.createClass({
@@ -71,16 +71,15 @@ var RunsPage = React.createClass({
                </button> : null}
             </h1>
             {this.state.displayProjectForm ? newProjectForm : null}
-            
-            <h5 className='filter-runs'>
-            Filter runs by project name:&nbsp;&nbsp;
-              <select className='select-project-filter' value={this.state.projectFilter}
-                      onChange={this.handleProjectFilter}>
-                {projectOptions}
-              </select>
-            </h5>
           </div>
           <div className="projects-table">
+          <div className='filter-runs'>
+            <label>Now Viewing</label>
+            <select className='select-project-filter' value={this.state.projectFilter}
+                    onChange={this.handleProjectFilter}>
+              {projectOptions}
+            </select>
+          </div>
             {projectTables}
           </div>
           <LatestComments comments={this.props.comments} />
@@ -144,8 +143,22 @@ var ProjectTable = React.createClass({
     }
     return (
       <div className='project'>
-      <div className='project-header'>
-        <h2 title={this.props.project_id}>{this.props.name === 'null' ? 'No Project' : this.props.name}</h2>
+        <div className='project-header'>
+          <h2 title={this.props.project_id}>{this.props.name === 'null' ? 'No Project' : this.props.name}
+            <div className='add'>
+              <button onClick={() => { this.displayRunForm(false); this.displayBAMForm(!this.state.displayBAMForm); }}
+                      type='button' className='btn btn-primary btn-xs'>
+                Add BAM
+              </button>
+              <button onClick={() => { this.displayBAMForm(false); this.displayRunForm(!this.state.displayRunForm); }}
+                      type='button' className='btn btn-primary btn-xs'>
+                Add Run
+              </button>
+            </div>
+          </h2>
+          <p className='notes'>{this.props.notes}</p>
+          {this.state.displayRunForm ? newRunForm : null}
+          {this.state.displayBAMForm ? newBAMForm : null}
           <div className='project-stats'>
             <div>
               <a onClick={() => this.setState({bamsTable: true})} className={this.state.bamsTable ? 'selected-pivot' : ''}>
@@ -157,20 +170,7 @@ var ProjectTable = React.createClass({
               </a>
             </div>
           </div>
-          <p className='notes'>{this.props.notes}</p>
-          <div className='add'>
-            <button onClick={() => { this.displayRunForm(false); this.displayBAMForm(!this.state.displayBAMForm); }}
-                    type='button' className='btn btn-primary btn-xs'>
-              Add BAM
-            </button>
-            <button onClick={() => { this.displayBAMForm(false); this.displayRunForm(!this.state.displayRunForm); }}
-                    type='button' className='btn btn-primary btn-xs'>
-              Add Run
-            </button>
-          </div>
         </div>
-        {this.state.displayRunForm ? newRunForm : null}
-        {this.state.displayBAMForm ? newBAMForm : null}
         {table}
       </div>
     );

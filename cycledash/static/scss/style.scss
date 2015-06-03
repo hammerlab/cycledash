@@ -8,9 +8,7 @@ html {
 body {
   font-size: 1em;
   font-family: "freight-sans-pro", verdana, helvetica, sans-serif;
-  background-color: $color-blue-light;
-  background-color: darken($color-blue-light, 5%);
-  background-color: #E0E7E8;
+  background-color: $color-bg-body;
 }
 main { 
   @extend .container;
@@ -24,6 +22,12 @@ img.cycle { float: right; }
 dd, dt {
   margin-bottom: 0.25em;
 }
+a {
+  color: $color-link;
+}
+label {
+  font-weight: normal;
+}
 .btn-primary {
   background-color: darken($color-fuchsia-sinai, 5%);
   color: $color-white;
@@ -34,55 +38,15 @@ dd, dt {
   }
 }
 .btn-default {
-  background-color: lighten($color-blue-sinai, 45%);
-  border-color: lighten($color-blue-sinai, 20%);
-
-}
-a {
-  color: $color-link;
+  background-color: lighten($color-blue-sinai, 43%);
+  &:hover, &:active, &:focus {
+    background-color: lighten($color-blue-sinai, 35%);
+  }
 }
 .btn-add-file {
   @extend .btn, .btn-primary, .btn-xs;
 }
 /*------[ Comments ]------*/
-.recent-comments-container {
-  @extend .col-md-3;
-  h4 {
-    margin-top: 20px;
-  }
-  // background-color: darken($color-blue-light, 5%);
-}
-.recent-comments-list {
-  @extend .clearfix;
-  padding: 0;
-  list-style: none;
-  li {
-    // background-color: white;
-    // float: left;
-    padding: 1em;
-    margin: 0.5em 0;
-    // border-left: 1px solid darken($color-blue-light, 10%);
-    border-top: 1px solid darken(#E0E7E8, 15%);
-    &:first-child {
-      border-top: none;
-    }
-  }
-}
-// table.comments {
-//   @extend .col-md-6;
-//   margin: 1em 0;
-//   font-size: 0.875em;
-//   td {
-//     vertical-align: top;
-//     font-family: "freight-sans-pro", verdana, helvetica, sans-serif;  
-//     padding: 0.5em 1em;
-//   }
-// }
-a.all-comments {
-  font-size: 0.875em;
-  color: $color-text-dim;
-  padding-left: 0.5em;
-}
 .author-name {
   font-weight: bold;
 }

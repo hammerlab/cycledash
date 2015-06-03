@@ -56,26 +56,26 @@ var NewRunForm = React.createClass({
       <form method='POST' action='/api/runs' className='add-form' ref='runForm'>
         <div className='row'>
           <h3>New Run</h3>
-            <TextInput label='Tumor BAM URI:' name='tumorBamUri'
+            <TextInput label='Tumor BAM URI' name='tumorBamUri'
                        completions={props.bamUris}
                        placeholder='/data/dream/tumor.chr20.bam' />
-            <TextInput label='Normal BAM URI:' name='normalBamUri'
+            <TextInput label='Normal BAM URI' name='normalBamUri'
                        completions={props.bamUris}
                        placeholder='/data/dream/normal.chr20.bam' />
-            <TextInput label='Variant Caller Name:' name='callerName'
+            <TextInput label='Variant Caller Name' name='callerName'
                        placeholder='Guacamole::Somatic' />
-            <TextInput label='VCF Path:' name='uri'
+            <TextInput label='VCF Path' name='uri'
                        placeholder='/data/somevcf.vcf'
                        required={true}
                        uploadable={true} uploadPath={'/upload'} />
           <input type='hidden' value={this.props.projectName} name='projectName' />
           <div className='form-group add-form-input-full'>
-            <label>Notes, Config, Params:</label>
+            <label>Notes, Config, Params</label>
             <textarea className='form-control add-form-notes' rows='8' name='notes'
                       placeholder='Notes, parameters, etc.'></textarea>
           </div>
           <div className='form-group add-form-input-full'>
-            <button type='submit' className='btn btn-success btn-block'>Submit New Run</button>
+            <button type='submit' className='btn btn-primary btn-block'>Submit New Run</button>
           </div>
         </div>
       </form>
@@ -95,23 +95,23 @@ var NewBAMForm = React.createClass({
       <form method='POST' action='/api/bams' className='add-form' ref='bamForm'>
         <div className='row'>
           <h3>New BAM</h3>
-            <TextInput label='Name:' name='name' required={true}
+            <TextInput label='Name' name='name' required={true}
                        placeholder='...' />
-            <TextInput label='Tissues:' name='tissues'
+            <TextInput label='Tissues' name='tissues'
                        placeholder='Left Ovary' />
-            <TextInput label='Resection Date:' name='resectionDate'
+            <TextInput label='Resection Date' name='resectionDate'
                        placeholder='2015-08-14' />
-            <TextInput label='BAM URI:' name='uri'
+            <TextInput label='BAM URI' name='uri'
                        required={true}
                        placeholder='hdfs:///data/somebam.bam' />
           <input type='hidden' value={this.props.projectName} name='projectName' />
           <div className='form-group add-form-input-full'>
-            <label>Notes:</label>
+            <label>Notes</label>
             <textarea className='form-control add-form-notes' rows='8' name='notes'
                       placeholder='Notes on the procedure, sample, alignment, etc.'></textarea>
           </div>
           <div className='form-group add-form-input-full'>
-            <button type='submit' className='btn btn-success btn-block'>Submit New BAM</button>
+            <button type='submit' className='btn btn-primary btn-block'>Submit New BAM</button>
           </div>
         </div>
       </form>
@@ -134,14 +134,14 @@ var NewProjectForm = React.createClass({
             <button className='close' type='button'
             onClick={this.props.handleClose}>&times;</button>
           </h3>
-            <TextInput label='Project Name:' name='name' placeholder='PT01234' required={true} />
+            <TextInput label='Project Name' name='name' placeholder='PT01234' required={true} />
             <div className='form-group add-form-input-full'>
               <label>Notes</label>
               <textarea className='form-control add-form-notes' rows='3' name='notes'
                         placeholder='Notes etc.'></textarea>
             </div>
             <div className='form-group add-form-input-full'>
-              <button type='submit' className='btn btn-success btn-block'>Submit New Project</button>
+              <button type='submit' className='btn btn-primary btn-block'>Submit New Project</button>
             </div>
         </div>
       </form>
