@@ -22,25 +22,39 @@ img.cycle { float: right; }
 dd, dt {
   margin-bottom: 0.25em;
 }
-a {
+a, .btn-link {
   color: $color-link;
+  &:hover {
+    color: darken($color-link, 15%);
+  }
 }
 label {
   font-weight: normal;
 }
 .btn-primary {
-  background-color: darken($color-fuchsia-sinai, 5%);
+  // background-color: darken($color-fuchsia-sinai, 5%);
+  // border-color: darken($color-fuchsia-sinai, 25%);
   color: $color-white;
-  border-color: $color-black;
+  background-color: $color-fuchsia-sinai;
+  border-color: darken($color-fuchsia-sinai, 20%);
   &:hover, &:active, &:focus {
-    background-color: darken($color-fuchsia-sinai, 15%);
+    background-color: darken($color-fuchsia-sinai, 5%);
+    border-color: darken($color-fuchsia-sinai, 20%);
     color: $color-white-smoke;
   }
 }
 .btn-default {
-  background-color: lighten($color-blue-sinai, 43%);
+  // background-color: darken($color-bg-body, 5%);
+  // border-color: darken($color-bg-body, 25%);
+  background-color: $color-blue-sinai;
+  border-color: darken($color-blue-sinai, 20%);
+  color: $color-white;
   &:hover, &:active, &:focus {
-    background-color: lighten($color-blue-sinai, 35%);
+    // background-color: darken($color-bg-body, 10%);
+    // border-color: darken($color-bg-body, 25%);
+    background-color: darken($color-blue-sinai, 5%);
+    border-color: darken($color-blue-sinai, 20%);
+    color: $color-white-smoke;
   }
 }
 .btn-add-file {

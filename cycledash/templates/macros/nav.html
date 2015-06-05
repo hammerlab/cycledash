@@ -1,17 +1,20 @@
 {% macro nav(active) -%}
 <nav class="navigation">
-  <ul>
-    <li class="{{ 'active' if active == 'runs' else '' }}">
-      <a href="/">Runs</a>
-      {% if active == 'examine' %} &raquo;
-      <span class="{{ 'active' if active == 'examine' else '' }}">Examine</span>
-      {% elif active == 'comments' %} &raquo;
-      <span class="{{ 'active' if active == 'comments' else '' }}">Comments</span>
-      {% endif %}
-    </li>
-    <li class="{{ 'active' if active == 'about' else '' }}">
-      <a href="/about">About</a>
-    </li>
-  </ul>
+  <div class="container">
+    <a class="header-logo" href="/">Home</a>
+    <ul>
+      <li class="{{ 'active' if active == 'runs' else '' }}">
+        <a href="/">Runs</a>
+        {% if active == 'examine' %} &raquo;
+        <span class="{{ 'active' if active == 'examine' else '' }}">Examine</span>
+        {% elif active == 'comments' %} &raquo;
+        <span class="{{ 'active' if active == 'comments' else '' }}">Comments</span>
+        {% endif %}
+      </li>
+      <li class="{{ 'active' if active == 'about' else '' }}">
+        <a href="/about">About</a>
+      </li>
+    </ul>
+  </div>
 </nav>
 {%- endmacro %}

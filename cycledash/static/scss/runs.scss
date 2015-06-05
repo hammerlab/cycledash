@@ -104,8 +104,7 @@ div.project-header div.project-stats div {
   width: 100%;
 }
 div.project {
-  background-color: #fefefe;
-  background-color: $color-blue-light;
+  background-color: $color-white-smoke;
   margin: 2em 0;
   padding: 1em;
   border-radius: $radius;
@@ -121,6 +120,10 @@ div.project a {
 /*------[ Runs Table ]------*/
 .runs-table {
   @extend .table;
+  table-layout: fixed;
+  td {
+    word-wrap: break-word;
+  }
 }
 main#runs .runs-table tr.info > td {
   background-color: $color-bg-expanded;

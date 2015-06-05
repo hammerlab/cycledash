@@ -9,14 +9,16 @@ $color-red: #f32d2d;
 $color-white: #fff;
 $color-white-smoke: #f5f5f5;
 $color-yellow-light: #feffcf;
-$color-fuchsia-sinai: #C3167B;
+// $color-fuchsia-sinai: #C3167B;
+$color-fuchsia-sinai: #AE387E;
+
 
 ////////////////////////////////
 
-$color-bg-body: $color-blue-medium;
+$color-bg-body: #E4E2E1;
 
-$color-bg-hover: $color-blue-light;
-$color-bg-expanded: $color-blue-light;
+$color-bg-hover: lighten($color-blue-sinai, 45%);
+$color-bg-expanded: lighten($color-blue-sinai, 45%);
 
 $color-status-success: $color-green;
 $color-status-error: $color-red;
@@ -27,6 +29,5 @@ $color-text-dim: $color-gray-medium;
 $color-link: $color-blue-sinai;
 
 $color-border-light: darken($color-bg-body, 15%);
-
 
 $radius: 4px;

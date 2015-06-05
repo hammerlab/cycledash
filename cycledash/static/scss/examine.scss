@@ -16,6 +16,15 @@ a, a:hover {
 /*------[ VCF Table ]------*/
 .vcf-table {
   @extend .table, .table-striped, .table-condensed;
+  background-color: $color-white;
+}
+.vcf-table thead {
+  background-color: $color-bg-body;
+  tr:last-child{
+    th {
+      background-color: darken($color-bg-body, 10%);
+    }
+  }
 }
 .vcf-table th {
   text-transform: capitalize;
@@ -184,7 +193,9 @@ a, a:hover {
 }
 .vcf-table .dalliance-open {
   @extend .btn, .btn-default;
-  background: $color-white url(/static/img/magnifying-glass-noun_907.svg) no-repeat 8px 8px;
+  background-image: url(/static/img/magnifying-glass-noun_907.svg);
+  background-repeat: no-repeat;
+  background-position: 8px 8px;
   cursor: pointer;
   background-size: 15px 15px;
   padding-left: 2.25em;
@@ -458,6 +469,8 @@ a.download-vcf {
   @extend .btn, .btn-default, .btn-xs;
   margin-left: 180px; /* from .dl-horizontal dd */
   padding-left: 2.25em;
-  background: url(/static/img/download-noun_4501.svg) no-repeat 5px 2px;
+  background-image: url(/static/img/download-noun_4501.svg);
+  background-repeat: no-repeat;
+  background-position: 5px 2px;
   background-size: 15px 15px;
 }
