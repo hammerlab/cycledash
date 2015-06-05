@@ -7,7 +7,7 @@ from flask import request
 import flask.ext.restful as restful
 from flask.ext.restful import Resource
 from sqlalchemy import (select, func, types, cast, join, outerjoin, asc, desc,
-                        and_, Integer, Float, String)
+                        and_, Integer, Float, String, distinct)
 from sqlalchemy.sql import text
 from sqlalchemy.sql.expression import label, column, case, literal
 from sqlalchemy.sql.functions import coalesce
@@ -52,9 +52,12 @@ def samples(vcf_id):
     query = """SELECT sample_name FROM genotypes WHERE vcf_id = %s
     GROUP BY sample_name ORDER BY sample_name
     """
-    with db.engine.connect() as connection:
-        samples = connection.execute(query, (vcf_id,)).fetchall()
-    return [sample for (sample,) in samples]
+    with tables(db.engine, 'genotypes') as (con, genotypes):
+        samples = (select([func.count(distinct(genotypes.c.sample_name))])
+                   .where(genotypes.c.vcf_id == vcf_id))
+        samples = [sample_name for (sample_name,)
+                   in samples.execute().fetchall()]
+    return samples
 
 
 @forever.memoize
@@ -162,7 +165,8 @@ def genotype_statistics(query, vcf_id, truth_vcf_id, count, total_count):
         joined_q = join(g, gt, and_(g.c.contig == gt.c.contig,
                                     g.c.position == gt.c.position,
                                     g.c.reference == gt.c.reference,
-                                    g.c.alternates == gt.c.alternates))
+                                    g.c.alternates == gt.c.alternates,
+                                    g.c.sample_name == gt.c.sample_name))
         true_pos_q = select([func.count()]).select_from(joined_q).where(
             and_(g.c.vcf_id == vcf_id, gt.c.vcf_id == truth_vcf_id))
         true_pos_q = _add_filters(true_pos_q, g, query.get('filters'))
@@ -180,7 +184,7 @@ def genotype_statistics(query, vcf_id, truth_vcf_id, count, total_count):
         total_truth_q = _add_filters(total_truth_q, g, query.get('filters'))
         total_truth_q = _add_range(total_truth_q, g, query.get('range'))
         (total_truth,) = con.execute(total_truth_q).fetchone()
-        total_truth *= len(samples(vcf_id))
+        total_truth *= len(samples(truth_vcf_id))
 
     stats.update(_true_false_pos_neg(true_positives, total_truth, count))
     return stats
@@ -448,10 +452,11 @@ def _annotate_query_with_types(query, vcf_spec):
     return query
 
 
-def _whitelist_query_filters(query, ok_fields=['reference', 'alternates']):
+def _whitelist_query_filters(
+        query, ok_fields=['reference', 'alternates', 'sample_name']):
     """Returns query with only validation-appropriate filters.
 
-    These are, by default: ['reference', 'alternates']"""
+    These are, by default: ['reference', 'alternates', 'sample_name']"""
     query = copy.deepcopy(query)
     query['filters'] = [f for f in query['filters']
                         if f.get('columnName') in ok_fields]

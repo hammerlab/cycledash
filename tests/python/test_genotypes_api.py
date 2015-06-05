@@ -4,7 +4,7 @@ import nose.tools as asserts
 import json
 
 from cycledash import db
-from cycledash.genotypes import get
+from cycledash import genotypes
 from common.helpers import tables, pick
 from workers.genotype_extractor import _extract
 
@@ -34,7 +34,7 @@ class TestGenotypesAPI(object):
             'filters': [{'columnName': 'sample_name', 'filterValue': 'normal', 'type': '='}],
             'sortBy': []
         }
-        records = get(run_id, query, with_stats=False)['records']
+        records = genotypes.get(run_id, query, with_stats=False)['records']
         asserts.eq_(len(records), 5)
 
     def test_number_of_genotypes_small_range(self):
@@ -44,7 +44,7 @@ class TestGenotypesAPI(object):
             'filters': [],
             'sortBy': []
         }
-        records = get(run_id, query, with_stats=False)['records']
+        records = genotypes.get(run_id, query, with_stats=False)['records']
         asserts.eq_(len(records), 4)
 
     def test_order_of_genotypes_with_chr_prefix(self):
@@ -55,7 +55,7 @@ class TestGenotypesAPI(object):
             'sortBy': [{'columnName': 'contig', 'order': 'asc'},
                        {'columnName': 'position', 'order': 'asc'}]
         }
-        records = get(run_id, query, with_stats=False)['records']
+        records = genotypes.get(run_id, query, with_stats=False)['records']
         results = [pick(r, 'contig', 'position') for r in records]
         expected_results = [{'contig': 'chr1', 'position': 1},
                             {'contig': 'chr1', 'position': 2},
@@ -84,7 +84,7 @@ class TestGenotypesAPI(object):
             'sortBy': [{'columnName': 'contig', 'order': 'asc'},
                        {'columnName': 'position', 'order': 'asc'}]
         }
-        records = get(run_id, query, with_stats=False)['records']
+        records = genotypes.get(run_id, query, with_stats=False)['records']
         results = [pick(r, 'contig', 'position') for r in records]
         expected_results = [{'contig': '1', 'position': 1},
                             {'contig': '1', 'position': 2},
@@ -113,7 +113,7 @@ class TestGenotypesAPI(object):
             'filters': [{'columnName': 'sample_name', 'filterValue': 'normal', 'type': '='}],
             'sortBy': [{'columnName': 'sample:DP', 'order': 'desc'}]
         }
-        records = get(run_id, query, with_stats=False)['records']
+        records = genotypes.get(run_id, query, with_stats=False)['records']
         results = [pick(r, 'contig', 'position', 'sample:DP') for r in records]
         expected_results = [{'contig': '23', 'position': 1, 'sample:DP': '99'},
                             {'contig': 'GT05182', 'position': 1, 'sample:DP': '99'},
@@ -142,7 +142,7 @@ class TestGenotypesAPI(object):
             'filters': [{'columnName': 'sample_name', 'filterValue': 'normal', 'type': '='}],
             'sortBy': [{'columnName': 'sample:DP', 'order': 'asc'}]
         }
-        records = get(run_id, query, with_stats=False)['records']
+        records = genotypes.get(run_id, query, with_stats=False)['records']
         results = [pick(r, 'contig', 'position', 'sample:DP') for r in records]
         expected_results = [{'contig': 'Y', 'position': 21, 'sample:DP': '10'},
                             {'contig': 'Y', 'position': 1, 'sample:DP': '11'},
@@ -172,7 +172,7 @@ class TestGenotypesAPI(object):
                         {'columnName': 'info:DP', 'filterValue': '50', 'type': '<'}],
             'sortBy': []
         }
-        records = get(run_id, query, with_stats=False)['records']
+        records = genotypes.get(run_id, query, with_stats=False)['records']
         results = [pick(r, 'contig', 'position', 'info:DP') for r in records]
         expected_results = [{'contig': '1', 'info:DP': '43', 'position': 11},
                             {'contig': '10', 'info:DP': '18', 'position': 17},
@@ -190,7 +190,7 @@ class TestGenotypesAPI(object):
             'filters': [{'columnName': 'sample:RD', 'filterValue': '35', 'type': '>'}],
             'sortBy': []
         }
-        records = get(run_id, query, with_stats=False)['records']
+        records = genotypes.get(run_id, query, with_stats=False)['records']
         results = [pick(r, 'contig', 'sample:RD', 'sample_name') for r in records]
         expected_results = [{'contig': '1', 'sample:RD': '38', 'sample_name': 'normal'},
                             {'contig': '1', 'sample:RD': '36', 'sample_name': 'normal'},
