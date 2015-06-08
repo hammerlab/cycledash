@@ -22,7 +22,7 @@ a, a:hover {
   background-color: $color-bg-body;
   tr:last-child{
     th {
-      background-color: darken($color-bg-body, 10%);
+      background-color: darken($color-bg-body, 5%);
     }
   }
 }

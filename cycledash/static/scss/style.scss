@@ -32,28 +32,22 @@ label {
   font-weight: normal;
 }
 .btn-primary {
-  // background-color: darken($color-fuchsia-sinai, 5%);
-  // border-color: darken($color-fuchsia-sinai, 25%);
   color: $color-white;
   background-color: $color-fuchsia-sinai;
-  border-color: darken($color-fuchsia-sinai, 20%);
+  border-color: darken($color-fuchsia-sinai, 10%);
   &:hover, &:active, &:focus {
     background-color: darken($color-fuchsia-sinai, 5%);
-    border-color: darken($color-fuchsia-sinai, 20%);
+    border-color: darken($color-fuchsia-sinai, 10%);
     color: $color-white-smoke;
   }
 }
 .btn-default {
-  // background-color: darken($color-bg-body, 5%);
-  // border-color: darken($color-bg-body, 25%);
   background-color: $color-blue-sinai;
-  border-color: darken($color-blue-sinai, 20%);
+  border-color: darken($color-blue-sinai, 10%);
   color: $color-white;
   &:hover, &:active, &:focus {
-    // background-color: darken($color-bg-body, 10%);
-    // border-color: darken($color-bg-body, 25%);
     background-color: darken($color-blue-sinai, 5%);
-    border-color: darken($color-blue-sinai, 20%);
+    border-color: darken($color-blue-sinai, 10%);
     color: $color-white-smoke;
   }
 }

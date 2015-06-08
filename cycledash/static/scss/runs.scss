@@ -81,27 +81,10 @@ div.project-header .notes {
   margin-top: 1em;
 }
 div.project-header .add button {
-  margin-right: 1em;
+  margin-left: 1em;
 }
 div.project-header .add {
-  // margin: 1em 0;
   float: right;
-}
-div.project-header div.project-stats {
-  font-size: 1.2em;
-  // float: right;
-  // position: relative;
-  // top: -1.51em;
-}
-div.project-header div.project-stats a.selected-pivot {
-  color: $color-text;
-  cursor: default;
-}
-div.project-header div.project-stats a.selected-pivot:hover {
-  text-decoration: none;
-}
-div.project-header div.project-stats div {
-  width: 100%;
 }
 div.project {
   background-color: $color-white-smoke;
@@ -116,13 +99,50 @@ div.project {
 div.project a {
   cursor: pointer;
 }
-
+.project-stats {
+  margin-top: 1em;
+  font-size: 1.125rem;
+  a {
+    padding: 0.25rem 0.5rem;
+    display: inline-block;
+    border-top: 1px solid transparent;
+    border-right: 1px solid transparent;
+    border-left: 1px solid transparent;
+    &:hover {
+      text-decoration: none;
+    }
+    &.selected-pivot {
+      background-color: $color-white-smoke;
+      border-top-left-radius: $radius;
+      border-top-right-radius: $radius;
+      border-top: 1px solid darken($color-white-smoke, 10%);
+      border-right: 1px solid darken($color-white-smoke, 10%);
+      border-left: 1px solid darken($color-white-smoke, 10%);
+      color: $color-text;
+      cursor: default;
+      &:hover {
+        text-decoration: none;
+      }
+    }
+  }
+}
+.count {
+  display: inline-block;
+  font-family: helvetica, arial, sans-serif;
+  padding-left: 1em;
+  font-size: 0.75rem;
+}
 /*------[ Runs Table ]------*/
-.runs-table {
+.runs-table, .bams-table {
   @extend .table;
+  border: 1px solid darken($color-white-smoke, 10%);
+  margin-top: -1px;
   table-layout: fixed;
   td {
     word-wrap: break-word;
+  }
+  thead {
+    font-size:0.75rem;
   }
 }
 main#runs .runs-table tr.info > td {
@@ -165,6 +185,12 @@ td.comments {
 }
 .runs-table .run-id, .runs-table .date {
   white-space: nowrap;
+}
+.runs-table .run-id {
+  text-align: right;
+}
+.linked-bam {
+  display: inline-block;
 }
 
 /*------[ Drag and Drop File Upload ]------*/

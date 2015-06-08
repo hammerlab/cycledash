@@ -144,30 +144,26 @@ var ProjectTable = React.createClass({
     return (
       <div className='project'>
         <div className='project-header'>
-          <h2 title={this.props.project_id}>{this.props.name === 'null' ? 'No Project' : this.props.name}
-            <div className='add'>
-              <button onClick={() => { this.displayRunForm(false); this.displayBAMForm(!this.state.displayBAMForm); }}
-                      type='button' className='btn btn-primary btn-xs'>
-                Add BAM
-              </button>
-              <button onClick={() => { this.displayBAMForm(false); this.displayRunForm(!this.state.displayRunForm); }}
-                      type='button' className='btn btn-primary btn-xs'>
-                Add Run
-              </button>
-            </div>
-          </h2>
+          <h2 title={this.props.project_id}>{this.props.name === 'null' ? 'No Project' : this.props.name}</h2>
           <p className='notes'>{this.props.notes}</p>
           {this.state.displayRunForm ? newRunForm : null}
           {this.state.displayBAMForm ? newBAMForm : null}
           <div className='project-stats'>
-            <div>
-              <a onClick={() => this.setState({bamsTable: true})} className={this.state.bamsTable ? 'selected-pivot' : ''}>
-                <em>{numBams}</em>&nbsp;BAMs
-              </a>
-              ,&nbsp;&nbsp;
-              <a onClick={() => this.setState({bamsTable: false})} className={this.state.bamsTable ? '' : 'selected-pivot'}>
-                {numRuns}&nbsp;Runs
-              </a>
+            <a onClick={() => this.setState({bamsTable: false})} className={this.state.bamsTable ? '' : 'selected-pivot'}>
+              Runs<span className="count">{numRuns}</span>
+            </a>
+            <a onClick={() => this.setState({bamsTable: true})} className={this.state.bamsTable ? 'selected-pivot' : ''}>
+              BAMs<span className="count">{numBams}</span>
+            </a>
+            <div className='add'>
+              <button onClick={() => { this.displayBAMForm(false); this.displayRunForm(!this.state.displayRunForm); }}
+                      type='button' className='btn btn-primary btn-xs'>
+                Add Run
+              </button>
+              <button onClick={() => { this.displayRunForm(false); this.displayBAMForm(!this.state.displayBAMForm); }}
+                      type='button' className='btn btn-primary btn-xs'>
+                Add BAM
+              </button>
             </div>
           </div>
         </div>
@@ -199,10 +195,10 @@ var RunsTable = React.createClass({
       <table className='runs-table'>
         <thead>
           <tr>
-            <th></th>
             <th className='caller-name'>Caller Name</th>
             <th className='date'>Submitted On</th>
             <th className='num-variants'>Variants</th>
+            <th>Linked BAMs</th>
             <th></th>
             <th></th>
           </tr>
@@ -228,14 +224,14 @@ var RunRow = React.createClass({
     var run = this.props.run;
     return (
       <tr className='run' onClick={this.handleClick}>
-        <td className='run-id'>
-          <a className='btn btn-default btn-xs' href={'/runs/' + run.id + '/examine'} ref='link'>Examine</a>
-        </td>
         <td className='caller-name'>{run.caller_name}</td>
         <td className='date' title={run.created_at}>{moment(new Date(run.created_at)).format('YYYY-MM-DD')}</td>
         <td className='num-variants' title={run.genotype_count}>{run.genotype_count}</td>
         <RunLabels run={run} />
         <RunComments run={run} />
+        <td className='run-id'>
+          <a className='btn btn-default btn-xs' href={'/runs/' + run.id + '/examine'} ref='link'>Examine</a>
+        </td>
       </tr>
     );
   }
@@ -324,7 +320,7 @@ var RunLabels = React.createClass({
         var value = utils.getIn(run, path) || utils.getIn(taskStates, path);
         if (value) {
           return (
-            <span className={`label label-info ${cssClass}`} title={title} key={path.join('-')}>
+            <span className={`linked-bam ${cssClass}`} title={title} key={path.join('-')}>
               {usePathValue ? value : ''}
             </span>
           );
@@ -377,7 +373,7 @@ var BamsTable = React.createClass({
       return rows;
     });
     return (
-      <table className='bams table'>
+      <table className='bams-table'>
         <thead>
           <tr>
             <th className='bam-name'>BAM Name</th>
