@@ -5,7 +5,6 @@
   "sub": true,
   "undef": true,
   "trailing": true,
-  "maxlen": 200,
   "esnext": true,
   "strict": true,
   "lastsemic": false,
