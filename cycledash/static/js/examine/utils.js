@@ -36,16 +36,17 @@ function makeIGVLink(run, igvHttpfsUrl) {
   }
 
   var nameFilePairs = [
-      ['Run', run.uri],
-      ['Normal', run.normal_bam && run.normal_bam.uri],
-      ['Tumor', run.tumor_bam && run.tumor_bam.uri]
-  ].filter(x => x[1]);
+      ['Run', 'vcf', run.uri],
+      ['Normal', 'bam', run.normal_bam && run.normal_bam.uri],
+      ['Tumor', 'bam', run.tumor_bam && run.tumor_bam.uri]
+  ].filter(x => x[2]);
 
-  var fileParam = nameFilePairs.map(x => fileUrl(x[1])).join(','),
-      nameParam = nameFilePairs.map(x => x[0]).join(',');
+  var fileParam = nameFilePairs.map(x => fileUrl(x[2])).join(','),
+      nameParam = nameFilePairs.map(x => x[0]).join(','),
+      formatParam = nameFilePairs.map(x => x[1]).join(',');
 
   return `http://${LOCAL_IGV_HOST}/load?user=cycledash&genome=hg19` +
-      `&file=${fileParam}&name=${nameParam}`;
+      `&file=${fileParam}&name=${nameParam}&format=${formatParam}`;
 }
 
 /**

@@ -13,17 +13,17 @@ describe('Examine Utils', function() {
 
     // No BAMs
     var run = { uri };
-    assert.equal('http://localhost:60151/load?user=cycledash&genome=hg19&file=http://example.com/snv.vcf&name=Run',
+    assert.equal('http://localhost:60151/load?user=cycledash&genome=hg19&file=http://example.com/snv.vcf&name=Run&format=vcf',
                  utils.makeIGVLink(run, igvHttpfsUrl));
 
     // One BAM
     run = { uri, normal_bam };
-    assert.equal('http://localhost:60151/load?user=cycledash&genome=hg19&file=http://example.com/snv.vcf,http://example.com/normal.bam&name=Run,Normal',
+    assert.equal('http://localhost:60151/load?user=cycledash&genome=hg19&file=http://example.com/snv.vcf,http://example.com/normal.bam&name=Run,Normal&format=vcf,bam',
                  utils.makeIGVLink(run, igvHttpfsUrl));
 
     // Two BAMs
     run = { uri, normal_bam, tumor_bam };
-    assert.equal('http://localhost:60151/load?user=cycledash&genome=hg19&file=http://example.com/snv.vcf,http://example.com/normal.bam,http://example.com/tumor.bam&name=Run,Normal,Tumor',
+    assert.equal('http://localhost:60151/load?user=cycledash&genome=hg19&file=http://example.com/snv.vcf,http://example.com/normal.bam,http://example.com/tumor.bam&name=Run,Normal,Tumor&format=vcf,bam,bam',
                  utils.makeIGVLink(run, igvHttpfsUrl));
   });
 });
