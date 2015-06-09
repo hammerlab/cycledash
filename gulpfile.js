@@ -124,7 +124,7 @@ gulp.task('staticlibs', function() {
 
 // Default task which compiles the JS and then watches the JS and CSS for
 // changes.
-gulp.task('default', ['watch', 'js', 'sass']);
+gulp.task('default', ['watch', 'js', 'sass', 'peg']);
 
 // Build production resources and copy them into the serving directory.
 gulp.task('prod', ['peg', 'build', 'staticlibs', 'sass']);
