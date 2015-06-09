@@ -26,7 +26,7 @@ dpxdt==0.1.5
 psycopg2==2.5.4
 pylint==1.4.1
 humanize==0.5.1
-pyensembl==0.5.13
+pyensembl==0.6.9
 mock==1.0.1
 flask-restful==0.3.2
 seltest==0.2.2
