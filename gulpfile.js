@@ -2,6 +2,7 @@ var _ = require('underscore'),
     browserify = require('browserify'),
     gulp = require('gulp'),
     livereload = require('gulp-livereload'),
+    livereactload = require('livereactload'),
     peg = require('gulp-peg'),
     reactify = require('reactify'),
     source = require('vinyl-source-stream'),
@@ -39,7 +40,9 @@ var REACT_OPTS = {es6: true},
 // Runs JSX, ES6 transforms, browserify, adds sourcemaps, and notifies the
 // livereload server that JS has changed.
 gulp.task('js', function() {
-  var bundler = watchify(browserify(BROWSERIFY_OPTS));
+  livereactload.monitor(PATHS.dest + 'bundled.js')
+
+  var bundler = watchify(browserify(_.extend({transform: [livereactload]}, BROWSERIFY_OPTS)));
 
   function rebundle() {
     return bundler
@@ -48,15 +51,13 @@ gulp.task('js', function() {
       .bundle()
       .on('error', function(e) { console.log(e.message); })
       .pipe(source('bundled.js'))
-      .pipe(gulp.dest(PATHS.dest))
-      .pipe(livereload({ auto: false })); // Because the 'watch' task has
-                                          // already started a livereload server.
+      .pipe(gulp.dest(PATHS.dest));
   }
 
   rebundle();
-  bundler.on('update', rebundle);
+  return bundler.on('error', console.log).on('update', rebundle);
 });
- 
+
 gulp.task('sass', ['staticlibs'], function () {
   return gulp.src('./cycledash/static/scss/*.scss')
         .pipe(sass.sync().on('error', sass.logError))
@@ -67,7 +68,6 @@ gulp.task('sass', ['staticlibs'], function () {
 // Starts the livereload server and runs the 'js' and 'sass' tasks, above.
 gulp.task('watch', function() {
   livereload.listen();
-  gulp.watch(PATHS.js, ['js']);
   gulp.watch(PATHS.sass, ['sass']);
 });
 
