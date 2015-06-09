@@ -29,6 +29,7 @@
     "gulp-sass": "^2.0.0",
     "jsdom": "^1.0.3",
     "jsxhint": "^0.7.0",
+    "livereactload": "^0.5.2",
     "mocha": "2.1.0",
     "mocha-clean": "^0.4.0",
     "mocha-lcov-reporter": "0.0.1",
