@@ -38,23 +38,36 @@ label {
   &:hover, &:active, &:focus {
     background-color: darken($color-fuchsia-sinai, 5%);
     border-color: darken($color-fuchsia-sinai, 10%);
-    color: $color-white-smoke;
+    color: $color-white;
   }
 }
 .btn-default {
-  background-color: $color-blue-sinai;
-  border-color: darken($color-blue-sinai, 10%);
-  color: $color-white;
+  background-color: $color-white;
+  border-color: $color-blue-sinai;
+  color: $color-blue-sinai;
   &:hover, &:active, &:focus {
-    background-color: darken($color-blue-sinai, 5%);
-    border-color: darken($color-blue-sinai, 10%);
-    color: $color-white-smoke;
+    background-color: darken($color-white, 5%);
+    border-color: $color-blue-sinai;
+    color: $color-blue-sinai;
   }
 }
 .btn-add-file {
   @extend .btn, .btn-primary, .btn-xs;
 }
 /*------[ Comments ]------*/
+.recent-comments-list {
+  @extend .clearfix;
+  list-style: none;
+  padding: 0;
+  li {
+    padding: 1em 0;
+    margin: 0.5em 0;
+    border-top: 1px solid $color-border-light;
+    &:first-child {
+      border-top: none;
+    }
+  }
+}
 .author-name {
   font-weight: bold;
 }
@@ -93,6 +106,35 @@ section#api-docs > section {
 /*------[ Table Styling ]------*/
 .table {
   font-size: 0.875em; /* 14/16 */
+  color: #666;
+  border-collapse: separate;
+  background-color: $color-white;
+  border-bottom: 1px solid darken($color-white-smoke, 10%);
+  td {
+    word-wrap: break-word;
+    &:first-child {
+      border-left: 1px solid darken($color-white-smoke, 10%);
+    }
+    &:last-child {
+      border-right: 1px solid darken($color-white-smoke, 10%);
+    }
+  }
+  thead {
+    font-size:0.75rem;
+    text-transform: uppercase;
+    th {
+      background-color: darken($color-bg-body, 15%);
+      background-color: $color-bg-body;
+      font-weight: normal;
+      letter-spacing: 1px;
+      &:first-child {
+        border-top-left-radius: $radius;
+      }
+      &:last-child {
+        border-top-right-radius: $radius;
+      }
+    }
+  }
 }
 .table tbody tr {
   cursor: pointer;

@@ -10,28 +10,17 @@
 
 /*------[ Recent Comments ]------*/
 .recent-comments-container {
-  @extend .col-md-3;
+  @extend .col-md-2;
+  font-size: 0.875em;
   h4 {
-    margin-top: 0;
+    font-size: 1rem;
+    margin: 0;
   }
   padding: 1em;
 }
-.recent-comments-list {
-  @extend .clearfix;
-  padding: 0;
-  list-style: none;
-  li {
-    padding: 1em;
-    margin: 0.5em 0;
-    border-top: 1px solid $color-border-light;
-    &:first-child {
-      border-top: none;
-    }
-  }
-}
+
 a.all-comments {
-  font-size: 0.875em;
-  color: $color-text-dim;
+  font-size: 0.75em;
   padding-left: 0.5em;
 }
 
@@ -59,7 +48,7 @@ form.add-form {
 
 /*------[ Projects ]------*/
 .projects-container {
-  @extend .col-md-9;
+  @extend .col-md-10;
 }
 .projects-page-header {
   @extend .clearfix;
@@ -70,28 +59,30 @@ form.add-form {
   }
 }
 .projects-table {
-  @extend .col-md-9;
-  padding: 1em;
+  @extend .col-md-10;
   border-right: 1px solid $color-border-light;
+  padding: 1em;
 }
 div.project-header h2 {
   margin: 0;
 }
 div.project-header .notes {
-  margin-top: 1em;
+  margin: 0;
 }
-div.project-header .add button {
+.project-stats .add button {
   margin-left: 1em;
 }
-div.project-header .add {
+.project-stats .add {
   float: right;
+}
+.project-header {
+  padding: 1em;
 }
 div.project {
   background-color: $color-white-smoke;
   margin: 2em 0;
-  padding: 1em;
   border-radius: $radius;
-  box-shadow: 1px 1px 1px 0px $color-border-light;
+  box-shadow: 1px 1px 1px 0px $color-bg-body;
   &:last-child {
     margin-bottom: 0;
   }
@@ -100,25 +91,21 @@ div.project a {
   cursor: pointer;
 }
 .project-stats {
-  margin-top: 1em;
+  @extend .clearfix;
   font-size: 1.125rem;
+  border-top: 1px solid darken($color-white-smoke, 10%);
+  padding: 1em 1em 0 1em;
   a {
-    padding: 0.25rem 0.5rem;
+    margin: 0 1rem 0 0;
     display: inline-block;
-    border-top: 1px solid transparent;
-    border-right: 1px solid transparent;
-    border-left: 1px solid transparent;
+    font-family: helvetica;
+    font-size: 0.875em;
     &:hover {
       text-decoration: none;
     }
     &.selected-pivot {
-      background-color: $color-white-smoke;
-      border-top-left-radius: $radius;
-      border-top-right-radius: $radius;
-      border-top: 1px solid darken($color-white-smoke, 10%);
-      border-right: 1px solid darken($color-white-smoke, 10%);
-      border-left: 1px solid darken($color-white-smoke, 10%);
-      color: $color-text;
+      border-bottom: 2px solid $color-text-dim;
+      color: #666;
       cursor: default;
       &:hover {
         text-decoration: none;
@@ -126,24 +113,20 @@ div.project a {
     }
   }
 }
-.count {
-  display: inline-block;
-  font-family: helvetica, arial, sans-serif;
-  padding-left: 1em;
-  font-size: 0.75rem;
+.project-table-nav {
+  float:left;
+}
+.add {
+  float:right;
 }
 /*------[ Runs Table ]------*/
+.runs-table-container {
+  padding: 1em;
+}
 .runs-table, .bams-table {
   @extend .table;
-  border: 1px solid darken($color-white-smoke, 10%);
-  margin-top: -1px;
   table-layout: fixed;
-  td {
-    word-wrap: break-word;
-  }
-  thead {
-    font-size:0.75rem;
-  }
+  margin: 0;
 }
 main#runs .runs-table tr.info > td {
   background-color: $color-bg-expanded;
@@ -175,6 +158,12 @@ span.comment-bubble {
   height: 15px;
   display: inline-block;
   margin-left: 2px;
+}
+.examine-col {
+  width: 5rem;
+}
+.num-comments {
+  width: 3rem;
 }
 .no-comment > span {
   opacity: 0.3;

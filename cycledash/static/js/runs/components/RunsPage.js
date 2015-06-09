@@ -148,26 +148,30 @@ var ProjectTable = React.createClass({
           <p className='notes'>{this.props.notes}</p>
           {this.state.displayRunForm ? newRunForm : null}
           {this.state.displayBAMForm ? newBAMForm : null}
-          <div className='project-stats'>
+        </div>
+        <div className='project-stats'>
+          <div className='project-table-nav'>
             <a onClick={() => this.setState({bamsTable: false})} className={this.state.bamsTable ? '' : 'selected-pivot'}>
-              Runs<span className="count">{numRuns}</span>
+              {numRuns} Runs
             </a>
             <a onClick={() => this.setState({bamsTable: true})} className={this.state.bamsTable ? 'selected-pivot' : ''}>
-              BAMs<span className="count">{numBams}</span>
+              {numBams} BAMs
             </a>
-            <div className='add'>
-              <button onClick={() => { this.displayBAMForm(false); this.displayRunForm(!this.state.displayRunForm); }}
-                      type='button' className='btn btn-primary btn-xs'>
-                Add Run
-              </button>
-              <button onClick={() => { this.displayRunForm(false); this.displayBAMForm(!this.state.displayBAMForm); }}
-                      type='button' className='btn btn-primary btn-xs'>
-                Add BAM
-              </button>
-            </div>
+          </div>
+          <div className='add'>
+            <button onClick={() => { this.displayBAMForm(false); this.displayRunForm(!this.state.displayRunForm); }}
+                    type='button' className='btn btn-primary btn-xs'>
+              Add Run
+            </button>
+            <button onClick={() => { this.displayRunForm(false); this.displayBAMForm(!this.state.displayBAMForm); }}
+                    type='button' className='btn btn-primary btn-xs'>
+              Add BAM
+            </button>
           </div>
         </div>
-        {table}
+        <div className="runs-table-container">
+          {table}
+        </div>
       </div>
     );
   }
@@ -199,8 +203,8 @@ var RunsTable = React.createClass({
             <th className='date'>Submitted On</th>
             <th className='num-variants'>Variants</th>
             <th>Linked BAMs</th>
-            <th></th>
-            <th></th>
+            <th className='num-comments'></th>
+            <th className='examine-col'></th>
           </tr>
         </thead>
         <tbody>
