@@ -16,7 +16,7 @@
     font-size: 1rem;
     margin: 0;
   }
-  padding: 1em;
+  padding: 1rem;
 }
 
 a.all-comments {
@@ -27,7 +27,7 @@ a.all-comments {
 /*------[ Add Form ]------*/
 form.add-form {
   @extend .col-md-12;
-  background: darken($color-bg-body, 5%);
+  background: $color-bg-body-dark;
   border: 1px solid $color-border-light;
   border-radius: $radius;
   margin: 1em 0;
@@ -82,7 +82,7 @@ div.project {
   background-color: $color-white-smoke;
   margin: 2em 0;
   border-radius: $radius;
-  box-shadow: 1px 1px 1px 0px $color-bg-body;
+  box-shadow: 1px 1px 1px 0px $color-bg-body-dark;
   &:last-child {
     margin-bottom: 0;
   }
@@ -93,8 +93,8 @@ div.project a {
 .project-stats {
   @extend .clearfix;
   font-size: 1.125rem;
-  border-top: 1px solid darken($color-white-smoke, 10%);
-  padding: 1em 1em 0 1em;
+  border-top: 1px solid $color-bg-body;
+  padding: 1rem 1rem 0 1rem;
   a {
     margin: 0 1rem 0 0;
     display: inline-block;
@@ -105,7 +105,7 @@ div.project a {
     }
     &.selected-pivot {
       border-bottom: 2px solid $color-text-dim;
-      color: #666;
+      color: $color-text-soft;
       cursor: default;
       &:hover {
         text-decoration: none;
@@ -159,14 +159,8 @@ span.comment-bubble {
   display: inline-block;
   margin-left: 2px;
 }
-.examine-col {
-  width: 5rem;
-}
-.num-comments {
-  width: 3rem;
-}
 .no-comment > span {
-  opacity: 0.3;
+  opacity: 0.2;
 }
 td.comments {
   text-align: right;
@@ -178,13 +172,31 @@ td.comments {
 .runs-table .run-id {
   text-align: right;
 }
+.runs-table .caller-name {
+  width: 30%;
+}
+.runs-table .date {
+  width: 15%;
+}
+.runs-table .num-variants {
+  width: 15%;
+}
+.runs-table .bam-info {
+  width: 20%;
+}
+.runs-table .num-comments {
+  width: 10%;
+}
+.runs-table .examine-col {
+  width: 10%;
+}
 .linked-bam {
   display: inline-block;
 }
 
 /*------[ Drag and Drop File Upload ]------*/
 main#runs .receiving-drag.uploadable {
-  background: $color-blue-light;
+  background: $color-bg-hover;
 }
 main#runs .dragging-over .uploadable {
   border: 2px dashed $color-blue-sinai;

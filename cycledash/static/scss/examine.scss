@@ -15,19 +15,20 @@ a, a:hover {
 
 /*------[ VCF Table ]------*/
 .vcf-table {
-  @extend .table, .table-striped, .table-condensed;
+  @extend .table, .table-striped;
 }
 .vcf-table thead {
   background-color: $color-bg-body;
   tr:first-child{
     th {
+      font-weight: bold;
       border-left: 1px solid $color-border-light;
-      color: $color-text;
-      background-color: darken($color-bg-body, 5%);  
+      background-color: $color-bg-body-dark;
     }
   }
   tr:last-child{
     th {
+      cursor: default;
       background-color: darken($color-bg-body, 3%);  
       &:first-child {
         border-top-left-radius: 0;
@@ -68,23 +69,22 @@ a, a:hover {
   border-radius: $radius;
   position: absolute;
   top: 110%;
-  right: -72px;
+  left: 0;
   background: $color-white;
+  background-color: $color-bg-hover;
   border: 1px solid $color-border-light;
-  width: 250px;
-  font-size: 12px;
-  font-color: $color-text;
+  min-width: 200px;
+  font-size: 0.75rem; 
+  color: $color-text;
   z-index: 1000;
   opacity: 100; /* This is needed to override Bootstrap. */
-  line-height: 1; /* This is needed to override Bootstrap. */
-  font-size: 12px; /* This is needed to override Bootstrap. */
+  text-transform: none;
+  padding: 0 1em;
 }
 .vcf-table .tooltip p {
-  font-weight: 500;
   text-align: left;
-  margin-top: 12px; /* This is needed to override Bootstrap. */
-  margin-bottom: 12px; /* This is needed to override Bootstrap. */
-  padding: 2px 13px;
+  margin-top: 1em; /* This is needed to override Bootstrap. */
+  margin-bottom: 1em; /* This is needed to override Bootstrap. */
 }
 .vcf-table .tooltip p strong {
   font-weight: bold;
@@ -94,7 +94,7 @@ a, a:hover {
 }
 .vcf-table .tooltip:after, .tooltip:before {
   bottom: 100%;
-  left: 50%;
+  left: 10%;
   border: solid transparent;
   content: " ";
   height: 0;
@@ -103,8 +103,8 @@ a, a:hover {
   pointer-events: none;
 }
 .vcf-table .tooltip:after {
-  border-color: rgba(255, 255, 255, 0);
-  border-bottom-color: $color-white;
+  border-color: rgba(231, 246, 252, 0);
+  border-bottom-color: $color-bg-hover;
   border-width: 10px;
   margin-left: -10px;
 }
@@ -139,7 +139,7 @@ a, a:hover {
   background-color: $color-white-smoke;
   border: 1px solid $color-border-light;
   border-radius: $radius $radius 0px 0px;
-  color: #666;
+  color: $color-text-soft;
 }
 .vcf-table .comment-text {
   background-color: $color-white;

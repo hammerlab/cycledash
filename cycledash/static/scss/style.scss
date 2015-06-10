@@ -106,32 +106,34 @@ section#api-docs > section {
 /*------[ Table Styling ]------*/
 .table {
   font-size: 0.875em; /* 14/16 */
-  color: #666;
+  color: $color-text-soft;
   border-collapse: separate;
   background-color: $color-white;
-  border-bottom: 1px solid darken($color-white-smoke, 10%);
+  border-bottom: 1px solid $color-bg-body;
   td {
     word-wrap: break-word;
     &:first-child {
-      border-left: 1px solid darken($color-white-smoke, 10%);
+      border-left: 1px solid $color-bg-body;
     }
     &:last-child {
-      border-right: 1px solid darken($color-white-smoke, 10%);
+      border-right: 1px solid $color-bg-body;
     }
   }
   thead {
     font-size:0.75rem;
     text-transform: uppercase;
-    th {
-      background-color: darken($color-bg-body, 15%);
-      background-color: $color-bg-body;
-      font-weight: normal;
-      letter-spacing: 1px;
-      &:first-child {
-        border-top-left-radius: $radius;
-      }
-      &:last-child {
-        border-top-right-radius: $radius;
+    tr {
+      th {
+        background-color: $color-bg-body;
+        font-weight: normal;
+        letter-spacing: 1px;
+        border-bottom: 0;
+        &:first-child {
+          border-top-left-radius: $radius;
+        }
+        &:last-child {
+          border-top-right-radius: $radius;
+        }
       }
     }
   }

@@ -202,7 +202,7 @@ var RunsTable = React.createClass({
             <th className='caller-name'>Caller Name</th>
             <th className='date'>Submitted On</th>
             <th className='num-variants'>Variants</th>
-            <th>Linked BAMs</th>
+            <th className='bam-info'>Linked BAMs</th>
             <th className='num-comments'></th>
             <th className='examine-col'></th>
           </tr>

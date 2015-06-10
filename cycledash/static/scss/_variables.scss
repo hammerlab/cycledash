@@ -1,20 +1,20 @@
 $color-black: #333;
 $color-blue-sinai: #1CABE1;
-$color-blue-light: #eff6f7;
-$color-blue-medium: #E0E7E8;
 $color-gray-light: #ccc;
 $color-gray-medium: #adadad;
+$color-gray-dark: #666;
+$color-beige-light: #E4E2E1;
 $color-green: #5cb85c;
 $color-red: #f32d2d;
 $color-white: #fff;
 $color-white-smoke: #f5f5f5;
-$color-yellow-light: #feffcf;
 $color-fuchsia-sinai: #AE387E;
 
 
 ////////////////////////////////
 
-$color-bg-body: #E4E2E1;
+$color-bg-body: $color-beige-light;
+$color-bg-body-dark: darken($color-bg-body, 5%);
 
 $color-bg-hover: lighten($color-blue-sinai, 45%);
 $color-bg-expanded: lighten($color-blue-sinai, 45%);
@@ -23,10 +23,11 @@ $color-status-success: $color-green;
 $color-status-error: $color-red;
 
 $color-text: $color-black;
+$color-text-soft: $color-gray-dark;
 $color-text-dim: $color-gray-medium;
 
 $color-link: $color-blue-sinai;
 
-$color-border-light: darken($color-bg-body, 15%);
+$color-border-light: $color-gray-light;
 
 $radius: 4px;
