@@ -82,6 +82,7 @@ div.project {
   background-color: $color-white-smoke;
   margin: 2em 0;
   border-radius: $radius;
+  border: 1px solid $color-border-light;
   box-shadow: 1px 1px 1px 0px $color-bg-body-dark;
   &:last-child {
     margin-bottom: 0;
@@ -93,7 +94,7 @@ div.project a {
 .project-stats {
   @extend .clearfix;
   font-size: 1.125rem;
-  border-top: 1px solid $color-bg-body;
+  border-top: 1px solid $color-border-light;
   padding: 1rem 1rem 0 1rem;
   a {
     margin: 0 1rem 0 0;
@@ -105,7 +106,7 @@ div.project a {
     }
     &.selected-pivot {
       border-bottom: 2px solid $color-text-dim;
-      color: $color-text-soft;
+      color: $color-text;;
       cursor: default;
       &:hover {
         text-decoration: none;

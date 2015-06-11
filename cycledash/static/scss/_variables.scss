@@ -1,17 +1,16 @@
 $color-black: #333;
-$color-blue-sinai: #1CABE1;
-$color-gray-light: #ccc;
+$color-blue-sinai: #1DACE9;
+$color-gray-light: #ddd;
 $color-gray-medium: #adadad;
-$color-gray-dark: #666;
-$color-beige-light: #E4E2E1;
+$color-beige-light: #f0efee;
 $color-green: #5cb85c;
 $color-red: #f32d2d;
 $color-white: #fff;
-$color-white-smoke: #f5f5f5;
-$color-fuchsia-sinai: #AE387E;
+$color-white-smoke: #fcfcfc;
 
 
 ////////////////////////////////
+
 
 $color-bg-body: $color-beige-light;
 $color-bg-body-dark: darken($color-bg-body, 5%);
@@ -23,7 +22,6 @@ $color-status-success: $color-green;
 $color-status-error: $color-red;
 
 $color-text: $color-black;
-$color-text-soft: $color-gray-dark;
 $color-text-dim: $color-gray-medium;
 
 $color-link: $color-blue-sinai;

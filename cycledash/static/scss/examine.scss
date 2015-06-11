@@ -22,7 +22,8 @@ a, a:hover {
   tr:first-child{
     th {
       font-weight: bold;
-      border-left: 1px solid $color-border-light;
+      border-left: 1px solid $color-gray-medium;
+      border-bottom: 1px solid $color-gray-medium;
       background-color: $color-bg-body-dark;
     }
   }
@@ -136,10 +137,10 @@ a, a:hover {
 .vcf-table .comment-header {
   @extend .clearfix;
   padding: 0.5em;
-  background-color: $color-white-smoke;
+  background-color: $color-bg-body;
   border: 1px solid $color-border-light;
   border-radius: $radius $radius 0px 0px;
-  color: $color-text-soft;
+  color: $color-text;;
 }
 .vcf-table .comment-text {
   background-color: $color-white;
@@ -186,6 +187,12 @@ a, a:hover {
 }
 .vcf-table .comment-by {
   float: left;
+}
+.vcf-table .comment-cancel {
+  @extend .btn, .btn-link;
+}
+.vcf-table .comment-save {
+  @extend .btn, .btn-success;
 }
 .vcf-table .save-buttons {
   width: 100%;
