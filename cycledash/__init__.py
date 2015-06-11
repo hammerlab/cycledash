@@ -2,6 +2,8 @@ from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask.ext import restful
 import humanize
+import logging
+import sys
 
 
 def initialize_application():
@@ -15,19 +17,15 @@ def initialize_application():
 
 
 def _configure_logging(app):
-    @app.errorhandler(500)
-    def internal_error(exception):
-        app.logger.exception(exception)
-        return 'Internal Server Error', 500
-
-    import logging
-    import sys
-
     stdout_handler = logging.StreamHandler(sys.stdout)
     stdout_handler.setLevel(logging.INFO)
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    formatter = logging.Formatter("""\
+[%(levelname)s] %(asctime)s - %(name)s
+%(pathname)s:%(lineno)d
+%(message)s""")
     stdout_handler.setFormatter(formatter)
     app.logger.addHandler(stdout_handler)
+    app.logger.setLevel(logging.INFO)
 
 
 def _configure_application(app):
