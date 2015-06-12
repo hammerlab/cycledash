@@ -11,6 +11,9 @@ var React = require('react'),
 var CHUNKS_LOADING = 'loading',
     CHUNKS_NOT_AVAILABLE = null;
 
+// Number of loci to show around the variant.
+var VIEW_WINDOW = 50;
+
 var PileupViewer = React.createClass({
   propTypes: {
     isOpen: React.PropTypes.bool,
@@ -147,8 +150,8 @@ var PileupViewer = React.createClass({
   rangeForRecord: function(record) {
     return {
       contig: record.contig,
-      start: record.position - 25,
-      stop: record.position + 25
+      start: record.position - VIEW_WINDOW / 2,
+      stop: record.position + VIEW_WINDOW / 2
     };
   },
   fetchIndexChunks: function() {
