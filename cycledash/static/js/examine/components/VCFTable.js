@@ -3,7 +3,6 @@
 var _ = require('underscore'),
     utils = require('../utils'),
     React = require('react/addons'),
-    types = require('./types'),
     $ = require('jquery'),
     CommentBox = require('./CommentBox');
 

@@ -203,6 +203,7 @@ var PileupViewer = React.createClass({
 // pileup track from scrolling the entire examine page.
 // http://stackoverflow.com/a/16324762/388951
 function cancelImpotentScrolls(ev) {
+  /* jshint validthis: true */
   var $this = $(this),
       scrollTop = this.scrollTop,
       scrollHeight = this.scrollHeight,
@@ -217,7 +218,7 @@ function cancelImpotentScrolls(ev) {
     ev.preventDefault();
     ev.returnValue = false;
     return false;
-  }
+  };
 
   if (!up && -delta > scrollHeight - height - scrollTop) {
     // Scrolling down, but this will take us past the bottom.
