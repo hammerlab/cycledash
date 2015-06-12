@@ -39,7 +39,7 @@
     "reactify": "^0.17.1",
     "sinon": "1.13.0",
     "typeahead.js": "^0.10.5",
-    "uglifyify": "^2.5.0",
+    "uglifyify": "^3.0.1",
     "vcf.js": "^0.2.6",
     "vinyl-source-stream": "^1.0.0",
     "watchify": "^1.0.2"

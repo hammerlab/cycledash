@@ -30,8 +30,8 @@ var PATHS = {
 };
 
 var REACT_OPTS = {es6: true, global: true},
-    BROWSERIFY_OPTS =  _.extend({entries: PATHS.src, debug: true}, watchify.args);
-
+    BROWSERIFY_OPTS =  _.extend({entries: PATHS.src, debug: true}, watchify.args),
+    UGLY_OPTS = {global: true};
 
 // Generates compiled JS bundle, automatically recompiling and reloading the
 // browser (by notifying the livereload server, listened to by the js included
@@ -78,8 +78,7 @@ gulp.task('build', function() {
   var srcs = PATHS.polyfills.concat(PATHS.src);
   return browserify(srcs)
     .transform(REACT_OPTS, reactify)
-    .transform({global: true}, uglifyify) // Global: true indicates that uglify
-                                          // will minify all of the module code.
+    .transform(UGLY_OPTS, uglifyify)
     .bundle()
     .pipe(source('bundled.js'))
     .pipe(gulp.dest(PATHS.dest));
