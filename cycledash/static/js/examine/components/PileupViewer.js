@@ -144,7 +144,11 @@ var PileupViewer = React.createClass({
   },
   update: function() {
     if (this.props.isOpen && this.props.selectedRecord) {
-      this.lazilyCreateDalliance();
+      if (!this.browser) {
+        this.lazilyCreateDalliance();
+      } else {
+        this.panToSelection();
+      }
     }
   },
   rangeForRecord: function(record) {
