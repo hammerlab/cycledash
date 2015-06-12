@@ -356,7 +356,7 @@ var VCFCommentEditor = React.createClass({
     var buttons = [];
     if (this.props.cancelable) {
       buttons.push(
-        <button className='btn btn-link comment-button btn-default comment-cancel'
+        <button className='comment-button comment-cancel'
                 key='cancel'
                 onClick={this.handleCancelConfirm}>
           Cancel
@@ -364,7 +364,7 @@ var VCFCommentEditor = React.createClass({
       );
     }
     buttons.push(
-      <button className='btn comment-button btn-success comment-save'
+      <button className='comment-button comment-save'
               key='save'
               onClick={this.handleSaveText}>
         Save

@@ -3,26 +3,36 @@
 #new-project {
   float: right;
 }
-
 .select-project-filter {
   @extend .form-control;
   display: inline-block;
-  width: 27em;
 }
-.filter-runs {
-  margin: 3em 0 2em 0;
+
+/*------[ Recent Comments ]------*/
+.recent-comments-container {
+  @extend .col-md-2;
+  font-size: 0.875em;
+  h4 {
+    font-size: 1rem;
+    margin: 0;
+  }
+  padding: 1rem;
+}
+
+a.all-comments {
+  font-size: 0.75em;
+  padding-left: 0.5em;
 }
 
 /*------[ Add Form ]------*/
 form.add-form {
-  @extend .container;
-  background: $color-white-smoke;
+  @extend .col-md-12;
+  background: $color-bg-body-dark;
   border: 1px solid $color-border-light;
-  box-shadow: inset 0 0 10px $color-border-light;
   border-radius: $radius;
   margin: 1em 0;
   h3 {
-    @extend .container;
+    @extend .col-md-12;
     margin: 15px 0;
   }
 }
@@ -37,44 +47,87 @@ form.add-form {
 }
 
 /*------[ Projects ]------*/
+.projects-container {
+  @extend .col-md-10;
+}
+.projects-page-header {
+  @extend .clearfix;
+  border-bottom: 1px solid $color-border-light;
+  padding: 1em 0;
+  h1 {
+    margin: 0;
+  }
+}
+.projects-table {
+  @extend .col-md-10;
+  border-right: 1px solid $color-border-light;
+  padding: 1em;
+}
 div.project-header h2 {
   margin: 0;
 }
 div.project-header .notes {
-  margin-top: 0.5em;
+  margin: 0;
 }
-div.project-header .add button {
-  margin-right: 1em;
+.project-stats .add button {
+  margin-left: 1em;
 }
-div.project-header .add {
-  margin: 1em 0;
-}
-div.project-header div.project-stats {
-  font-size: 1.2em;
+.project-stats .add {
   float: right;
-  position: relative;
-  top: -1.51em;
 }
-div.project-header div.project-stats a.selected-pivot {
-  color: $color-text;
-  cursor: default;
-}
-div.project-header div.project-stats a.selected-pivot:hover {
-  text-decoration: none;
-}
-div.project-header div.project-stats div {
-  width: 100%;
+.project-header {
+  padding: 1em;
 }
 div.project {
-  margin: 0 0 5em 0;
+  background-color: $color-white-smoke;
+  margin: 2em 0;
+  border-radius: $radius;
+  border: 1px solid $color-border-light;
+  box-shadow: 1px 1px 1px 0px $color-bg-body-dark;
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 div.project a {
   cursor: pointer;
 }
-
+.project-stats {
+  @extend .clearfix;
+  font-size: 1.125rem;
+  border-top: 1px solid $color-border-light;
+  padding: 1rem 1rem 0 1rem;
+  a {
+    margin: 0 1rem 0 0;
+    display: inline-block;
+    font-family: helvetica;
+    font-size: 0.875em;
+    &:hover {
+      text-decoration: none;
+    }
+    &.selected-pivot {
+      border-bottom: 2px solid $color-text-dim;
+      color: $color-text;;
+      cursor: default;
+      &:hover {
+        text-decoration: none;
+      }
+    }
+  }
+}
+.project-table-nav {
+  float:left;
+}
+.add {
+  float:right;
+}
 /*------[ Runs Table ]------*/
-.runs-table {
+.runs-table-container {
+  padding: 1em;
+}
+.runs-table, .bams-table {
   @extend .table;
+  table-layout: fixed;
+  margin: 0;
 }
 main#runs .runs-table tr.info > td {
   background-color: $color-bg-expanded;
@@ -96,7 +149,7 @@ td .label {
   content: 'x';
 }
 .runs-table .label.run::after {
-  color: $color-blue;
+  color: $color-blue-sinai;
   content: '…';
 }
 span.comment-bubble {
@@ -108,7 +161,7 @@ span.comment-bubble {
   margin-left: 2px;
 }
 .no-comment > span {
-  opacity: 0.3;
+  opacity: 0.2;
 }
 td.comments {
   text-align: right;
@@ -117,13 +170,37 @@ td.comments {
 .runs-table .run-id, .runs-table .date {
   white-space: nowrap;
 }
+.runs-table .run-id {
+  text-align: right;
+}
+.runs-table .caller-name {
+  width: 30%;
+}
+.runs-table .date {
+  width: 15%;
+}
+.runs-table .num-variants {
+  width: 15%;
+}
+.runs-table .bam-info {
+  width: 20%;
+}
+.runs-table .num-comments {
+  width: 10%;
+}
+.runs-table .examine-col {
+  width: 10%;
+}
+.linked-bam {
+  display: inline-block;
+}
 
 /*------[ Drag and Drop File Upload ]------*/
 main#runs .receiving-drag.uploadable {
-  background: $color-blue-light;
+  background: $color-bg-hover;
 }
 main#runs .dragging-over .uploadable {
-  border: 2px dashed $color-blue;
+  border: 2px dashed $color-blue-sinai;
 }
 
 /*------[ Autocomplete Styling ]------*/

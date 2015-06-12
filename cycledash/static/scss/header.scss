@@ -1,17 +1,26 @@
 @import 'variables';
 
+.header-logo {
+  text-indent: -9999px;
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  background-image: url('../img/cycle-dash.png');
+  background-size: 22px;
+}
 nav.navigation {
   padding: 0.25em 0;
   background: $color-white-smoke;
   border-bottom: 1px solid $color-border-light;
 }
 nav.navigation ul {
-  @extend .container;
   margin-bottom: 0;
+  padding-left: 0;
+  display: inline-block;
 }
 nav.navigation li {
   display: inline-block;
-  padding: 0 1em 0 0;
+  padding: 0 0 0 1em;
 }
 nav.navigation a {
   color: black;

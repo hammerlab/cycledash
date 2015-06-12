@@ -6,7 +6,7 @@ var React = require('react'),
     moment = require('moment'),
     utils = require('../../examine/utils');
 
-var NO_FILTER = '----';
+var NO_FILTER = 'All projects';
 
 
 var RunsPage = React.createClass({
@@ -57,27 +57,34 @@ var RunsPage = React.createClass({
         }.bind(this)).value();
     var newProjectForm = <forms.NewProjectForm handleClose={() => this.setDisplayProjectForm(false)} />;
     return (
-      <div onDragOver={this.createDragOverHandler(true)}
-           onDragLeave={this.createDragOverHandler(false)}
-           className={this.state.draggingOver ? 'dragging-over' : ''}>
-        <h1>
-          Data Directory
-          {!this.state.displayProjectForm ?
-           <button className='btn btn-default' id='new-project'
-                   onClick={() => this.setDisplayProjectForm(true)}>
-             New Project
-           </button> : null}
-        </h1>
-        {this.state.displayProjectForm ? newProjectForm : null}
-        <LatestComments comments={this.props.comments} />
-        <h5 className='filter-runs'>
-        Filter runs by project name:&nbsp;&nbsp;
-          <select className='select-project-filter' value={this.state.projectFilter}
-                  onChange={this.handleProjectFilter}>
-            {projectOptions}
-          </select>
-        </h5>
-        {projectTables}
+      <div className="row">
+        <div onDragOver={this.createDragOverHandler(true)}
+             onDragLeave={this.createDragOverHandler(false)}
+             className={this.state.draggingOver ? 'dragging-over container' : 'container'}>
+          <div className="projects-page-header">
+            <h1>
+              Projects
+              {!this.state.displayProjectForm ?
+               <button className='btn btn-primary' id='new-project'
+                       onClick={() => this.setDisplayProjectForm(true)}>
+                 New Project
+               </button> : null}
+            </h1>
+            {this.state.displayProjectForm ? newProjectForm : null}
+          </div>
+          <div className="projects-table">
+          <div className='filter-runs'>
+            <label>Now Viewing</label>
+            <select className='select-project-filter' value={this.state.projectFilter}
+                    onChange={this.handleProjectFilter}>
+              {projectOptions}
+            </select>
+          </div>
+            {projectTables}
+          </div>
+          <LatestComments comments={this.props.comments} />
+        </div>
+        
       </div>
     );
   }
@@ -136,34 +143,35 @@ var ProjectTable = React.createClass({
     }
     return (
       <div className='project'>
-      <div className='project-header'>
-        <h2 title={this.props.project_id}>{this.props.name === 'null' ? 'No Project' : this.props.name}</h2>
-          <div className='project-stats'>
-            <div>
-              <a onClick={() => this.setState({bamsTable: true})} className={this.state.bamsTable ? 'selected-pivot' : ''}>
-                <em>{numBams}</em>&nbsp;BAMs
-              </a>
-              ,&nbsp;&nbsp;
-              <a onClick={() => this.setState({bamsTable: false})} className={this.state.bamsTable ? '' : 'selected-pivot'}>
-                {numRuns}&nbsp;Runs
-              </a>
-            </div>
-          </div>
+        <div className='project-header'>
+          <h2 title={this.props.project_id}>{this.props.name === 'null' ? 'No Project' : this.props.name}</h2>
           <p className='notes'>{this.props.notes}</p>
+          {this.state.displayRunForm ? newRunForm : null}
+          {this.state.displayBAMForm ? newBAMForm : null}
+        </div>
+        <div className='project-stats'>
+          <div className='project-table-nav'>
+            <a onClick={() => this.setState({bamsTable: false})} className={this.state.bamsTable ? '' : 'selected-pivot'}>
+              {numRuns} Runs
+            </a>
+            <a onClick={() => this.setState({bamsTable: true})} className={this.state.bamsTable ? 'selected-pivot' : ''}>
+              {numBams} BAMs
+            </a>
+          </div>
           <div className='add'>
-            <button onClick={() => { this.displayRunForm(false); this.displayBAMForm(!this.state.displayBAMForm); }}
-                    type='button' className='btn btn-default btn-xs'>
-              Add BAM
-            </button>
             <button onClick={() => { this.displayBAMForm(false); this.displayRunForm(!this.state.displayRunForm); }}
-                    type='button' className='btn btn-default btn-xs'>
+                    type='button' className='btn btn-primary btn-xs'>
               Add Run
+            </button>
+            <button onClick={() => { this.displayRunForm(false); this.displayBAMForm(!this.state.displayBAMForm); }}
+                    type='button' className='btn btn-primary btn-xs'>
+              Add BAM
             </button>
           </div>
         </div>
-        {this.state.displayRunForm ? newRunForm : null}
-        {this.state.displayBAMForm ? newBAMForm : null}
-        {table}
+        <div className="runs-table-container">
+          {table}
+        </div>
       </div>
     );
   }
@@ -191,12 +199,12 @@ var RunsTable = React.createClass({
       <table className='runs-table'>
         <thead>
           <tr>
-            <th></th>
             <th className='caller-name'>Caller Name</th>
             <th className='date'>Submitted On</th>
             <th className='num-variants'>Variants</th>
-            <th></th>
-            <th></th>
+            <th className='bam-info'>Linked BAMs</th>
+            <th className='num-comments'></th>
+            <th className='examine-col'></th>
           </tr>
         </thead>
         <tbody>
@@ -220,14 +228,14 @@ var RunRow = React.createClass({
     var run = this.props.run;
     return (
       <tr className='run' onClick={this.handleClick}>
-        <td className='run-id'>
-          <a className='btn btn-default btn-xs' href={'/runs/' + run.id + '/examine'} ref='link'>Examine</a>
-        </td>
         <td className='caller-name'>{run.caller_name}</td>
         <td className='date' title={run.created_at}>{moment(new Date(run.created_at)).format('YYYY-MM-DD')}</td>
         <td className='num-variants' title={run.genotype_count}>{run.genotype_count}</td>
         <RunLabels run={run} />
         <RunComments run={run} />
+        <td className='run-id'>
+          <a className='btn btn-default btn-xs' href={'/runs/' + run.id + '/examine'} ref='link'>Examine</a>
+        </td>
       </tr>
     );
   }
@@ -316,7 +324,7 @@ var RunLabels = React.createClass({
         var value = utils.getIn(run, path) || utils.getIn(taskStates, path);
         if (value) {
           return (
-            <span className={`label label-info ${cssClass}`} title={title} key={path.join('-')}>
+            <span className={`linked-bam ${cssClass}`} title={title} key={path.join('-')}>
               {usePathValue ? value : ''}
             </span>
           );
@@ -369,7 +377,7 @@ var BamsTable = React.createClass({
       return rows;
     });
     return (
-      <table className='bams table'>
+      <table className='bams-table'>
         <thead>
           <tr>
             <th className='bam-name'>BAM Name</th>

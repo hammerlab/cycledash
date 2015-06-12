@@ -8,6 +8,7 @@ html {
 body {
   font-size: 1em;
   font-family: "freight-sans-pro", verdana, helvetica, sans-serif;
+  background-color: $color-bg-body;
 }
 main { 
   @extend .container;
@@ -21,39 +22,59 @@ img.cycle { float: right; }
 dd, dt {
   margin-bottom: 0.25em;
 }
-
-/*------[ Comments ]------*/
-table.comments {
-  @extend .col-md-6;
-  margin: 1em 0;
-  font-size: 0.875em;
-  td {
-    vertical-align: top;
-    font-family: "freight-sans-pro", verdana, helvetica, sans-serif;  
-    padding: 0.5em 1em;
+a {
+  color: $color-link;
+  &:hover {
+    color: darken($color-link, 15%);
   }
 }
-a.all-comments {
-  font-size: 0.875em;
-  color: $color-text-dim;
-  padding-left: 0.5em;
+label {
+  font-weight: normal;
+}
+.btn-primary {
+  color: $color-white;
+  background-color: $color-blue-sinai;
+  border-color: darken($color-blue-sinai, 10%);
+  &:hover, &:active, &:focus {
+    background-color: darken($color-blue-sinai, 5%);
+    border-color: darken($color-blue-sinai, 10%);
+    color: $color-white;
+  }
+}
+.btn-add-file {
+  @extend .btn, .btn-primary, .btn-xs;
+}
+.btn-link {
+  color: $color-text;
+  &:hover {
+    color: $color-text;
+  }
+}
+/*------[ Comments ]------*/
+.recent-comments-list {
+  @extend .clearfix;
+  list-style: none;
+  padding: 0;
+  li {
+    padding: 1em 0;
+    margin: 0.5em 0;
+    border-top: 1px solid $color-border-light;
+    &:first-child {
+      border-top: none;
+    }
+  }
 }
 .author-name {
   font-weight: bold;
-  &:after {
-    content: ': ';
-    font-weight: normal;
-  }
 }
 .comments .run-id {
   padding-right: 0.5em;
-  color: $color-text;
 }
 .comments .position {
   font-family: "inconsolata", monospace;
 }
-.comments .summary-container {
-  width: 50%;
+.comments .summary {
+  padding: 0.5em 0;
 }
 .comments .summary:before {
   content: '“';
@@ -65,6 +86,8 @@ a.all-comments {
 }
 .comments .time {
   text-align: right;
+  font-size: 0.875em;
+  color: $color-text-dim;
 }
 .form-group.required .control-label:after {
   content:"*";
@@ -79,6 +102,38 @@ section#api-docs > section {
 /*------[ Table Styling ]------*/
 .table {
   font-size: 0.875em; /* 14/16 */
+  color: $color-text;
+  border-collapse: separate;
+  background-color: $color-white;
+  border-bottom: 1px solid $color-border-light;
+  td {
+    word-wrap: break-word;
+    &:first-child {
+      border-left: 1px solid $color-border-light;
+    }
+    &:last-child {
+      border-right: 1px solid $color-border-light;
+    }
+  }
+  thead {
+    font-size:0.75rem;
+    text-transform: uppercase;
+    tr {
+      th {
+        background-color: $color-bg-body;
+        font-weight: normal;
+        letter-spacing: 1px;
+        border-bottom: 0;
+
+        &:first-child {
+          border-top-left-radius: $radius;
+        }
+        &:last-child {
+          border-top-right-radius: $radius;
+        }
+      }
+    }
+  }
 }
 .table tbody tr {
   cursor: pointer;
