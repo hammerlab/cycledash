@@ -11,6 +11,9 @@ var React = require('react'),
 var CHUNKS_LOADING = 'loading',
     CHUNKS_NOT_AVAILABLE = null;
 
+// Number of loci to show around the variant.
+var VIEW_WINDOW = 50;
+
 var PileupViewer = React.createClass({
   propTypes: {
     isOpen: React.PropTypes.bool,
@@ -132,27 +135,28 @@ var PileupViewer = React.createClass({
     var pileupEl = this.refs.pileupElement.getDOMNode();
 
     this.browser = pileup.create(pileupEl, {
-      range: {
-        contig: '20',  // random position -- it will be changed.
-        start:  2684736 - 50,
-        stop:   2684736 + 50
-      },
+      range: this.rangeForRecord(this.props.selectedRecord),
       tracks: sources
     });
   },
   panToSelection: function() {
-    var rec = this.props.selectedRecord;
-    this.browser.setRange({
-      contig: rec.contig,
-      start: rec.position - 25,
-      stop: rec.position + 25
-    });
+    this.browser.setRange(this.rangeForRecord(this.props.selectedRecord));
   },
   update: function() {
     if (this.props.isOpen && this.props.selectedRecord) {
-      this.lazilyCreateDalliance();
-      this.panToSelection();
+      if (!this.browser) {
+        this.lazilyCreateDalliance();
+      } else {
+        this.panToSelection();
+      }
     }
+  },
+  rangeForRecord: function(record) {
+    return {
+      contig: record.contig,
+      start: record.position - VIEW_WINDOW / 2,
+      stop: record.position + VIEW_WINDOW / 2
+    };
   },
   fetchIndexChunks: function() {
     var propBamPathPairs = [['normalBaiChunks', this.props.normalBamPath],
