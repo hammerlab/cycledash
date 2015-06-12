@@ -29,7 +29,7 @@ var PATHS = {
   ]  // polyfills
 };
 
-var REACT_OPTS = {es6: true},
+var REACT_OPTS = {es6: true, global: true},
     BROWSERIFY_OPTS =  _.extend({entries: PATHS.src, debug: true}, watchify.args);
 
 

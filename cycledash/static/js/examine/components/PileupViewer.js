@@ -2,10 +2,9 @@
 
 var React = require('react'),
     _ = require('underscore'),
+    pileup = require('pileup'),
     $ = require('jquery'),
     VCFTable = require('./VCFTable');
-// Someday: pileup = require('pileup');
-
 
 // Indicator value that the BAI chunks are still loading.
 var CHUNKS_LOADING = 'loading',
