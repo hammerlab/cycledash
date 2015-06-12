@@ -180,56 +180,17 @@ var PileupViewer = React.createClass({
   componentDidMount: function() {
     this.fetchIndexChunks();
     this.update();
-
-    var pileupEl = this.refs.pileupElement.getDOMNode();
-    $(pileupEl).on('DOMMouseScroll mousewheel', '.pileup', cancelImpotentScrolls);
   },
   componentDidUpdate: function() {
     this.update();
   },
   componentWillUnmount: function() {
-    var pileupEl = this.refs.pileupElement.getDOMNode();
-    $(pileupEl).off('mousewheel DOMMouseScroll');
   },
   shouldComponentUpdate: function(nextProps, nextState) {
     return ((nextProps.isOpen != this.props.isOpen) ||
             (nextProps.selectedRecord != this.props.selectedRecord));
   },
 });
-
-
-// This prevents mousewheel events at the top/bottom of an element from
-// scrolling parent elements. On Cycledash, it prevents mousewheeling on the
-// pileup track from scrolling the entire examine page.
-// http://stackoverflow.com/a/16324762/388951
-function cancelImpotentScrolls(ev) {
-  /* jshint validthis: true */
-  var $this = $(this),
-      scrollTop = this.scrollTop,
-      scrollHeight = this.scrollHeight,
-      height = $this.height(),
-      delta = (ev.type == 'DOMMouseScroll' ?
-          ev.originalEvent.detail * -40 :
-          ev.originalEvent.wheelDelta),
-      up = delta > 0;
-
-  var prevent = function() {
-    ev.stopPropagation();
-    ev.preventDefault();
-    ev.returnValue = false;
-    return false;
-  };
-
-  if (!up && -delta > scrollHeight - height - scrollTop) {
-    // Scrolling down, but this will take us past the bottom.
-    $this.scrollTop(scrollHeight);
-    return prevent();
-  } else if (up && delta > scrollTop) {
-    // Scrolling up, but this will take us past the top.
-    $this.scrollTop(0);
-    return prevent();
-  }
-}
 
 
 module.exports = PileupViewer;
