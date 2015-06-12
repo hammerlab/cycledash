@@ -47,7 +47,6 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
       sortBys = DEFAULT_SORT_BYS,
       range = ENTIRE_GENOME,
 
-      contigs = run.contigs,
       columns = run.spec,
 
       igvLink = utils.makeIGVLink(run, igvHttpfsUrl);
@@ -465,7 +464,6 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
       var query = queryFrom(range, filters, sortBys, page, limit, compareToVcfId);
       return {
         columns,
-        contigs,
         filters,
         hasLoaded,
         hasPendingRequest,
@@ -473,7 +471,6 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
         isViewerOpen,
         loadError,
         query,
-        range,
         records,
         selectedRecord,
         compareToVcfId,

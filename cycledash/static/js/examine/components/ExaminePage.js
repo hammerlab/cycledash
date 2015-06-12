@@ -39,7 +39,7 @@ var ExaminePage = React.createClass({
   },
   handleOpenViewer: function(record) {
     this.props.recordActions.setViewerOpen(true);
-    this.refs.vcfTable.scrollRecordToTop(record);
+    // this.refs.vcfTable.scrollRecordToTop(record);
   },
   handleCloseViewer: function() {
     this.props.recordActions.setViewerOpen(false);
@@ -76,62 +76,77 @@ var ExaminePage = React.createClass({
     var state = this.state,
         props = this.props,
         run = props.vcf;
-    return (
-      <div className="examine-page">
-        <div className="examine-header">
-          <div className="row">
-            <div className="examine-info-container">
-              <ExamineInformation run={run}/>
-              {props.comparableVcfs ?
-              <VCFValidation vcfs={props.comparableVcfs}
-                             selectedVcfId={state.selectedVcfId}
-                             handleComparisonVcfChange={this.handleComparisonVcfChange} /> :
-                null}
-              <Downloads query={state.query} run_id={run.id} />
-            </div>
-            <div className="examine-summary-container">
-              <StatsSummary hasLoaded={state.hasLoaded}
-                            stats={state.stats} />
+
+    // The pileup viewer still needs to be created, even if it's not visible,
+    // so that it will pre-fetch the index chunks.
+    var pileupViewer = (
+      <PileupViewer key="pileup-viewer"
+                    vcfPath={run.uri}
+                    normalBamPath={run.normal_bam && run.normal_bam.uri}
+                    tumorBamPath={run.tumor_bam && run.tumor_bam.uri}
+                    igvHttpfsUrl={props.igvHttpfsUrl}
+                    selectedRecord={state.selectedRecord}
+                    columns={state.columns}
+                    isOpen={state.isViewerOpen}
+                    handlePreviousRecord={this.handlePreviousRecord}
+                    handleNextRecord={this.handleNextRecord}
+                    handleClose={this.handleCloseViewer} />
+    );
+
+    if (state.isViewerOpen) {
+      return (
+        <div className="examine-page">
+          {pileupViewer}
+        </div>
+      );
+    } else {
+      return (
+        <div className="examine-page">
+          <div className="examine-header">
+            <div className="row">
+              <div className="examine-info-container">
+                <ExamineInformation run={run}/>
+                {props.comparableVcfs ?
+                <VCFValidation vcfs={props.comparableVcfs}
+                               selectedVcfId={state.selectedVcfId}
+                               handleComparisonVcfChange={this.handleComparisonVcfChange} /> :
+                  null}
+                <Downloads query={state.query} run_id={run.id} />
+              </div>
+              <div className="examine-summary-container">
+                <StatsSummary hasLoaded={state.hasLoaded}
+                              stats={state.stats} />
+              </div>
             </div>
           </div>
-        </div>
-        <div className="examine-cql">
-          <QueryBox columns={state.columns}
-                    hasPendingRequest={state.hasPendingRequest}
-                    loadError={state.loadError}
-                    query={state.query}
-                    handleQueryChange={this.handleQueryChange} />
+          <div className="examine-cql">
+            <QueryBox columns={state.columns}
+                      hasPendingRequest={state.hasPendingRequest}
+                      loadError={state.loadError}
+                      query={state.query}
+                      handleQueryChange={this.handleQueryChange} />
 
+          </div>
+          <div className="examine-table">
+            <VCFTable ref="vcfTable"
+                      hasLoaded={state.hasLoaded}
+                      records={state.records}
+                      columns={state.columns}
+                      selectedRecord={state.selectedRecord}
+                      sortBys={state.sortBys}
+                      igvLink={state.igvLink}
+                      handleSortByChange={this.handleSortByChange}
+                      handleRequestPage={this.handleRequestPage}
+                      handleSelectRecord={this.handleSelectRecord}
+                      handleOpenViewer={this.handleOpenViewer}
+                      handleSetComment={this.handleSetComment}
+                      handleDeleteComment={this.handleDeleteComment} />
+          </div>
+          {pileupViewer}
         </div>
-        <div className="examine-table">
-          <VCFTable ref="vcfTable"
-                    hasLoaded={state.hasLoaded}
-                    records={state.records}
-                    range={state.range}
-                    columns={state.columns}
-                    selectedRecord={state.selectedRecord}
-                    contigs={state.contigs}
-                    sortBys={state.sortBys}
-                    igvLink={state.igvLink}
-                    handleSortByChange={this.handleSortByChange}
-                    handleRequestPage={this.handleRequestPage}
-                    handleSelectRecord={this.handleSelectRecord}
-                    handleOpenViewer={this.handleOpenViewer}
-                    handleSetComment={this.handleSetComment}
-                    handleDeleteComment={this.handleDeleteComment} />
-          <PileupViewer vcfPath={run.uri}
-                        normalBamPath={run.normal_bam && run.normal_bam.uri}
-                        tumorBamPath={run.tumor_bam && run.tumor_bam.uri}
-                        igvHttpfsUrl={props.igvHttpfsUrl}
-                        selectedRecord={state.selectedRecord}
-                        isOpen={state.isViewerOpen}
-                        handlePreviousRecord={this.handlePreviousRecord}
-                        handleNextRecord={this.handleNextRecord}
-                        handleClose={this.handleCloseViewer} />
-        </div>
-      </div>
-     );
-   }
+       );
+     }
+  }
 });
 
 module.exports = ExaminePage;
