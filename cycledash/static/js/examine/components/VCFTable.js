@@ -13,10 +13,6 @@ var VCFTable = React.createClass({
     columns: React.PropTypes.object.isRequired,
     // Currently selected VCF record.
     selectedRecord: React.PropTypes.object,
-    // List of contigs found in the VCF
-    contigs: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
-    // The position object, from ExaminePage, denoting the current range selected
-    range: types.PositionType,
     // List of VCF records (including embedded user comments)
     records: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     // Attribute by which we are sorting

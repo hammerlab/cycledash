@@ -277,12 +277,12 @@ a, a:hover {
   padding: 3px 0;
 }
 
-/*------[ BioDalliance ]------*/
+/*------[ pileup.js ]------*/
 .variant-inspector {
   position: fixed;
   left: 0;
   right: 0;
-  height: 850px;
+  top: 0;
   bottom: 0;
   background-color: $color-white;
 }
@@ -296,26 +296,44 @@ a, a:hover {
   text-decoration: none;
   margin-left: 5px;
 }
-#svgHolder {
-  position: relative;
+#pileup-container {
+  position: absolute;
+  top: 125px;
   bottom: 0;
   border: 1px solid $color-border-light;
   overflow-y: auto;
   margin: 0 5%;
   padding: 10px;
+  width: 90%;
 }
+
+/* All of the tracks are fixed-height except for the pileup(s), which split the
+ * remaining vertical space. */
+#pileup-container > div {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#pileup-container .controls {
+  flex: 0 0 50px;  /* fixed height */
+}
+#pileup-container .reference {
+  flex: 0 0 50px;  /* fixed height */
+}
+#pileup-container .variants {
+  flex: 0 0 25px;  /* fixed height */
+}
+#pileup-container .pileup {
+  flex: 1;
+  height: auto;  /* overrides defaults from pileup.css */
+  overflow-y: auto;  /* extra content scrolls */
+}
+
 .pileup {
   border-top: 1px solid #000;
 }
-@media(max-height:1000px) {
-  .variant-inspector {
-    height: 600px;
-  }
-  .dalliance .tier.pileup {
-    max-height: 200px;
-    min-height: 200px;
-  }
-}
+
 
 /*------[ VCFValidation ]------*/
 .vcf-validations select {

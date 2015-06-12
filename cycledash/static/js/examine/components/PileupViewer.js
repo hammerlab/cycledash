@@ -1,7 +1,8 @@
 "use strict";
 
 var React = require('react'),
-    _ = require('underscore');
+    _ = require('underscore'),
+    VCFTable = require('./VCFTable');
 // Someday: pileup = require('pileup');
 
 // Indicator value that the BAI chunks are still loading.
@@ -13,6 +14,7 @@ var PileupViewer = React.createClass({
     isOpen: React.PropTypes.bool,
     // Currently selected variant, or null for no selection.
     selectedRecord: React.PropTypes.object,
+    columns: React.PropTypes.object.isRequired,
     vcfPath: React.PropTypes.string.isRequired,
     truthVcfPath: React.PropTypes.string,
     normalBamPath: React.PropTypes.string,
@@ -30,20 +32,37 @@ var PileupViewer = React.createClass({
     tumorBaiChunks: CHUNKS_LOADING,
   }),
   render: function() {
-    var style = {};
+    var isVisible = true;
     if (!this.props.isOpen ||
         !this.props.selectedRecord ||
         this.state.normalBaiChunks == CHUNKS_LOADING ||
         this.state.tumorBaiChunks == CHUNKS_LOADING) {
-      style = {display: 'none'};
+      isVisible = false;
     }
+    var style = isVisible ? {} : {display: 'none'};
+
+    var vcfTable = !isVisible ? null : (
+      <VCFTable columns={this.props.columns}
+                selectedRecord={null}
+                records={[this.props.selectedRecord]}
+                sortBys={[]}
+                handleSortByChange={_.noop}
+                handleRequestPage={_.noop}
+                handleSelectRecord={_.noop}
+                handleOpenViewer={_.noop}
+                handleSetComment={_.noop}
+                handleDeleteComment={_.noop} />
+    );
 
     return (
       <div className="variant-inspector" ref="inspector" style={style}>
         <a href='#' className="close-button" onClick={this.handleClose}>✕</a>
         <a href='#' className="left-button" onClick={this.handleLeft}>←</a>
         <a href='#' className="right-button" onClick={this.handleRight}>→</a>
-        <div ref="pileupElement" id="svgHolder" />
+
+        {vcfTable}
+
+        <div ref="pileupElement" id="pileup-container" />
       </div>
     );
   },
