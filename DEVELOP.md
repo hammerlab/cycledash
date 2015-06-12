@@ -154,20 +154,32 @@ To run an individual JavaScript test, you can use:
 
 CycleDash uses [seltest](https://github.com/ihodes/seltest) for perceptual
 difference testing. This means the tests operate an actual web browser and take
-screenshots of the web-app being used. To update the reference screenshots, run:
+screenshots of the web-app being used. In order to maintain consitancy between
+platforms, browser version, etc, we use [Sauce Labs](http://saucelabs.com) to
+host our browser, and interact with it remotely. To update the reference
+screenshots, run the following. Make sure you have
+[Sauce Connect](https://docs.saucelabs.com/reference/sauce-connect/) installed
+and on your path. You will also need to have valid `SAUCE_ACCESS_KEY` and
+`SAUCE_USERNAME` in your environment or in `tests/pdifftests/SAUCE_CREDS` in
+order to run the tests. To get a username and access key, you should create a
+free account on SauceLabs.
+
 
 ```
 source path/to/bin/activate
-./tests/pdifftests/run.sh
+./scripts/update-screenshots.sh
 ```
+
+This starts up a test server, opens a tunnel between your local machine and
+Sauce Labs, and carries out the screenshot tests, updating the screenshots which
+have changed.
 
 Running `git status` after this should indicate whether the screenshots have
 changed.
 
-You can pass command-line options to `seltest` through `run.sh`,
-e.g. `./tests/pdifftests/run.sh -d chrome` to run with the Chrome driver, or
-`./tests/pdifftests/run.sh -c examine -f base` to filter the tests to those in
-the 'examine' class with 'base' in their name.
+You can pass command-line options to `seltest` through the script,
+e.g. `./scripts/update-screenshots.sh -c examine` to run only the Examine test
+suite.
 
 To determine whether there are any pixels that have changed before/after, and to
 generate a perceptual diff that will make it clear where the changes are, you
