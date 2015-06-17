@@ -70,6 +70,7 @@ def annotate(self, vcf_id):
 
         # We've added annotations:gene_names, so update the columns to display.
         update_extant_columns(metadata, con, vcf_id)
+        return(vcf_id)
 
 
 def write_to_table_via_csv(table, rows, connection):
