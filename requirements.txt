@@ -26,6 +26,7 @@ psycopg2==2.5.4
 pylint==1.4.1
 humanize==0.5.1
 pyensembl==0.6.9
+varcode==0.3.11
 mock==1.0.1
 flask-restful==0.3.2
 seltest==0.2.8
