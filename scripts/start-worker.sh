@@ -3,6 +3,6 @@
 
 celery --loglevel=info \
     -A workers.shared \
-    -I workers.indexer,workers.genotype_extractor,workers.gene_annotator \
+    -I workers.indexer,workers.genotype_extractor,workers.gene_annotator,workers.varcode_annotator \
     worker \
     -n worker.$1
