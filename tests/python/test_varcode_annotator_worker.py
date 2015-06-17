@@ -12,7 +12,7 @@ from test_projects_api import create_project_with_name
 from test_bams_api import create_bam_with_name
 from test_runs_api import create_run_with_uri
 
-from workers.varcode_annotator import _annotate
+from workers.varcode_annotator import annotate
 
 
 class TestVarcodeAnnotatorWorker(object):
@@ -27,7 +27,7 @@ class TestVarcodeAnnotatorWorker(object):
             projects.delete().execute()
 
     def test_extraction(self):
-        _annotate(self.run['id'])
+        annotate(self, self.run['id'])
         with tables(db.engine, 'vcfs', 'genotypes') as (con, vcfs, genotypes):
             vcf = vcfs.select(vcfs.c.id == self.run['id']).execute().fetchone()
             variants = genotypes.select(
