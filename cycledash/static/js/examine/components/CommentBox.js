@@ -244,7 +244,7 @@ var VCFCommentHeader = React.createClass({
         </a>
         <div className='igv-links'>
           <a className='igv-load' href={loadIGVLink}>Load in IGV</a>
-          <a href="https://github.com/hammerlab/cycledash/wiki/IGV-Integration" className="igv-help" title="IGV Help"></a>
+          <a href="https://github.com/hammerlab/cycledash/wiki/IGV-Integration" className="igv-help" title="IGV Help" target="_blank"></a>
         </div>
       </div>
     );

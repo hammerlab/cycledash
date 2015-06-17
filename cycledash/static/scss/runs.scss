@@ -153,12 +153,9 @@ td .label {
   content: '…';
 }
 span.comment-bubble {
-  background: url(/static/img/speech-bubble-noun_5483.svg) no-repeat 0px 3px;
-  background-size: 15px 15px;
-  width: 15px;
-  height: 15px;
-  display: inline-block;
-  margin-left: 2px;
+  @extend .glyphicon, .glyphicon-comment;
+  margin-left: 0.5em;
+  font-size: 0.625rem;
 }
 .no-comment > span {
   opacity: 0.2;

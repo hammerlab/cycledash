@@ -109,6 +109,11 @@ gulp.task('staticlibs', function() {
       .pipe(ext_replace('.scss', '.min.css'))
       .pipe(gulp.dest('./cycledash/static/lib/bootstrap/scss')),
 
+    // Move glyphicons to static/fonts
+    gulp.src('./cycledash/static/lib/bootstrap/fonts/*',
+            {base: './cycledash/static/lib/bootstrap/fonts/'})
+      .pipe(gulp.dest('./cycledash/static/fonts')),
+
     // pileup.js
     gulp.src('./node_modules/pileup/style/*.*',
              {base: './node_modules/pileup/style'})

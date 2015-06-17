@@ -13,4 +13,5 @@ cycledash/static/lib/
 coverage.html
 tests/pdifftests/log.txt
 cycledash/static/css/
+cycledash/static/fonts/
 .sass-cache
