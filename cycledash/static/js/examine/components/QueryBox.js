@@ -136,7 +136,7 @@ var QueryBox = React.createClass({
         <div className='typeahead-input'>
           <span ref='status' className={statusClasses}></span>
           <input ref='input' className='query-input' type='text' />
-          <a className='cql-help' title='CQL Help' href='https://github.com/hammerlab/cycledash/wiki/CQL-(CycleDash-Query-Language)'>
+          <a className='cql-help' title='CQL Help' target="_blank" href='https://github.com/hammerlab/cycledash/wiki/CQL-(CycleDash-Query-Language)'>
           </a>
         </div>
         {errorMessage}

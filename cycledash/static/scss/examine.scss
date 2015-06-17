@@ -170,20 +170,16 @@ a, a:hover {
   float: right;
 }
 .vcf-table .comment-delete, .vcf-table .comment-edit {
-  width: 16px;
-  height: 16px;
-  display: inline-block;
-  opacity: 0.7;
+  &:before {
+    @extend .glyphicon;
+  }
 }
 .vcf-table .comment-delete {
-  background: url(/static/img/delete-comment-noun_16505_cc.svg);
-  background-size: 20px 20px;
+  @extend .glyphicon-trash;
   margin-left: 0.75em;
-  margin-bottom: -1px;
 }
 .vcf-table .comment-edit {
-  background: url(/static/img/edit-comment-noun_8070_cc.svg);
-  background-size: 22px 22px;
+  @extend .glyphicon-pencil;
 }
 .vcf-table .comment-by {
   float: left;
@@ -210,13 +206,11 @@ a, a:hover {
   background-color: $color-white;
 }
 .vcf-table .dalliance-open {
-  @extend .btn, .btn-default;
-  background-image: url(/static/img/magnifying-glass-noun_907.svg);
-  background-repeat: no-repeat;
-  background-position: 8px 8px;
-  cursor: pointer;
-  background-size: 15px 15px;
-  padding-left: 2.25em;
+  @extend .btn, .btn-default, .glyphicon-search;
+  &:before {
+    @extend .glyphicon;
+    padding-right: 0.5em;
+  }
 }
 .vcf-table .igv-links {
   margin-left: 1em;
@@ -227,13 +221,12 @@ a, a:hover {
   margin-right: 0.5em;
 }
 .vcf-table .igv-help {
-  margin-bottom: -4px;
-  width: 18px;
-  height: 18px;
-  background: url(/static/img/question-mark-noun_61692.svg);
-  background-size: 18px 18px;
-  opacity: 0.55;
+  @extend .glyphicon-question-sign, %link;
+  font-size: 1rem;
   display: inline-block;
+  &:before {
+    @extend .glyphicon;
+  }
 }
 .vcf-table tr.selected {
   background: $color-bg-hover!important;
@@ -257,12 +250,9 @@ a, a:hover {
   font-family: "inconsolata", monospace;
 }
 .vcf-table span.comment-bubble {
-  background: url(/static/img/speech-bubble-noun_5483.svg) no-repeat 0px 3px;
-  background-size: 15px 15px;
-  width: 15px;
-  height: 15px;
-  display: inline-block;
-  margin-right: 0.15em;
+  @extend .glyphicon, .glyphicon-comment;
+  margin-right: 0.5em;
+  font-size: 0.625rem;
 }
 .vcf-table td {
   white-space: nowrap;
@@ -432,15 +422,14 @@ a, a:hover {
   content: "";
 }
 .cql-help {
+  @extend .glyphicon-question-sign, %link;
   position: absolute;
-  top: 50%;
-  margin-top: -10px;
   right: 10px;
-  width: 20px;
-  height: 20px;
-  background: url(/static/img/question-mark-noun_61692.svg);
-  background-size: 20px 20px;
-  opacity: 0.55;
+  top: 10px;
+  font-size: 1rem;
+  &:before {
+    @extend .glyphicon;
+  }
 }
 .server-error {
   color: $color-status-error;
@@ -484,11 +473,10 @@ a, a:hover {
 
 /*------[ Download VCF ]------*/
 a.download-vcf {
-  @extend .btn, .btn-default, .btn-xs;
+  @extend .btn, .btn-default, .btn-xs, .glyphicon-download-alt;
   margin-left: 180px; /* from .dl-horizontal dd */
-  padding-left: 2.25em;
-  background-image: url(/static/img/download-noun_4501.svg);
-  background-repeat: no-repeat;
-  background-position: 5px 2px;
-  background-size: 15px 15px;
+  &:before {
+    @extend .glyphicon;
+    padding-right: 5px;
+  }
 }

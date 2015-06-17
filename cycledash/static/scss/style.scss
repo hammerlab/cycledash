@@ -22,7 +22,7 @@ img.cycle { float: right; }
 dd, dt {
   margin-bottom: 0.25em;
 }
-a {
+a, %link {
   color: $color-link;
   &:hover {
     color: darken($color-link, 15%);
