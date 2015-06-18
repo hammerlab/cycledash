@@ -8,111 +8,118 @@
 {% block body %}
 {{ nav("about") }}
 <main>
-  <section>
+  <section class="about-intro">
     <h1>Welcome to CycleDash <img class="cycle" src="static/img/cycle-dash.png" width=100></h1>
     <p>
-      Cycledash is an open-source somatic variant caller analysis and
+      CycleDash is an open-source somatic variant caller analysis and
       visualization tool. The
-      <a href="https://github.com/hammerlab/cycledash">source can be found</a>
-      on GitHub, and is developed by the
-      <a href="http://hammerlab.org">Hammerlab</a> out of Mount Sinai's Icahn
+      <a href="https://github.com/hammerlab/cycledash" target="_blank">source can be found</a>
+      on GitHub, and is developed by
+      <a href="http://hammerlab.org" target="_blank">Hammer Lab</a> out of Mount Sinai's Icahn
       School of Medicine.
     </p>
   </section>
+
   <section id="api-docs">
     <h2>JSON API</h2>
     <section>
-      <h3>VCFs</h3>
-      <p>JSON should be POSTed to <tt>/api/runs</tt> with following fields:</p>
+      <div class="card-header">
+        <h3>VCFs</h3>
+        <p>JSON should be POSTed to <tt>/api/runs</tt> with following fields:</p>
+      </div>
+      <div class="card-body">
+        <h4>Required</h4>
+        <dl class="dl-horizontal">
+          <dt>uri</dt>
+          <dd>
+            The path on HDFS where the VCF can be found.
+            (e.g. <tt>/users/cycledasher/pt-123.vcf</tt>)
+            This should be immutable, as CycleDash expects
+            to be able to find the VCF here at any time.
+          </dd>
+          <dt>projectName</dt>
+          <dd>
+            The name of the project that the run related to.
+          </dd>
+        </dl>
+        <h4>Optional</h4>
+        <dl class="dl-horizontal">
+          <dt>tumorBamUri</dt>
+          <dd>The path on HDFS of the tumor BAM on which the caller was run. The BAM must already be in the database.</dd>
 
-      <h4>Required</h4>
-      <dl class="dl-horizontal">
-        <dt>uri</dt>
-        <dd>
-          The path on HDFS where the VCF can be found.
-          (e.g. <tt>/users/cycledasher/pt-123.vcf</tt>)
-          This should be immutable, as CycleDash expects
-          to be able to find the VCF here at any time.
-        </dd>
-        <dt>projectName</dt>
-        <dd>
-          The name of the project that the run related to.
-        </dd>
-      </dl>
+          <dt>tumorBamId</dt>
+          <dd>The ID of the BAM.</dd>
 
-      <h4>Optional</h4>
-      <dl class="dl-horizontal">
-        <dt>tumorBamUri</dt>
-        <dd>The path on HDFS of the tumor BAM on which the caller was run. The BAM must already be in the database.</dd>
+          <dt>normalBamUri</dt>
+          <dd>The path on HDFS of the normalBAM on which the caller was run. The BAM must already be in the database.</dd>
 
-        <dt>tumorBamId</dt>
-        <dd>The ID of the BAM.</dd>
+          <dt>normalBamId</dt>
+          <dd>The ID of the BAM.</dd>
 
-        <dt>normalBamUri</dt>
-        <dd>The path on HDFS of the normalBAM on which the caller was run. The BAM must already be in the database.</dd>
+          <dt>notes</dt>
+          <dd>Params that the caller was run with, or other notes relevant to the run.</dd>
 
-        <dt>normalBamId</dt>
-        <dd>The ID of the BAM.</dd>
-
-        <dt>notes</dt>
-        <dd>Params that the caller was run with, or other notes relevant to the run.</dd>
-
-        <dt>callerName</dt>
-        <dd>
-          The name of the variant caller which produced this VCF. This
-          should remain constant between VCFs with the same caller in
-          order to compare runs to one another.
-        </dd>
-      </dl>
+          <dt>callerName</dt>
+          <dd>
+            The name of the variant caller which produced this VCF. This
+            should remain constant between VCFs with the same caller in
+            order to compare runs to one another.
+          </dd>
+        </dl>
+      </div>
     </section>
 
     <section>
-      <h3>Projects</h3>
-      <p>JSON should be POSTed to <tt>/api/projects</tt> with following fields:</p>
+      <div class="card-header">
+        <h3>Projects</h3>
+        <p>JSON should be POSTed to <tt>/api/projects</tt> with following fields:</p>
+      </div>
+      <div class="card-body">
+        <h4>Required</h4>
+        <dl class="dl-horizontal">
+          <dt>name</dt>
+          <dd>
+            The name of the project. This can be an obfuscated patient ID, or a research project name, etc.
+          </dd>
+        </dl>
 
-      <h4>Required</h4>
-      <dl class="dl-horizontal">
-        <dt>name</dt>
-        <dd>
-          The name of the project. This can be an obfuscated patient ID, or a research project name, etc.
-        </dd>
-      </dl>
-
-      <h4>Optional</h4>
-      <dl class="dl-horizontal">
-        <dt>notes</dt>
-        <dd>Any pertinent project notes.</dd>
-      </dl>
+        <h4>Optional</h4>
+        <dl class="dl-horizontal">
+          <dt>notes</dt>
+          <dd>Any pertinent project notes.</dd>
+        </dl>
+      </div>
     </section>
 
-
     <section>
-      <h3>BAMs</h3>
-      <p>JSON should be POSTed to <tt>/api/bams</tt> with following fields:</p>
-
-      <h4>Required</h4>
-      <dl class="dl-horizontal">
-        <dt>uri</dt>
-        <dd>The URI of the BAM on HDFS. Should start with 'hdfs://'.</dd>
-        <dt>projectName/projectId</dt>
-        <dd>
-          The name or ID of the project that the run related to.
-        </dd>
-      </dl>
-
-      <h4>Optional</h4>
-      <dl class="dl-horizontal">
-        <dt>name</dt>
-        <dd>
-          The name of the BAM. This is just for easy identification.
-        </dd>
-        <dt>notes</dt>
-        <dd>Any pertinent BAM notes.</dd>
-        <dt>tissues</dt>
-        <dd>The resected tissue types.</dd>
-        <dt>resection_date</dt>
-        <dd>The resected date, in YYYY-MM-DD form.</dd>
-      </dl>
+      <div class="card-header">
+        <h3>BAMs</h3>
+        <p>JSON should be POSTed to <tt>/api/bams</tt> with following fields:</p>
+      </div>
+      <div class="card-body">
+        <h4>Required</h4>
+        <dl class="dl-horizontal">
+          <dt>uri</dt>
+          <dd>The URI of the BAM on HDFS. Should start with 'hdfs://'.</dd>
+          <dt>projectName/projectId</dt>
+          <dd>
+            The name or ID of the project that the run related to.
+          </dd>
+        </dl>
+        <h4>Optional</h4>
+        <dl class="dl-horizontal">
+          <dt>name</dt>
+          <dd>
+            The name of the BAM. This is just for easy identification.
+          </dd>
+          <dt>notes</dt>
+          <dd>Any pertinent BAM notes.</dd>
+          <dt>tissues</dt>
+          <dd>The resected tissue types.</dd>
+          <dt>resection_date</dt>
+          <dd>The resected date, in YYYY-MM-DD form.</dd>
+        </dl>
+      </div>
     </section>
   </section>
 </main>

@@ -50,14 +50,25 @@ label {
     color: $color-text;
   }
 }
+%card {
+  background-color: $color-white-smoke;
+  border-radius: $radius;
+  box-shadow: 1px 1px 1px 0px $color-bg-body-dark;
+  border: 1px solid $color-border-light;
+}
+.card-body, .card-header {
+  padding: 1rem;
+}
+.card-header {
+  border-bottom: 1px solid $color-border-light;
+}
 /*------[ Comments ]------*/
-.recent-comments-list {
-  @extend .clearfix;
+.comments-list {
+  @extend .comments, .clearfix, %card;
   list-style: none;
   padding: 0;
   li {
-    padding: 1em 0;
-    margin: 0.5em 0;
+    padding: 1rem;
     border-top: 1px solid $color-border-light;
     &:first-child {
       border-top: none;
@@ -73,19 +84,18 @@ label {
 .comments .position {
   font-family: "inconsolata", monospace;
 }
-.comments .summary {
+.comments .comment-text {
   padding: 0.5em 0;
 }
-.comments .summary:before {
+.comments .comment-text:before {
   content: '“';
   color: $color-text-dim;
 }
-.comments .summary:after {
+.comments .comment-text:after {
   content: '”';
   color: $color-text-dim;
 }
 .comments .time {
-  text-align: right;
   font-size: 0.875em;
   color: $color-text-dim;
 }
@@ -94,9 +104,23 @@ label {
   color: $color-red;
 }
 section#api-docs > section {
-  margin: 31px 0 87px 0;
-  padding: 0 67px;
-  border-left: 7px solid $color-border-light;
+  @extend %card;
+  margin-bottom: 2em;
+  h3 {
+    margin-top: 0;
+  }
+  p {
+    margin: 0;
+  }
+}
+.about-intro {
+  border-bottom: 1px solid $color-border-light;
+  h1 {
+    margin-bottom: 0;
+  }
+  p {
+    padding: 1rem;
+  }
 }
 
 /*------[ Table Styling ]------*/

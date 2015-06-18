@@ -125,30 +125,35 @@ a, a:hover {
 /*------[ Comments ]------*/
 .vcf-table .comment-edit-container, .vcf-table .comment-view-container {
   @extend .col-md-6;
-  margin: 1em 0 0 0;
+  border-top: 1px solid $color-border-light;
+  border-left: 1px solid $color-border-light;
+  border-right: 1px solid $color-border-light;
+  padding: 1em;
+  background-color: lighten($color-bg-expanded, 1%);
 }
-.vcf-table .comment-edit-container {
-  border-radius: $radius;
+.variant-info {
+  .comments:last-of-type {
+    .comment-edit-container {
+      border-left: none;
+      border-right: none;
+      background-color: transparent;
+    }
+  }
+}
+.vcf-table .comments {
+  @extend .row;
+  font-family: "freight-sans-pro", verdana, helvetica, sans-serif;
+  margin: 0;
 }
 .vcf-table .comment-box-header {
   text-align: left;
+  padding-bottom: 1em;
 }
 .vcf-table .comment-header {
   @extend .clearfix;
-  padding: 0.5em;
-  background-color: $color-bg-body;
-  border: 1px solid $color-border-light;
-  border-radius: $radius $radius 0px 0px;
-  color: $color-text;;
 }
-.vcf-table .comment-text {
-  background-color: $color-white;
-  border: 1px solid $color-border-light;
-  border-top: 0px;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  border-radius: 0px 0px $radius $radius;
-  padding: 0.5em;
+.vcf-table .comment-text p {
+  display: inline-block;
 }
 .vcf-table .comment-text p, ul, li, pre {
   margin: 0px;
@@ -169,6 +174,7 @@ a, a:hover {
   float: right;
 }
 .vcf-table .comment-delete, .vcf-table .comment-edit {
+  font-size: 0.75rem;
   &:before {
     @extend .glyphicon;
   }
@@ -180,7 +186,7 @@ a, a:hover {
 .vcf-table .comment-edit {
   @extend .glyphicon-pencil;
 }
-.vcf-table .comment-by {
+.vcf-table .author-name {
   float: left;
 }
 .vcf-table .comment-cancel {
@@ -502,7 +508,6 @@ a, a:hover {
 .typeahead-input .tt-suggestion.tt-cursor {
   background-color: $color-bg-hover;
   cursor: pointer;
-
 }
 .typeahead-input .tt-suggestion p {
   margin: 0;

@@ -268,19 +268,20 @@ var VCFCommentViewer = React.createClass({
 
     var markedDownText = marked(plainText);
     return (
-      <div className='row'>
+      <div className='comments'>
         <div className='comment-view-container'>
           <div className='comment-header'>
-            <span className='comment-by'>
-              Comment by <b>{this.props.authorName}</b>, <span className='time'>{this.props.createdString}</span>
-            </span>
-            <span className='edit-buttons'>
+            <div className='author-name'>
+              <b>{this.props.authorName}</b>
+            </div>
+            <div className='edit-buttons'>
               <a className='comment-edit' title='Edit Comment' href='#' onClick={this.props.handleEdit}></a>
               <a className='comment-delete' title='Delete Comment' href='#' onClick={this.props.handleDelete}></a>
-            </span>
+            </div>
           </div>
           <div className='comment-text'
                dangerouslySetInnerHTML={{__html: markedDownText}} />
+          <div className='time'>{this.props.createdString}</div>
         </div>
       </div>
     );
@@ -371,7 +372,7 @@ var VCFCommentEditor = React.createClass({
       </button>
     );
     return (
-      <div className='row'>
+      <div className='comments'>
         <div className='comment-edit-container'>
           <input className='form-control comment-author'
                  type='text'

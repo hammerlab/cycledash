@@ -26,7 +26,7 @@ var LatestComments = React.createClass({
     return (
       <div className='recent-comments-container'>
         <h4>Last {this.props.comments.length} Comments
-        <a href='/comments' className='all-comments'>(See all)</a></h4>
+        <a href='/comments' className='all-comments'>See all</a></h4>
         <Comments comments={this.props.comments} />
       </div>
     );
@@ -40,7 +40,7 @@ var Comments = React.createClass({
   render: function() {
     var comments = this.props.comments.map(c => <Comment comment={c} key={c.id} />);
     return (
-      <ul className='recent-comments-list comments'>
+      <ul className='comments-list'>
         {comments}
       </ul>
     );
@@ -68,7 +68,7 @@ var Comment = React.createClass({
           <a className='location' href={this.urlForComment(comment)}>
             {comment.contig}:{comment.position}
           </a>
-          <div className='summary'>{comment.commentText.slice(0, 45)}</div>
+          <div className='comment-text'>{comment.commentText.slice(0, 45)}</div>
           <div className='time'>
             <span title={comment.lastModified}>{relativeDate}</span>
           </div>
