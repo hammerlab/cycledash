@@ -45,24 +45,24 @@ var VariantStats = React.createClass({
         <table>
           <tbody>
             <tr>
-              <td></td>
-              <td className="label">True</td>
-              <td className="label">False</td>
+              <th></th>
+              <th>True</th>
+              <th>False</th>
             </tr>
             <tr>
-              <td className="label">Postive</td>
+              <th>Positive</th>
               <td>{fmt(truePositives || 0)}</td>
               <td>{fmt(falsePositives || 0)}</td>
             </tr>
             <tr>
-              <td className="label">Negative</td>
+              <th>Negative</th>
               <td className="na">-</td>
               <td>{fmt(falseNegatives || 0)}</td>
             </tr>
-            <tr>
-              <td className="label">Precision</td>
-              <td className="label">Recall</td>
-              <td className="label">f1score</td>
+            <tr className="other-stats">
+              <th>Precision</th>
+              <th>Recall</th>
+              <th>f1score</th>
             </tr>
             <tr>
               <td>{dfmt(precision || 0)}</td>

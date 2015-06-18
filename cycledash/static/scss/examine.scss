@@ -19,23 +19,22 @@ a, a:hover {
 }
 .vcf-table thead {
   background-color: $color-bg-body;
-  tr:first-child{
-    th {
-      font-weight: bold;
-      border-left: 1px solid $color-gray-medium;
-      border-bottom: 1px solid $color-gray-medium;
-      background-color: $color-bg-body-dark;
-    }
-  }
-  tr:last-child{
+  tr {
     th {
       cursor: default;
-      background-color: darken($color-bg-body, 3%);  
       &:first-child {
         border-top-left-radius: 0;
       }
       &:last-child {
         border-top-right-radius: 0;
+      }
+    }
+    &:first-child {
+      th {
+        font-weight: bold;
+        border-left: 2px solid $color-border-light;
+        border-bottom: 2px solid $color-border-light;
+        background-color: $color-bg-body-dark;
       }
     }
   }
@@ -262,34 +261,53 @@ a, a:hover {
 }
 
 /*------[ Stats Summary ]------*/
-#stats-container {
+.examine-summary-container {
   @extend .col-md-4;
+}
+#stats-container {
   border: 1px solid $color-border-light;
   border-radius: $radius;
 }
 #stats-container .precision-recall {
-  padding: 13px 0px;
   border-bottom: 1px solid $color-border-light;
 }
 #stats-container table {
-  border-collapse: collapse;
   width: 100%;
-  border: none;
-  font-size: 13px;
-  white-space: nowrap;
-}
-#stats-container td {
-  text-align: center;
-  padding: 3px 13px;
-}
-#stats-container td.label {
-  padding: .2em .6em .3em  /* from bootstrap */
-}
-#stats-container .precision-recall .label {
-  display: table-cell; /* This is needed to override Bootstrap. */
-  font-weight: bold;
-  font-size: 14px;
-  color: #000; /* This is needed to override Bootstrap. */
+  td, th {
+    padding: 5px;
+    text-align: center;
+  }
+  td {
+    border-top: 1px solid $color-border-light;
+    border-left: 1px solid $color-border-light;
+    &:first-child {
+      border-left: none;
+    }
+  }
+  th {
+    font-family: "freight-sans-pro", verdana, helvetica, sans-serif;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background-color: $color-bg-body-dark;
+    border-right: 1px solid $color-border-light;
+    border-bottom: 1px solid $color-border-light;
+    &:last-child {
+      border-right: none;
+    }
+  }
+  .other-stats {
+    border-top: 2px solid $color-border-light;
+    th {
+      font-weight: normal;
+      background-color: $color-bg-body;
+      border-right: 1px solid $color-border-light;
+      border-bottom: 1px solid transparent;
+      &:last-child {
+        border-right: none;
+      }
+    }
+  }
 }
 #stats-container .total-records {
   text-align: center;
@@ -369,9 +387,10 @@ a, a:hover {
   @extend .col-md-8;
 }
 .examine-cql {
-  @extend .col-md-12;
+  background-color: $color-border-light;
+  padding: 0.5em;
+  position: relative;
   float:none;
-  margin-bottom: 1em;
 }
 
 /*------[ CQL Typeahead ]------*/
@@ -393,7 +412,7 @@ a, a:hover {
   border: 1px solid $color-border-light;
   border-radius: $radius;
   outline: none;
-  padding-right: 27px;  /* 20px for .cql-help + padding */
+  padding-right: 155px;  /* 20px for .cql-help + .download-vcf + padding */
   padding-left: 37px;  /* 18px for .query-status + padding */
 }
 .query-container input {
@@ -491,8 +510,11 @@ a, a:hover {
 
 /*------[ Download VCF ]------*/
 a.download-vcf {
-  @extend .btn, .btn-default, .btn-xs, .glyphicon-download-alt;
+  @extend .btn, .btn-primary, .btn-xs, .glyphicon-download-alt;
   margin-left: 180px; /* from .dl-horizontal dd */
+  position: absolute;
+  top: 1.4em;
+  right: 4em;
   &:before {
     @extend .glyphicon;
     padding-right: 5px;
