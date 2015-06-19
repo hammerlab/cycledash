@@ -69,7 +69,7 @@ a, a:hover {
   border-radius: $radius;
   position: absolute;
   top: 110%;
-  left: 0;
+  right: 0;
   background: $color-white;
   background-color: $color-bg-hover;
   border: 1px solid $color-border-light;
@@ -94,7 +94,7 @@ a, a:hover {
 }
 .vcf-table .tooltip:after, .tooltip:before {
   bottom: 100%;
-  left: 10%;
+  right: 10%;
   border: solid transparent;
   content: " ";
   height: 0;
@@ -106,13 +106,13 @@ a, a:hover {
   border-color: rgba(231, 246, 252, 0);
   border-bottom-color: $color-bg-hover;
   border-width: 10px;
-  margin-left: -10px;
+  margin-right: -10px;
 }
 .vcf-table .tooltip:before {
   border-color: rgba(51, 51, 51, 0);
   border-bottom-color: $color-border-light;
   border-width: 11px;
-  margin-left: -11px;
+  margin-right: -11px;
 }
 .vcf-table .variant-info {
   border-top: 1px solid $color-border-light;
@@ -327,7 +327,7 @@ a, a:hover {
   right: 0;
   top: 0;
   bottom: 0;
-  background-color: $color-white;
+  background-color: $color-bg-expanded;
 }
 .variant-inspector .close-button, .variant-inspector .right-button {
   float: right;
@@ -348,6 +348,27 @@ a, a:hover {
   margin: 0 5%;
   padding: 10px;
   width: 90%;
+  background-color: $color-white;
+  border-radius: $radius;
+}
+#pileup-container .controls {
+  select, input {
+    @extend .form-control;
+    display: inline-block;
+    width: auto;
+    margin-left: 0.5em;
+  }
+  button {
+    @extend .btn, .btn-default;
+    &:first-of-type {
+      @extend .btn-primary;
+      margin-left: 0.5em;
+      margin-right: 1em;
+    }
+    &:last-of-type {
+      margin-left: 0.25em;
+    }
+  }
 }
 
 /* All of the tracks are fixed-height except for the pileup(s), which split the
@@ -359,7 +380,7 @@ a, a:hover {
 }
 
 #pileup-container .controls {
-  flex: 0 0 30px;  /* fixed height */
+  flex: 0 0 35px;  /* fixed height */
 }
 #pileup-container .reference {
   flex: 0 0 50px;  /* fixed height */
@@ -372,11 +393,9 @@ a, a:hover {
   height: auto;  /* overrides defaults from pileup.css */
   overflow-y: auto;  /* extra content scrolls */
 }
-
 .pileup {
-  border-top: 1px solid #000;
+  border-top: 1px solid $color-gray-medium;
 }
-
 
 /*------[ VCFValidation ]------*/
 .vcf-validations select {
@@ -384,7 +403,7 @@ a, a:hover {
 }
 .examine-header {
   @extend .container;
-  margin-bottom: 2em;
+  margin-bottom: 1em;
   margin-top: 20px;
 }
 
