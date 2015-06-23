@@ -129,7 +129,7 @@ a, a:hover {
   border-left: 1px solid $color-border-light;
   border-right: 1px solid $color-border-light;
   padding: 1em;
-  background-color: lighten($color-bg-expanded, 1%);
+  background-color: $color-white-smoke;
 }
 .variant-info {
   .comments:last-of-type {
@@ -472,8 +472,8 @@ a, a:hover {
 .query-status.bad:before {
   content: "×";
   position: relative;
-  left: 3px;
-  bottom: 11px;
+  left: -1px;
+  bottom: 9px;
   font-size: 1.5em;
   color: $color-white;
 }
