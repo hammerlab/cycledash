@@ -111,7 +111,6 @@ var ExaminePage = React.createClass({
                                selectedVcfId={state.selectedVcfId}
                                handleComparisonVcfChange={this.handleComparisonVcfChange} /> :
                   null}
-                <Downloads query={state.query} run_id={run.id} />
               </div>
               <div className="examine-summary-container">
                 <StatsSummary hasLoaded={state.hasLoaded}
@@ -125,7 +124,7 @@ var ExaminePage = React.createClass({
                       loadError={state.loadError}
                       query={state.query}
                       handleQueryChange={this.handleQueryChange} />
-
+            <Downloads query={state.query} run_id={run.id} />
           </div>
           <div className="examine-table">
             <VCFTable ref="vcfTable"

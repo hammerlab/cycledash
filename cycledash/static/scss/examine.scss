@@ -19,23 +19,22 @@ a, a:hover {
 }
 .vcf-table thead {
   background-color: $color-bg-body;
-  tr:first-child{
-    th {
-      font-weight: bold;
-      border-left: 1px solid $color-gray-medium;
-      border-bottom: 1px solid $color-gray-medium;
-      background-color: $color-bg-body-dark;
-    }
-  }
-  tr:last-child{
+  tr {
     th {
       cursor: default;
-      background-color: darken($color-bg-body, 3%);  
       &:first-child {
         border-top-left-radius: 0;
       }
       &:last-child {
         border-top-right-radius: 0;
+      }
+    }
+    &:first-child {
+      th {
+        font-weight: bold;
+        border-left: 2px solid $color-border-light;
+        border-bottom: 2px solid $color-border-light;
+        background-color: $color-bg-body-dark;
       }
     }
   }
@@ -70,7 +69,7 @@ a, a:hover {
   border-radius: $radius;
   position: absolute;
   top: 110%;
-  left: 0;
+  right: 0;
   background: $color-white;
   background-color: $color-bg-hover;
   border: 1px solid $color-border-light;
@@ -95,7 +94,7 @@ a, a:hover {
 }
 .vcf-table .tooltip:after, .tooltip:before {
   bottom: 100%;
-  left: 10%;
+  right: 10%;
   border: solid transparent;
   content: " ";
   height: 0;
@@ -107,13 +106,13 @@ a, a:hover {
   border-color: rgba(231, 246, 252, 0);
   border-bottom-color: $color-bg-hover;
   border-width: 10px;
-  margin-left: -10px;
+  margin-right: -10px;
 }
 .vcf-table .tooltip:before {
   border-color: rgba(51, 51, 51, 0);
   border-bottom-color: $color-border-light;
   border-width: 11px;
-  margin-left: -11px;
+  margin-right: -11px;
 }
 .vcf-table .variant-info {
   border-top: 1px solid $color-border-light;
@@ -126,30 +125,35 @@ a, a:hover {
 /*------[ Comments ]------*/
 .vcf-table .comment-edit-container, .vcf-table .comment-view-container {
   @extend .col-md-6;
-  margin: 1em 0 0 0;
+  border-top: 1px solid $color-border-light;
+  border-left: 1px solid $color-border-light;
+  border-right: 1px solid $color-border-light;
+  padding: 1em;
+  background-color: $color-white-smoke;
 }
-.vcf-table .comment-edit-container {
-  border-radius: $radius;
+.variant-info {
+  .comments:last-of-type {
+    .comment-edit-container {
+      border-left: none;
+      border-right: none;
+      background-color: transparent;
+    }
+  }
+}
+.vcf-table .comments {
+  @extend .row;
+  font-family: "freight-sans-pro", verdana, helvetica, sans-serif;
+  margin: 0;
 }
 .vcf-table .comment-box-header {
   text-align: left;
+  padding-bottom: 1em;
 }
 .vcf-table .comment-header {
   @extend .clearfix;
-  padding: 0.5em;
-  background-color: $color-bg-body;
-  border: 1px solid $color-border-light;
-  border-radius: $radius $radius 0px 0px;
-  color: $color-text;;
 }
-.vcf-table .comment-text {
-  background-color: $color-white;
-  border: 1px solid $color-border-light;
-  border-top: 0px;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  border-radius: 0px 0px $radius $radius;
-  padding: 0.5em;
+.vcf-table .comment-text p {
+  display: inline-block;
 }
 .vcf-table .comment-text p, ul, li, pre {
   margin: 0px;
@@ -170,6 +174,7 @@ a, a:hover {
   float: right;
 }
 .vcf-table .comment-delete, .vcf-table .comment-edit {
+  font-size: 0.75rem;
   &:before {
     @extend .glyphicon;
   }
@@ -181,7 +186,7 @@ a, a:hover {
 .vcf-table .comment-edit {
   @extend .glyphicon-pencil;
 }
-.vcf-table .comment-by {
+.vcf-table .author-name {
   float: left;
 }
 .vcf-table .comment-cancel {
@@ -262,34 +267,53 @@ a, a:hover {
 }
 
 /*------[ Stats Summary ]------*/
-#stats-container {
+.examine-summary-container {
   @extend .col-md-4;
+}
+#stats-container {
   border: 1px solid $color-border-light;
   border-radius: $radius;
 }
 #stats-container .precision-recall {
-  padding: 13px 0px;
   border-bottom: 1px solid $color-border-light;
 }
 #stats-container table {
-  border-collapse: collapse;
   width: 100%;
-  border: none;
-  font-size: 13px;
-  white-space: nowrap;
-}
-#stats-container td {
-  text-align: center;
-  padding: 3px 13px;
-}
-#stats-container td.label {
-  padding: .2em .6em .3em  /* from bootstrap */
-}
-#stats-container .precision-recall .label {
-  display: table-cell; /* This is needed to override Bootstrap. */
-  font-weight: bold;
-  font-size: 14px;
-  color: #000; /* This is needed to override Bootstrap. */
+  td, th {
+    padding: 5px;
+    text-align: center;
+  }
+  td {
+    border-top: 1px solid $color-border-light;
+    border-left: 1px solid $color-border-light;
+    &:first-child {
+      border-left: none;
+    }
+  }
+  th {
+    font-family: "freight-sans-pro", verdana, helvetica, sans-serif;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background-color: $color-bg-body-dark;
+    border-right: 1px solid $color-border-light;
+    border-bottom: 1px solid $color-border-light;
+    &:last-child {
+      border-right: none;
+    }
+  }
+  .other-stats {
+    border-top: 2px solid $color-border-light;
+    th {
+      font-weight: normal;
+      background-color: $color-bg-body;
+      border-right: 1px solid $color-border-light;
+      border-bottom: 1px solid transparent;
+      &:last-child {
+        border-right: none;
+      }
+    }
+  }
 }
 #stats-container .total-records {
   text-align: center;
@@ -303,7 +327,7 @@ a, a:hover {
   right: 0;
   top: 0;
   bottom: 0;
-  background-color: $color-white;
+  background-color: $color-bg-expanded;
 }
 .variant-inspector .close-button, .variant-inspector .right-button {
   float: right;
@@ -324,6 +348,27 @@ a, a:hover {
   margin: 0 5%;
   padding: 10px;
   width: 90%;
+  background-color: $color-white;
+  border-radius: $radius;
+}
+#pileup-container .controls {
+  select, input {
+    @extend .form-control;
+    display: inline-block;
+    width: auto;
+    margin-left: 0.5em;
+  }
+  button {
+    @extend .btn, .btn-default;
+    &:first-of-type {
+      @extend .btn-primary;
+      margin-left: 0.5em;
+      margin-right: 1em;
+    }
+    &:last-of-type {
+      margin-left: 0.25em;
+    }
+  }
 }
 
 /* All of the tracks are fixed-height except for the pileup(s), which split the
@@ -335,7 +380,7 @@ a, a:hover {
 }
 
 #pileup-container .controls {
-  flex: 0 0 30px;  /* fixed height */
+  flex: 0 0 35px;  /* fixed height */
 }
 #pileup-container .reference {
   flex: 0 0 50px;  /* fixed height */
@@ -348,11 +393,9 @@ a, a:hover {
   height: auto;  /* overrides defaults from pileup.css */
   overflow-y: auto;  /* extra content scrolls */
 }
-
 .pileup {
-  border-top: 1px solid #000;
+  border-top: 1px solid $color-gray-medium;
 }
-
 
 /*------[ VCFValidation ]------*/
 .vcf-validations select {
@@ -360,7 +403,7 @@ a, a:hover {
 }
 .examine-header {
   @extend .container;
-  margin-bottom: 2em;
+  margin-bottom: 1em;
   margin-top: 20px;
 }
 
@@ -369,9 +412,10 @@ a, a:hover {
   @extend .col-md-8;
 }
 .examine-cql {
-  @extend .col-md-12;
+  background-color: $color-border-light;
+  padding: 0.5em;
+  position: relative;
   float:none;
-  margin-bottom: 1em;
 }
 
 /*------[ CQL Typeahead ]------*/
@@ -393,7 +437,7 @@ a, a:hover {
   border: 1px solid $color-border-light;
   border-radius: $radius;
   outline: none;
-  padding-right: 27px;  /* 20px for .cql-help + padding */
+  padding-right: 155px;  /* 20px for .cql-help + .download-vcf + padding */
   padding-left: 37px;  /* 18px for .query-status + padding */
 }
 .query-container input {
@@ -428,8 +472,8 @@ a, a:hover {
 .query-status.bad:before {
   content: "×";
   position: relative;
-  left: 3px;
-  bottom: 11px;
+  left: -1px;
+  bottom: 9px;
   font-size: 1.5em;
   color: $color-white;
 }
@@ -483,7 +527,6 @@ a, a:hover {
 .typeahead-input .tt-suggestion.tt-cursor {
   background-color: $color-bg-hover;
   cursor: pointer;
-
 }
 .typeahead-input .tt-suggestion p {
   margin: 0;
@@ -491,8 +534,11 @@ a, a:hover {
 
 /*------[ Download VCF ]------*/
 a.download-vcf {
-  @extend .btn, .btn-default, .btn-xs, .glyphicon-download-alt;
+  @extend .btn, .btn-primary, .btn-xs, .glyphicon-download-alt;
   margin-left: 180px; /* from .dl-horizontal dd */
+  position: absolute;
+  top: 1.4em;
+  right: 4em;
   &:before {
     @extend .glyphicon;
     padding-right: 5px;

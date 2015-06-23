@@ -60,12 +60,10 @@ var PileupViewer = React.createClass({
 
     return (
       <div className="variant-inspector" ref="inspector" style={style}>
+        {vcfTable}
         <a href='#' className="close-button" onClick={this.handleClose}>✕</a>
         <a href='#' className="left-button" onClick={this.handleLeft}>←</a>
         <a href='#' className="right-button" onClick={this.handleRight}>→</a>
-
-        {vcfTable}
-
         <div ref="pileupElement" id="pileup-container" />
       </div>
     );

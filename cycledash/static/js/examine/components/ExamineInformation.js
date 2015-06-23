@@ -12,8 +12,8 @@ var ExamineInformation = React.createClass({
     return (
         <div className="examine-information">
           <dl className='dl-horizontal'>
+            <dt>Caller Name</dt> <dd>{run.caller_name}</dd>
             <dt>VCF URI</dt> <dd>{run.uri}</dd>
-            <dt>Caller</dt> <dd>{run.caller_name}</dd>
             <dt>Submitted</dt> <dd>{run.created_at}</dd>
           </dl>
         </div>
