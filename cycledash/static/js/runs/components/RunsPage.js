@@ -84,7 +84,6 @@ var RunsPage = React.createClass({
           </div>
           <LatestComments comments={this.props.comments} />
         </div>
-        
       </div>
     );
   }
