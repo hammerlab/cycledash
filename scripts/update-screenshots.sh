@@ -44,10 +44,10 @@ if [ -z "$SAUCE_USERNAME" ] || [ -z "$SAUCE_ACCESS_KEY" ]; then
 fi
 
 echo -n "Creating test DB, logging to $DB_LOGS..."
-source tests/create-test-db.sh > $DB_LOGS 2>&1
+./tests/create-test-db.sh > $DB_LOGS 2>&1
 echo "done."
 
-echo "Starting test server, logging to $RUN_SERVER_LOGS..."
+echo -n "Starting test server, logging to $RUN_SERVER_LOGS..."
 python run.py > $RUN_SERVER_LOGS 2>&1 &
 RUN_PID=$!
 echo "done."
@@ -74,7 +74,7 @@ echo "done."
 
 sel update -b remote --remote-capabilities="{\"platform\":\"Mac OS X 10.9\", \
                                              \"browserName\": \"chrome\", \
-                                             \"browserVersion\": \"31\"}"\
+                                             \"browserVersion\": \"31\"}" \
     --remote-command-executor="http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@ondemand.saucelabs.com:80/wd/hub"\
     -o $BASE/images "$@" $BASE
 

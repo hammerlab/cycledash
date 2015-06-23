@@ -28,4 +28,4 @@ humanize==0.5.1
 pyensembl==0.6.9
 mock==1.0.1
 flask-restful==0.3.2
-seltest==0.2.6
+seltest==0.2.8

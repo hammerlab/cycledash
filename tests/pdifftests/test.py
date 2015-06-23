@@ -114,9 +114,21 @@ class Examine(Base):
         """Examine page showing a poorly formed query."""
         input = driver.find_element_by_css_selector('input[type="text"].tt-input')
         input.send_keys('bad query is so bad')
+        blur_inputs(driver)  # so we don't get a screenshot of the cursor blinking
 
     @waitfor('tr:nth-child(12) td:nth-child(2)', text=u'✓')
     def validation(self, driver):
         """Examine page with a validation."""
         select = Select(driver.find_element_by_tag_name('select'))
         select.select_by_visible_text('file:///tmp/truthy-snv.vcf')
+
+
+def blur_inputs(driver):
+    """Blurs (removed focus from) all inputs on the page."""
+    driver.execute_script("""
+    function blurrer(input) {
+      input.blur();
+    }
+    var inputs = document.querySelectorAll('input');
+    Array.prototype.slice.call(inputs).map(blurrer);
+    """)
