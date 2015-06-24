@@ -10,7 +10,7 @@ body {
   font-family: "freight-sans-pro", verdana, helvetica, sans-serif;
   background-color: $color-bg-body;
 }
-main { 
+main {
   @extend .container;
 }
 pre, tt { font-family: "inconsolata", monospace; }
@@ -25,7 +25,18 @@ dd, dt {
 a, %link {
   color: $color-link;
   &:hover {
-    color: darken($color-link, 15%);
+      color: darken($color-link, 15%);
+  }
+}
+/*------[ Comments ]------*/
+table.comments {
+  @extend .col-md-6;
+  margin: 1em 0;
+  font-size: 0.875em;
+  td {
+    vertical-align: top;
+    font-family: "freight-sans-pro", verdana, helvetica, sans-serif;
+    padding: 0.5em 1em;
   }
 }
 label {

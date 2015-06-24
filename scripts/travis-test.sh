@@ -18,4 +18,4 @@ if [ $CI ]; then
   echo ''  # reset last exit code
 fi
 
-./scripts/run-pdiff-tests.sh
+./scripts/travis-run-pdiff-tests.sh
