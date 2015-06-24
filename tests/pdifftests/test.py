@@ -124,7 +124,7 @@ class Examine(Base):
 
 
 def blur_inputs(driver):
-    """Blurs (removed focus from) all inputs on the page."""
+    """Blurs (removes focus from) all inputs on the page."""
     driver.execute_script("""
     function blurrer(input) {
       input.blur();

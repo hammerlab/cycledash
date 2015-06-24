@@ -154,7 +154,7 @@ To run an individual JavaScript test, you can use:
 
 CycleDash uses [seltest](https://github.com/ihodes/seltest) for perceptual
 difference testing. This means the tests operate an actual web browser and take
-screenshots of the web-app being used. In order to maintain consitancy between
+screenshots of the web-app being used. In order to maintain consistency between
 platforms, browser version, etc, we use [Sauce Labs](http://saucelabs.com) to
 host our browser, and interact with it remotely. To update the reference
 screenshots, run the following. Make sure you have

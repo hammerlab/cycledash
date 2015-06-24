@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# This script runs the visual tests on Travis.
+# This script runs the visual tests on a Travis worker.
 
 source tests/ENV.sh
 gulp prod
