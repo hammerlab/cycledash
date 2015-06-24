@@ -10,7 +10,7 @@ body {
   font-family: "freight-sans-pro", verdana, helvetica, sans-serif;
   background-color: $color-bg-body;
 }
-main { 
+main {
   @extend .container;
 }
 pre, tt { font-family: "inconsolata", monospace; }
@@ -25,7 +25,7 @@ dd, dt {
 a, %link {
   color: $color-link;
   &:hover {
-    color: darken($color-link, 15%);
+      color: darken($color-link, 15%);
   }
 }
 label {
