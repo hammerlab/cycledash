@@ -27,6 +27,7 @@ COPY projects (id, name, notes) FROM stdin;
 
 COPY bams (id, project_id, name, normal, notes, tissues, resection_date, uri) FROM stdin;
 1	1	Test BAM	f	A note.	Brain	2001-02-02	/data/somebam.bam
+2	1	Test BAM2	f	A note.	Brain	2001-02-02	/data/somebam.bam
 \.
 
 
