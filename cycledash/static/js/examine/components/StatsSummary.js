@@ -21,9 +21,6 @@ var StatsSummary = React.createClass({
     return (
       <div id="stats-container">
         {variantStats}
-        <RecordsShown hasLoaded={this.props.hasLoaded}
-                      numberOfFilteredRecords={stats.totalRecords}
-                      totalNumberOfRecords={stats.totalUnfilteredRecords} />
       </div>
     );
   }
@@ -48,26 +45,25 @@ var VariantStats = React.createClass({
               <th></th>
               <th>True</th>
               <th>False</th>
-            </tr>
-            <tr>
-              <th>Positive</th>
-              <td>{fmt(truePositives || 0)}</td>
-              <td>{fmt(falsePositives || 0)}</td>
-            </tr>
-            <tr>
-              <th>Negative</th>
-              <td className="na">-</td>
-              <td>{fmt(falseNegatives || 0)}</td>
-            </tr>
-            <tr className="other-stats">
               <th>Precision</th>
               <th>Recall</th>
               <th>f1score</th>
             </tr>
             <tr>
-              <td>{dfmt(precision || 0)}</td>
-              <td>{dfmt(recall || 0)}</td>
-              <td>{dfmt(f1score || 0)}</td>
+              <th>Positive</th>
+              <td>{fmt(truePositives || 0)}</td>
+              <td>{fmt(falsePositives || 0)}</td>
+              <td className="other-stats">{dfmt(precision || 0)}</td>
+              <td className="other-stats">{dfmt(recall || 0)}</td>
+              <td className="other-stats">{dfmt(f1score || 0)}</td>
+            </tr>
+            <tr>
+              <th>Negative</th>
+              <td className="na">-</td>
+              <td>{fmt(falseNegatives || 0)}</td>
+              <td className="other-stats"></td>
+              <td className="other-stats"></td>
+              <td className="other-stats"></td>
             </tr>
           </tbody>
         </table>
@@ -75,29 +71,5 @@ var VariantStats = React.createClass({
     );
   }
 });
-
-var RecordsShown = React.createClass({
-  propTypes: {
-    hasLoaded: React.PropTypes.bool.isRequired,
-    numberOfFilteredRecords: React.PropTypes.number.isRequired,
-    totalNumberOfRecords: React.PropTypes.number.isRequired
-  },
-  render: function() {
-    var fmt = d3.format(','),
-        countsText;
-    if (this.props.totalNumberOfRecords === this.props.numberOfFilteredRecords) {
-      countsText = 'all' + ' ' + fmt(this.props.totalNumberOfRecords);
-    } else {
-      countsText = fmt(this.props.numberOfFilteredRecords) + ' of ' +
-                       fmt(this.props.totalNumberOfRecords);
-    }
-    return (
-      <div className="total-records">
-        Showing {this.props.hasLoaded ? countsText : '...'} variants.
-      </div>
-    );
-  }
-});
-
 
 module.exports = StatsSummary;

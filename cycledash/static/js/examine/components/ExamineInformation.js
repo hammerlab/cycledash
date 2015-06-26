@@ -10,13 +10,24 @@ var ExamineInformation = React.createClass({
   render: function() {
     var run = this.props.run;
     return (
-        <div className="examine-information">
-          <dl className='dl-horizontal'>
-            <dt>Caller Name</dt> <dd>{run.caller_name}</dd>
-            <dt>VCF URI</dt> <dd>{run.uri}</dd>
-            <dt>Submitted</dt> <dd>{run.created_at}</dd>
-          </dl>
-        </div>
+      <div className="examine-information">
+        <table className="header-table">
+          <tbody>
+            <tr>
+              <th>Caller Name</th>
+              <td>{run.caller_name}</td>
+            </tr>
+            <tr>
+              <th>VCF URI</th>
+              <td>{run.uri}</td>
+            </tr>
+            <tr>
+              <th>Submitted</th>
+              <td>{run.created_at}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     );
   }
 });

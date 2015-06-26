@@ -8,7 +8,7 @@ var Downloads = React.createClass({
   render: function() {
     var jsonQuery = encodeURIComponent(JSON.stringify(this.props.query)),
         link = `/runs/${this.props.run_id}/download?query=${jsonQuery}`;
-    return <a className='download-vcf' href={link}>Download VCF</a>;
+    return <a className='download-vcf' href={link}>Save VCF</a>;
   }
 });
 
