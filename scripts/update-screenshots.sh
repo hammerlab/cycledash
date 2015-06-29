@@ -54,6 +54,7 @@ echo -n "Creating test DB, logging to $DB_LOGS..."
 echo "done."
 
 echo -n "Starting test server, logging to $RUN_SERVER_LOGS..."
+export LOGIN_DISABLED=true
 python run.py > $RUN_SERVER_LOGS 2>&1 &
 RUN_PID=$!
 echo "done."

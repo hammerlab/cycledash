@@ -1,7 +1,7 @@
 """API for user comments."""
 from collections import defaultdict
 from flask import jsonify, request
-from flask.ext.restful import abort, Resource, fields
+from flask.ext.restful import abort, fields
 from sqlalchemy import select, func, desc
 
 from common.helpers import tables, to_epoch
@@ -10,6 +10,8 @@ from cycledash.helpers import (prepare_request_data, success_response,
                                validate_with, abort_if_none_for, EpochField,
                                marshal_with, camelcase_dict)
 from cycledash.validations import CreateComment, DeleteComment, UpdateComment
+
+from . import Resource
 
 
 comment_fields = {
@@ -28,6 +30,7 @@ comment_fields = {
 
 
 class CommentList(Resource):
+    require_auth = True
     @marshal_with(comment_fields, envelope='comments')
     def get(self, run_id):
         """Get a list of all comments."""
@@ -49,6 +52,7 @@ class CommentList(Resource):
 
 
 class Comment(Resource):
+    require_auth = True
     @marshal_with(comment_fields)
     def get(self, run_id, comment_id):
         """Get comment with the given ID."""
@@ -93,6 +97,7 @@ class Comment(Resource):
 
 
 class CommentsForVcf(Resource):
+    require_auth = True
     def get(self, run_id):
         """Returns comments keys by their record ID."""
         # Ideally, this would be done on the client-side with the basic API

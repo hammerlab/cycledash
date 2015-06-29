@@ -7,12 +7,12 @@ import vcf as pyvcf
 
 from cycledash import app, db
 from common.helpers import tables, find
+from workers.genotype_extractor import _extract
 
 from test_projects_api import create_project_with_name
 from test_bams_api import create_bam_with_name
 from test_runs_api import create_run_with_uri
-
-from workers.genotype_extractor import _extract
+import helpers
 
 
 class TestGenotypeExtractorWorker(object):
@@ -26,6 +26,9 @@ class TestGenotypeExtractorWorker(object):
             runs.delete().execute()
             projects.delete().execute()
 
+    @classmethod
+    def tearDownClass(cls):
+        helpers.delete_all_records(db)
 
     def test_extraction(self):
         _extract(self.run['id'])

@@ -1,3 +1,10 @@
+CREATE TABLE users (
+       id BIGSERIAL PRIMARY KEY,
+       username TEXT UNIQUE NOT NULL,
+       password TEXT NOT NULL,
+       email TEXT UNIQUE NOT NULL
+);
+
 CREATE TABLE projects (
        id BIGSERIAL PRIMARY KEY,
        name TEXT UNIQUE NOT NULL,

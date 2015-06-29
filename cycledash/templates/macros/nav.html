@@ -1,8 +1,8 @@
-{% macro nav(active) -%}
+{% macro nav(active, current_user) -%}
 <nav class="navigation">
   <div class="container">
     <a class="header-logo" href="/">Home</a>
-    <ul>
+    <ul id="navigation-list">
       <li class="{{ 'active' if active == 'runs' else '' }}">
         <a href="/">Projects</a>
         {% if active == 'examine' %} &raquo;
@@ -13,6 +13,19 @@
       </li>
       <li class="{{ 'active' if active == 'about' else '' }}">
         <a href="/about">About</a>
+      </li>
+    </ul>
+    <ul id="user-login-logout">
+      <li>
+        {% if current_user.is_authenticated() %}
+        <form action="/logout" method="POST">
+          <button id="logout">Log out {{ current_user['username'] }}</button>
+        </form>
+        {% else %}
+        <a href="/login">
+          <span class="{{ 'active' if active == 'login' else '' }}">Log in</span>
+        </a>
+        {% endif %}
       </li>
     </ul>
   </div>

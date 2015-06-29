@@ -1,16 +1,16 @@
 """Defines the API for Projects."""
 from flask import request, redirect, jsonify, url_for, render_template
-from flask.ext.restful import Resource, fields, abort
+from flask.ext.restful import fields, abort
 from sqlalchemy import exc, select, func, desc
 import voluptuous
 
 from common.helpers import tables, find
 from cycledash import db
-import cycledash.tasks
-import cycledash.bams
 from cycledash.helpers import (get_id_where, abort_if_none_for, validate_with,
                                marshal_with)
 from cycledash.validations import CreateProject, UpdateProject
+
+from . import bams, tasks, Resource
 
 
 project_fields = {
@@ -21,6 +21,7 @@ project_fields = {
 
 
 class ProjectList(Resource):
+    require_auth = True
     @marshal_with(project_fields, envelope='projects')
     def get(self):
         """Get list of all projects."""
@@ -43,6 +44,7 @@ class ProjectList(Resource):
 
 
 class Project(Resource):
+    require_auth = True
     @marshal_with(project_fields)
     def get(self, project_id):
         """Get a project by its ID."""
@@ -85,7 +87,7 @@ def get_projects_tree():
     ]}
     """
     with tables(db.engine, 'vcfs', 'user_comments', 'bams', 'projects') as \
-         (con, vcfs, user_comments, bams, projects):
+         (con, vcfs, user_comments, bams_table, projects):
         joined = (vcfs
             .outerjoin(user_comments, vcfs.c.id == user_comments.c.vcf_id))
         num_comments = func.count(user_comments.c.vcf_id).label('num_comments')
@@ -95,13 +97,13 @@ def get_projects_tree():
             .order_by(desc(vcfs.c.id)))
         vcfs = [dict(v) for v in con.execute(q).fetchall()]
 
-        q = select(bams.c)
-        bams = [dict(b) for b in con.execute(q).fetchall()]
+        q = select(bams_table.c)
+        all_bams = [dict(b) for b in con.execute(q).fetchall()]
 
         q = select(projects.c)
         projects = [dict(b) for b in con.execute(q).fetchall()]
 
-        cycledash.bams.attach_bams_to_vcfs(vcfs)
+        bams.attach_bams_to_vcfs(vcfs)
 
         for vcf in vcfs:
             project_id = vcf.get('project_id')
@@ -113,7 +115,7 @@ def get_projects_tree():
 
         for project in projects:
             project_id = project['id']
-            project_bams = [bam for bam in bams
+            project_bams = [bam for bam in all_bams
                             if bam.get('project_id') == project_id]
             project_vcfs = [vcf for vcf in vcfs
                             if vcf.get('project_id') == project_id]
@@ -124,7 +126,7 @@ def get_projects_tree():
 
 def _join_task_states(vcfs):
     """Add a task_states field to each VCF in a list of VCFs."""
-    ts = cycledash.tasks.all_non_success_tasks()
+    ts = tasks.all_non_success_tasks()
 
     for vcf in vcfs:
         vcf['task_states'] = ts.get(vcf['id'], [])

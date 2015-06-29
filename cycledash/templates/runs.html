@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block body %}
-{{ nav("runs") }}
+{{ nav("runs", current_user) }}
 <main id="runs"></main>
 <script type="text/javascript" src="/static/js/dist/bundled.js"></script>
 <script>

@@ -1,10 +1,13 @@
 import os
+import subprocess
+
 
 def handle_false(value):
     # ensure that false in config isn't interpreted as True
-    if value and value.lower() == 'false':
-        value = False
-    return value
+    if not value or value.lower() == 'false':
+        return False
+    return True
+
 
 USE_RELOADER = handle_false(os.environ.get('USE_RELOADER', False))
 SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URI']
@@ -18,7 +21,6 @@ ALLOW_VCF_OVERWRITES = handle_false(
 
 TYPEKIT_URL = os.environ.get('TYPEKIT_URL', None)
 
-import subprocess
 try:
     DEPLOYED_GIT_HASH = subprocess.check_output(['git', 'rev-parse', 'HEAD'])[:-1]
 except subprocess.CalledProcessError:
@@ -29,4 +31,14 @@ TEMPORARY_DIR = os.environ.get('TEMPORARY_DIR', '/tmp')
 TRAVIS = os.environ.get('TRAVIS')
 ENSEMBL_RELEASE = os.environ.get('ENSEMBL_RELEASE', 75)
 
+SECRET_KEY = os.environ['SECRET_KEY']
+BCRYPT_LOG_ROUNDS = int(os.environ.get('BCRYPT_LOG_ROUNDS', 10))
+
+# Used to disable the @login_required decorator for e.g. seltest
+# cf. http://flask-login.readthedocs.org/en/latest/ "Protecting views"
+LOGIN_DISABLED = handle_false(os.environ.get('LOGIN_DISABLED', False))
+
+
 del os
+del subprocess
+del handle_false

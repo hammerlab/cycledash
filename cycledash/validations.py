@@ -20,8 +20,14 @@ def expect_one_of(dct, *args):
     error = Invalid(error_string)
     raise MultipleInvalid(errors=[error])
 
+
 def is_path(s):
     return s[0] == '/' or s.startswith('file://') or s.startswith('hdfs://')
+
+
+def is_email(s):
+    return '@' in s
+
 
 PathString = All(unicode,
                  Length(min=1),
@@ -141,4 +147,27 @@ UpdateComment = Schema({
     Required('last_modified'): Coerce(float),
     "comment_text": basestring,
     "author_name": basestring,
+})
+
+
+################
+# Registration #
+################
+
+RegisterUser = Schema({
+    Required('username'): basestring,
+    Required('email'): All(basestring,
+                           Msg(truth(is_email), 'Must be a valid email.')),
+    Required('password1'): All(basestring, Length(min=8)),
+    Required('password2'): All(basestring, Length(min=8))
+})
+
+
+#########
+# Login #
+#########
+
+LoginUser = Schema({
+    Required('username'): basestring,
+    Required('password'): basestring
 })
