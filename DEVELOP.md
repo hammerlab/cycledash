@@ -184,3 +184,13 @@ suite.
 To determine whether there are any pixels that have changed before/after, and to
 generate a perceptual diff that will make it clear where the changes are, you
 can use [webdiff](https://github.com/danvk/webdiff): `git webdiff`.
+
+You may speed up the `update-screenshots.sh` script by daemonizing SauceConnect
+in advance. 
+
+```
+sc -u $SAUCE_USERNAME -k $SAUCE_ACCESS_KEY --daemonize
+```
+
+This ensures that the tunnel to SauceLabs is always open, and needn't be
+reestablished on every run of the script. 
