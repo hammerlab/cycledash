@@ -69,7 +69,11 @@ CREATE TABLE genotypes (
        quality TEXT,
 
        -- Cycledash-derived data
-       "annotations:gene_names" TEXT,
+       -- These are from the varcode annotation worker
+       "annotations:gene_name" TEXT,
+       "annotations:transcript" TEXT,
+       "annotations:effect_notation" TEXT,
+       "annotations:effect_type" TEXT,
 
        -- Many of the below values taken from VCF4.2 spec examples
        -- some taken from existing VCFs.
