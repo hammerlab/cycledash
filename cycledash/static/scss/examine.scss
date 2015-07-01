@@ -392,6 +392,8 @@ a, a:hover {
   flex: 1;
   height: auto;  /* overrides defaults from pileup.css */
   overflow-y: auto;  /* extra content scrolls */
+  /* a vertical scroll bar can result in a horizontal bar, which we don't want. */
+  overflow-x: hidden;
 }
 .pileup {
   border-top: 1px solid $color-gray-medium;
