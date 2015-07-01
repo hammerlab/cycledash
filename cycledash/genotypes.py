@@ -392,7 +392,7 @@ def _header_spec(vcf_header_text, extant_cols):
     _add_extant_column_to_spec(extant_cols, 'annotations:transcript', res,
             ('Transcript that overlaps with this variant'
             'derived from Varcode project.'))
-    _add_extant_column_to_spec(extant_cols, 'annotations:effect_notation',
+    _add_extant_column_to_spec(extant_cols, 'annotations:effect_notation', res,
             ('Protein change caused by this variant, '
             'derived from Varcode project.'))
     _add_extant_column_to_spec(extant_cols, 'annotations:effect_type', res,
