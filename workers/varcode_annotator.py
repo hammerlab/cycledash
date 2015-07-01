@@ -46,7 +46,7 @@ def annotate(self, vcf_id):
     with tables(engine, 'genotypes') as (con, genotypes):
         metadata = sqlalchemy.MetaData(bind=con)
         metadata.reflect()
-        gene_names = get_varcode_annotations(genotypes, vcf_id, config.ENSEMBL_RELEASE)
+        annotations = get_varcode_annotations(genotypes, vcf_id, config.ENSEMBL_RELEASE)
 
         tmp_table = Table('gene_annotations',
                           metadata,
@@ -62,7 +62,7 @@ def annotate(self, vcf_id):
 
         try:
             tmp_table.create()
-            write_to_table_via_csv(tmp_table, rows=gene_names, connection=con)
+            write_to_table_via_csv(tmp_table, rows=annotations, connection=con)
             # Add gene names from temp table to genotypes.
             (genotypes.update()
              .where(genotypes.c.contig == tmp_table.c.contig)
@@ -88,7 +88,6 @@ def annotate(self, vcf_id):
 
 def write_to_table_via_csv(table, rows, connection):
     with temp_csv(mode='r+', tmp_dir=TEMPORARY_DIR) as csv_file:
-        # Don't use commas as a delim, as commas are part of gene_names.
         csv.writer(csv_file, delimiter='\t').writerows(rows)
         csv_file.seek(0, 0)
         connection.connection.cursor().copy_from(csv_file, sep='\t', null='',
