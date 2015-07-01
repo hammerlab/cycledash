@@ -40,13 +40,16 @@ def annotate(self, vcf_id):
         return  # An error must have occurred earlier.
     register_running_task(self, vcf_id)
 
-    EnsemblRelease(config.ENSEMBL_RELEASE).install()  # Only runs the first time for this release.
+    # Only runs the first time for this release.
+    EnsemblRelease(config.ENSEMBL_RELEASE).install()
 
     engine = sqlalchemy.create_engine(DATABASE_URI)
     with tables(engine, 'genotypes') as (con, genotypes):
         metadata = sqlalchemy.MetaData(bind=con)
         metadata.reflect()
-        annotations = get_varcode_annotations(genotypes, vcf_id, config.ENSEMBL_RELEASE)
+        annotations = get_varcode_annotations(genotypes,
+                                              vcf_id,
+                                              config.ENSEMBL_RELEASE)
 
         tmp_table = Table('gene_annotations',
                           metadata,
@@ -83,7 +86,7 @@ def annotate(self, vcf_id):
 
         # We've added annotations:varcode_*, so update the columns to display.
         update_extant_columns(metadata, con, vcf_id)
-        return(vcf_id)
+        return vcf_id
 
 
 def write_to_table_via_csv(table, rows, connection):
@@ -111,12 +114,11 @@ def get_varcode_annotations(genotypes, vcf_id, ensembl_release_num):
 
     varcode_annotations = []
     for contig, position, reference, alternates in results:
-        variant = Variant(
-            contig=contig, 
-            start=position, 
-            ref=reference.encode('ascii','ignore'),
-            alt=alternates.encode('ascii','ignore'), 
-            ensembl=ensembl_rel)
+        variant = Variant(contig=contig,
+                          start=position,
+                          ref=reference.encode('ascii','ignore'),
+                          alt=alternates.encode('ascii','ignore'),
+                          ensembl=ensembl_rel)
 
         # This will give us a single, yet relevant effect
         best_effect = variant.effects().top_priority_effect()
@@ -126,7 +128,13 @@ def get_varcode_annotations(genotypes, vcf_id, ensembl_release_num):
         effect_type = type(best_effect).__name__
         # Make it human readable
         effect_type = re.sub("([a-z])([A-Z])","\g<1> \g<2>", effect_type)
-        varcode_annotations.append([contig, position, reference, alternates, 
-            gene_name, transcript, notation, effect_type])
+        varcode_annotations.append([contig,
+                                    position,
+                                    reference,
+                                    alternates,
+                                    gene_name,
+                                    transcript,
+                                    notation,
+                                    effect_type])
 
     return varcode_annotations

@@ -383,19 +383,19 @@ def _header_spec(vcf_header_text, extant_cols):
         path=['sample_name']) # This path is not the default super -> sub column
 
     # Add Cycledash-derived columns
-    _add_extant_column_to_spec(extant_cols, 'annotations:gene_names', res, 'String', 1,
+    _add_extant_column_to_spec(extant_cols, 'annotations:gene_names', res,
             ('Names of genes that overlap with this variant\'s '
             'starting position, derived from Ensembl Release 75.'))
-    _add_extant_column_to_spec(extant_cols, 'annotations:gene_name', res, 'String', 1,
+    _add_extant_column_to_spec(extant_cols, 'annotations:gene_name', res,
             ('Name of the gene that overlaps with this variant\'s effect'
             'derived from Varcode project.'))
-    _add_extant_column_to_spec(extant_cols, 'annotations:transcript', res, 'String', 1,
+    _add_extant_column_to_spec(extant_cols, 'annotations:transcript', res,
             ('Transcript that overlaps with this variant'
             'derived from Varcode project.'))
-    _add_extant_column_to_spec(extant_cols, 'annotations:effect_notation', res, 'String', 1,
+    _add_extant_column_to_spec(extant_cols, 'annotations:effect_notation',
             ('Protein change caused by this variant, '
             'derived from Varcode project.'))
-    _add_extant_column_to_spec(extant_cols, 'annotations:effect_type', res, 'String', 1,
+    _add_extant_column_to_spec(extant_cols, 'annotations:effect_type', res,
             ('Type of the variant, '
             'derived from Varcode project.'))
 
@@ -406,7 +406,7 @@ def _header_spec(vcf_header_text, extant_cols):
 
     return res
 
-def _add_extant_column_to_spec(extant_cols, column_name, res, column_type, num, description):
+def _add_extant_column_to_spec(extant_cols, column_name, res, description):
    if column_name in extant_cols:
         supercolumn, subcolumn = column_name.split(':')
         _add_column_to_spec(
@@ -416,9 +416,7 @@ def _add_extant_column_to_spec(extant_cols, column_name, res, column_type, num, 
             subcolumn=subcolumn,
             column_type='String',
             num=1, # This number is not currently used
-            description=(
-                'Names of genes that overlap with this variant\'s '
-                'starting position, derived from Ensembl Release 75.'))
+            description=description)
 
 def _add_column_to_spec(spec, column_name, supercolumn, subcolumn,
                         column_type, num, description, path=None):
