@@ -69,7 +69,6 @@ CREATE TABLE genotypes (
        quality TEXT,
 
        -- Cycledash-derived data
-       "annotations:gene_names" TEXT,
        -- These are from the varcode annotation worker
        "annotations:gene_name" TEXT,
        "annotations:transcript" TEXT,

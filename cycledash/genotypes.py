@@ -383,9 +383,6 @@ def _header_spec(vcf_header_text, extant_cols):
         path=['sample_name']) # This path is not the default super -> sub column
 
     # Add Cycledash-derived columns
-    _add_extant_column_to_spec(extant_cols, 'annotations:gene_names', res,
-            ('Names of genes that overlap with this variant\'s '
-            'starting position, derived from Ensembl Release 75.'))
     _add_extant_column_to_spec(extant_cols, 'annotations:gene_name', res,
             ('Name of the gene that overlaps with this variant\'s effect'
             'derived from Varcode project.'))
