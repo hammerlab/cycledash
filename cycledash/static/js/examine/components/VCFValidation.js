@@ -15,17 +15,14 @@ var VCFValidation = React.createClass({
     this.props.handleComparisonVcfChange(parseInt(evt.target.value, 10));
   },
   render: function() {
-    var vcfs = [{id: null, uri: '---'}].concat(this.props.vcfs)
+    var vcfs = [{id: null, uri: 'Compare to...'}].concat(this.props.vcfs)
         .map(v => <option value={v.id} key={v.uri}>{v.uri}</option>);
     return (
-      <dl className='dl-horizontal vcf-validations'>
-        <dt>Compare to</dt>
-        <dd>
-          <select onChange={this.handleSelect} value={this.props.compareToVcfId}>
-            {vcfs}
-          </select>
-        </dd>
-      </dl>
+      <div className='vcf-validations'>
+        <select onChange={this.handleSelect} value={this.props.compareToVcfId}>
+          {vcfs}
+        </select>
+      </div>
     );
   }
 });

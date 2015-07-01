@@ -13,9 +13,232 @@ a, a:hover {
   text-decoration: none;
 }
 
+/*------[ Run Information ]------*/
+.header-table {
+  @extend .table, .table-condensed;
+  background-color: transparent;
+  border-bottom: 0;
+  margin-bottom: 0;
+  td {
+    &:last-child {
+      border-right: none;
+    }
+  }
+  tbody tr {
+    cursor: default;
+    &:hover {
+      background-color: transparent;
+    }
+    th {
+      border-top: 0;
+      width: 110px;
+    }
+    td {
+      border-top: 0;
+    }
+  }
+}
+/*------[ Table Controls ]------*/
+.examine-info-container {
+  @extend .col-md-12;
+}
+.examine-table-controls {
+  @extend .clearfix;
+  background-color: $color-border-light;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
+.examine-cql, .vcf-validations, .download-container {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+}
+.examine-cql {
+  @extend .col-md-6;
+}
+
+/*------[ VCFValidation ]------*/
+.vcf-validations {
+  @extend .col-md-3;
+}
+.vcf-validations select {
+  @extend .form-control;
+  font-size: 1rem;
+}
+.examine-header {
+  @extend .container;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+/*------[ Download VCF ]------*/
+.download-container {
+  @extend .col-md-3;
+  padding-top: 0.8em;
+}
+.total-records {
+  display: inline;
+}
+a.download-vcf {
+  @extend .btn, .btn-primary, .btn-xs, .glyphicon-save;
+  float: right;
+  &:before {
+    @extend .glyphicon;
+    padding-right: 5px;
+  }
+}
+
+/*------[ CQL Typeahead ]------*/
+.query-container * { box-sizing: border-box; }
+.typeahead-input {
+  position: relative;
+}
+.typeahead-input .twitter-typeahead {
+  width: 100%;
+}
+.typeahead-input .query-input,
+.typeahead-input .twitter-typeahead .tt-query,
+.typeahead-input .twitter-typeahead .tt-hint {
+  width: 100%;
+  height: 34px;
+  padding: 5px 12px;
+  font-size: 1rem;
+  line-height: 30px;
+  border: 1px solid #ccc;
+  border-radius: $radius;
+  outline: none;
+  padding-right: 30px;  /* 20px for .cql-help + padding */
+  padding-left: 37px;  /* 18px for .query-status + padding */
+}
+.query-status {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  margin-top: -9px;
+  width: 18px;
+  height: 18px;
+  z-index: 1;
+  line-height: 1.43;
+}
+.query-status.good {
+  background: $color-status-success;
+  border-radius: 20px;
+}
+.query-status.good:before {
+  content: "✓";
+  position: relative;
+  left: 3px;
+  bottom: 2px;
+  color: $color-white;
+}
+.query-status.bad {
+  background: $color-status-error;
+  border-radius: 1px;
+}
+.query-status.bad:before {
+  content: "×";
+  position: relative;
+  left: 3px;
+  bottom: 11px;
+  font-size: 1.5em;
+  color: $color-white;
+}
+.query-status.loading {
+  background: url(/static/img/loader.gif) no-repeat;
+}
+.query-status.loading:before {
+  content: "";
+}
+.cql-help {
+  @extend .glyphicon-question-sign, %link;
+  position: absolute;
+  right: 10px;
+  top: 8px;
+  font-size: 1rem;
+  &:before {
+    @extend .glyphicon;
+  }
+}
+.server-error {
+  color: $color-status-error;
+}
+.tt-hint {
+  color: $color-text-dim;
+}
+.error-message {
+  display: none;
+}
+/* Styles from http://stackoverflow.com/a/20205623/388951 */
+.typeahead-input .tt-query {
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+.typeahead-input .tt-hint {
+  color: $color-text-dim;
+}
+.typeahead-input .tt-dropdown-menu {
+  min-width: 422px;
+  margin-top: 12px;
+  padding: 8px 0;
+  background-color: $color-white;
+  border: 1px solid $color-border-light;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: $radius;
+  box-shadow: 0 5px 10px rgba(0,0,0,.2);
+}
+.typeahead-input .tt-suggestion {
+  padding: 3px 20px;
+  font-size: 18px;
+  line-height: 24px;
+}
+.typeahead-input .tt-suggestion.tt-cursor {
+  background-color: $color-bg-hover;
+  cursor: pointer;
+}
+.typeahead-input .tt-suggestion p {
+  margin: 0;
+}
+
+/*------[ Stats Summary ]------*/
+#stats-container {
+  @extend .col-md-12;
+  padding: 0;
+}
+#stats-container table {
+  width: 100%;
+  td, th {
+    padding: 5px;
+    text-align: center;
+  }
+  td {
+    border-top: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    font-size: 0.875rem;
+    &:first-child {
+      border-left: none;
+    }
+  }
+  th {
+    font-family: "freight-sans-pro", verdana, helvetica, sans-serif;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-right: 1px solid #ccc;
+    border-top: 1px solid #ccc;
+    &:last-child {
+      border-right: none;
+    }
+  }
+  .other-stats {
+    border-top: none;
+  }
+}
+
 /*------[ VCF Table ]------*/
+.examine-table-container {
+  overflow: auto;
+}
 .vcf-table {
   @extend .table, .table-striped;
+  margin-bottom: 0;
 }
 .vcf-table thead {
   background-color: $color-bg-body;
@@ -266,60 +489,6 @@ a, a:hover {
   overflow-x: hidden;
 }
 
-/*------[ Stats Summary ]------*/
-.examine-summary-container {
-  @extend .col-md-4;
-}
-#stats-container {
-  border: 1px solid $color-border-light;
-  border-radius: $radius;
-}
-#stats-container .precision-recall {
-  border-bottom: 1px solid $color-border-light;
-}
-#stats-container table {
-  width: 100%;
-  td, th {
-    padding: 5px;
-    text-align: center;
-  }
-  td {
-    border-top: 1px solid $color-border-light;
-    border-left: 1px solid $color-border-light;
-    &:first-child {
-      border-left: none;
-    }
-  }
-  th {
-    font-family: "freight-sans-pro", verdana, helvetica, sans-serif;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    background-color: $color-bg-body-dark;
-    border-right: 1px solid $color-border-light;
-    border-bottom: 1px solid $color-border-light;
-    &:last-child {
-      border-right: none;
-    }
-  }
-  .other-stats {
-    border-top: 2px solid $color-border-light;
-    th {
-      font-weight: normal;
-      background-color: $color-bg-body;
-      border-right: 1px solid $color-border-light;
-      border-bottom: 1px solid transparent;
-      &:last-child {
-        border-right: none;
-      }
-    }
-  }
-}
-#stats-container .total-records {
-  text-align: center;
-  padding: 3px 0;
-}
-
 /*------[ pileup.js ]------*/
 .variant-inspector {
   position: fixed;
@@ -397,152 +566,4 @@ a, a:hover {
 }
 .pileup {
   border-top: 1px solid $color-gray-medium;
-}
-
-/*------[ VCFValidation ]------*/
-.vcf-validations select {
-  @extend .form-control;
-}
-.examine-header {
-  @extend .container;
-  margin-bottom: 1em;
-  margin-top: 20px;
-}
-
-/*------[ Examine Information ]------*/
-.examine-info-container {
-  @extend .col-md-8;
-}
-.examine-cql {
-  background-color: $color-border-light;
-  padding: 0.5em;
-  position: relative;
-  float:none;
-}
-
-/*------[ CQL Typeahead ]------*/
-.query-container * { box-sizing: border-box; }
-.typeahead-input {
-  position: relative;
-}
-.typeahead-input .twitter-typeahead {
-  width: 100%;
-}
-.typeahead-input .query-input,
-.typeahead-input .twitter-typeahead .tt-query,
-.typeahead-input .twitter-typeahead .tt-hint {
-  width: 100%;
-  height: 40px;
-  padding: 8px 12px;
-  font-size: 22px;
-  line-height: 30px;
-  border: 1px solid $color-border-light;
-  border-radius: $radius;
-  outline: none;
-  padding-right: 155px;  /* 20px for .cql-help + .download-vcf + padding */
-  padding-left: 37px;  /* 18px for .query-status + padding */
-}
-.query-container input {
-  font-family: "inconsolatas", monospace !important;
-  font-weight: 200;
-}
-.query-status {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  margin-top: -8px;
-  width: 18px;
-  height: 18px;
-  z-index: 1;
-  line-height: 1.43;
-}
-.query-status.good {
-  background: $color-status-success;
-  border-radius: 20px;
-}
-.query-status.good:before {
-  content: "✓";
-  position: relative;
-  left: 3px;
-  bottom: 2px;
-  color: $color-white;
-}
-.query-status.bad {
-  background: $color-status-error;
-  border-radius: 1px;
-}
-.query-status.bad:before {
-  content: "×";
-  position: relative;
-  left: -1px;
-  bottom: 9px;
-  font-size: 1.5em;
-  color: $color-white;
-}
-.query-status.loading {
-  background: url(/static/img/loader.gif) no-repeat;
-}
-.query-status.loading:before {
-  content: "";
-}
-.cql-help {
-  @extend .glyphicon-question-sign, %link;
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  font-size: 1rem;
-  &:before {
-    @extend .glyphicon;
-  }
-}
-.server-error {
-  color: $color-status-error;
-}
-.tt-hint {
-  color: $color-text-dim;
-}
-.error-message {
-  display: none;
-}
-/* Styles from http://stackoverflow.com/a/20205623/388951 */
-.typeahead-input .tt-query {
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-}
-.typeahead-input .tt-hint {
-  color: $color-text-dim;
-}
-.typeahead-input .tt-dropdown-menu {
-  min-width: 422px;
-  margin-top: 12px;
-  padding: 8px 0;
-  background-color: $color-white;
-  border: 1px solid $color-border-light;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  border-radius: $radius;
-  box-shadow: 0 5px 10px rgba(0,0,0,.2);
-}
-.typeahead-input .tt-suggestion {
-  padding: 3px 20px;
-  font-size: 18px;
-  line-height: 24px;
-}
-.typeahead-input .tt-suggestion.tt-cursor {
-  background-color: $color-bg-hover;
-  cursor: pointer;
-}
-.typeahead-input .tt-suggestion p {
-  margin: 0;
-}
-
-/*------[ Download VCF ]------*/
-a.download-vcf {
-  @extend .btn, .btn-primary, .btn-xs, .glyphicon-download-alt;
-  margin-left: 180px; /* from .dl-horizontal dd */
-  position: absolute;
-  top: 1.4em;
-  right: 4em;
-  &:before {
-    @extend .glyphicon;
-    padding-right: 5px;
-  }
 }

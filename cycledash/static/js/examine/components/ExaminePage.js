@@ -3,6 +3,7 @@
 var React = require('react'),
     PileupViewer = require('./PileupViewer'),
     StatsSummary = require('./StatsSummary'),
+    RecordsShown = require('./RecordsShown'),
     VCFTable = require('./VCFTable'),
     QueryBox = require('./QueryBox'),
     Downloads = require('./Downloads'),
@@ -106,27 +107,32 @@ var ExaminePage = React.createClass({
             <div className="row">
               <div className="examine-info-container">
                 <ExamineInformation run={run}/>
-                {props.comparableVcfs ?
-                <VCFValidation vcfs={props.comparableVcfs}
-                               selectedVcfId={state.selectedVcfId}
-                               handleComparisonVcfChange={this.handleComparisonVcfChange} /> :
-                  null}
-              </div>
-              <div className="examine-summary-container">
-                <StatsSummary hasLoaded={state.hasLoaded}
-                              stats={state.stats} />
               </div>
             </div>
           </div>
-          <div className="examine-cql">
-            <QueryBox columns={state.columns}
-                      hasPendingRequest={state.hasPendingRequest}
-                      loadError={state.loadError}
-                      query={state.query}
-                      handleQueryChange={this.handleQueryChange} />
-            <Downloads query={state.query} run_id={run.id} />
+          <div className="examine-table-controls">
+            <div className="examine-cql">
+              <QueryBox columns={state.columns}
+                        hasPendingRequest={state.hasPendingRequest}
+                        loadError={state.loadError}
+                        query={state.query}
+                        handleQueryChange={this.handleQueryChange} />
+            </div>
+            {props.comparableVcfs ?
+              <VCFValidation vcfs={props.comparableVcfs}
+                             selectedVcfId={state.selectedVcfId}
+                             handleComparisonVcfChange={this.handleComparisonVcfChange} /> :
+            null}
+            <div className="download-container">
+              <RecordsShown hasLoaded={state.hasLoaded}
+                            numberOfFilteredRecords={state.stats.totalRecords}
+                            totalNumberOfRecords={state.stats.totalUnfilteredRecords} />
+              <Downloads query={state.query} run_id={run.id} />
+            </div>
+            <StatsSummary hasLoaded={state.hasLoaded}
+                            stats={state.stats} />
           </div>
-          <div className="examine-table">
+          <div className="examine-table-container">
             <VCFTable ref="vcfTable"
                       hasLoaded={state.hasLoaded}
                       records={state.records}
