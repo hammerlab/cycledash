@@ -30,9 +30,8 @@ from workers.shared import (worker, DATABASE_URI, TEMPORARY_DIR,
                             initialize_database, temp_csv,
                             update_extant_columns, register_running_task)
 
-if not config.TRAVIS:
-    from pyensembl import EnsemblRelease
-    from varcode import Variant
+from pyensembl import EnsemblRelease
+from varcode import Variant
 
 @worker.task(bind=True)
 def annotate(self, vcf_id):
