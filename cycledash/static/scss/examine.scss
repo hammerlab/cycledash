@@ -31,6 +31,7 @@ a, a:hover {
     }
     th {
       border-top: 0;
+      width: 110px;
     }
     td {
       border-top: 0;
@@ -99,7 +100,7 @@ a.download-vcf {
 .typeahead-input .twitter-typeahead .tt-hint {
   width: 100%;
   height: 34px;
-  padding: 8px 12px;
+  padding: 5px 12px;
   font-size: 1rem;
   line-height: 30px;
   border: 1px solid #ccc;
@@ -108,14 +109,11 @@ a.download-vcf {
   padding-right: 30px;  /* 20px for .cql-help + padding */
   padding-left: 37px;  /* 18px for .query-status + padding */
 }
-.query-container input {
-  letter-spacing: 1px;
-}
 .query-status {
   position: absolute;
   left: 10px;
   top: 50%;
-  margin-top: -8px;
+  margin-top: -9px;
   width: 18px;
   height: 18px;
   z-index: 1;
