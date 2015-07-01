@@ -194,3 +194,7 @@ sc -u $SAUCE_USERNAME -k $SAUCE_ACCESS_KEY --daemonize
 
 This ensures that the tunnel to SauceLabs is always open, and needn't be
 reestablished on every run of the script. 
+
+When debugging tests, the `interactive` mode of seltest can be very useful
+to drive the tests by hand from a Python REPL. Simply run `sel interactive`
+to get started. Cf. more documentation at [seltest](https://github.com/ihodes/seltest).
