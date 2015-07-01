@@ -72,10 +72,10 @@ def annotate(self, vcf_id):
              .where(genotypes.c.vcf_id == vcf_id)
              .values(
                  {
-                    'annotations:varcode_gene_name': tmp_table.c.gene_name,
-                    'annotations:varcode_transcript': tmp_table.c.transcript,
-                    'annotations:varcode_effect_notation': tmp_table.c.notation,
-                    'annotations:varcode_effect_type': tmp_table.c.effect_type
+                    'annotations:gene_name': tmp_table.c.gene_name,
+                    'annotations:transcript': tmp_table.c.transcript,
+                    'annotations:effect_notation': tmp_table.c.notation,
+                    'annotations:effect_type': tmp_table.c.effect_type
                  }
              )).execute()
         finally:
