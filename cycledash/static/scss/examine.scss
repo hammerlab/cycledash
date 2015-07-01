@@ -235,8 +235,12 @@ a.download-vcf {
 }
 
 /*------[ VCF Table ]------*/
+.examine-table-container {
+  overflow: auto;
+}
 .vcf-table {
   @extend .table, .table-striped;
+  margin-bottom: 0;
 }
 .vcf-table thead {
   background-color: $color-bg-body;

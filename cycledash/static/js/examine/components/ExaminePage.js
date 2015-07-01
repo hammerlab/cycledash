@@ -110,28 +110,29 @@ var ExaminePage = React.createClass({
               </div>
             </div>
           </div>
-            <div className="examine-table-controls">
-              <div className="examine-cql">
-                <QueryBox columns={state.columns}
-                          hasPendingRequest={state.hasPendingRequest}
-                          loadError={state.loadError}
-                          query={state.query}
-                          handleQueryChange={this.handleQueryChange} />
-              </div>
-              {props.comparableVcfs ?
-                <VCFValidation vcfs={props.comparableVcfs}
-                               selectedVcfId={state.selectedVcfId}
-                               handleComparisonVcfChange={this.handleComparisonVcfChange} /> :
-              null}
-              <div className="download-container">
-                <RecordsShown hasLoaded={state.hasLoaded}
-                              numberOfFilteredRecords={state.stats.totalRecords}
-                              totalNumberOfRecords={state.stats.totalUnfilteredRecords} />
-                <Downloads query={state.query} run_id={run.id} />
-              </div>
-              <StatsSummary hasLoaded={state.hasLoaded}
-                              stats={state.stats} />
+          <div className="examine-table-controls">
+            <div className="examine-cql">
+              <QueryBox columns={state.columns}
+                        hasPendingRequest={state.hasPendingRequest}
+                        loadError={state.loadError}
+                        query={state.query}
+                        handleQueryChange={this.handleQueryChange} />
             </div>
+            {props.comparableVcfs ?
+              <VCFValidation vcfs={props.comparableVcfs}
+                             selectedVcfId={state.selectedVcfId}
+                             handleComparisonVcfChange={this.handleComparisonVcfChange} /> :
+            null}
+            <div className="download-container">
+              <RecordsShown hasLoaded={state.hasLoaded}
+                            numberOfFilteredRecords={state.stats.totalRecords}
+                            totalNumberOfRecords={state.stats.totalUnfilteredRecords} />
+              <Downloads query={state.query} run_id={run.id} />
+            </div>
+            <StatsSummary hasLoaded={state.hasLoaded}
+                            stats={state.stats} />
+          </div>
+          <div className="examine-table-container">
             <VCFTable ref="vcfTable"
                       hasLoaded={state.hasLoaded}
                       records={state.records}
@@ -145,6 +146,7 @@ var ExaminePage = React.createClass({
                       handleOpenViewer={this.handleOpenViewer}
                       handleSetComment={this.handleSetComment}
                       handleDeleteComment={this.handleDeleteComment} />
+          </div>
           {pileupViewer}
         </div>
        );
