@@ -3,7 +3,9 @@ from seltest import url, waitfor, dontwaitfor, Base, hide
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.action_chains import ActionChains
 
+
 BASE = 'localhost:5001'
+
 
 class Website(Base):
     window_size = [1280, 800]
