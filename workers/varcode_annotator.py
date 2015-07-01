@@ -35,9 +35,12 @@ from varcode import Variant
 
 @worker.task(bind=True)
 def annotate(self, vcf_id):
+    register_running_task(self, vcf_id)
+    return _annotate(vcf_id)
+
+def _annotate(vcf_id):
     if vcf_id == False:
         return  # An error must have occurred earlier.
-    register_running_task(self, vcf_id)
 
     # Only runs the first time for this release.
     EnsemblRelease(config.ENSEMBL_RELEASE).install()
