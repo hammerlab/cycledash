@@ -453,6 +453,7 @@ a.download-vcf {
   font-size: 1rem;
   display: inline-block;
   &:before {
+    top: 4px;
     @extend .glyphicon;
   }
 }
@@ -473,7 +474,6 @@ a.download-vcf {
 .vcf-table th .sorting-by.desc:before {
   content: ' ↓';
 }
-
 .vcf-table td.pos {
   font-family: "inconsolata", monospace;
 }
@@ -497,16 +497,40 @@ a.download-vcf {
   top: 0;
   bottom: 0;
   background-color: $color-bg-expanded;
-}
-.variant-inspector .close-button, .variant-inspector .right-button {
-  float: right;
-  text-decoration: none;
-  margin-right: 5px;
-}
-.variant-inspector .left-button {
-  float: left;
-  text-decoration: none;
-  margin-left: 5px;
+  .close-button, .right-button, .left-button {
+    padding: 0.5rem;
+    &:before {
+      @extend .glyphicon;
+    }
+    &:active, &:hover, &:focus {
+      color: #000;
+    }
+  }
+  .right-button, .left-button {
+    @extend .btn, .btn-default;
+    &:before {
+      top: 2px;
+    }
+    font-size: 1rem;
+    position: absolute;
+    top: 50%;
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    text-align: center;
+  }
+  .left-button {
+    @extend .glyphicon-arrow-left;
+    left: 0.5em;
+  }
+  .right-button {
+    @extend .glyphicon-arrow-right;
+    right: 0.5em;
+  }
+  .close-button {
+    @extend .glyphicon-remove;
+    float: right;
+  }
 }
 #pileup-container {
   position: absolute;
@@ -520,23 +544,34 @@ a.download-vcf {
   background-color: $color-white;
   border-radius: $radius;
 }
+
 #pileup-container .controls {
   select, input {
     @extend .form-control;
-    display: inline-block;
     width: auto;
+    display: inline-block;
+  }
+  select {
+    margin-right: 0.5em
+  }
+  .btn-submit {
+    @extend .btn, .btn-primary;
     margin-left: 0.5em;
   }
-  button {
+  .zoom-controls {
+    margin-left: 1em;
+  }
+  .btn-zoom-in, .btn-zoom-out {
     @extend .btn, .btn-default;
-    &:first-of-type {
-      @extend .btn-primary;
-      margin-left: 0.5em;
-      margin-right: 1em;
+    &:before {
+      @extend .glyphicon;
     }
-    &:last-of-type {
-      margin-left: 0.25em;
-    }
+  }
+  .btn-zoom-out {
+    @extend .glyphicon-zoom-out;
+  }
+  .btn-zoom-in {
+    @extend .glyphicon-zoom-in;
   }
 }
 
@@ -549,7 +584,7 @@ a.download-vcf {
 }
 
 #pileup-container .controls {
-  flex: 0 0 35px;  /* fixed height */
+  flex: 0 0 36px;  /* fixed height */
 }
 #pileup-container .reference {
   flex: 0 0 50px;  /* fixed height */
@@ -563,6 +598,9 @@ a.download-vcf {
   overflow-y: auto;  /* extra content scrolls */
   /* a vertical scroll bar can result in a horizontal bar, which we don't want. */
   overflow-x: hidden;
+}
+#pileup-container .track-label {
+  font-family: "freight-sans-pro", verdana, helvetica, sans-serif;
 }
 .pileup {
   border-top: 1px solid $color-gray-medium;
