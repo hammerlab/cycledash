@@ -8,6 +8,7 @@ gulp prod
 SELTEST_CAPABILITIES=scripts/seltest-remote-capabilities.json
 SAUCE_URL='ondemand.saucelabs.com:80/wd/hub'
 
+export LOGIN_DISABLED=true
 python run.py > test-server-logs.txt 2>&1 &
 RUN_PID=$!
 trap "kill $RUN_PID" EXIT

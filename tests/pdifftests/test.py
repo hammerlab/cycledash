@@ -22,6 +22,17 @@ class Website(Base):
         """Initial view of the comments page."""
         pass
 
+    @url('/login')
+    def login(self, driver):
+        """View of the login page."""
+        pass
+
+    @url('/register')
+    def register(self, driver):
+        """View of the registration page."""
+        pass
+
+
 class Runs(Base):
     window_size = [1280, 800]
     base_url = BASE
@@ -58,6 +69,7 @@ class Runs(Base):
         add_run = driver.find_element_by_css_selector(add_run_btn_sel)
         add_run.click()
 
+
 class Tasks(Base):
     window_size = [1280, 800]
     base_url = BASE + '/runs/1/tasks'
@@ -65,6 +77,7 @@ class Tasks(Base):
     def page(self, driver):
         """Tasks view for a particular run."""
         pass
+
 
 class Examine(Base):
     window_size = [1280, 800]

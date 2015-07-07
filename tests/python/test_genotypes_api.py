@@ -4,13 +4,13 @@ import nose.tools as asserts
 import json
 
 from cycledash import db
-from cycledash import genotypes
+from cycledash.api import genotypes
 from common.helpers import tables, pick
 from workers.genotype_extractor import _extract
 
 from test_projects_api import create_project_with_name
 from test_runs_api import create_run_with_uri
-from helpers import delete_tables
+import helpers
 
 
 class TestGenotypesAPI(object):
@@ -25,7 +25,7 @@ class TestGenotypesAPI(object):
 
     @classmethod
     def tearDownClass(cls):
-        delete_tables(db.engine, 'genotypes', 'vcfs', 'bams', 'projects')
+        helpers.delete_all_records(db)
 
     def test_number_of_genotypes_normal_sample_name(self):
         run_id = self.chr_run['id']

@@ -3,11 +3,12 @@ import functools
 import json
 import os
 import re
+from urlparse import urlparse, urljoin
 
 from cycledash import db
 from common.helpers import tables, to_epoch
 
-from flask import jsonify, request
+from flask import jsonify, request, url_for, redirect
 import flask.ext.restful, flask.ext.restful.fields
 import voluptuous
 from werkzeug.utils import secure_filename
@@ -201,6 +202,26 @@ def validate_with(schema):
             return f(*args, **kwargs)
         return wrapper
     return decorator
+
+
+def is_safe_url(target):
+    """Make sure a redirect target is to the same server
+
+    This is used to prevent open redirects.
+
+    cf. http://flask.pocoo.org/snippets/62/."""
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return test_url.scheme in ('http', 'https') and \
+           ref_url.netloc == test_url.netloc
+
+
+def safely_redirect_to_next(fallback_endpoint, **values):
+    """Redirect to `next` endpoint if safe, else to `fallback_endpoint`."""
+    target = request.form.get('next')
+    if not target or not is_safe_url(target):
+        target = url_for(fallback_endpoint, **values)
+    return redirect(target)
 
 
 def abort_if_none_for(obj_name):

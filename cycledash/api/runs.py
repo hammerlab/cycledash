@@ -1,16 +1,16 @@
 from flask import request
-from flask.ext.restful import abort, Resource, fields
+from flask.ext.restful import abort, fields
 from sqlalchemy import select, desc, func
 import voluptuous
 
-from cycledash import db, genotypes
+from cycledash import db
 from cycledash.helpers import (get_id_where, get_where, abort_if_none_for,
                                validate_with, marshal_with)
-import cycledash.bams
-import cycledash.projects
 from cycledash.validations import CreateRun, UpdateRun, expect_one_of
 from common.helpers import tables
 import workers.runner
+
+from . import genotypes, bams, projects, Resource
 
 
 run_fields = {
@@ -35,6 +35,7 @@ thick_run_fields = dict(
 
 
 class RunList(Resource):
+    require_auth = True
     @marshal_with(run_fields, envelope='runs')
     def get(self):
         """Get list of all runs in order of recency."""
@@ -57,7 +58,7 @@ class RunList(Resource):
             errors = [str(err) for err in e.errors]
             abort(409, message='Validation error', errors=errors)
         try:
-            cycledash.projects.set_and_verify_project_id_on(run)
+            projects.set_and_verify_project_id_on(run)
         except voluptuous.Invalid as e:
             abort(404, message='Project not found.', errors=[str(e)])
         try:
@@ -74,13 +75,14 @@ class RunList(Resource):
 
 
 class Run(Resource):
+    require_auth = True
     @marshal_with(thick_run_fields)
     def get(self, run_id):
         """Return a vcf with a given ID."""
         with tables(db.engine, 'vcfs') as (con, runs):
             q = select(runs.c).where(runs.c.id == run_id)
             run = dict(_abort_if_none(q.execute().fetchone(), run_id))
-        cycledash.bams.attach_bams_to_vcfs([run])
+        bams.attach_bams_to_vcfs([run])
         return run
 
     @validate_with(UpdateRun)

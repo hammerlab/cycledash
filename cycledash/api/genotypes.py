@@ -2,10 +2,8 @@
 from collections import OrderedDict
 import copy
 import json
-
 from flask import request
 import flask.ext.restful as restful
-from flask.ext.restful import Resource
 from sqlalchemy import (select, func, types, cast, join, outerjoin, asc, desc,
                         and_, Integer, Float, String, distinct)
 from sqlalchemy.sql import text
@@ -17,8 +15,11 @@ from plone.memoize import forever
 from cycledash import db
 from common.helpers import tables
 
+from . import Resource
+
 
 class Genotypes(Resource):
+    require_auth = True
     def get(self, run_id):
         return get(run_id, json.loads(request.args.get('q')))
 

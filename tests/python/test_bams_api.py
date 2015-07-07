@@ -2,10 +2,11 @@ import mock
 import nose
 import json
 
-from cycledash import app, db
+from cycledash import db
 from common.helpers import tables
 
 from test_projects_api import create_project_with_name
+import helpers
 
 
 def create_bam_with_name(project_id, name, uri='hdfs://testbam.bam'):
@@ -17,30 +18,29 @@ def create_bam_with_name(project_id, name, uri='hdfs://testbam.bam'):
         return dict(res.fetchone())
 
 
-class TestBamsAPI(object):
+class TestBamsAPI(helpers.ResourceTest):
     PROJECT_NAME = 'TEST PROJECT BAM'
     BAM_NAME = 'something bam name'
     PATH = 'hdfs://somebam.bam'
 
-    def setUp(self):
-        self.app = app.test_client()
-        self.project = create_project_with_name(self.PROJECT_NAME)
+    @classmethod
+    def setUpClass(cls):
+        cls.project = create_project_with_name(cls.PROJECT_NAME)
+        return super(TestBamsAPI, cls).setUpClass()
 
     def tearDown(self):
-        with tables(db.engine, 'projects', 'bams') as (con, projects, bams):
-            bams.delete(bams.c.name == self.BAM_NAME).execute()
-            projects.delete(projects.c.name == self.PROJECT_NAME).execute()
+        helpers.delete_table(db, 'bams')
 
     @mock.patch('workers.indexer.index.delay', lambda *args, **kwargs: True)
     def test_create_bam(self):
         NOTES = 'random notes'
         TISSUES = 'left ovary etc'
-        r = self.app.post('/api/bams',
-                          data=json.dumps({'name': self.BAM_NAME,
-                                           'notes': NOTES,
-                                           'tissues': TISSUES,
-                                           'uri': self.PATH,
-                                           'projectId': self.project['id']}))
+        r = self.post('/api/bams',
+                      data={'name': self.BAM_NAME,
+                            'notes': NOTES,
+                            'tissues': TISSUES,
+                            'uri': self.PATH,
+                            'projectId': self.project['id']})
         assert r.status_code == 201
         assert isinstance(json.loads(r.data)['id'], int)
         assert json.loads(r.data)['projectId'] == self.project['id']
@@ -51,10 +51,10 @@ class TestBamsAPI(object):
 
     @mock.patch('workers.indexer.index.delay', lambda *args, **kwargs: True)
     def test_create_bam_with_project_name(self):
-        r = self.app.post('/api/bams',
-                          data=json.dumps({'name': self.BAM_NAME,
-                                           'uri': self.PATH,
-                                           'projectName': self.project['name']}))
+        r = self.post('/api/bams',
+                      data={'name': self.BAM_NAME,
+                            'uri': self.PATH,
+                            'projectName': self.project['name']})
         assert r.status_code == 201
         assert isinstance(json.loads(r.data)['id'], int)
         assert json.loads(r.data)['projectId'] == self.project['id']
@@ -62,25 +62,25 @@ class TestBamsAPI(object):
         assert json.loads(r.data)['uri'] == self.PATH
 
     def test_create_bam_without_project(self):
-        r = self.app.post('/api/bams',
-                          data=json.dumps({'name': self.BAM_NAME,
-                                           'uri': self.PATH}))
+        r = self.post('/api/bams',
+                      data={'name': self.BAM_NAME,
+                            'uri': self.PATH})
         assert r.status_code == 409
         assert 'is required' in json.loads(r.data)['errors'][0]
         assert 'Validation error' in json.loads(r.data)['message']
 
     def test_create_bam_with_nonexistent_project(self):
-        r = self.app.post('/api/bams',
-                          data=json.dumps({'name': self.BAM_NAME,
-                                           'uri': self.PATH,
-                                           'projectId': 1000000000}))
+        r = self.post('/api/bams',
+                      data={'name': self.BAM_NAME,
+                            'uri': self.PATH,
+                            'projectId': 1000000000})
         assert r.status_code == 404
         assert 'not found' in json.loads(r.data)['message']
 
     def test_get_bam(self):
         bam = create_bam_with_name(self.project['id'], self.BAM_NAME)
 
-        r = self.app.get('/api/bams/{}'.format(bam['id']))
+        r = self.get('/api/bams/{}'.format(bam['id']))
         assert r.status_code == 200
         assert json.loads(r.data)['id'] == bam['id']
         assert json.loads(r.data)['name'] == bam['name']
@@ -88,7 +88,7 @@ class TestBamsAPI(object):
 
     def test_get_bams(self):
         bam = create_bam_with_name(self.project['id'], self.BAM_NAME)
-        r = self.app.get('/api/bams')
+        r = self.get('/api/bams')
         bams = json.loads(r.data)['bams']
         assert r.status_code == 200
         assert isinstance(bams, list)
@@ -99,8 +99,8 @@ class TestBamsAPI(object):
         bam = create_bam_with_name(self.project['id'], self.BAM_NAME)
 
         NEW_NOTES = 'these are new BAM notes'
-        r = self.app.put('/api/bams/{}'.format(bam['id']),
-                         data=json.dumps({'notes': NEW_NOTES}))
+        r = self.put('/api/bams/{}'.format(bam['id']),
+                     data={'notes': NEW_NOTES})
         assert r.status_code == 200
         assert json.loads(r.data)['id'] == bam['id']
         assert json.loads(r.data)['name'] == bam['name']
@@ -109,9 +109,9 @@ class TestBamsAPI(object):
 
     def test_delete_bam(self):
         bam = create_bam_with_name(self.project['id'], self.BAM_NAME)
-        r = self.app.delete('/api/bams/{}'.format(bam['id']))
+        r = self.delete('/api/bams/{}'.format(bam['id']))
         assert r.status_code == 200
         assert json.loads(r.data)['id'] == bam['id']
         assert json.loads(r.data)['name'] == bam['name']
-        r = self.app.get('/api/bams/{}'.format(bam['id']))
+        r = self.get('/api/bams/{}'.format(bam['id']))
         assert r.status_code == 404

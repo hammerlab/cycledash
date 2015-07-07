@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block body %}
-{{ nav("comments") }}
+{{ nav("comments", current_user) }}
 <main id="comments"></main>
 <script type="text/javascript" src="/static/js/dist/bundled.js"></script>
 <script>

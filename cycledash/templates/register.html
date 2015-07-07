@@ -1,0 +1,44 @@
+{% extends "layouts/layout.html" %}
+{%- from 'macros/nav.html' import nav -%}
+
+{% block head %}
+<link rel="stylesheet" href="static/css/style.css">
+{% endblock %}
+
+{% block body %}
+{{ nav("register", current_user) }}
+<main id="register">
+  <form class="centered-form" method="POST">
+    <h2>Register for Cycledash</h3>
+    {% if errors %}
+    <p class="bg-danger form-errors">{{errors}}</p>
+    {% endif %}
+    <div class="form-group add-form-input-half">
+      <label class="control-label">Username</label>
+      <input class="form-control" "type="text"
+             placeholder="username" name="username">
+    </div>
+    <div class="form-group add-form-input-half">
+      <label class="control-label">Email</label>
+      <input class="form-control" "type="text"
+             placeholder="email" name="email">
+    </div>
+    <div class="form-group add-form-input-half">
+      <label class="control-label">Password</label>
+      <p class="help-block">Password must be 8 characters or more.</p>
+      <input class="form-control" type="password"
+             placeholder="password" name="password1">
+    </div>
+    <div class="form-group add-form-input-half">
+      <label class="control-label">Confirm password</label>
+      <input class="form-control" type="password"
+             placeholder="confirm password" name="password2">
+    </div>
+    <div className='form-group add-form-input-full'>
+      <button class="btn btn-info btn-block" type="submit">
+        Register
+      </button>
+    </div>
+  </form>
+</main>
+{% endblock %}

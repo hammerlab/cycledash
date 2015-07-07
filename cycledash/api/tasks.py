@@ -1,13 +1,15 @@
 """Methods for working with Celery task states."""
 from collections import defaultdict
 from sqlalchemy import select
-from flask.ext.restful import abort, Resource, fields
+from flask.ext.restful import abort, fields
 
 from common.helpers import tables
 from cycledash.helpers import marshal_with
 from cycledash import db
 from workers.shared import update_tasks_table, worker
 import workers.runner
+
+from . import Resource
 
 
 task_fields = {
@@ -18,6 +20,7 @@ task_fields = {
 
 
 class TaskList(Resource):
+    require_auth = True
     @marshal_with(task_fields, envelope='tasks')
     def get(self, run_id):
         with tables(db.engine, 'task_states') as (con, tasks):
@@ -37,6 +40,7 @@ class TaskList(Resource):
 
 
 class TasksRestart(Resource):
+    require_auth = True
     def post(self, run_id):
         restart_failed_tasks_for(run_id)
         return {'message': 'Restarting failed tasks (run_id={})'.format(run_id)}

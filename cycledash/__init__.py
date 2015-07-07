@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
-from flask.ext import restful
+from flask.ext import restful, login, bcrypt
 import humanize
 import logging
 import sys
@@ -12,8 +12,18 @@ def initialize_application():
     _configure_application(app)
     _configure_logging(app)
     _configure_templates(app)
+    _configure_extensions(app)
 
     return app
+
+
+def _configure_extensions(app):
+    global db, api, login_manager, bcrypt
+    db = SQLAlchemy(app)
+    api = restful.Api(app, prefix='/api', catch_all_404s=True)
+    bcrypt = bcrypt.Bcrypt(app)
+    login_manager = login.LoginManager()
+    login_manager.init_app(app)
 
 
 def _configure_logging(app):
@@ -39,8 +49,7 @@ def _configure_templates(app):
 
 
 app = initialize_application()
-db = SQLAlchemy(app)
-api = restful.Api(app, prefix='/api', catch_all_404s=True)
 
 
 import cycledash.views
+import cycledash.auth

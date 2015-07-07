@@ -1,6 +1,6 @@
 """Defines the API for BAMs."""
 from flask import request
-from flask.ext.restful import abort, Resource, fields
+from flask.ext.restful import abort, fields
 from sqlalchemy import select, desc
 import voluptuous
 
@@ -8,8 +8,10 @@ from common.helpers import tables, find
 from cycledash.validations import CreateBam, UpdateBam, expect_one_of
 from cycledash import db
 from cycledash.helpers import validate_with, abort_if_none_for, marshal_with
-import cycledash.projects
 import workers.indexer
+
+import projects
+from . import Resource
 
 
 bam_fields = {
@@ -25,6 +27,7 @@ bam_fields = {
 
 
 class BamList(Resource):
+    require_auth = True
     @marshal_with(bam_fields, envelope='bams')
     def get(self):
         """Get list of all BAMs."""
@@ -44,7 +47,7 @@ class BamList(Resource):
             errors = [str(err) for err in e.errors]
             abort(409, message='Validation error', errors=errors)
         try:
-            cycledash.projects.set_and_verify_project_id_on(request.validated_body)
+            projects.set_and_verify_project_id_on(request.validated_body)
         except voluptuous.Invalid as e:
             abort(404, message='Project not found.', error=str(e))
         with tables(db.engine, 'bams') as (con, bams):
@@ -56,6 +59,7 @@ class BamList(Resource):
 
 
 class Bam(Resource):
+    require_auth = True
     @marshal_with(bam_fields)
     def get(self, bam_id):
         """Get a BAM by its ID."""

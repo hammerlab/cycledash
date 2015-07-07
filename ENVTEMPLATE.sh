@@ -6,6 +6,8 @@ export WEBHDFS_USER=username
 export WEBHDFS_URL=http://example.com:5000
 export IGV_HTTPFS_URL=http://example.com:9876
 export ALLOW_VCF_OVERWRITES=False
+export BCRYPT_LOG_ROUNDS=12
+export SECRET_KEY  # Set to something real + random for deployment
 
 # True for automatic reloading & debugging JS insertion.
 export USE_RELOADER=False

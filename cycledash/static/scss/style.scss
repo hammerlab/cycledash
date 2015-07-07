@@ -99,9 +99,20 @@ label {
   font-size: 0.875em;
   color: $color-text-dim;
 }
+.form-errors {
+    padding: 0.6em;
+}
 .form-group.required .control-label:after {
   content:"*";
   color: $color-red;
+}
+form.centered-form {
+  width: 500px;
+  background: $color-bg-body-dark;
+  border: 1px solid $color-border-light;
+  border-radius: $radius;
+  margin: 2em auto;
+  padding: 1em 2em 2em 2em;
 }
 section#api-docs > section {
   @extend %card;

@@ -35,3 +35,15 @@ nav.navigation .active a:hover {
 nav.navigation .active {
   font-weight: bold;
 }
+nav #user-login-logout {
+  float: right;
+  display: inline-block;
+}
+
+nav #user-login-logout {
+  float: right;
+  #logout {
+    border: none;
+    background: none;
+  }
+}
