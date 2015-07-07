@@ -112,7 +112,16 @@ form.centered-form {
   border: 1px solid $color-border-light;
   border-radius: $radius;
   margin: 2em auto;
-  padding: 1em 2em 2em 2em;
+  padding: 1em;
+  h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 0.5em;
+  }
+}
+.create-account {
+  display: block;
+  text-align: center;
 }
 section#api-docs > section {
   @extend %card;
