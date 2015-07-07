@@ -9,24 +9,24 @@
 {{ nav("login", current_user) }}
 <main id="login">
   <form class="centered-form" method="POST">
-    <h2>Login to Cycledash</h3>
+    <h2>Cycledash Login</h3>
     {% if errors %}
     <p class="bg-danger form-errors">{{errors}}</p>
     {% endif %}
-    <div class="form-group add-form-input-half">
+    <div class="form-group">
       <label class="control-label">Username</label>
-      <input class="form-control" "type="text"
-             placeholder="username" name="username">
+      <input class="form-control" type="text"
+             name="username">
     </div>
     <div class="form-group add-form-input-half">
       <label class="control-label">Password</label>
       <input class="form-control" type="password"
-             placeholder="password" name="password">
+             name="password">
     </div>
-    <div className='form-group add-form-input-full'>
-      <button class="btn btn-info btn-block"type="submit">Log in</button>
+    <div class="form-group">
+      <button class="btn btn-primary btn-block" type="submit">Log In</button>
     </div>
-    <a href="/register">Register here if you don't have an account</a>
+    <a class="create-account" href="/register">Create an account</a>
   </form>
 </main>
 {% endblock %}

@@ -20,7 +20,7 @@ nav.navigation ul {
 }
 nav.navigation li {
   display: inline-block;
-  padding: 0 0 0 1em;
+  padding: 0 1em 0 0;
 }
 nav.navigation a {
   color: black;
@@ -35,15 +35,24 @@ nav.navigation .active a:hover {
 nav.navigation .active {
   font-weight: bold;
 }
+#navigation-list {
+  float: left;
+}
 nav #user-login-logout {
   float: right;
   display: inline-block;
-}
-
-nav #user-login-logout {
-  float: right;
+  .active:hover {
+    text-decoration: none;
+  }
+  li {
+    padding: 0;
+  }
   #logout {
     border: none;
     background: none;
+    padding: 0;
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }

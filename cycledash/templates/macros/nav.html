@@ -1,8 +1,8 @@
 {% macro nav(active, current_user) -%}
 <nav class="navigation">
   <div class="container">
-    <a class="header-logo" href="/">Home</a>
     <ul id="navigation-list">
+      <li><a class="header-logo" href="/">Home</a></li>
       <li class="{{ 'active' if active == 'runs' else '' }}">
         <a href="/">Projects</a>
         {% if active == 'examine' %} &raquo;
@@ -22,9 +22,7 @@
           <button id="logout">Log out {{ current_user['username'] }}</button>
         </form>
         {% else %}
-        <a href="/login">
-          <span class="{{ 'active' if active == 'login' else '' }}">Log in</span>
-        </a>
+        <a class="{{ 'active' if active == 'login' else '' }}" href="/login">Log in</a>
         {% endif %}
       </li>
     </ul>
