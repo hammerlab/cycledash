@@ -6,9 +6,6 @@ var React = require('react/addons'),
     assert = require('assert'),
     _ = require('underscore');
 
-global.reactModulesToStub = [
-  'components/BioDalliance.js'
-];
 
 var ExaminePage = require('../../cycledash/static/js/examine/components/ExaminePage'),
     QueryBox = require('../../cycledash/static/js/examine/components/QueryBox'),

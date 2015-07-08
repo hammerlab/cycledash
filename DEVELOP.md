@@ -78,16 +78,9 @@ gulp build
 
 This will also minify the JS and not create a source map.
 
-To update BioDalliance, run:
-
-```
-npm install
-gulp dalliance
-```
-
 Run `gulp peg` to update the `PEG.js` generated grammar after modifying CQL.
 
-Run `gulp prod` to update all of the above (BioDalliance, PEG.js grammar, etc.)
+Run `gulp prod` to update all of the above (PEG.js grammar, etc.)
 
 
 ### 6. Start CycleDash
