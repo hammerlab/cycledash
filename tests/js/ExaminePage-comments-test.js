@@ -6,9 +6,6 @@ var React = require('react/addons'),
     _ = require('underscore'),
     sinon = require('sinon');
 
-global.reactModulesToStub = [
-  'components/BioDalliance.js'
-];
 
 var ExaminePage = require('../../cycledash/static/js/examine/components/ExaminePage'),
     createRecordStore = require('../../cycledash/static/js/examine/RecordStore'),
