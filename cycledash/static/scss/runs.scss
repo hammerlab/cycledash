@@ -50,8 +50,18 @@ form.add-form {
 .add-form-input-full {
   @extend .col-md-12;
 }
-.add-form-notes {
+.form-control.add-form-notes {
   height: 8em;  
+}
+.close {
+  position: absolute;
+  top: 1.75rem;
+  right: 1rem;
+  z-index: 1;
+}
+.add-form-submit {
+  @extend .btn, .btn-primary;
+  float: right;
 }
 
 /*------[ Projects ]------*/
