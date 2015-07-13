@@ -2,26 +2,28 @@
 from collections import defaultdict
 from sqlalchemy import select
 from flask.ext.restful import abort, fields
+from voluptuous import Schema, Any
 
 from common.helpers import tables
-from cycledash.helpers import marshal_with
 from cycledash import db
+from cycledash.validations import Doc
 from workers.shared import update_tasks_table, worker
 import workers.runner
 
-from . import Resource
+from . import Resource, marshal_with, validate_with
 
 
-task_fields = {
-    'state': fields.String,
-    'traceback': fields.String,
-    'type': fields.String
-}
+# Private API
+TaskFields = Schema({
+    Doc('state', 'Current state of the task. PENDING, RUNNING, FAILED.'): basestring,
+    Doc('traceback', 'Traceback in case of failure.'): Any(basestring, None),
+    Doc('type', 'Task/worker name.'): basestring
+})
 
 
 class TaskList(Resource):
     require_auth = True
-    @marshal_with(task_fields, envelope='tasks')
+    @marshal_with(TaskFields, envelope='tasks')
     def get(self, run_id):
         with tables(db.engine, 'task_states') as (con, tasks):
             q = (select([tasks.c.task_id, tasks.c.type, tasks.c.state])
@@ -32,7 +34,7 @@ class TaskList(Resource):
                      'traceback': worker.AsyncResult(task_id).traceback}
                     for task_id, typ, state in con.execute(q).fetchall()]
 
-    @marshal_with(task_fields, envelope='tasks')
+    @marshal_with(TaskFields, envelope='tasks')
     def delete(self, run_id):
         with tables(db.engine, 'tasks') as (con, tasks):
             q = tasks.delete(tasks.c.vcf_id == run_id).returning(*tasks.c)

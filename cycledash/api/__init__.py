@@ -1,9 +1,13 @@
+from collections import OrderedDict
 from flask import request
 import flask.ext.restful
 from flask.ext.login import current_user
+import functools
+import voluptuous
 
 from cycledash import login_manager
 from cycledash.auth import check_login
+from cycledash.helpers import prepare_request_data, camelcase_dict
 
 
 class Resource(flask.ext.restful.Resource, object):
@@ -31,6 +35,70 @@ class Resource(flask.ext.restful.Resource, object):
                 auth_msg = 'Correct username/password required.'
                 return flask.ext.restful.abort(401, message=auth_msg)
         return super(Resource, self).dispatch_request(*args, **kwargs)
+
+
+def marshal(data, schema, envelope=None):
+    """Takes raw data (in the form of a dict, or a list or tuple of dicts) and a
+    voluptuous.Schema to output, and applies the Schmea to the object(s)
+
+    Args:
+       data: the actual object(s) from which the fields are taken from
+       schema: a voluptuous.Schema of whose keys will make up the final
+               serialized response output
+       envelope: optional key that will be used to envelop the serialized
+                 response
+    """
+    items = None
+    if isinstance(data, (list, tuple)):
+        items = [marshal(d, schema) for d in data]
+    elif isinstance(data, dict):
+        items = schema(data)
+    else:
+        raise ValueError('`data` must be a list, tuple, or dict.')
+    if envelope:
+        items = [(envelope, items)]
+    return OrderedDict(items)
+
+
+def marshal_with(schema, envelope=None):
+    """Wraps flask-restful's marshal_with to transform the returned object to
+    have camelCased keys."""
+    def decorator(f):
+        @functools.wraps(f)
+        def wrapper(*args, **kwargs):
+            resp = f(*args, **kwargs)
+            if not isinstance(resp, tuple):
+                content = resp
+                resp = (content, 200, {})
+            content = marshal(resp[0], schema, envelope=envelope)
+            content = camelcase_dict(content)
+            return (content,) + resp[1:]
+        return wrapper
+    return decorator
+
+
+def validate_with(schema):
+    """Wraps a get/post/put/delete method in a Flask-restful Resource, and
+    validates the request body with the given Voluptuous schema. If it passed,
+    sets `validated_body` on the request object, else abort(400) with helpful
+    error messages.
+    """
+    def decorator(f):
+        @functools.wraps(f)
+        def wrapper(*args, **kwargs):
+            if not (request.json or request.data or request.form):
+                flask.ext.restful.abort(400, message='Validation error.',
+                                        errors=['No data provided.'])
+            try:
+                data = schema(prepare_request_data(request))
+            except voluptuous.MultipleInvalid as err:
+                flask.ext.restful.abort(400,
+                                        message='Validation error.',
+                                        errors=[str(e) for e in err.errors])
+            setattr(request, 'validated_body', data)
+            return f(*args, **kwargs)
+        return wrapper
+    return decorator
 
 
 import projects, bams, runs, genotypes, tasks, comments

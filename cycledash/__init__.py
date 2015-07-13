@@ -1,4 +1,5 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response, current_app
+import flask.json
 from flask_sqlalchemy import SQLAlchemy
 from flask.ext import restful, login, bcrypt
 import humanize
@@ -21,6 +22,23 @@ def _configure_extensions(app):
     global db, api, login_manager, bcrypt
     db = SQLAlchemy(app)
     api = restful.Api(app, prefix='/api', catch_all_404s=True)
+
+    def output_json(data, status_code, headers=None):
+        """A JSON serializing request maker."""
+        settings = {}
+        if current_app.debug:
+            settings = {'indent': 4, 'sort_keys': True}
+        dumped = flask.json.dumps(data, **settings) + '\n'
+        resp = flask.make_response(dumped, status_code)
+        resp.headers.extend(headers or {})
+        return resp
+
+    # We primarily do this so that the JSON serializer in flask-restful can
+    # handle datetime objects. There's a hook to do this in the upcoming
+    # release of flask-restful, but as of 0.3.3, it's not exposed to the user.
+    api.representations = {
+        'application/json': output_json
+    }
     bcrypt = bcrypt.Bcrypt(app)
     login_manager = login.LoginManager()
     login_manager.init_app(app)

@@ -30,16 +30,11 @@ CREATE TABLE vcfs (
        project_id BIGINT REFERENCES projects NOT NULL,
 
        caller_name TEXT, -- Name of the caller this came from.
-       validation_vcf BOOLEAN DEFAULT false, -- whether or not this is a validation VCF
        notes TEXT, -- Any notes, params, etc the user might add. Ideally in JSON format.
        uri TEXT UNIQUE, -- URI of source file, if any
        vcf_header TEXT, -- Plaintext header of the VCF
        extant_columns TEXT, -- JSON list of non-null columns in the VCF
-       genotype_count BIGINT,  -- number of variants in this VCF
-
-       precision NUMERIC,
-       recall NUMERIC,
-       f1score NUMERIC
+       genotype_count BIGINT  -- number of variants in this VCF
 );
 
 CREATE TABLE user_comments (

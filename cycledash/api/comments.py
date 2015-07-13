@@ -3,35 +3,69 @@ from collections import defaultdict
 from flask import jsonify, request
 from flask.ext.restful import abort, fields
 from sqlalchemy import select, func, desc
+from voluptuous import Any, Required, Coerce, Schema
 
 from common.helpers import tables, to_epoch
 from cycledash import db
 from cycledash.helpers import (prepare_request_data, success_response,
-                               validate_with, abort_if_none_for, EpochField,
-                               marshal_with, camelcase_dict)
-from cycledash.validations import CreateComment, DeleteComment, UpdateComment
+                               abort_if_none_for, camelcase_dict)
+from cycledash.validations import Doc, to_epoch
 
-from . import Resource
+from . import Resource, validate_with, marshal_with
 
 
-comment_fields = {
-    "id": fields.Integer,
-    "vcf_id": fields.Integer,
-    "sample_name": fields.String,
-    "contig": fields.String,
-    "position": fields.Integer,
-    "reference": fields.String,
-    "alternates": fields.String,
-    "comment_text": fields.String,
-    "author_name": fields.String,
-    "created": EpochField,
-    "last_modified": EpochField
-}
+CreateComment = Schema({
+    Required("sample_name"): basestring,
+    Required("contig"): basestring,
+    Required("position"): Coerce(int),
+    Required("reference"): basestring,
+    Required("alternates"): basestring,
+    Required("comment_text"): basestring,
+    "author_name": basestring,
+})
+
+DeleteComment = Schema({
+    Required('last_modified'): Coerce(float),
+})
+
+UpdateComment = Schema({
+    Required('last_modified'): Coerce(float),
+    "comment_text": basestring,
+    "author_name": basestring,
+})
+
+CommentFields = Schema({
+    Doc('id', 'The internal ID of the Comment.'):
+        long,
+    Doc('vcf_id', 'The ID of the Run this comment is associated with.'):
+        long,
+    Doc('sample_name', 'The name of the sample this comment is on.'):
+        basestring,
+    Doc('contig', 'The contig of the variant this comment is on.'):
+        basestring,
+    Doc('position', 'The position of the variant this comment is on.'):
+        int,
+    Doc('reference', 'The reference of the variant this comment is on.'):
+        basestring,
+    Doc('alternates',
+        'The alternate allele of the variant this comment is on.'):
+        basestring,
+    Doc('comment_text', 'The text of the comment.'):
+        Any(basestring, None),
+    Doc('author_name', 'The name of the author of this comment.'):
+        Any(basestring, None),
+    Doc('created',
+        'The time at which the comment was created (in epoch time).'):
+        Coerce(to_epoch),
+    Doc('last_modified',
+        'The last modified time of the comment (in epoch time).'):
+        Coerce(to_epoch)
+})
 
 
 class CommentList(Resource):
     require_auth = True
-    @marshal_with(comment_fields, envelope='comments')
+    @marshal_with(CommentFields, envelope='comments')
     def get(self, run_id):
         """Get a list of all comments."""
         with tables(db.engine, 'user_comments') as (con, comments):
@@ -40,7 +74,7 @@ class CommentList(Resource):
             return [dict(c) for c in q.execute().fetchall()]
 
     @validate_with(CreateComment)
-    @marshal_with(comment_fields)
+    @marshal_with(CommentFields)
     def post(self, run_id):
         """Create a comment."""
         with tables(db.engine, 'user_comments') as (con, comments):
@@ -53,14 +87,14 @@ class CommentList(Resource):
 
 class Comment(Resource):
     require_auth = True
-    @marshal_with(comment_fields)
+    @marshal_with(CommentFields)
     def get(self, run_id, comment_id):
         """Get comment with the given ID."""
         with tables(db.engine, 'user_comments') as (con, comments):
             return _get_comment(comments, id=comment_id, vcf_id=run_id)
 
     @validate_with(UpdateComment)
-    @marshal_with(comment_fields)
+    @marshal_with(CommentFields)
     def put(self, run_id, comment_id):
         """Update the comment with the given ID.
 
@@ -80,7 +114,7 @@ class Comment(Resource):
             return dict(q.execute().fetchone())
 
     @validate_with(DeleteComment)
-    @marshal_with(comment_fields)
+    @marshal_with(CommentFields)
     def delete(self, run_id, comment_id):
         """Delete the comment with the given ID.
 
