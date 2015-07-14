@@ -3,32 +3,59 @@ from flask import request
 from flask.ext.restful import abort, fields
 from sqlalchemy import select, desc
 import voluptuous
+from voluptuous import Schema, Required, Any, Exclusive, Coerce
 
 from common.helpers import tables, find
-from cycledash.validations import CreateBam, UpdateBam, expect_one_of
+from cycledash.validations import expect_one_of, PathString, Doc
 from cycledash import db
-from cycledash.helpers import validate_with, abort_if_none_for, marshal_with
+from cycledash.helpers import abort_if_none_for
+from cycledash.validations import Doc
 import workers.indexer
 
 import projects
-from . import Resource
+from . import Resource, marshal_with, validate_with
 
 
-bam_fields = {
-    "id": fields.Integer,
-    "project_id": fields.Integer,
-    "name": fields.String,
-    "normal": fields.Boolean,
-    "notes": fields.String,
-    "resection_date": fields.String,
-    "tissues": fields.String,
-    "uri": fields.String
-}
+CreateBam = Schema({
+    Required('uri'): PathString,
+
+    # One of `project` is required, but not supported in voluptuous, so we
+    # enforce this in code. cf. https://github.com/alecthomas/voluptuous/issues/115
+    Exclusive('project_id', 'project'): Coerce(int),
+    Exclusive('project_name', 'project'): unicode,
+
+    'name': unicode,
+    'notes': unicode,
+    'tissues': unicode,
+    'resection_date': unicode,
+})
+
+UpdateBam = Schema({
+    'name': unicode,
+    'notes': unicode,
+    'tissues': unicode,
+    'resection_date': unicode,
+    'uri': PathString
+})
+
+BamFields = Schema({
+    Doc('id', 'The internal ID of the BAM.'): long,
+    Doc('project_id', 'The internal ID of the project.'): long,
+    Doc('name', 'The name of the BAM.'): Any(basestring, None),
+    Doc('notes', 'Any notes or ancillary data.'): Any(basestring, None),
+    Doc('resection_date',
+        ('The date the tissue sample'
+         'for these reads was extracted')): Any(basestring, None),
+    Doc('normal',
+        'Whether or not the sample is from normal tissue.'): Any(bool, None),
+    Doc('tissues', 'Tissue type of sample.'): Any(basestring, None),
+    Doc('uri', 'The URI of the BAM on HDFS.'): PathString
+})
 
 
 class BamList(Resource):
     require_auth = True
-    @marshal_with(bam_fields, envelope='bams')
+    @marshal_with(BamFields, envelope='bams')
     def get(self):
         """Get list of all BAMs."""
         with tables(db.engine, 'bams') as (con, bams):
@@ -36,7 +63,7 @@ class BamList(Resource):
             return [dict(r) for r in con.execute(q).fetchall()]
 
     @validate_with(CreateBam)
-    @marshal_with(bam_fields)
+    @marshal_with(BamFields)
     def post(self):
         """Create a new BAM.
 
@@ -60,7 +87,7 @@ class BamList(Resource):
 
 class Bam(Resource):
     require_auth = True
-    @marshal_with(bam_fields)
+    @marshal_with(BamFields)
     def get(self, bam_id):
         """Get a BAM by its ID."""
         with tables(db.engine, 'bams') as (con, bams):
@@ -68,7 +95,7 @@ class Bam(Resource):
             return dict(_abort_if_none(q.execute().fetchone(), bam_id))
 
     @validate_with(UpdateBam)
-    @marshal_with(bam_fields)
+    @marshal_with(BamFields)
     def put(self, bam_id):
         """Update the BAM by its ID."""
         with tables(db.engine, 'bams') as (con, bams):
@@ -77,7 +104,7 @@ class Bam(Resource):
             ).returning(*bams.c)
             return dict(_abort_if_none(q.execute().fetchone(), bam_id))
 
-    @marshal_with(bam_fields)
+    @marshal_with(BamFields)
     def delete(self, bam_id):
         """Delete a BAM by its ID."""
         with tables(db.engine, 'bams') as (con, bams):

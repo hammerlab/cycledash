@@ -164,46 +164,6 @@ def request_wants_json():
         request.accept_mimetypes[best] > request.accept_mimetypes['text/html'])
 
 
-def marshal_with(fields, envelope=None):
-    """Wraps flask-restful's marshal_with to transform the returned object to
-    have camelCased keys."""
-    def decorator(f):
-        @functools.wraps(f)
-        def wrapper(*args, **kwargs):
-            marshalled = flask.ext.restful.marshal_with(fields, envelope=envelope)(f)
-            resp = marshalled(*args, **kwargs)
-            if isinstance(resp, tuple):
-                return (camelcase_dict(resp[0]), resp[1], resp[2])
-            else:
-                return camelcase_dict(resp)
-        return wrapper
-    return decorator
-
-
-def validate_with(schema):
-    """Wraps a get/post/put/delete method in a Flask-restful Resource, and
-    validates the request body with the given Voluptuous schema. If it passed,
-    sets `validated_body` on the request object, else abort(400) with helpful
-    error messages.
-    """
-    def decorator(f):
-        @functools.wraps(f)
-        def wrapper(*args, **kwargs):
-            if not (request.json or request.data or request.form):
-                flask.ext.restful.abort(400, message='Validation error.',
-                                        errors=['No data provided.'])
-            try:
-                data = schema(prepare_request_data(request))
-            except voluptuous.MultipleInvalid as err:
-                flask.ext.restful.abort(400,
-                                        message='Validation error.',
-                                        errors=[str(e) for e in err.errors])
-            setattr(request, 'validated_body', data)
-            return f(*args, **kwargs)
-        return wrapper
-    return decorator
-
-
 def is_safe_url(target):
     """Make sure a redirect target is to the same server
 
@@ -238,8 +198,3 @@ def abort_if_none_for(obj_name):
 
 class CollisionError(Exception):
     pass
-
-
-class EpochField(flask.ext.restful.fields.Raw):
-    def format(self, value):
-        return to_epoch(value)

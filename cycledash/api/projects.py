@@ -3,26 +3,36 @@ from flask import request, redirect, jsonify, url_for, render_template
 from flask.ext.restful import fields, abort
 from sqlalchemy import exc, select, func, desc
 import voluptuous
+from voluptuous import Schema, Required, Any
 
 from common.helpers import tables, find
 from cycledash import db
-from cycledash.helpers import (get_id_where, abort_if_none_for, validate_with,
-                               marshal_with)
-from cycledash.validations import CreateProject, UpdateProject
+from cycledash.helpers import get_id_where, abort_if_none_for
+from cycledash.validations import Doc
 
-from . import bams, tasks, Resource
+from . import bams, tasks, Resource, marshal_with, validate_with
 
 
-project_fields = {
-    'id': fields.Integer,
-    'name': fields.String,
-    'notes': fields.String
-}
+CreateProject = Schema({
+    Required('name'): unicode,
+    'notes': unicode
+})
+
+UpdateProject = Schema({
+    'name': unicode,
+    'notes': unicode
+})
+
+ProjectFields = Schema({
+    Doc('id', docstring='The internal ID of the project.'): long,
+    Doc('name', docstring='The name of the project (unique).'): Any(basestring, None),
+    Doc('notes', docstring='The notes of the project.'): Any(basestring, None)
+}, extra=voluptuous.REMOVE_EXTRA)
 
 
 class ProjectList(Resource):
     require_auth = True
-    @marshal_with(project_fields, envelope='projects')
+    @marshal_with(ProjectFields, envelope='projects')
     def get(self):
         """Get list of all projects."""
         with tables(db.engine, 'projects') as (con, projects):
@@ -30,7 +40,7 @@ class ProjectList(Resource):
             return [dict(r) for r in con.execute(q).fetchall()]
 
     @validate_with(CreateProject)
-    @marshal_with(project_fields)
+    @marshal_with(ProjectFields)
     def post(self):
         """Create a new project."""
         with tables(db.engine, 'projects') as (con, projects):
@@ -45,7 +55,7 @@ class ProjectList(Resource):
 
 class Project(Resource):
     require_auth = True
-    @marshal_with(project_fields)
+    @marshal_with(ProjectFields)
     def get(self, project_id):
         """Get a project by its ID."""
         with tables(db.engine, 'projects') as (con, projects):
@@ -53,7 +63,7 @@ class Project(Resource):
             return dict(_abort_if_none(con.execute(q).fetchone(), project_id))
 
     @validate_with(UpdateProject)
-    @marshal_with(project_fields)
+    @marshal_with(ProjectFields)
     def put(self, project_id):
         """Update a project by its ID."""
         with tables(db.engine, 'projects') as (con, projects):
@@ -62,7 +72,7 @@ class Project(Resource):
             ).returning(*projects.c)
             return dict(_abort_if_none(q.execute().fetchone(), project_id))
 
-    @marshal_with(project_fields)
+    @marshal_with(ProjectFields)
     def delete(self, project_id):
         """Delete a project by its ID."""
         with tables(db.engine, 'projects') as (con, projects):

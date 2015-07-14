@@ -1,50 +1,114 @@
+import datetime
 from flask import request
 from flask.ext.restful import abort, fields
 from sqlalchemy import select, desc, func
 import voluptuous
+from voluptuous import Schema, Any, Required, Exclusive, Coerce
 
 from cycledash import db
-from cycledash.helpers import (get_id_where, get_where, abort_if_none_for,
-                               validate_with, marshal_with)
-from cycledash.validations import CreateRun, UpdateRun, expect_one_of
+from cycledash.helpers import get_id_where, get_where, abort_if_none_for
+from cycledash.validations import Doc, expect_one_of, PathString
 from common.helpers import tables
 import workers.runner
 
-from . import genotypes, bams, projects, Resource
+from . import genotypes, bams, marshal_with, validate_with, projects, Resource
 
+
+CreateRun = Schema({
+    Required('uri'): PathString,
+
+    # One of `project` is required, but not supported in voluptuous, so we
+    # enforce this in code. cf. https://github.com/alecthomas/voluptuous/issues/115
+    Exclusive('project_id', 'project'): Coerce(int),
+    Exclusive('project_name', 'project'): unicode,
+
+    Exclusive('normal_bam_id', 'normal_bam'): Coerce(int),
+    Exclusive('normal_bam_uri', 'normal_bam'): PathString,
+    Exclusive('tumor_bam_id', 'tumor_bam'): Coerce(int),
+    Exclusive('tumor_bam_uri', 'tumor_bam'): PathString,
+
+    'caller_name': unicode,
+    'project_id': Coerce(int),
+    'tumor_dataset_id': Coerce(int),
+    'normal_dataset_id': Coerce(int),
+    'truth_vcf_path': PathString,
+    'is_validation': bool,
+    'notes': unicode,
+    'dataset': unicode,
+    'project_name': unicode,
+    'vcf_header': unicode
+})
+
+UpdateRun = Schema({
+    'caller_name': unicode,
+
+    Exclusive('normal_bam_id', 'normal_bam'): Coerce(int),
+    Exclusive('normal_bam_uri', 'normal_bam'): PathString,
+    Exclusive('tumor_bam_id', 'tumor_bam'): Coerce(int),
+    Exclusive('tumor_bam_uri', 'tumor_bam'): PathString,
+
+    'notes': unicode,
+    'vcf_header': unicode,
+
+    'true_positive': Coerce(int),
+    'false_positive': Coerce(int),
+    'precision': Coerce(float),
+    'recall': Coerce(float),
+    'f1score': Coerce(float)
+})
 
 run_fields = {
-    'id': fields.Integer,
-
-    'extant_columns': fields.String,
-    'uri': fields.String,
-    'caller_name': fields.String,
-    'genotype_count': fields.Integer,
-    'created_at': fields.DateTime(dt_format='iso8601'),
-    'notes': fields.String,
-    'vcf_header': fields.String,
-
-    'project_id': fields.Integer,
-    'normal_bam_id': fields.Integer,
-    'tumor_bam_id': fields.Integer
+    Doc('id', 'The internal ID of the Run.'):
+        long,
+    Doc('extant_columns', 'A list of all the columns the Run has.'):
+        Any(basestring, None),
+    Doc('uri', 'The HDFS or NFS URI of the VCF this run was based on.'):
+        basestring,
+    Doc('caller_name',
+        'The name of the variant caller used to generate this Run.'):
+        Any(basestring, None),
+    Doc('genotype_count', 'The number of genotypes (calls) made in this Run.'):
+        Any(long, None),
+    Doc('created_at', 'Timestamp when the Run was created.'):
+        datetime.datetime,
+    Doc('notes', 'Any ancillary notes, parameters, etc of the Run.'):
+        Any(basestring, None),
+    Doc('vcf_header', 'The raw VCF text of the header.'):
+        Any(basestring, None),
+    Doc('project_id', 'The internal ID of the Project this Run belongs to.'):
+        long,
+    Doc('normal_bam_id',
+        'The internal ID of the normal BAM associated with the Run.'):
+        Any(long, None),
+    Doc('tumor_bam_id',
+        'The internal ID of the normal BAM associated with the Run.'):
+        Any(long, None)
 }
 
-# Used because on GET /runs/<id> we want the spec and contig, too [for now].
-thick_run_fields = dict(
-    run_fields, spec=fields.Raw, contigs=fields.List(fields.String))
+RunFields = Schema(run_fields)
+
+# Used because on GET /runs/<id> we need some extra fields [for now].
+thick_run_fields = run_fields.copy()
+thick_run_fields.update({
+    'spec': type,
+    'contigs': list,
+    'normal_bam': object,
+    'tumor_bam': object
+})
+ThickRunFields = Schema(thick_run_fields)
 
 
 class RunList(Resource):
     require_auth = True
-    @marshal_with(run_fields, envelope='runs')
+    @marshal_with(RunFields, envelope='runs')
     def get(self):
         """Get list of all runs in order of recency."""
         with tables(db.engine, 'vcfs') as (con, runs):
             q = select(runs.c).order_by(desc(runs.c.id))
-            return [r for r in q.execute().fetchall()]
+            return [dict(r) for r in q.execute().fetchall()]
 
     @validate_with(CreateRun)
-    @marshal_with(run_fields)
+    @marshal_with(RunFields)
     def post(self):
         """Create a new run.
 
@@ -71,12 +135,12 @@ class RunList(Resource):
             run = runs.insert(
                 request.validated_body).returning(*runs.c).execute().fetchone()
         workers.runner.start_workers_for_vcf_id(run['id'])
-        return run, 201
+        return dict(run), 201
 
 
 class Run(Resource):
     require_auth = True
-    @marshal_with(thick_run_fields)
+    @marshal_with(ThickRunFields)
     def get(self, run_id):
         """Return a vcf with a given ID."""
         with tables(db.engine, 'vcfs') as (con, runs):
@@ -86,7 +150,7 @@ class Run(Resource):
         return run
 
     @validate_with(UpdateRun)
-    @marshal_with(run_fields)
+    @marshal_with(RunFields)
     def put(self, run_id):
         """Update the run by its ID."""
         with tables(db.engine, 'vcfs') as (con, runs):
@@ -95,7 +159,7 @@ class Run(Resource):
             ).returning(*runs.c)
             return dict(_abort_if_none(q.execute().fetchone(), run_id))
 
-    @marshal_with(run_fields)
+    @marshal_with(RunFields)
     def delete(self, run_id):
         """Delete a run by its ID."""
         with tables(db.engine, 'vcfs') as (con, runs):
