@@ -38,12 +38,13 @@ class Resource(flask.ext.restful.Resource, object):
 
 
 def marshal(data, schema, envelope=None):
-    """Takes raw data (in the form of a dict, or a list or tuple of dicts) and a
-    voluptuous.Schema to output, and applies the Schmea to the object(s)
+    """Takes raw data and a schema to output, and applies the schema to the
+    object(s).
 
     Args:
-       data: the actual object(s) from which the fields are taken from
-       schema: a voluptuous.Schema of whose keys will make up the final
+       data: The actual object(s) from which the fields are taken from. A dict,
+             list, or tuple.
+       schema: A voluptuous.Schema of whose keys will make up the final
                serialized response output
        envelope: optional key that will be used to envelop the serialized
                  response
