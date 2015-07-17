@@ -127,17 +127,16 @@ var NewProjectForm = React.createClass({
     return (
       <form method='POST' action='/api/projects' className='add-form' ref='projectForm'>
         <div className='row'>
-          <h3>New Project
-          </h3>
-            <TextInput label='Project Name' name='name' placeholder='PT01234' required={true} />
-            <div className='form-group add-form-input-full'>
-              <label>Notes</label>
-              <textarea className='form-control add-form-notes' rows='3' name='notes'
-                        placeholder='Notes etc.'></textarea>
-            </div>
-            <div className='form-group add-form-input-full'>
-              <button type='submit' className='add-form-submit'>Submit New Project</button>
-            </div>
+          <h3>New Project</h3>
+          <TextInput label='Project Name' name='name' placeholder='PT01234' required={true} />
+          <div className='form-group add-form-input-full'>
+            <label>Notes</label>
+            <textarea className='form-control add-form-notes' rows='3' name='notes'
+                      placeholder='Notes etc.'></textarea>
+          </div>
+          <div className='form-group add-form-input-full'>
+            <button type='submit' className='add-form-submit'>Submit New Project</button>
+          </div>
         </div>
       </form>
     );

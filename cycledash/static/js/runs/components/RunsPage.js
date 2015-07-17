@@ -9,21 +9,28 @@ var React = require('react'),
 var NO_FILTER = 'All projects';
 
 var ModalStates = {
-    NONE: 0,
-    PROJECT: 1,
-    RUN: 2,
-    BAM: 3
+      NONE: 0,
+      PROJECT: 1,
+      RUN: 2,
+      BAM: 3
 };
 
+// This is a Bootstrap modal that displays all (3) forms: New Project, Add Run, and Add BAM
+// Closing/esc'ing/unfocusing the modal will set the ModalState to NONE.
+// cf. http://getbootstrap.com/javascript/#modals
 var Modal = React.createClass({
   componentDidMount: function() {
-    $('.modal').on('hidden.bs.modal', () => {this.props.handleClose()});
+    $('.modal').modal('show');
+    $('.modal').on('hidden.bs.modal', () => {this.props.handleClose();});
+  },
+  hideModal: function() {
+    $('.modal').modal('hide');
   },
   render: function(){
     return (
       <div className="modal fade" role="dialog" tabIndex="-1">
         <div className="modal-dialog" role="document">
-          <button className='close' type='button' onClick={this.props.handleClose}>&times;</button>
+          <button className='close' type='button' onClick={this.hideModal}>&times;</button>
           {this.props.children}
         </div>
       </div>
@@ -66,24 +73,6 @@ var RunsPage = React.createClass({
   createDragOverHandler: function(draggingOver) {
     return () => this.setState({draggingOver});
   },
-  componentDidUpdate: function(prevProps, prevState) {
-    var prevModal = prevState.modal,
-        newModal = this.state.modal;
-    if (prevModal == newModal) return;
-
-    if (prevModal == ModalStates.NONE) {
-      $(this.getDOMNode()).find('.modal').modal('show');
-    }
-  },
-  componentWillUpdate: function(nextProps, nextState) {
-    var newModal = nextState.modal,
-        prevModal = this.state.modal;
-    if (prevModal == newModal) return;
-
-    if (newModal == ModalStates.NONE) {
-      $(this.getDOMNode()).find('.modal').modal('hide');
-    }
-  },
   render: function() {
     var projectOptions = [NO_FILTER].concat(_.pluck(this.props.projects, 'name')).map(name => {
       return <option value={name} key={name}>{name}</option>;
@@ -106,20 +95,19 @@ var RunsPage = React.createClass({
         }.bind(this)).value();
     var modal;
     if (this.state.modal === ModalStates.NONE) {
-    modal = null;
+      modal = null;
     } else {
       var form;
       if (this.state.modal === ModalStates.PROJECT) {
         form = <forms.NewProjectForm />;
       } else if (this.state.modal === ModalStates.RUN) {
         form = <forms.NewRunForm bamUris={_.unique(_.pluck(this.state.newFormProps.projectBams, 'uri'))}
-                                       projectId={this.state.newFormProps.projectId}
-                                       projectName={this.state.newFormProps.projectName} />;
+                                 projectId={this.state.newFormProps.projectId}
+                                 projectName={this.state.newFormProps.projectName} />;
       } else {
-        form = <forms.NewBAMForm projectId={this.state.newFormProps.projectId}
-                                       projectName={this.state.newFormProps.projectName} />;
+        form = <forms.NewBAMForm {...this.state.newFormProps} />;
       }
-      modal = <Modal handleClose={this.closeModal}>{form}</Modal>
+      modal = <Modal handleClose={this.closeModal}>{form}</Modal>;
     }
     return (
       <div className="row">
@@ -181,6 +169,12 @@ var ProjectTable = React.createClass({
       this.setState({selectedBamId});
     };
   },
+  showRunModal: function(){
+    this.props.handleShowRunModal(this.props.name, this.props.project_id, this.props.bams);
+  },
+  showBAMModal: function(){
+    this.props.handleShowBAMModal(this.props.name, this.props.project_id);
+  },
   render: function() {
     var numBams = this.props.bams.length;
     var numRuns = this.props.runs.length;
@@ -210,11 +204,11 @@ var ProjectTable = React.createClass({
             </a>
           </div>
           <div className='add'>
-            <button onClick={() => this.props.handleShowRunModal(this.props.name, this.props.project_id, this.props.bams)}
+            <button onClick={this.showRunModal}
                     type='button' className='btn btn-primary btn-xs'>
               Add Run
             </button>
-            <button onClick={() => this.props.handleShowBAMModal(this.props.name, this.props.project_id)}
+            <button onClick={this.showBAMModal}
                     type='button' className='btn btn-primary btn-xs'>
               Add BAM
             </button>
