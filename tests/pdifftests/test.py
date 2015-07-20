@@ -69,6 +69,13 @@ class Runs(Base):
         add_run = driver.find_element_by_css_selector(add_run_btn_sel)
         add_run.click()
 
+    @hide('span.time')
+    def new_project(self, driver):
+        """Showing the New Project form."""
+        new_project_btn_sel = '#new-project'
+        new_project = driver.find_element_by_css_selector(new_project_btn_sel)
+        new_project.click()
+
 
 class Tasks(Base):
     window_size = [1280, 800]
