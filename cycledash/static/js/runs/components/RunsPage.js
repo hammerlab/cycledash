@@ -9,10 +9,10 @@ var React = require('react'),
 var NO_FILTER = 'All projects';
 
 var ModalStates = {
-      NONE: 0,
-      PROJECT: 1,
-      RUN: 2,
-      BAM: 3
+  NONE: 0,
+  PROJECT: 1,
+  RUN: 2,
+  BAM: 3
 };
 
 // This is a Bootstrap modal that displays all (3) forms: New Project, Add Run, and Add BAM
