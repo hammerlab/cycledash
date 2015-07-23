@@ -21,7 +21,7 @@ var ModalStates = {
 var Modal = React.createClass({
   componentDidMount: function() {
     $('.modal').modal('show');
-    $('.modal').on('hidden.bs.modal', () => {this.props.handleClose();});
+    $('.modal').on('hidden.bs.modal', this.props.handleClose);
   },
   hideModal: function() {
     $('.modal').modal('hide');
