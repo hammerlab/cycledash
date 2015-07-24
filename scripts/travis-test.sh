@@ -17,5 +17,3 @@ if [ $CI ]; then
   ./scripts/travis-coverage.sh
   echo ''  # reset last exit code
 fi
-
-./scripts/travis-run-pdiff-tests.sh
