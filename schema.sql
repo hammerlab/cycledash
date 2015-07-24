@@ -31,11 +31,12 @@ CREATE TABLE vcfs (
 
        caller_name TEXT, -- Name of the caller this came from.
        notes TEXT, -- Any notes, params, etc the user might add. Ideally in JSON format.
-       uri TEXT UNIQUE, -- URI of source file, if any
+       uri TEXT, -- URI of source file, if any
        vcf_header TEXT, -- Plaintext header of the VCF
        extant_columns TEXT, -- JSON list of non-null columns in the VCF
        genotype_count BIGINT  -- number of variants in this VCF
 );
+CREATE UNIQUE INDEX vcfs_project_id_uri_key ON vcfs (project_id, uri);
 
 CREATE TABLE user_comments (
        id BIGSERIAL PRIMARY KEY,
