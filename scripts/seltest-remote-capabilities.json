@@ -1,5 +1,5 @@
 {
   "platform":"Mac OS X 10.10",
-  "browserName": "firefox",
-  "browserVersion": "33"
+  "browserName": "chrome",
+  "browserVersion": "43"
 }
