@@ -9,5 +9,5 @@ DB=cycledash-test
 dropdb --if-exists $DB
 
 createdb $DB
-psql $DB < schema.sql
+python scripts/init_db.py force
 psql $DB < tests/data.sql

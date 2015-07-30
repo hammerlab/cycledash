@@ -1,7 +1,3 @@
-cpnode:
-	@echo "Copying node_modules to ./cycledash/static/lib..."
-	if [ ! -d ./cycledash/static/lib ]; then mkdir -v ./cycledash/static/lib; fi
-	cp -R ./node_modules/ ./cycledash/static/lib
 
 initenv:
 	@echo "Creating ENV template..."
@@ -13,4 +9,4 @@ initenv:
 	fi
 
 
-.PHONY: npnode initenv
+.PHONY: initenv

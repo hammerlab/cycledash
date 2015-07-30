@@ -31,3 +31,4 @@ flask-restful==0.3.3
 seltest==0.2.8
 flask-login==0.2.11
 flask-bcrypt==0.6.2
+alembic==0.7.7
