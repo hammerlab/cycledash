@@ -28,7 +28,6 @@ virtualenv venv                    # Initialize a new virtual environment.
 source venv/bin/activate           # Activate your virtual environment.
 pip install -r requirements.txt    # Install python requirements into virtualenv
 npm install                        # Install JS requirements from package.json
-
 ```
 
 After the initial setup, the only command you'll need to run is:
@@ -56,7 +55,7 @@ On OS X, setting up and running psql might look like this:
 ```bash
 postgres -D /usr/local/var/postgres
 createdb cycledash
-psql cycledash < schema.sql        # This loads the schema
+python scripts/init_db.py
 ```
 
 
@@ -88,10 +87,8 @@ Run `gulp prod` to update all of the above (PEG.js grammar, etc.)
 To start the application server:
 
 ```bash
-gulp prod
 ./run.sh
 ```
-
 
 ### 7. Run RabbitMQ (and keep it running)
 
@@ -145,7 +142,7 @@ To run an individual JavaScript test, you can use:
 
 #### Perceptual Diff Testing
 
-CycleDash uses [seltest](https://github.com/ihodes/seltest) for perceptual
+CycleDash uses [seltest](https://github.com/hammerlab/seltest) for perceptual
 difference testing. This means the tests operate an actual web browser and take
 screenshots of the web-app being used. In order to maintain consistency between
 platforms, browser version, etc, we use [Sauce Labs](http://saucelabs.com) to
@@ -179,15 +176,25 @@ generate a perceptual diff that will make it clear where the changes are, you
 can use [webdiff](https://github.com/danvk/webdiff): `git webdiff`.
 
 You may speed up the `update-screenshots.sh` script by daemonizing SauceConnect
-in advance. 
+in advance.
 
 ```
 sc -u $SAUCE_USERNAME -k $SAUCE_ACCESS_KEY --daemonize
 ```
 
 This ensures that the tunnel to SauceLabs is always open, and needn't be
-reestablished on every run of the script. 
+reestablished on every run of the script.
 
 When debugging tests, the `interactive` mode of seltest can be very useful
 to drive the tests by hand from a Python REPL. Simply run `sel interactive`
 to get started. Cf. more documentation at [seltest](https://github.com/ihodes/seltest).
+
+
+### Database Migrations
+
+We use
+[Alembic](https://alembic.readthedocs.org/en/rel_0_7/tutorial.html#running-our-first-migration)
+to generate and run migrations. The previous link demonstrates how to generate
+and execute simple migrations (adding a table or a column). Be sure to update
+`schema.py` with whatever changes you've made in the migration as well;
+`schema.py` is the canonical description of the database.
