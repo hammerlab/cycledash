@@ -12,6 +12,9 @@ echo 'Running tests in reverse...'
 echo 'Linting...'
 ./scripts/lint.sh
 
+echo 'Running seltests...'
+./scripts/travis-run-pdiff-tests.sh
+
 if [ $CI ]; then
   set +o errexit
   ./scripts/travis-coverage.sh
