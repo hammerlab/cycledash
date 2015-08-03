@@ -1,5 +1,33 @@
-# Cycledash Changelog
+# CycleDash Changelog
+## Version v0.2.0
+* PR #[804](http://github.com/hammerlab/cycledash/pull/804): "Bump pileup version"
+* PR #[803](http://github.com/hammerlab/cycledash/pull/803): "Add simple upgrade script for deployments."
+* PR #[801](http://github.com/hammerlab/cycledash/pull/801): "Use Alembic for migrations"
+* PR #[802](http://github.com/hammerlab/cycledash/pull/802): "Turn seltests back on"
+* PR #[795](http://github.com/hammerlab/cycledash/pull/795): "Remove UNIQUE constraint on VCF URIs"
+* PR #[787](http://github.com/hammerlab/cycledash/pull/787): "Use modals"
+* PR #[786](http://github.com/hammerlab/cycledash/pull/786): "Issue 621 Use Voluptuous for object marshaling + object documentation"
+* PR #[784](http://github.com/hammerlab/cycledash/pull/784): "Remove remaining references to biodalliance"
+* PR #[781](http://github.com/hammerlab/cycledash/pull/781): "Login style tweaks"
+* PR #[769](http://github.com/hammerlab/cycledash/pull/769): "Login & authentication"
+* PR #[777](http://github.com/hammerlab/cycledash/pull/777): "Pileup style tweaks in Cycledash."
+* PR #[774](http://github.com/hammerlab/cycledash/pull/774): "Examine page header"
+* PR #[750](http://github.com/hammerlab/cycledash/pull/750): "Add a varcode-powered worker for annotating VCF files"
+* PR #[775](http://github.com/hammerlab/cycledash/pull/775): "Bump to pileup 0.2"
+* PR #[773](http://github.com/hammerlab/cycledash/pull/773): "Update DEVELOP.md"
+* PR #[761](http://github.com/hammerlab/cycledash/pull/761): "Linked bams fix"
+* PR #[720](http://github.com/hammerlab/cycledash/pull/720): "Use TravisCI + Saucelabs to run seltest"
+* PR #[757](http://github.com/hammerlab/cycledash/pull/757): "Update reactify to handle weird build errors"
+* PR #[755](http://github.com/hammerlab/cycledash/pull/755): "Design part two"
+* PR #[748](http://github.com/hammerlab/cycledash/pull/748): "Remove obsolete dependencies (wsgiref and dpxdt) from the requirements file"
+* PR #[726](http://github.com/hammerlab/cycledash/pull/726): "Use the newest version of pileup with require support"
+* PR #[745](http://github.com/hammerlab/cycledash/pull/745): "Use glyphicons"
+* PR #[723](http://github.com/hammerlab/cycledash/pull/723): "Set the initial pileup range correctly"
+* PR #[721](http://github.com/hammerlab/cycledash/pull/721): "Full page pileup"
+* PR #[713](http://github.com/hammerlab/cycledash/pull/713): "Design (for Runs page)"
+* PR #[714](http://github.com/hammerlab/cycledash/pull/714): "Better exception formatting."
 ## Version v0.1.0
+* PR #[717](http://github.com/hammerlab/cycledash/pull/717): "Release v0.1.0"
 * PR #[659](http://github.com/hammerlab/cycledash/pull/659): "resolves #658"
 * PR #[708](http://github.com/hammerlab/cycledash/pull/708): "Use livereactload to reload new JS without refreshing the page"
 * PR #[707](http://github.com/hammerlab/cycledash/pull/707): "Bump pyensembl to 0.6.9"
@@ -90,8 +118,6 @@
 * PR #[418](http://github.com/hammerlab/cycledash/pull/418): "Fixing a try finally error"
 * PR #[420](http://github.com/hammerlab/cycledash/pull/420): "Increasing the test timeout for one test"
 * PR #[419](http://github.com/hammerlab/cycledash/pull/419): "Some CSS fixes"
-
-## Version v0.0.0
 * PR #[410](http://github.com/hammerlab/cycledash/pull/410): "fix release README"
 * PR #[409](http://github.com/hammerlab/cycledash/pull/409): "in case we ARE storing the list correctly, leave them be"
 * PR #[399](http://github.com/hammerlab/cycledash/pull/399): "Display true positive indication in the table"
