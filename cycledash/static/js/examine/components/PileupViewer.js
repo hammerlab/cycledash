@@ -96,16 +96,23 @@ var PileupViewer = React.createClass({
       })
     });
 
-    var bamSource = (name, cssClass, path, chunks) => ({
-      name: name,
-      cssClass: cssClass,
-      viz: pileup.viz.pileup(),
-      data: pileup.formats.bam({
-        url: this.hdfsUrl(path),
-        indexUrl: this.hdfsUrl(path + '.bai'),
-        indexChunks: chunks
-      })
-    });
+    var bamSource = (name, cssClass, path, chunks) => {
+      var data = pileup.formats.bam({
+          url: this.hdfsUrl(path),
+          indexUrl: this.hdfsUrl(path + '.bai'),
+          indexChunks: chunks
+        });
+      return [
+        {
+          name, cssClass, data,
+          viz: pileup.viz.coverage()
+        },
+        {
+          name, cssClass, data,
+          viz: pileup.viz.pileup()
+        }
+      ];
+    };
 
     var sources = [
         {
@@ -116,6 +123,14 @@ var PileupViewer = React.createClass({
             url: 'http://www.biodalliance.org/datasets/hg19.2bit'
           })
         },
+        {
+          name: 'Scale',
+          viz: pileup.viz.scale()
+        },
+        {
+          name: 'Location',
+          viz: pileup.viz.location()
+        },
         vcfSource('Run VCF', this.props.vcfPath)
     ];
     if (this.props.truthVcfPath) {
@@ -123,10 +138,10 @@ var PileupViewer = React.createClass({
     }
 
     if (this.props.normalBamPath) {
-      sources.push(bamSource('Normal', 'normal', this.props.normalBamPath, this.state.normalBaiChunks));
+      sources = sources.concat(bamSource('Normal', 'normal', this.props.normalBamPath, this.state.normalBaiChunks));
     }
     if (this.props.tumorBamPath) {
-      sources.push(bamSource('Tumor', 'tumor', this.props.tumorBamPath, this.state.tumorBaiChunks));
+      sources = sources.concat(bamSource('Tumor', 'tumor', this.props.tumorBamPath, this.state.tumorBaiChunks));
     }
 
     var pileupEl = this.refs.pileupElement.getDOMNode();
