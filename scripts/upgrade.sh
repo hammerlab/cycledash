@@ -3,7 +3,7 @@ set -o errexit
 
 # If we're not in a virtual environment and haven't passed "force" to the
 # script, then make sure the user wants to run the upgrade.
-if [[ (! $VIRTUAL_ENV)  && (! $1 || (! ($1 -neq 'force'))) ]]; then
+if [[ ! ($VIRTUAL_ENV || $1 = 'force') ]]; then
     read 'You are not running in a virtual environment, are you sure you would like to proceed? ' -n 1 -r
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         echo 'Aborting upgrade.'
