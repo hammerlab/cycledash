@@ -297,7 +297,7 @@ a.download-vcf {
   background-color: $color-bg-hover;
   border: 1px solid $color-border-light;
   min-width: 200px;
-  font-size: 0.75rem; 
+  font-size: 0.75rem;
   color: $color-text;
   z-index: 1000;
   opacity: 100; /* This is needed to override Bootstrap. */
@@ -586,3 +586,6 @@ a.download-vcf {
 .coverage {
   border-top: 1px solid $color-gray-medium;
 }
+/* removes unwanted white space after SVG (issue #805) */
+#pileup-container .track-content svg {
+  display: block; }
