@@ -98,28 +98,24 @@ gulp.task('staticlibs', function() {
              {base: './node_modules/jquery/dist'})
       .pipe(gulp.dest('./cycledash/static/lib/jquery')),
 
-    // Bootstrap
-    gulp.src('./node_modules/bootstrap/dist/**/*',
-             {base: './node_modules/bootstrap/dist'})
-      .pipe(gulp.dest('./cycledash/static/lib/bootstrap')),
+      // Bootstrap
+      gulp.src('./node_modules/bootstrap/dist/**/*',
+               {base: './node_modules/bootstrap/dist'})
+        .pipe(ext_replace('.scss', '.css'))
+        .pipe(gulp.dest('./cycledash/static/lib/bootstrap/')),
 
-    // Change bootstrap.min.css to bootstrap.min.scss
-    gulp.src('./cycledash/static/lib/bootstrap/css/bootstrap.min.css')
-      .pipe(ext_replace('.scss', '.min.css'))
-      .pipe(gulp.dest('./cycledash/static/lib/bootstrap/scss')),
+      // Move glyphicons to static/fonts
+      gulp.src('./cycledash/static/lib/bootstrap/fonts/*',
+              {base: './cycledash/static/lib/bootstrap/fonts/'})
+        .pipe(gulp.dest('./cycledash/static/fonts')),
 
-    // Move glyphicons to static/fonts
-    gulp.src('./cycledash/static/lib/bootstrap/fonts/*',
-            {base: './cycledash/static/lib/bootstrap/fonts/'})
-      .pipe(gulp.dest('./cycledash/static/fonts')),
-
-    // pileup.js
-    gulp.src('./node_modules/pileup/style/*.*',
-             {base: './node_modules/pileup/style'})
-       .pipe(gulp.dest('./cycledash/static/lib/pileup.js')),
-    gulp.src('./node_modules/pileup/build/*.js',
-             {base: './node_modules/pileup/build'})
-      .pipe(gulp.dest('./cycledash/static/lib/pileup.js'))
+      // pileup.js
+      gulp.src('./node_modules/pileup/style/*.*',
+               {base: './node_modules/pileup/style'})
+         .pipe(gulp.dest('./cycledash/static/lib/pileup.js')),
+      gulp.src('./node_modules/pileup/build/*.js',
+               {base: './node_modules/pileup/build'})
+        .pipe(gulp.dest('./cycledash/static/lib/pileup.js'))
   ]);
 });
 
