@@ -161,7 +161,7 @@ def download_vcf(run_id):
     query = json.loads(request.args.get('query'))
     genotypes = cycledash.api.genotypes.genotypes_for_records(run_id, query)
     fd = tempfile.NamedTemporaryFile(mode='w+b')
-    with tables(db, 'vcfs') as (con, vcfs):
+    with tables(db.engine, 'vcfs') as (con, vcfs):
         q = select(
             [vcfs.c.extant_columns, vcfs.c.vcf_header]
         ).where(vcfs.c.id == run_id)
