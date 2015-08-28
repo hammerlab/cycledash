@@ -42,16 +42,24 @@ def _annotate(vcf_id):
     if vcf_id == False:
         return  # An error must have occurred earlier.
 
-    # Only runs the first time for this release.
-    EnsemblRelease(config.ENSEMBL_RELEASE).install()
-
     engine = sqlalchemy.create_engine(DATABASE_URI)
+    # See if we have any guesses for a release version
+    with tables(engine, 'vcfs') as (con, vcfs):
+        metadata = sqlalchemy.MetaData(bind=con)
+        metadata.reflect()
+        vcf = vcfs.select().where(vcfs.c.id == vcf_id).execute().fetchone()
+        release = vcf['vcf_release']
+
+    if not release:
+        release = config.ENSEMBL_RELEASE
+
+    # Only runs the first time for this release.
+    EnsemblRelease(release).install()
+
     with tables(engine, 'genotypes') as (con, genotypes):
         metadata = sqlalchemy.MetaData(bind=con)
         metadata.reflect()
-        annotations = get_varcode_annotations(genotypes,
-                                              vcf_id,
-                                              config.ENSEMBL_RELEASE)
+        annotations = get_varcode_annotations(genotypes, vcf_id, release)
 
         tmp_table = Table('gene_annotations',
                           metadata,
@@ -101,7 +109,7 @@ def write_to_table_via_csv(table, rows, connection):
 
 
 def get_varcode_annotations(genotypes, vcf_id, ensembl_release_num):
-    """Get contig, position, ref and alt data from the genotypes table, 
+    """Get contig, position, ref and alt data from the genotypes table,
     and get the best effect from Varcode library. Return a list of the form:
     [[contig, position, "NAME,NAME,..."], [contig...], ...]
     """
