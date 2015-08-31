@@ -43,6 +43,7 @@ You will need to generate an `ENV.sh` file using 'make initenv'. `ENV.sh` contai
 ```
 make initenv                       # Initialize environment file.
 $EDITOR ENV.sh                     # Fill in values.
+source ENV.sh                      # make sure all our environment variables are around
 ```
 
 
