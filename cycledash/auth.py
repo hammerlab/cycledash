@@ -115,13 +115,6 @@ def check_login_from_key(api_key):
 
 def load_user_from_request(request):
     """Support for basic authorization."""
-    # first, try to login using the api_key url arg
-    api_key = request.args.get('api_key')
-    if api_key:
-        user = check_login_from_key(api_key)
-        if user:
-            return user
-
     # next, try to login using Basic Auth
     api_key = request.headers.get('Authorization')
     if api_key:
