@@ -100,17 +100,16 @@ def load_vcf(vcf_path):
     if config.ALLOW_LOCAL_VCFS and vcf_path.startswith('/tests/'):
         filepath = vcf_path[1:];
         text = open(filepath).read()
-        release = guess_ensembl_release(filepath)
     elif vcf_path.startswith('file://'):
         filepath = vcf_path[6:];
         text = open(filepath).read()
-        release = guess_ensembl_release(filepath)
     elif vcf_path.startswith('hdfs://'):
         return load_vcf(vcf_path[6:])
     else:
         text = get_contents_from_hdfs(vcf_path)
-        release = guess_ensembl_release(hdfs_to_local_path(vcf_path))
+        filepath = hdfs_to_local_path(vcf_path)
     header = '\n'.join(l for l in text.split('\n') if l.startswith('#'))
+    release = guess_ensembl_release(filepath)
 
     return pyvcf.Reader(l for l in text.split('\n')), header, release
 

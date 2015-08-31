@@ -45,8 +45,6 @@ def _annotate(vcf_id):
     engine = sqlalchemy.create_engine(DATABASE_URI)
     # See if we have any guesses for a release version
     with tables(engine, 'vcfs') as (con, vcfs):
-        metadata = sqlalchemy.MetaData(bind=con)
-        metadata.reflect()
         vcf = vcfs.select().where(vcfs.c.id == vcf_id).execute().fetchone()
         release = vcf['vcf_release']
 
