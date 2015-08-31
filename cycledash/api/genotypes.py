@@ -109,7 +109,8 @@ def get(run_id, query, with_stats=True):
                 g.c.contig == gt.c.contig,
                 g.c.position == gt.c.position,
                 g.c.reference == gt.c.reference,
-                g.c.alternates == gt.c.alternates))
+                g.c.alternates == gt.c.alternates,
+                g.c.sample_name == gt.c.sample_name))
             valid_column = label('tag:true-positive', gt.c.contig != None)
             q = (select(g.c + [valid_column])
                  .select_from(joined_q)
