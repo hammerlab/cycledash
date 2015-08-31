@@ -82,17 +82,9 @@ else
     echo "SauceConnect tunnel detected already running, will attempt to use that."
 fi
 
-capabilities=$(python <<EOF
-import json
-capabilities = json.loads(open('$SELTEST_CAPABILITIES').read())
-capabilities['tunnel-identifier'] = '$TRAVIS_JOB_NUMBER'
-print(json.dumps(capabilities))
-EOF
-)
-
 # Run the actual tests now that we're ready.
 sel update -b remote \
-    --remote-capabilities="$capabilities" \
+    --remote-capabilities="$(cat $SELTEST_CAPABILITIES)" \
     --remote-command-executor="http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@$SAUCE_URL" \
     -o $BASE/images \
     "$@" \
