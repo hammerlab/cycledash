@@ -1,6 +1,7 @@
 import mock
 import nose
 import json
+import urllib
 
 from cycledash import app, db
 from common.helpers import tables
@@ -33,14 +34,13 @@ class TestDownload(helpers.ResourceTest):
 
     def test_download(self):
         # match the URL with the default download button href
-        downUrl = ("/runs/" + str(self.run['id']) + "/download?query="
-                   "%7B%22range%22%3A%7B%22start%22%3Anull%2C%22end%22%3Anull"
-                   "%2C%22contig%22%3Anull%7D%2C%22filters%22%3A%5B%5D%2C%22"
-                   "sortBy%22%3A%5B%7B%22order%22%3A%22asc%22%2C%22"
-                   "columnName%22%3A%22contig%22%7D%2C%7B%22order"
-                   "%22%3A%22asc%22%2C%22columnName%22%3A%22position"
-                   "%22%7D%5D%2C%22page%22%3A0%2C%22limit%22%3A250%2C%22"
-                   "compareToVcfId%22%3Anull%7D")
+        queryStr = ('{"range":{"start":null,"end":null,"contig":null},'
+                    '"filters":[],'
+                    '"sortBy":[{"columnName":"contig","order":"asc"},'
+                    '{"columnName":"position","order":"asc"}],'
+                    '"page":0,"limit":250,"compareToVcfId":null}')
+        downUrl = ("/runs/" + str(self.run['id']) + "/download?query=" +
+                   urllib.quote(queryStr))
         r = self.get(downUrl)
         assert r.status_code == 200  # no fail
         assert len(r.data) == 1193  # might differ from the original file
