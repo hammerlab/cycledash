@@ -3,6 +3,7 @@ from flask import request, redirect, render_template
 from flask.ext.login import login_user, logout_user
 from sqlalchemy import exc
 import voluptuous
+import base64
 
 from cycledash import db, bcrypt, login_manager
 from cycledash.helpers import prepare_request_data, safely_redirect_to_next
@@ -107,3 +108,26 @@ def register():
             login_user(user)
             return redirect('/')
     return render_template('register.html', errors=errors)
+
+def check_login_from_key(api_key):
+    username, password = api_key.split(":")
+    return check_login(username, password)
+
+def load_user_from_request(request):
+    """Support for basic authorization."""
+    # next, try to login using Basic Auth
+    api_key = request.headers.get('Authorization')
+    if api_key:
+        api_key = api_key.replace('Basic ', '', 1)
+        try:
+            api_key = base64.b64decode(api_key)
+        except TypeError:
+            pass
+        user = check_login_from_key(api_key)
+        if user:
+            return user
+
+    # finally, return None if both methods did not login the user
+    return None
+
+login_manager.request_loader(load_user_from_request)
