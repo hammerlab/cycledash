@@ -49,7 +49,11 @@ source ENV.sh                      # make sure all our environment variables are
 
 ### 4. Set up the Database (Postgres)
 
-We use PostgreSQL as our datastore, with the schema described in `schema.sql`.
+We use PostgreSQL as our datastore, with the schema described in `schema.sql` and `UTC` timezone:
+
+```bash
+$EDITOR /usr/local/var/postgres/postgresql.conf  # timezone = 'UTC'
+```
 
 On OS X, setting up and running psql might look like this:
 
