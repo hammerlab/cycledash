@@ -1,4 +1,10 @@
-## JSON API
+# JSON API
+
+## Authentication
+
+Authentication is done via
+[HTTP basic authorization](https://en.wikipedia.org/wiki/Basic_access_authentication),
+and is required for all API calls.
 
 ### VCFs
 
