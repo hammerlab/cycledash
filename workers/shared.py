@@ -10,6 +10,7 @@ import celery
 from sqlalchemy import select, func, create_engine, MetaData, bindparam, not_, or_
 import pywebhdfs.webhdfs
 import pywebhdfs.errors
+import varcode
 
 import config
 from common.helpers import tables
@@ -86,20 +87,31 @@ def hdfs_to_local_path(hdfs_path):
 
     return filename
 
+def guess_ensembl_release(filepath):
+    try:
+        release = varcode.load_vcf(filepath)[0].ensembl.release
+    except ValueError:  # no guesses from varcode, return default
+        release = config.ENSEMBL_RELEASE
+    finally:
+        return release
 
 def load_vcf(vcf_path):
     """Return a vcf.Reader, header text for the given VCF."""
     if config.ALLOW_LOCAL_VCFS and vcf_path.startswith('/tests/'):
-        text = open(vcf_path[1:]).read()
+        filepath = vcf_path[1:];
+        text = open(filepath).read()
     elif vcf_path.startswith('file://'):
-        text = open(vcf_path[6:]).read()
+        filepath = vcf_path[6:];
+        text = open(filepath).read()
     elif vcf_path.startswith('hdfs://'):
         return load_vcf(vcf_path[6:])
     else:
         text = get_contents_from_hdfs(vcf_path)
+        filepath = hdfs_to_local_path(vcf_path)
     header = '\n'.join(l for l in text.split('\n') if l.startswith('#'))
+    release = guess_ensembl_release(filepath)
 
-    return pyvcf.Reader(l for l in text.split('\n')), header
+    return pyvcf.Reader(l for l in text.split('\n')), header, release
 
 
 def initialize_database(database_uri):

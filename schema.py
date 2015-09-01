@@ -39,6 +39,7 @@ Table('vcfs', metadata,
     Column('notes', String()),  # Any notes, params, etc the user might add. Ideally in JSON format.
     Column('uri', String()),  # URI of source file, if any
     Column('vcf_header', String()),  # Plaintext header of the VCF
+    Column('vcf_release', Integer),  # ENSEMBL compatible release for reference
     Column('extant_columns', String()),  # JSON list of non-null columns in the VCF
     Column('genotype_count', BigInteger),   # number of variants in this VCF
     UniqueConstraint('project_id', 'uri', name='vcfs_project_id_uri_key')

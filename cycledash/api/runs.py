@@ -36,7 +36,8 @@ CreateRun = Schema({
     'notes': unicode,
     'dataset': unicode,
     'project_name': unicode,
-    'vcf_header': unicode
+    'vcf_header': unicode,
+    'vcf_release': Coerce(int)
 })
 
 UpdateRun = Schema({
@@ -49,6 +50,7 @@ UpdateRun = Schema({
 
     'notes': unicode,
     'vcf_header': unicode,
+    'vcf_release': Coerce(int),
 
     'true_positive': Coerce(int),
     'false_positive': Coerce(int),
@@ -75,6 +77,8 @@ run_fields = {
         Any(basestring, None),
     Doc('vcf_header', 'The raw VCF text of the header.'):
         Any(basestring, None),
+    Doc('vcf_release', 'ENSEMBL Release for the reference'):
+        Any(long, None),
     Doc('project_id', 'The internal ID of the Project this Run belongs to.'):
         long,
     Doc('normal_bam_id',

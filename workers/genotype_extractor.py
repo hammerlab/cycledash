@@ -40,12 +40,12 @@ def _extract(vcf_id):
         vcf = vcfs_table.select().where(vcfs_table.c.id == vcf_id).execute().fetchone()
 
         # Validate the contents of the VCF before modifying the database.
-        reader, header_text = load_vcf(vcf['uri'])
+        reader, header_text, release = load_vcf(vcf['uri'])
 
         # Fill in VCF header text, which is now available.
         (vcfs_table.update()
          .where(vcfs_table.c.id == vcf_id)
-         .values(vcf_header=header_text)
+         .values(vcf_header=header_text, vcf_release=release)
          .execute())
 
         insert_genotypes_with_copy(reader, engine,
