@@ -70,14 +70,12 @@ class CommentList(Resource):
         with tables(db.engine, 'user_comments') as (con, comments):
             q = select(comments.c).where(
                 comments.c.vcf_id == run_id).order_by(desc(comments.c.id))
-            return [userify_comments(dict(c) for c in q.execute().fetchall())]
+            return [dict(c) for c in q.execute().fetchall()]
 
     @validate_with(CreateComment)
     @marshal_with(CommentFields)
     def post(self, run_id):
         """Create a comment."""
-        print current_user
-
         with tables(db.engine, 'user_comments') as (con, comments):
             q = comments.insert().values(
                 vcf_id=run_id,
@@ -150,6 +148,8 @@ def get_vcf_comments(vcf_id):
         "<row_key STRING>": [...], ...
       }
     }
+
+    where comments have an additional "user" field.
     """
     def _row_key(comment, table):
         cols = ['contig', 'position', 'reference', 'alternates', 'sample_name']
@@ -181,7 +181,7 @@ def get_last_comments(n=5):
 
 def add_user_to_comments(comments):
     """Given comments with userIds, attaches the relevant user
-    info to the comments
+    info to the comments.
     """
     for comment in comments:
         add_user_to_comment(comment)
@@ -189,14 +189,14 @@ def add_user_to_comments(comments):
 
 def add_user_to_comment(comment):
     """Given a comment with userId, attaches the relevant user
-    info to the comment
+    information (user: id, username) to the comment (comment: user).
     """
     if 'userId' in comment:
         with tables(db.engine, 'users') as (con, users):
-            q = select([users.c.username, users.c.id]).
-                where(users.c.id == comment['userId'])
+            q = select([users.c.username, users.c.id]).where(
+                users.c.id == comment['userId'])
             user = q.execute().fetchone()
-            if user is not None:
+            if user:
                 user = dict(user)
             comment['user'] = user
     else:
@@ -232,4 +232,4 @@ def _get_comment(comment_table, id=None, **query_kwargs):
     for colname, val in query_kwargs.items():
         q = q.where(comment_table.c[colname] == val)
     comment = q.execute().fetchone()
-    return userify_comment(dict(abort_if_none_for('comment')(comment, id)))
+    return dict(abort_if_none_for('comment')(comment, id))

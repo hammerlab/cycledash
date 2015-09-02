@@ -65,6 +65,21 @@ class User(dict):
     def get_id(self):
         return unicode(self['id'])
 
+class AnonymousUser(User):
+    def __init__(self):
+        self['id'] = None
+        self['username'] = u'Anonymous'
+
+    def is_active(self):
+        return False
+
+    def is_anonymous(self):
+        return True
+
+    def is_authenticated(self):
+        return False
+
+login_manager.anonymous_user = AnonymousUser
 
 def wrap_user(user):
     """Wraps user record returned from the database in a class providing methods

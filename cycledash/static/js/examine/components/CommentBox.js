@@ -246,7 +246,8 @@ var VCFCommentViewer = React.createClass({
 
     var markedDownText = marked(plainText);
     var user = this.props.user;
-    var authorName = user != null ? user.username : "Anonymous";
+    var authorName =
+      (user !== undefined && user !== null) ? user.username : "Anonymous";
 
     return (
       <div className='comments'>

@@ -62,6 +62,7 @@ describe('IGV Links', function() {
 
   it('should display load/jump initially', function() {
     var commentBox = renderCommentBox({
+      currentUser: Utils.fakeCurrentUser(),
       selectedRow: 0,
       hasOpenedIGV: false
     });

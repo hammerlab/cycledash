@@ -294,7 +294,7 @@ var VCFRecord = React.createClass({
     record: React.PropTypes.object.isRequired,
     columns: React.PropTypes.object.isRequired,
     isSelected: React.PropTypes.bool.isRequired,
-    handleSelectRecord: React.PropTypes.func.isRequired,
+    handleSelectRecord: React.PropTypes.func.isRequired
   },
   handleClick: function() {
     // If the same record is selected, treat that as a deselect toggle.
