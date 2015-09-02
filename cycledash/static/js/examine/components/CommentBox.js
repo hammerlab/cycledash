@@ -36,7 +36,8 @@ var CommentBox = React.createClass({
     igvLink: React.PropTypes.string,
     handleOpenViewer: React.PropTypes.func.isRequired,
     handleSetComment: React.PropTypes.func.isRequired,
-    handleDeleteComment: React.PropTypes.func.isRequired
+    handleDeleteComment: React.PropTypes.func.isRequired,
+    currentUser: React.PropTypes.object.isRequired
   },
   getHandleDelete: function(comment) {
     var handleDeleteComment = this.props.handleDeleteComment;
@@ -61,6 +62,8 @@ var CommentBox = React.createClass({
     var handleSetComment = this.props.handleSetComment;
     var getGranularUnixSeconds = this.getGranularUnixSeconds;
     var record = this.props.record;
+    var currentUser = this.props.currentUser;
+
     return function(commentText) {
       // Subtract the offset to get GMT (to match what's in the DB)
       var newComment = _.extend(
@@ -71,6 +74,8 @@ var CommentBox = React.createClass({
                'alternates',
                'sample_name'),
         {'commentText': commentText,
+         'user': currentUser,
+         'userId': currentUser.id,
          // Note: this is a temporary date that does not get persisted
          // to the DB. Instead, the DB creates its own date, but this
          // timestamp is used for distinguishing between comments in
@@ -98,7 +103,7 @@ var CommentBox = React.createClass({
               moment(comment.created)));
         return <VCFComment record={this.props.record}
                            commentText={comment.commentText}
-                           userId={comment.userId}
+                           user={comment.user}
                            key={reactKey}
                            handleSave={this.getHandleSaveForUpdate(comment)}
                            startInEditState={false}
@@ -139,7 +144,7 @@ var VCFComment = React.createClass({
     cancelable: React.PropTypes.bool.isRequired,
 
     // Optional arguments.
-    userId: React.PropTypes.number,
+    user: React.PropTypes.object,
     createdString: React.PropTypes.string,
     handleDelete: React.PropTypes.func,
   },
@@ -185,7 +190,7 @@ var VCFComment = React.createClass({
                         handleSave={this.props.handleSave}
                         cancelable={this.props.cancelable} /> :
       <VCFCommentViewer commentText={this.props.commentText}
-                        userId={this.props.userId}
+                        user={this.props.user}
                         createdString={this.props.createdString}
                         placeHolder={placeHolder}
                         handleDelete={this.props.handleDelete}
@@ -231,7 +236,7 @@ var VCFCommentViewer = React.createClass({
     placeHolder: React.PropTypes.string.isRequired,
     handleDelete: React.PropTypes.func.isRequired,
     handleEdit: React.PropTypes.func.isRequired,
-    userId: React.PropTypes.number
+    user: React.PropTypes.object
   },
   render: function() {
     // Warning: by using this dangerouslySetInnerHTML feature, we're relying
@@ -240,8 +245,8 @@ var VCFCommentViewer = React.createClass({
         this.props.commentText : this.props.placeHolder;
 
     var markedDownText = marked(plainText);
-    var userId = this.props.userId;
-    var authorName = userId ? "User #" + userId : "Anonymous";
+    var user = this.props.user;
+    var authorName = user != null ? user.username : "Anonymous";
 
     return (
       <div className='comments'>

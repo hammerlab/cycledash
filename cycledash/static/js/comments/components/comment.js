@@ -59,9 +59,7 @@ var Comment = React.createClass({
     // moment uses the local timezone by default (converting the
     // value, which starts as a UNIX timestamp, to that timezone)
     var relativeDate = moment.unix(comment.created).fromNow();
-    var authorName = comment.userId
-                        ? "User #" + comment.userId
-                        : "Anonymous";
+    var authorName = comment.userId ? comment.user.username : "Anonymous";
     return (
         <li>
           <div className='author-name'>{authorName}</div>

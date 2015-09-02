@@ -23,7 +23,8 @@ var VCFTable = React.createClass({
     handleOpenViewer: React.PropTypes.func.isRequired,
     handleRequestPage: React.PropTypes.func.isRequired,
     handleSetComment: React.PropTypes.func.isRequired,
-    handleDeleteComment: React.PropTypes.func.isRequired
+    handleDeleteComment: React.PropTypes.func.isRequired,
+    currentUser: React.PropTypes.object.isRequired
   },
   // Call this to scroll a record to somewhere close to the top of the page.
   scrollRecordToTop: function(record) {
@@ -45,6 +46,7 @@ var VCFTable = React.createClass({
                         records={this.props.records} />
         <VCFTableBody records={this.props.records}
                       columns={this.props.columns}
+                      currentUser={this.props.currentUser}
                       selectedRecord={this.props.selectedRecord}
                       igvLink={this.props.igvLink}
                       handleRequestPage={this.props.handleRequestPage}
@@ -223,7 +225,8 @@ var VCFTableBody = React.createClass({
     handleOpenViewer: React.PropTypes.func.isRequired,
     handleRequestPage: React.PropTypes.func.isRequired,
     handleSetComment: React.PropTypes.func.isRequired,
-    handleDeleteComment: React.PropTypes.func.isRequired
+    handleDeleteComment: React.PropTypes.func.isRequired,
+    currentUser: React.PropTypes.object.isRequired
   },
   BOTTOM_BUFFER: 5000, // distance in px from bottom at which we load more records
   componentDidMount: function() {
@@ -266,6 +269,7 @@ var VCFTableBody = React.createClass({
               <CommentBox record={record}
                           key={commentBoxKey}
                           igvLink={this.props.igvLink}
+                          currentUser={this.props.currentUser}
                           handleOpenViewer={this.props.handleOpenViewer}
                           handleSetComment={this.props.handleSetComment}
                           handleDeleteComment={this.props.handleDeleteComment} />
@@ -290,7 +294,7 @@ var VCFRecord = React.createClass({
     record: React.PropTypes.object.isRequired,
     columns: React.PropTypes.object.isRequired,
     isSelected: React.PropTypes.bool.isRequired,
-    handleSelectRecord: React.PropTypes.func.isRequired
+    handleSelectRecord: React.PropTypes.func.isRequired,
   },
   handleClick: function() {
     // If the same record is selected, treat that as a deselect toggle.
