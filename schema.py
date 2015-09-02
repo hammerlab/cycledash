@@ -54,7 +54,7 @@ Table('user_comments', metadata,
     Column('reference', String()),
     Column('alternates', String()),
     Column('comment_text', String(), nullable=False),
-    Column('author_name', String()),
+    Column('user_id', BigInteger, ForeignKey('users.id')),
     Column('created', DateTime(timezone=True), nullable=False, server_default=func.now()),
     Column('last_modified', DateTime(timezone=True), nullable=False, server_default=func.now())
 )

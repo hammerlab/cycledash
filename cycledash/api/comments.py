@@ -2,6 +2,7 @@
 from collections import defaultdict
 from flask import jsonify, request
 from flask.ext.restful import abort, fields
+from flask.ext.login import current_user
 from sqlalchemy import select, func, desc
 from voluptuous import Any, Required, Coerce, Schema
 
@@ -20,8 +21,7 @@ CreateComment = Schema({
     Required("position"): Coerce(int),
     Required("reference"): basestring,
     Required("alternates"): basestring,
-    Required("comment_text"): basestring,
-    "author_name": basestring,
+    Required("comment_text"): basestring
 })
 
 DeleteComment = Schema({
@@ -30,8 +30,7 @@ DeleteComment = Schema({
 
 UpdateComment = Schema({
     Required('last_modified'): Coerce(float),
-    "comment_text": basestring,
-    "author_name": basestring,
+    "comment_text": basestring
 })
 
 CommentFields = Schema({
@@ -52,8 +51,8 @@ CommentFields = Schema({
         basestring,
     Doc('comment_text', 'The text of the comment.'):
         Any(basestring, None),
-    Doc('author_name', 'The name of the author of this comment.'):
-        Any(basestring, None),
+    Doc('user_id', 'The ID of the User this comment is associated with.'):
+        Any(long, None),
     Doc('created',
         'The time at which the comment was created (in epoch time).'):
         Coerce(to_epoch),
@@ -77,9 +76,12 @@ class CommentList(Resource):
     @marshal_with(CommentFields)
     def post(self, run_id):
         """Create a comment."""
+        print current_user
+
         with tables(db.engine, 'user_comments') as (con, comments):
             q = comments.insert().values(
                 vcf_id=run_id,
+                user_id=current_user['id'],
                 **request.validated_body
             ).returning(*comments.c)
             return dict(q.execute().fetchone()), 201

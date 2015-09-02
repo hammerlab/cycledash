@@ -11,10 +11,7 @@ var _ = require('underscore'),
     utils = require('../utils'),
     React = require('react/addons'),
     marked = require('marked'),
-    moment = require('moment'),
-    store = require('store');
-
-// Currently used to write comment author names to local storage.
+    moment = require('moment');
 
 /**
  * Use markdown for comments, and set appropriate flags to:
@@ -41,7 +38,6 @@ var CommentBox = React.createClass({
     handleSetComment: React.PropTypes.func.isRequired,
     handleDeleteComment: React.PropTypes.func.isRequired
   },
-  LOCAL_STORAGE_AUTHOR_KEY: 'CYCLEDASH_AUTHORNAME',
   getHandleDelete: function(comment) {
     var handleDeleteComment = this.props.handleDeleteComment;
     var record = this.props.record;
@@ -55,11 +51,9 @@ var CommentBox = React.createClass({
   getHandleSaveForUpdate: function(comment) {
     var handleSetComment = this.props.handleSetComment;
     var record = this.props.record;
-    return function(commentText, authorName) {
+    return function(commentText) {
       var newComment = _.clone(comment);
       newComment.commentText = commentText;
-      newComment.authorName = authorName;
-
       handleSetComment(newComment, record);
     };
   },
@@ -67,7 +61,7 @@ var CommentBox = React.createClass({
     var handleSetComment = this.props.handleSetComment;
     var getGranularUnixSeconds = this.getGranularUnixSeconds;
     var record = this.props.record;
-    return function(commentText, authorName) {
+    return function(commentText) {
       // Subtract the offset to get GMT (to match what's in the DB)
       var newComment = _.extend(
         _.pick(record,
@@ -77,7 +71,6 @@ var CommentBox = React.createClass({
                'alternates',
                'sample_name'),
         {'commentText': commentText,
-         'authorName': authorName,
          // Note: this is a temporary date that does not get persisted
          // to the DB. Instead, the DB creates its own date, but this
          // timestamp is used for distinguishing between comments in
@@ -89,15 +82,6 @@ var CommentBox = React.createClass({
   getGranularUnixSeconds: function(momentObject) {
     // moment does not appear to provide this functionality.
     return momentObject.valueOf() / 1000.0;
-  },
-  getLocalAuthorName: function() {
-    return store.enabled ? store.get(this.LOCAL_STORAGE_AUTHOR_KEY, '') : '';
-  },
-  saveLocalAuthorName: function(authorName) {
-    if (store.enabled &&
-        store.get(this.LOCAL_STORAGE_AUTHOR_KEY, '') !== authorName) {
-      store.set(this.LOCAL_STORAGE_AUTHOR_KEY, authorName);
-    }
   },
   render: function() {
     var comments = this.props.record.comments;
@@ -114,12 +98,11 @@ var CommentBox = React.createClass({
               moment(comment.created)));
         return <VCFComment record={this.props.record}
                            commentText={comment.commentText}
+                           userId={comment.userId}
                            key={reactKey}
                            handleSave={this.getHandleSaveForUpdate(comment)}
                            startInEditState={false}
                            cancelable={true}
-                           saveLocalAuthorName={this.saveLocalAuthorName}
-                           authorName={comment.authorName}
                            createdString={createdString}
                            handleDelete={this.getHandleDelete(comment)} />;
     });
@@ -136,9 +119,7 @@ var CommentBox = React.createClass({
                       key={utils.getRowKey(this.props.record) + 'newcomment'}
                       handleSave={this.getHandleSaveForCreate()}
                       startInEditState={true}
-                      cancelable={false}
-                      saveLocalAuthorName={this.saveLocalAuthorName}
-                      authorName={this.getLocalAuthorName()}/>
+                      cancelable={false}/>
         </td>
       </tr>
     );
@@ -156,10 +137,9 @@ var VCFComment = React.createClass({
     handleSave: React.PropTypes.func.isRequired,
     startInEditState: React.PropTypes.bool.isRequired,
     cancelable: React.PropTypes.bool.isRequired,
-    saveLocalAuthorName:React.PropTypes.func.isRequired,
 
     // Optional arguments.
-    authorName: React.PropTypes.string,
+    userId: React.PropTypes.number,
     createdString: React.PropTypes.string,
     handleDelete: React.PropTypes.func,
   },
@@ -194,17 +174,10 @@ var VCFComment = React.createClass({
   },
   render: function() {
     var placeHolder = 'Enter your comment here';
-    // Only use "Anonymous" in the viewer; the editor should just be
-    // blank in that case.
-    var authorNameOrAnonymous = this.props.authorName || 'Anonymous';
-    var authorNameOrBlank = this.props.authorName || '';
-
     // handleDelete is optional, but not providing it requires the
     // edit view.
     var commentElement = (this.state.isEditing || !this.props.handleDelete) ?
       <VCFCommentEditor commentText={this.props.commentText}
-                        authorName={authorNameOrBlank}
-                        saveLocalAuthorName={this.props.saveLocalAuthorName}
                         placeHolder={placeHolder}
                         setCommentTextState={this.setCommentTextState}
                         setEditState={this.setEditState}
@@ -212,7 +185,7 @@ var VCFComment = React.createClass({
                         handleSave={this.props.handleSave}
                         cancelable={this.props.cancelable} /> :
       <VCFCommentViewer commentText={this.props.commentText}
-                        authorName={authorNameOrAnonymous}
+                        userId={this.props.userId}
                         createdString={this.props.createdString}
                         placeHolder={placeHolder}
                         handleDelete={this.props.handleDelete}
@@ -254,11 +227,11 @@ var VCFCommentHeader = React.createClass({
 var VCFCommentViewer = React.createClass({
   propTypes: {
     commentText: React.PropTypes.string.isRequired,
-    authorName: React.PropTypes.string.isRequired,
     createdString: React.PropTypes.string.isRequired,
     placeHolder: React.PropTypes.string.isRequired,
     handleDelete: React.PropTypes.func.isRequired,
-    handleEdit: React.PropTypes.func.isRequired
+    handleEdit: React.PropTypes.func.isRequired,
+    userId: React.PropTypes.number
   },
   render: function() {
     // Warning: by using this dangerouslySetInnerHTML feature, we're relying
@@ -267,12 +240,15 @@ var VCFCommentViewer = React.createClass({
         this.props.commentText : this.props.placeHolder;
 
     var markedDownText = marked(plainText);
+    var userId = this.props.userId;
+    var authorName = userId ? "User #" + userId : "Anonymous";
+
     return (
       <div className='comments'>
         <div className='comment-view-container'>
           <div className='comment-header'>
             <div className='author-name'>
-              <b>{this.props.authorName}</b>
+              <b>{authorName}</b>
             </div>
             <div className='edit-buttons'>
               <a className='comment-edit' title='Edit Comment' href='#' onClick={this.props.handleEdit}></a>
@@ -289,15 +265,13 @@ var VCFCommentViewer = React.createClass({
 });
 
 /**
- * VCFCommentEditor represents the active editing (or creating) of a 
+ * VCFCommentEditor represents the active editing (or creating) of a
  * comment, and it has a separate state variable for updated text that
  * is not yet saved.
  */
 var VCFCommentEditor = React.createClass({
   propTypes: {
     commentText: React.PropTypes.string.isRequired,
-    authorName: React.PropTypes.string.isRequired,
-    saveLocalAuthorName: React.PropTypes.func.isRequired,
     placeHolder: React.PropTypes.string.isRequired,
     setCommentTextState: React.PropTypes.func.isRequired,
     setEditState: React.PropTypes.func.isRequired,
@@ -307,18 +281,12 @@ var VCFCommentEditor = React.createClass({
   },
   handleSaveText: function() {
     // If non-blank text is entered that differs from what was originally
-    // in the editor (either text or author), save it. A new comment can
+    // in the editor, save it. A new comment can
     // never be blank, though.
     var newCommentText = this.state.newCommentText;
-    var newAuthorName = this.state.newAuthorName;
     if (newCommentText !== '') {
-      if ((newCommentText !== this.props.commentText) ||
-          (newAuthorName !== '' &&
-           newAuthorName !== this.props.authorName)) {
-        // Store the author name in local storage.
-        this.props.saveLocalAuthorName(newAuthorName);
-
-        this.props.handleSave(newCommentText, newAuthorName);
+      if ((newCommentText !== this.props.commentText)) {
+        this.props.handleSave(newCommentText);
         this.props.setCommentTextState(newCommentText);
         this.props.setEditState(false);
 
@@ -344,11 +312,7 @@ var VCFCommentEditor = React.createClass({
     }
   },
   getInitialState: function() {
-    return {newCommentText: this.props.commentText,
-            newAuthorName: this.props.authorName};
-  },
-  handleAuthorChange: function(event) {
-    this.setState({newAuthorName: event.target.value});
+    return {newCommentText: this.props.commentText};
   },
   handleTextChange: function(event) {
     this.setState({newCommentText: event.target.value});
@@ -374,11 +338,6 @@ var VCFCommentEditor = React.createClass({
     return (
       <div className='comments'>
         <div className='comment-edit-container'>
-          <input className='form-control comment-author'
-                 type='text'
-                 value={this.state.newAuthorName}
-                 placeholder='Enter your name here'
-                 onChange={this.handleAuthorChange} />
           <textarea className='form-control comment-textarea'
                     value={this.state.newCommentText}
                     placeholder={this.props.placeHolder}
