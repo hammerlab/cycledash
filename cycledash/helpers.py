@@ -195,6 +195,5 @@ def abort_if_none_for(obj_name):
             return obj
     return abort_if_none
 
-
 class CollisionError(Exception):
     pass

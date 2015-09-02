@@ -70,7 +70,7 @@ class CommentList(Resource):
         with tables(db.engine, 'user_comments') as (con, comments):
             q = select(comments.c).where(
                 comments.c.vcf_id == run_id).order_by(desc(comments.c.id))
-            return [dict(c) for c in q.execute().fetchall()]
+            return [userify_comments(dict(c) for c in q.execute().fetchall())]
 
     @validate_with(CreateComment)
     @marshal_with(CommentFields)
@@ -165,6 +165,7 @@ def get_vcf_comments(vcf_id):
             comment['last_modified'] = to_epoch(comment['last_modified'])
             comment['created'] = to_epoch(comment['created'])
             comment = camelcase_dict(comment)
+            comment = add_user_to_comment(comment)
             results_map[row_key].append(comment)
     return {'comments': results_map}
 
@@ -176,8 +177,31 @@ def get_last_comments(n=5):
         q = select(cols.values()).order_by(
             desc(cols.created)).limit(n)
         comments = [camelcase_dict(dict(c)) for c in con.execute(q).fetchall()]
-    return epochify_comments(comments)
+    return add_user_to_comments(epochify_comments(comments))
 
+def add_user_to_comments(comments):
+    """Given comments with userIds, attaches the relevant user
+    info to the comments
+    """
+    for comment in comments:
+        add_user_to_comment(comment)
+    return comments
+
+def add_user_to_comment(comment):
+    """Given a comment with userId, attaches the relevant user
+    info to the comment
+    """
+    if 'userId' in comment:
+        with tables(db.engine, 'users') as (con, users):
+            q = select([users.c.username, users.c.id]).
+                where(users.c.id == comment['userId'])
+            user = q.execute().fetchone()
+            if user is not None:
+                user = dict(user)
+            comment['user'] = user
+    else:
+        comment['user'] = None
+    return comment
 
 def epochify_comments(comments):
     """Sets `lastModified` and `created` to be epoch time instead of iso8061."""
@@ -207,4 +231,5 @@ def _get_comment(comment_table, id=None, **query_kwargs):
     q = comment_table.select().where(comment_table.c.id == id)
     for colname, val in query_kwargs.items():
         q = q.where(comment_table.c[colname] == val)
-    return dict(abort_if_none_for('comment')(q.execute().fetchone(), id))
+    comment = q.execute().fetchone()
+    return userify_comment(dict(abort_if_none_for('comment')(comment, id)))
