@@ -104,18 +104,33 @@ COPY task_states (id, vcf_id, type, task_id, state) FROM stdin;
 
 SELECT pg_catalog.setval('task_states_id_seq', 2, true);
 
+--
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: arman
+--
+
+COPY users (id, username, password, email) FROM stdin;
+1	Alice	$2a$12$YKrtItAnZw8qGS8brcNJiu2bAKz9jBYzsIXVJaw4L78pgyeO33rbu	alice@cycledash.com
+2	Bob	$2a$12$YKrtItAnZw8qGS8brcNJiu2bAKz9jBYzsIXVJaw4L78pgyeO33rbu	bob@cycledash.com
+3	Carol	$2a$12$YKrtItAnZw8qGS8brcNJiu2bAKz9jBYzsIXVJaw4L78pgyeO33rbu	carol@cycledash.com
+\.
+
+--
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: arman
+--
+
+SELECT pg_catalog.setval('users_id_seq', 3, true);
 
 --
 -- Data for Name: user_comments; Type: TABLE DATA; Schema: public; Owner: tavi
 --
 
 COPY user_comments (id, vcf_id, sample_name, contig, "position", reference, alternates, comment_text, user_id, created, last_modified) FROM stdin;
-1	1	NORMAL	20	61795	G	T	This is a comment on the second row!	\N	2015-03-24 15:29:09.615967+00	2015-03-11 23:33:33.951753+00
-2	1	NORMAL	20	65900	G	A	*This* is a comment with [Markdown](http://daringfireball.net/projects/markdown/syntax).	\N	2015-03-24 15:29:09.615967+00	2015-03-11 23:34:18.19118+00
-3	1	TUMOR	20	61795	G	T	*This* is a comment on the first variant with [Markdown](http://daringfireball.net/projects/markdown/syntax).\n	\N	2015-03-24 15:29:09.615967+00	2015-03-12 15:30:20.570952+00
-4	1	NORMAL	20	61795	G	T	This is another comment on the second row!	\N	2015-03-24 17:40:44.984191+00	2015-03-24 17:40:44.984191+00
-6	1	TUMOR	20	61795	G	T	This is a comment without Markdown by Bob!	\N	2015-03-24 17:46:40.962213+00	2015-03-24 17:46:40.962213+00
-5	1	TUMOR	20	61795	G	T	This is a comment without Markdown!	\N	2015-03-24 17:43:23.497883+00	2015-03-24 17:43:23.497883+00
+1	1	NORMAL	20	61795	G	T	This is a comment on the second row!	1	2015-03-24 15:29:09.615967+00	2015-03-11 23:33:33.951753+00
+2	1	NORMAL	20	65900	G	A	*This* is a comment with [Markdown](http://daringfireball.net/projects/markdown/syntax).	2	2015-03-24 15:29:09.615967+00	2015-03-11 23:34:18.19118+00
+3	1	TUMOR	20	61795	G	T	*This* is a comment on the first variant with [Markdown](http://daringfireball.net/projects/markdown/syntax).\n	3	2015-03-24 15:29:09.615967+00	2015-03-12 15:30:20.570952+00
+4	1	NORMAL	20	61795	G	T	This is another comment on the second row by Anonymous!	\N	2015-03-24 17:40:44.984191+00	2015-03-24 17:40:44.984191+00
+6	1	TUMOR	20	61795	G	T	This is a comment without Markdown by Bob!	2	2015-03-24 17:46:40.962213+00	2015-03-24 17:46:40.962213+00
+5	1	TUMOR	20	61795	G	T	This is a comment without Markdown by Alice!	1	2015-03-24 17:43:23.497883+00	2015-03-24 17:43:23.497883+00
 \.
 
 
