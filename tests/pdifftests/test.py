@@ -114,12 +114,14 @@ class Examine(Base):
         """Examine page showing a filtered view."""
         pass
 
+    @hide('.comment-bubble')  # the icon doesn't always appear instantenously
     @hide('.time')
     def comments_view(self, driver):
         """Examine page showing a comment in view mode."""
         row = driver.find_element_by_css_selector('.vcf-table tbody tr')
         row.click()
 
+    @hide('.comment-bubble')
     @hide('.time')
     def comments_edit(self, driver):
         """Examine page showing a comment in edit mode."""
