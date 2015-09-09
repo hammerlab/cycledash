@@ -38,6 +38,8 @@ BCRYPT_LOG_ROUNDS = int(os.environ.get('BCRYPT_LOG_ROUNDS', 10))
 # cf. http://flask-login.readthedocs.org/en/latest/ "Protecting views"
 LOGIN_DISABLED = handle_false(os.environ.get('LOGIN_DISABLED', False))
 
+GA4GH_ROOT = os.environ.get('GA4GH_ROOT')
+
 
 del os
 del subprocess

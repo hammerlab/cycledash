@@ -102,4 +102,4 @@ def validate_with(schema):
     return decorator
 
 
-import projects, bams, runs, genotypes, tasks, comments
+import projects, bams, runs, genotypes, tasks, comments, ga4gh_wrapper

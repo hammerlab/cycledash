@@ -32,3 +32,4 @@ seltest==0.2.8
 flask-login==0.2.11
 flask-bcrypt==0.6.2
 alembic==0.7.7
+-e 'git+https://github.com/ga4gh/server.git@49e3acf7947#egg=ga4gh'
