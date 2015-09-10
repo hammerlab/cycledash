@@ -250,7 +250,8 @@ var RunsTable = React.createClass({
             <th className='caller-name'>Caller Name</th>
             <th className='date'>Submitted</th>
             <th className='num-variants'>Variants</th>
-            <th className='bam-info'>Linked BAMs</th>
+            <th className='linked-bams'>Linked BAMs</th>
+            <th className='run-labels'></th>
             <th className='num-comments'></th>
             <th className='examine-col'></th>
           </tr>
@@ -279,6 +280,7 @@ var RunRow = React.createClass({
         <td className='caller-name'>{run.caller_name}</td>
         <td className='date' title={run.created_at}>{moment(new Date(run.created_at)).format('YYYY-MM-DD')}</td>
         <td className='num-variants' title={run.genotype_count}>{run.genotype_count}</td>
+        <RunBAMs run={run} />
         <RunLabels run={run} />
         <RunComments run={run} />
         <td className='run-id'>
@@ -320,7 +322,7 @@ var RunDescriptionRow = React.createClass({
           });
     return (
       <tr className='info'>
-        <td colSpan='6'>
+        <td colSpan='7'>
           <dl className='dl-horizontal'>
             {descriptions}
             {tasks}
@@ -362,17 +364,15 @@ var RunLabels = React.createClass({
                       .object()
                       .value();
     var labelSpecs = [
-      {path: ['tumor_bam' , 'name'], usePathValue: true, title: 'Tumor BAM'},
-      {path: ['normal_bam', 'name'], usePathValue: true, title: 'Normal BAM'},
       {path: ['run'], title: 'Has a running worker task', cssClass: 'run'},
       {path: ['fail'], title: 'Has a failed worker task', cssClass: 'fail'}
     ];
     var labels = labelSpecs.map(
       function({path, usePathValue, title, cssClass}) {
-        var value = utils.getIn(run, path) || utils.getIn(taskStates, path);
+        var value = utils.getIn(taskStates, path);
         if (value) {
           return (
-            <span className={`linked-bam ${cssClass}`} title={title} key={path.join('-')}>
+            <span className={`${cssClass}`} title={title} key={path.join('-')}>
               {usePathValue ? value : ''}
             </span>
           );
@@ -381,6 +381,36 @@ var RunLabels = React.createClass({
     return (
         <td className='labels'>
           {labels}
+        </td>
+    );
+  }
+});
+
+var RunBAMs = React.createClass({
+  propTypes: {
+    run: React.PropTypes.object.isRequired
+  },
+  render: function() {
+    var run = this.props.run;
+
+    var labelSpecs = [
+      {path: ['tumor_bam' , 'name'], usePathValue: true, title: 'Tumor BAM', cssClass: 'linked-bam'},
+      {path: ['normal_bam', 'name'], usePathValue: true, title: 'Normal BAM', cssClass: 'linked-bam'},
+    ];
+    var run_bams = labelSpecs.map(
+      function({path, usePathValue, title, cssClass}) {
+        var value = utils.getIn(run, path);
+        if (value) {
+          return (
+            <span className={`${cssClass}`} title={title} key={path.join('-')}>
+              {usePathValue ? value : ''}
+            </span>
+          );
+        }
+      });
+    return (
+        <td className='bam-labels'>
+          {run_bams}
         </td>
     );
   }

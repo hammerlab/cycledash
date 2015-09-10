@@ -143,7 +143,7 @@ div.project a {
   table-layout: fixed;
   margin: 0;
 }
-main#runs .runs-table tr.info > td {
+main#runs .runs-table tr.info > td, main#runs .bams-table tr.info > td {
   background-color: $color-bg-expanded;
 }
 input.selector {
@@ -152,19 +152,25 @@ input.selector {
 td .label {
   margin: 0 3px 0 3px;
 }
-.runs-table .label.fail, .runs-table .label.run {
-  background: none;
-  display: inline-block;
-  width: 16px;
-  height: 16px;
+.runs-table .labels .fail, .runs-table .labels .run {
+  font-size: 0.875em;
 }
-.runs-table .label.fail::after {
+.runs-table .labels .fail {
+  @extend .glyphicon-remove;
+}
+.runs-table .labels .fail::before{
+  @extend .glyphicon;
   color: $color-status-error;
-  content: 'x';
+  padding-right: 0.25em;
+  font-size: 10px;
 }
-.runs-table .label.run::after {
+.runs-table .labels .fail::after {
+  color: $color-status-error;
+  content: 'Failed';
+}
+.runs-table .labels .run::after {
   color: $color-blue-sinai;
-  content: '…';
+  content: 'Uploading...';
 }
 span.comment-bubble {
   @extend .glyphicon, .glyphicon-comment;
@@ -182,25 +188,28 @@ td.comments {
   text-align: right;
 }
 .runs-table .caller-name {
-  width: 30%;
+  width: 27%;
 }
 .runs-table .date {
-  width: 15%;
+  width: 13%;
 }
 .runs-table .num-variants {
-  width: 15%;
+  width: 13%;
 }
-.runs-table .bam-info {
+.runs-table .linked-bams {
   width: 20%;
 }
-.runs-table .num-comments {
+.runs-table .run-labels {
   width: 10%;
+}
+.runs-table .num-comments {
+  width: 7%;
 }
 .runs-table .examine-col {
   width: 10%;
 }
 .bams-table .bam-name {
-  width: 30%
+  width: 30%;
 }
 .bams-table .resection-date {
   width: 21%;
