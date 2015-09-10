@@ -2,7 +2,7 @@
 """Defines all views for CycleDash."""
 import json
 import tempfile
-from flask import request, redirect, render_template, send_file
+from flask import request, redirect, render_template, send_file, Response
 from flask.ext.login import login_required
 from sqlalchemy import select, desc, exc
 import voluptuous
@@ -58,6 +58,18 @@ api.add_resource(cycledash.api.comments.CommentsForVcf,
 api.add_resource(cycledash.api.genotypes.Genotypes,
                  '/runs/<int:run_id>/genotypes',
                  endpoint='api:genotypes')
+
+
+#############################
+# (subset of the) GA4GH API #
+#############################
+ga4gh_backend = cycledash.api.ga4gh_wrapper.DirectBamBackend(app.config.get('GA4GH_ROOT', ''))
+
+@app.route('/ga4gh/reads/search', methods=['POST'])
+def searchReads():
+    endpoint = ga4gh_backend.runSearchReads
+    response_string = endpoint(request.get_data())
+    return Response(response_string, status=200, mimetype='application/json')
 
 
 ##############
