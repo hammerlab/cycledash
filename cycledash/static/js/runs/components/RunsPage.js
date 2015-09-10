@@ -188,11 +188,15 @@ var ProjectTable = React.createClass({
                          selectedRunId={this.state.selectedRunId}
                          createClickRunHandler={this.createClickRunHandler} />;
     }
+    var notes;
+    if (this.props.notes) {
+      notes = <p className='notes'>{this.props.notes}</p>
+    }
     return (
       <div className='project'>
         <div className='project-header'>
           <h2 title={this.props.project_id}>{this.props.name === 'null' ? 'No Project' : this.props.name}</h2>
-          <p className='notes'>{this.props.notes}</p>
+          {notes}
         </div>
         <div className='project-stats'>
           <div className='project-table-nav'>
