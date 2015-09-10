@@ -63,13 +63,13 @@ api.add_resource(cycledash.api.genotypes.Genotypes,
 #############################
 # (subset of the) GA4GH API #
 #############################
-ga4gh_backend = cycledash.api.ga4gh_wrapper.DirectBamBackend(app.config['GA4GH_ROOT'])
+ga4gh_backend = cycledash.api.ga4gh_wrapper.DirectBamBackend(app.config.get('GA4GH_ROOT', ''))
 
 @app.route('/ga4gh/reads/search', methods=['POST'])
 def searchReads():
     endpoint = ga4gh_backend.runSearchReads
-    responseStr = endpoint(request.get_data())
-    return Response(responseStr, status=200, mimetype='application/json')
+    response_string = endpoint(request.get_data())
+    return Response(response_string, status=200, mimetype='application/json')
 
 
 ##############

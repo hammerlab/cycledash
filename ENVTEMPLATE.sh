@@ -12,10 +12,12 @@ export SECRET_KEY  # Set to something real + random for deployment
 # True for automatic reloading & debugging JS insertion.
 export USE_RELOADER=False
 
-
 ###  Optional:
 ## This is one way to get fancy fonts working in CycleDash.
 # export TYPEKIT_URL="//use.typekit.net/SOMETHING.js"
+
+# To serve BAM files using the GA4GH API
+# export GA4GH_ROOT=/hdfs
 
 ## Useful to specify where CSV files will be written to when importing data into
 ## Postgres via CSV, which is how workers/genotype_extractor.py works.
