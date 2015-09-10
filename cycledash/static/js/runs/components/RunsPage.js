@@ -190,7 +190,7 @@ var ProjectTable = React.createClass({
     }
     var notes;
     if (this.props.notes) {
-      notes = <p className='notes'>{this.props.notes}</p>
+      notes = <p className='notes'>{this.props.notes}</p>;
     }
     return (
       <div className='project'>
