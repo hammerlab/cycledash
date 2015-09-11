@@ -392,16 +392,14 @@ var RunComments = React.createClass({
   },
   render: function() {
     var run = this.props.run;
-    var tdClasses = React.addons.classSet({
-      'comments': true,
-      'no-comment': run.num_comments === 0
-    });
+    var commentBubble;
+    if (run.num_comments !== 0){
+      commentBubble = <div>{run.num_comments}<span className='comment-bubble'></span></div>;
+    }
+
     return (
-      <td className={tdClasses}>
-        <span>
-          {run.num_comments === 0 ? null : run.num_comments}
-        </span>
-        <span className='comment-bubble'></span>
+      <td className='comments'>
+        {commentBubble}
       </td>
     );
   }
