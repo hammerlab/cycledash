@@ -393,7 +393,7 @@ var RunComments = React.createClass({
   render: function() {
     var run = this.props.run;
     var commentBubble;
-    if (run.num_comments != 0){
+    if (run.num_comments !== 0){
       commentBubble = <div>{run.num_comments}<span className='comment-bubble'></span></div>;
     }
 
