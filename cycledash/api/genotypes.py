@@ -386,17 +386,17 @@ def _header_spec(vcf_header_text, extant_cols):
 
     # Add Cycledash-derived columns
     _add_extant_column_to_spec(extant_cols, 'annotations:gene_name', res,
-            ('Name of the gene that overlaps with this variant\'s effect'
-            'derived from Varcode project.'))
+            ('Name of the gene that overlaps with this variant\'s effect, '
+            'derived from Varcode.'))
     _add_extant_column_to_spec(extant_cols, 'annotations:transcript', res,
-            ('Transcript that overlaps with this variant'
-            'derived from Varcode project.'))
+            ('Transcript that overlaps with this variant, '
+            'derived from Varcode.'))
     _add_extant_column_to_spec(extant_cols, 'annotations:effect_notation', res,
             ('Protein change caused by this variant, '
-            'derived from Varcode project.'))
+            'derived from Varcode.'))
     _add_extant_column_to_spec(extant_cols, 'annotations:effect_type', res,
-            ('Type of the variant, '
-            'derived from Varcode project.'))
+            ('Type of this variant, '
+            'derived from Varcode.'))
 
     # Remove empty supercolumns
     for key, val in res.iteritems():
