@@ -32,9 +32,19 @@ function mapValues(o, fn) {
   });
 }
 
+function fakeCurrentUser() {
+  return {
+      username: 'currentUser',
+      email: 'current@user.com',
+      id: 1,
+      password: 'dummy'
+    };
+}
+
 module.exports = {
   findInComponent,
   makeObj,
   mapValues,
-  stubReactMethod
+  stubReactMethod,
+  fakeCurrentUser
 };

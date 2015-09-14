@@ -2,6 +2,7 @@
 from collections import defaultdict
 from flask import jsonify, request
 from flask.ext.restful import abort, fields
+from flask.ext.login import current_user
 from sqlalchemy import select, func, desc
 from voluptuous import Any, Required, Coerce, Schema
 
@@ -20,8 +21,7 @@ CreateComment = Schema({
     Required("position"): Coerce(int),
     Required("reference"): basestring,
     Required("alternates"): basestring,
-    Required("comment_text"): basestring,
-    "author_name": basestring,
+    Required("comment_text"): basestring
 })
 
 DeleteComment = Schema({
@@ -30,8 +30,7 @@ DeleteComment = Schema({
 
 UpdateComment = Schema({
     Required('last_modified'): Coerce(float),
-    "comment_text": basestring,
-    "author_name": basestring,
+    "comment_text": basestring
 })
 
 CommentFields = Schema({
@@ -52,8 +51,8 @@ CommentFields = Schema({
         basestring,
     Doc('comment_text', 'The text of the comment.'):
         Any(basestring, None),
-    Doc('author_name', 'The name of the author of this comment.'):
-        Any(basestring, None),
+    Doc('user_id', 'The ID of the User this comment is associated with.'):
+        Any(long, None),
     Doc('created',
         'The time at which the comment was created (in epoch time).'):
         Coerce(to_epoch),
@@ -80,6 +79,7 @@ class CommentList(Resource):
         with tables(db.engine, 'user_comments') as (con, comments):
             q = comments.insert().values(
                 vcf_id=run_id,
+                user_id=current_user['id'],
                 **request.validated_body
             ).returning(*comments.c)
             return dict(q.execute().fetchone()), 201
@@ -148,6 +148,8 @@ def get_vcf_comments(vcf_id):
         "<row_key STRING>": [...], ...
       }
     }
+
+    where comments have an additional "user" field.
     """
     def _row_key(comment, table):
         cols = ['contig', 'position', 'reference', 'alternates', 'sample_name']
@@ -163,6 +165,7 @@ def get_vcf_comments(vcf_id):
             comment['last_modified'] = to_epoch(comment['last_modified'])
             comment['created'] = to_epoch(comment['created'])
             comment = camelcase_dict(comment)
+            comment = add_user_to_comment(comment)
             results_map[row_key].append(comment)
     return {'comments': results_map}
 
@@ -174,8 +177,31 @@ def get_last_comments(n=5):
         q = select(cols.values()).order_by(
             desc(cols.created)).limit(n)
         comments = [camelcase_dict(dict(c)) for c in con.execute(q).fetchall()]
-    return epochify_comments(comments)
+    return add_user_to_comments(epochify_comments(comments))
 
+def add_user_to_comments(comments):
+    """Given comments with userIds, attaches the relevant user
+    info to the comments.
+    """
+    for comment in comments:
+        add_user_to_comment(comment)
+    return comments
+
+def add_user_to_comment(comment):
+    """Given a comment with userId, attaches the relevant user
+    information (user: id, username) to the comment (comment: user).
+    """
+    if 'userId' in comment:
+        with tables(db.engine, 'users') as (con, users):
+            q = select([users.c.username, users.c.id]).where(
+                users.c.id == comment['userId'])
+            user = q.execute().fetchone()
+            if user:
+                user = dict(user)
+            comment['user'] = user
+    else:
+        comment['user'] = None
+    return comment
 
 def epochify_comments(comments):
     """Sets `lastModified` and `created` to be epoch time instead of iso8061."""
@@ -205,4 +231,5 @@ def _get_comment(comment_table, id=None, **query_kwargs):
     q = comment_table.select().where(comment_table.c.id == id)
     for colname, val in query_kwargs.items():
         q = q.where(comment_table.c[colname] == val)
-    return dict(abort_if_none_for('comment')(q.execute().fetchone(), id))
+    comment = q.execute().fetchone()
+    return dict(abort_if_none_for('comment')(comment, id))

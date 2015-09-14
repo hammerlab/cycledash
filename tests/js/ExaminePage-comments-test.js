@@ -51,6 +51,7 @@ describe('ExaminePage Comments', function() {
     return TestUtils.renderIntoDocument(
       <ExaminePage recordStore={recordStore}
                    recordActions={recordActions}
+                   currentUser={Utils.fakeCurrentUser()}
                    igvHttpfsUrl={igvHttpfsUrl}
                    vcf={run} comparableVcfs={[]} />);
   }

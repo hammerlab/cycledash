@@ -17,6 +17,7 @@
  window.renderExaminePage(document.getElementById('examine'),
                           {{ vcf | tojson }},
                           {{ vcfs | tojson }},
-                          {{ config['IGV_HTTPFS_URL'] | tojson }});
+                          {{ config['IGV_HTTPFS_URL'] | tojson }},
+                          {{ current_user | tojson }});
 </script>
 {% endblock%}

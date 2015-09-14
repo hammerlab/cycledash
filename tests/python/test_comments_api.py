@@ -20,10 +20,10 @@ def create_comment_with_text(run_id, text):
             'contig': 'chr101',
             'position': 909090,
             'reference': 'Q',
-            'alternates': 'WHOA'
+            'alternates': 'WHOA',
+            'user_id': None
             }).returning(*comments.c).execute()
         return dict(res.fetchone())
-
 
 class TestCommentsAPI(helpers.ResourceTest):
     @classmethod
@@ -43,14 +43,12 @@ class TestCommentsAPI(helpers.ResourceTest):
                             'position': 123,
                             'reference': 'C',
                             'alternates': 'A,G',
-                            'commentText': comment_text,
-                            'authorName': 'Tester McGee'})
+                            'commentText': comment_text})
         data = json.loads(r.data)
         assert r.status_code == 201
         assert isinstance(json.loads(r.data)['id'], int)
         assert data['vcfId'] == self.run['id']
         assert data['sampleName'] == 'samp'
-        assert data['authorName'] == 'Tester McGee'
         assert data['commentText'] == comment_text
         assert data['reference'] == 'C'
         assert data['alternates'] == 'A,G'
@@ -84,12 +82,10 @@ class TestCommentsAPI(helpers.ResourceTest):
         comment = create_comment_with_text(self.run['id'], 'some text')
         r = self.put('/api/runs/{}/comments/{}'.format(self.run['id'], comment['id']),
                      data={'commentText': new_text,
-                           'authorName': new_author,
                            'last_modified': to_epoch(comment['last_modified'])})
         assert r.status_code == 200
         assert json.loads(r.data)['id'] == comment['id']
         assert json.loads(r.data)['commentText'] == new_text
-        assert json.loads(r.data)['authorName'] == new_author
 
     def test_update_comment_without_timestamp(self):
         comment = create_comment_with_text(self.run['id'], 'some text')

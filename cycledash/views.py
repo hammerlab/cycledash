@@ -158,6 +158,7 @@ def comments():
         comments = [camelcase_dict(dict(c))
                     for c in comments.execute().fetchall()]
         comments = cycledash.api.comments.epochify_comments(comments)
+        comments = cycledash.api.comments.add_user_to_comments(comments)
     return render_template('comments.html', comments=comments)
 
 

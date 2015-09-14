@@ -7,7 +7,8 @@ var React = require('react'),
     getRecordActions = require('./RecordActions').getRecordActions;
 
 
-window.renderExaminePage = function(el, vcf, comparableVcfs, igvHttpfsUrl) {
+window.renderExaminePage = function(el, vcf, comparableVcfs,
+                                    igvHttpfsUrl, currentUser) {
   var dispatcher = new Dispatcher();
   var recordActions = getRecordActions(dispatcher);
   var recordStore = createRecordStore(vcf, igvHttpfsUrl, dispatcher);
@@ -15,5 +16,6 @@ window.renderExaminePage = function(el, vcf, comparableVcfs, igvHttpfsUrl) {
                             recordActions={recordActions}
                             comparableVcfs={comparableVcfs}
                             vcf={vcf}
+                            currentUser={currentUser}
                             igvHttpfsUrl={igvHttpfsUrl} />, el);
 };

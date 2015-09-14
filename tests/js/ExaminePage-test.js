@@ -27,6 +27,7 @@ function renderExamine(fakeServer) {
     created_at: '',
     uri: '/tests/data/snv.vcf'
   };
+
   var igvHttpfsUrl = '';  // not needed
 
   var dispatcher = new Dispatcher(),
@@ -38,6 +39,7 @@ function renderExamine(fakeServer) {
                    recordActions={recordActions}
                    igvHttpfsUrl={igvHttpfsUrl}
                    vcf={run}
+                   currentUser={Utils.fakeCurrentUser()}
                    comparableVcfs={[]} />);
 }
 

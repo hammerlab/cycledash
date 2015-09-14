@@ -18,6 +18,7 @@ var ExaminePage = React.createClass({
     recordActions: React.PropTypes.object.isRequired,
     igvHttpfsUrl: React.PropTypes.string.isRequired,
     vcf: React.PropTypes.object,
+    currentUser: React.PropTypes.object.isRequired,
     // a list of VCFs to possibly compare against:
     comparableVcfs: React.PropTypes.arrayOf(React.PropTypes.object)
   },
@@ -135,6 +136,7 @@ var ExaminePage = React.createClass({
           <div className="examine-table-container">
             <VCFTable ref="vcfTable"
                       hasLoaded={state.hasLoaded}
+                      currentUser={props.currentUser}
                       records={state.records}
                       columns={state.columns}
                       selectedRecord={state.selectedRecord}
