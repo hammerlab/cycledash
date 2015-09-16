@@ -251,7 +251,7 @@ var RunsTable = React.createClass({
             <th className='date'>Submitted</th>
             <th className='num-variants'>Variants</th>
             <th className='linked-bams'>Linked BAMs</th>
-            <th className='run-labels'></th>
+            <th className='task-labels'></th>
             <th className='num-comments'></th>
             <th className='examine-col'></th>
           </tr>
@@ -280,8 +280,8 @@ var RunRow = React.createClass({
         <td className='caller-name'>{run.caller_name}</td>
         <td className='date' title={run.created_at}>{moment(new Date(run.created_at)).format('YYYY-MM-DD')}</td>
         <td className='num-variants' title={run.genotype_count}>{run.genotype_count}</td>
-        <RunBAMs run={run} />
-        <RunLabels run={run} />
+        <LinkedBams run={run} />
+        <TaskLabels run={run} />
         <RunComments run={run} />
         <td className='run-id'>
           <a className='btn btn-default btn-xs' href={'/runs/' + run.id + '/examine'} ref='link'>Examine</a>
@@ -343,7 +343,7 @@ var RunDescriptionRow = React.createClass({
   }
 });
 
-var RunLabels = React.createClass({
+var TaskLabels = React.createClass({
   propTypes: {
     run: React.PropTypes.object.isRequired
   },
@@ -368,12 +368,12 @@ var RunLabels = React.createClass({
       {path: ['fail'], title: 'Has a failed worker task', cssClass: 'fail'}
     ];
     var labels = labelSpecs.map(
-      function({path, usePathValue, title, cssClass}) {
+      function({path, title, cssClass}) {
         var value = utils.getIn(taskStates, path);
         if (value) {
           return (
-            <span className={`${cssClass}`} title={title} key={path.join('-')}>
-              {usePathValue ? value : ''}
+            <span className={cssClass} title={title} key={path.join('-')}>
+              {value}
             </span>
           );
         }
@@ -386,7 +386,7 @@ var RunLabels = React.createClass({
   }
 });
 
-var RunBAMs = React.createClass({
+var LinkedBams = React.createClass({
   propTypes: {
     run: React.PropTypes.object.isRequired
   },
@@ -394,23 +394,23 @@ var RunBAMs = React.createClass({
     var run = this.props.run;
 
     var labelSpecs = [
-      {path: ['tumor_bam' , 'name'], usePathValue: true, title: 'Tumor BAM', cssClass: 'linked-bam'},
-      {path: ['normal_bam', 'name'], usePathValue: true, title: 'Normal BAM', cssClass: 'linked-bam'},
+      {path: ['tumor_bam' , 'name'], title: 'Tumor BAM' },
+      {path: ['normal_bam', 'name'], title: 'Normal BAM' },
     ];
-    var run_bams = labelSpecs.map(
-      function({path, usePathValue, title, cssClass}) {
+    var runBams = labelSpecs.map(
+      function({path, title}) {
         var value = utils.getIn(run, path);
         if (value) {
           return (
-            <span className={`${cssClass}`} title={title} key={path.join('-')}>
-              {usePathValue ? value : ''}
+            <span className="linked-bam" title={title} key={path.join('-')}>
+              {value}
             </span>
           );
         }
       });
     return (
         <td className='bam-labels'>
-          {run_bams}
+          {runBams}
         </td>
     );
   }
