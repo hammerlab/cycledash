@@ -134,6 +134,15 @@ div.project a {
 .add {
   float:right;
 }
+.project-empty-state {
+  text-align: center;
+  padding: 1em;
+  background-color: #fff;
+  border-radius: $radius;
+  color: $color-text-dim;
+  border: 1px solid $color-border-light;
+}
+
 /*------[ Runs Table ]------*/
 .runs-table-container {
   @extend .card-body;

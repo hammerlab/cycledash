@@ -179,14 +179,16 @@ var ProjectTable = React.createClass({
     var numBams = this.props.bams.length;
     var numRuns = this.props.runs.length;
     var table;
-    if (this.state.bamsTable) {
+    if (this.state.bamsTable && numBams > 0) {
       table = <BamsTable bams={this.props.bams}
                          selectedBamId={this.state.selectedBamId}
                          createClickBamHandler={this.createClickBamHandler} />;
-    } else {
+    } else if (!this.state.bamsTable && numRuns > 0) {
       table = <RunsTable runs={this.props.runs}
                          selectedRunId={this.state.selectedRunId}
                          createClickRunHandler={this.createClickRunHandler} />;
+    } else {
+      table = <div className="project-empty-state">No files uploaded</div>;
     }
     var notes;
     if (this.props.notes) {
