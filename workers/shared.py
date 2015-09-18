@@ -92,6 +92,8 @@ def guess_ensembl_release(filepath):
         release = varcode.load_vcf(filepath)[0].ensembl.release
     except ValueError:  # no guesses from varcode, return default
         release = config.ENSEMBL_RELEASE
+    except Exception:  # varcode cannot handle this one, so go w/ default
+        release = config.ENSEMBL_RELEASE
     finally:
         return release
 
