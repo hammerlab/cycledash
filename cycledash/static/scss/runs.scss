@@ -32,6 +32,22 @@ a.all-comments {
   }
 }
 
+.comments-empty-state {
+  text-align: center;
+  font-size: 1rem;
+  padding: 1em 0;
+  color: $color-bg-body-dark;
+  color: $color-text-dim;
+  @extend .glyphicon-comment;
+  &:before {
+    @extend .glyphicon;
+    display: block;
+    font-size: 3em;
+    margin-bottom: 1rem;
+    opacity: 0.6;
+  }
+}
+
 /*------[ Add Form ]------*/
 form.add-form {
   @extend .col-md-12;
