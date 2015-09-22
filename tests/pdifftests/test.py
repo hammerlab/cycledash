@@ -43,6 +43,13 @@ class Runs(Base):
         pass
 
     @hide('.time')
+    def no_bams(self, driver):
+        """Showing an empty BAMs table."""
+        no_bams_sel = 'div.project:nth-child(2) .project-table-nav a:last-child'
+        no_bams = driver.find_element_by_css_selector(no_bams_sel)
+        no_bams.click()
+
+    @hide('.time')
     def info(self, driver):
         """Showing an expanded run row and information."""
         run = driver.find_element_by_css_selector('tr.run')
