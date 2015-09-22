@@ -187,8 +187,10 @@ var ProjectTable = React.createClass({
       table = <RunsTable runs={this.props.runs}
                          selectedRunId={this.state.selectedRunId}
                          createClickRunHandler={this.createClickRunHandler} />;
-    } else {
-      table = <div className="project-empty-state">No files uploaded</div>;
+    } else if (this.state.bamsTable && numBams === 0) {
+      table = <div className="project-empty-state">No BAMs uploaded</div>;
+    } else if (!this.state.bamsTable && numRuns === 0) {
+      table = <div className="project-empty-state">No runs uploaded</div>;
     }
     var notes;
     if (this.props.notes) {
