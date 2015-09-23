@@ -150,13 +150,18 @@ div.project a {
 .add {
   float:right;
 }
-.project-empty-state {
+tr.table-empty-state {
   text-align: center;
-  padding: 1em;
-  background-color: #fff;
-  border-radius: $radius;
   color: $color-text-dim;
-  border: 1px solid $color-border-light;
+  font-size: 1rem;
+  &:hover {
+    background-color: transparent!important;
+    cursor: default!important;
+  }
+  td {
+    font-family: "freight-sans-pro", verdana, helvetica, sans-serif;
+    padding: 1em!important;
+  } 
 }
 
 /*------[ Runs Table ]------*/

@@ -26,8 +26,10 @@ var LatestComments = React.createClass({
     var numComments = this.props.comments.length;
     var recentComments;
     if (numComments > 0) {
-      recentComments =  <div><h4>Last {numComments} Comments<a href='/comments' className='all-comments'>See all</a></h4>
-                          <Comments comments={this.props.comments} /></div>;
+      recentComments = <div>
+                        <h4>Last {numComments} Comments<a href='/comments' className='all-comments'>See all</a></h4>
+                        <Comments comments={this.props.comments} />
+                       </div>;
     } else {
       recentComments = <div className="comments-empty-state">No comments yet</div>;
     }
