@@ -23,11 +23,19 @@ var LatestComments = React.createClass({
     comments: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
   },
   render: function() {
+    var numComments = this.props.comments.length;
+    var recentComments;
+    if (numComments > 0) {
+      recentComments = <div>
+                        <h4>Last {numComments} Comments<a href='/comments' className='all-comments'>See all</a></h4>
+                        <Comments comments={this.props.comments} />
+                       </div>;
+    } else {
+      recentComments = <div className="comments-empty-state">No comments yet</div>;
+    }
     return (
       <div className='recent-comments-container'>
-        <h4>Last {this.props.comments.length} Comments
-        <a href='/comments' className='all-comments'>See all</a></h4>
-        <Comments comments={this.props.comments} />
+        {recentComments}
       </div>
     );
   }

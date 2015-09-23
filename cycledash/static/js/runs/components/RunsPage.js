@@ -187,7 +187,7 @@ var ProjectTable = React.createClass({
       table = <RunsTable runs={this.props.runs}
                          selectedRunId={this.state.selectedRunId}
                          createClickRunHandler={this.createClickRunHandler} />;
-    }
+    } 
     var notes;
     if (this.props.notes) {
       notes = <p className='notes'>{this.props.notes}</p>;
@@ -233,29 +233,37 @@ var RunsTable = React.createClass({
     createClickRunHandler: React.PropTypes.func.isRequired,
   },
   render: function() {
-    var rows = this.props.runs.map(run => {
-      var rows = [<RunRow run={run} key={run.id} handleClick={this.props.createClickRunHandler(run.id)} />];
-      if (run.id === this.props.selectedRunId) {
-        var runDescription = (
-            <RunDescriptionRow run={run}
-                               key={'row-values-'+run.id} />);
-        rows.push(runDescription);
-      }
-      return rows;
-    });
+    var numRuns = this.props.runs.length;
+    var rows;
+    var thead;
+    if (numRuns !== 0) {
+      thead = <thead>
+                <tr>
+                  <th className='caller-name'>Caller Name</th>
+                  <th className='date'>Submitted</th>
+                  <th className='num-variants'>Variants</th>
+                  <th className='linked-bams'>Linked BAMs</th>
+                  <th className='task-labels'></th>
+                  <th className='num-comments'></th>
+                  <th className='examine-col'></th>
+                </tr>
+              </thead>;
+      rows = this.props.runs.map(run => {
+        rows = [<RunRow run={run} key={run.id} handleClick={this.props.createClickRunHandler(run.id)} />];
+        if (run.id === this.props.selectedRunId) {
+          var runDescription = (
+              <RunDescriptionRow run={run}
+                                 key={'row-values-'+run.id} />);
+          rows.push(runDescription);
+        }
+        return rows;
+      });
+    } else {
+      rows = <tr className="table-empty-state"><td>No runs uploaded</td></tr>;
+    }
     return (
       <table className='runs-table'>
-        <thead>
-          <tr>
-            <th className='caller-name'>Caller Name</th>
-            <th className='date'>Submitted</th>
-            <th className='num-variants'>Variants</th>
-            <th className='linked-bams'>Linked BAMs</th>
-            <th className='task-labels'></th>
-            <th className='num-comments'></th>
-            <th className='examine-col'></th>
-          </tr>
-        </thead>
+        {thead}
         <tbody>
           {rows}
         </tbody>
@@ -442,25 +450,33 @@ var BamsTable = React.createClass({
     createClickBamHandler: React.PropTypes.func.isRequired,
   },
   render: function() {
-    var rows = this.props.bams.map(bam => {
-      var rows = [<BamRow bam={bam} key={bam.id} handleClick={this.props.createClickBamHandler(bam.id)} />];
-      if (bam.id === this.props.selectedBamId) {
-        var bamDescription = (
-            <BamDescriptionRow bam={bam}
-                               key={'row-values-'+bam.id} />);
-        rows.push(bamDescription);
-      }
-      return rows;
-    });
+    var numBams = this.props.bams.length;
+    var rows;
+    var thead;
+    if (numBams !== 0) {
+      thead = <thead>
+                <tr>
+                  <th className='bam-name'>BAM Name</th>
+                  <th className='resection-date'>Resected On</th>
+                  <th className='tissues'>Tissues</th>
+                </tr>
+              </thead>;
+      rows = this.props.bams.map(bam => {
+        rows = [<BamRow bam={bam} key={bam.id} handleClick={this.props.createClickBamHandler(bam.id)} />];
+        if (bam.id === this.props.selectedBamId) {
+          var bamDescription = (
+              <BamDescriptionRow bam={bam}
+                                 key={'row-values-'+bam.id} />);
+          rows.push(bamDescription);
+        }
+        return rows;
+      });
+    } else {
+      rows = <tr className="table-empty-state"><td>No BAMs uploaded</td></tr>;
+    }
     return (
       <table className='bams-table'>
-        <thead>
-          <tr>
-            <th className='bam-name'>BAM Name</th>
-            <th className='resection-date'>Resected On</th>
-            <th className='tissues'>Tissues</th>
-          </tr>
-        </thead>
+        {thead}
         <tbody>
           {rows}
         </tbody>
