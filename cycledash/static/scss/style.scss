@@ -182,6 +182,9 @@ section#api-docs > section {
 .table tbody tr {
   cursor: pointer;
 }
+.table tbody tr.selected {
+  background: $color-bg-hover;
+}
 .table tbody tr:hover {
   background: $color-bg-hover;
 }

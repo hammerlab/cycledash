@@ -457,9 +457,6 @@ a.download-vcf {
     @extend .glyphicon;
   }
 }
-.vcf-table tr.selected {
-  background: $color-bg-hover!important;
-}
 
 /*------[ Table Headers ]------*/
 .vcf-table th .sort {
