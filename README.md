@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/hammerlab/cycledash.svg?branch=master)](https://travis-ci.org/hammerlab/cycledash) [![Coverage Status](https://img.shields.io/coveralls/hammerlab/cycledash/master.svg)](https://coveralls.io/r/hammerlab/cycledash?branch=master)
 
 
-![Looking at a VCF on the "Examine Page"](cycledash/static/img/readme-screenshot.png)
+![Looking at a VCF on the "Examine Page"](/readme-screenshot.png)
 
 # Cycledash
 
