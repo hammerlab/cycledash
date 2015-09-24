@@ -249,7 +249,7 @@ var RunsTable = React.createClass({
                 </tr>
               </thead>;
       rows = this.props.runs.map(run => {
-        rows = [<RunRow run={run} key={run.id} handleClick={this.props.createClickRunHandler(run.id)} />];
+        rows = [<RunRow run={run} key={run.id} handleClick={this.props.createClickRunHandler(run.id)} isSelected={run.id === this.props.selectedRunId}/>];
         if (run.id === this.props.selectedRunId) {
           var runDescription = (
               <RunDescriptionRow run={run}
@@ -274,6 +274,7 @@ var RunsTable = React.createClass({
 
 var RunRow = React.createClass({
   propTypes: {
+    isSelected: React.PropTypes.bool.isRequired,
     run: React.PropTypes.object.isRequired,
     handleClick: React.PropTypes.func.isRequired
   },
@@ -284,7 +285,7 @@ var RunRow = React.createClass({
   render: function() {
     var run = this.props.run;
     return (
-      <tr className='run' onClick={this.handleClick}>
+      <tr className={this.props.isSelected ? 'selected' : 'run'} onClick={this.handleClick}>
         <td className='caller-name'>{run.caller_name}</td>
         <td className='date' title={run.created_at}>{moment(new Date(run.created_at)).format('YYYY-MM-DD')}</td>
         <td className='num-variants' title={run.genotype_count}>{run.genotype_count}</td>
@@ -462,7 +463,7 @@ var BamsTable = React.createClass({
                 </tr>
               </thead>;
       rows = this.props.bams.map(bam => {
-        rows = [<BamRow bam={bam} key={bam.id} handleClick={this.props.createClickBamHandler(bam.id)} />];
+        rows = [<BamRow bam={bam} key={bam.id} handleClick={this.props.createClickBamHandler(bam.id)} isSelected={bam.id === this.props.selectedBamId} />];
         if (bam.id === this.props.selectedBamId) {
           var bamDescription = (
               <BamDescriptionRow bam={bam}
@@ -487,6 +488,7 @@ var BamsTable = React.createClass({
 
 var BamRow = React.createClass({
   propTypes: {
+    isSelected: React.PropTypes.bool.isRequired,
     bam: React.PropTypes.object.isRequired,
     handleClick: React.PropTypes.func.isRequired
   },
@@ -496,7 +498,7 @@ var BamRow = React.createClass({
   render: function() {
     var bam = this.props.bam;
     return (
-      <tr className='bam' onClick={this.handleClick}>
+      <tr className={this.props.isSelected ? 'selected' : 'bam'} onClick={this.handleClick}>
         <td className='name'>{bam.name}</td>
         <td className='resection-date'>{bam.resection_date}</td>
         <td className='tissues'>{bam.tissues}</td>
