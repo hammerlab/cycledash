@@ -87,14 +87,6 @@ label {
 .comments .comment-text {
   padding: 0.5em 0;
 }
-.comments .comment-text:before {
-  content: '“';
-  color: $color-text-dim;
-}
-.comments .comment-text:after {
-  content: '”';
-  color: $color-text-dim;
-}
 .comments .time {
   font-size: 0.875em;
   color: $color-text-dim;

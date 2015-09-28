@@ -377,6 +377,7 @@ a.download-vcf {
 }
 .vcf-table .comment-text p {
   display: inline-block;
+  white-space: normal;
 }
 .vcf-table .comment-text p, ul, li, pre {
   margin: 0px;
