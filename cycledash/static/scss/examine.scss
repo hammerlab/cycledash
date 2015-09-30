@@ -585,5 +585,5 @@ a.download-vcf {
   border-top: 1px solid $color-gray-medium;
 }
 /* removes unwanted white space after SVG (issue #805) */
-#pileup-container .track-content svg {
+#pileup-container .track-content canvas {
   display: block; }
