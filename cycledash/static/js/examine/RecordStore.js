@@ -109,6 +109,9 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
       case ACTION_TYPES.DELETE_COMMENT:
         deleteComment(action.comment, action.record);
         break;
+      case ACTION_TYPES.STAR_GENOTYPE:
+        starGenotype(action.star, action.record);
+        break;
     }
     // Required: lets the dispatcher know that the Store is done processing.
     return true;
@@ -264,6 +267,14 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
     return oldComment;
   }
 
+  function starGenotypeAndNotify(star, record) {
+    var recordFinder = _.pick(
+      record, 'contig', 'position', 'reference', 'alternates', 'sample_name');
+    var realRecord = _.findWhere(records, recordFinder);
+    realRecord['annotations:starred'] = star;
+    notifyChange();
+  }
+
   function deferredComments(vcfId) {
     return callbackToPromise(
       dataSource,
@@ -306,6 +317,26 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
         // Undo the delete if it was a failure.
         updateCommentAndNotify(oldComment, record);
       });
+  }
+
+  function starGenotype(star, record) {
+    var data = {
+      starred: star,
+      contig: record.contig,
+      position: record.position,
+      reference: record.reference,
+      alternates: record.alternates,
+      sampleName: record.sample_name
+    },
+        url = '/api/runs/' + record.vcf_id + '/genotypes';
+
+    starGenotypeAndNotify(star, record);  // optimistic UI update
+    $.when(
+      callbackToPromise(dataSource, url, 'PUT', data)
+    ).fail((e) => {
+      starGenotypeAndNotify(!star, record);  // rollback optimism
+      console.error('Failed to star', record, e);
+    });
   }
 
   function deferredCommentUpdate(vcfId, comment) {
@@ -495,9 +526,11 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
 }
 
 function networkDataSource(url, type, data, doneCallback, errCallback) {
-  var params = {url: url, type: type};
+  var params = {url: url,
+                type: type,
+                contentType: 'application/json; charset=UTF-8'};
   if (_.isObject(data)) {
-    params.data = data;
+    params.data = JSON.stringify(data);
   }
 
   return $.ajax(params).done(doneCallback).fail(errCallback);

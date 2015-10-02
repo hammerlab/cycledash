@@ -4,24 +4,42 @@ import copy
 import json
 from flask import request
 import flask.ext.restful as restful
+from plone.memoize import forever
 from sqlalchemy import (select, func, types, cast, join, outerjoin, asc, desc,
                         and_, Integer, Float, String, distinct)
 from sqlalchemy.sql import text
 from sqlalchemy.sql.expression import label, column, case, literal
 from sqlalchemy.sql.functions import coalesce
 import vcf as pyvcf
-from plone.memoize import forever
+import voluptuous
+from voluptuous import Schema, Required, Coerce
 
 from cycledash import db
+from cycledash.helpers import abort_if_none_for
 from common.helpers import tables
 
-from . import Resource
+from . import Resource, validate_with
+
+
+StarGenotype = Schema({
+    Required('starred'): Coerce(bool),
+    Required('contig'): unicode,
+    Required('position'): Coerce(int),
+    Required('reference'): unicode,
+    Required('alternates'): unicode,
+    Required('sample_name'): unicode,
+})
 
 
 class Genotypes(Resource):
     require_auth = True
     def get(self, run_id):
         return get(run_id, json.loads(request.args.get('q')))
+
+    @validate_with(StarGenotype)
+    def put(self, run_id):
+        star_genotype(run_id, **request.validated_body)
+        return {}, 200
 
 
   ##############################################################################
@@ -128,6 +146,27 @@ def get(run_id, query, with_stats=True):
         genotypes = [dict(g) for g in con.execute(q).fetchall()]
     stats = calculate_stats(run_id, compare_to_run_id, query) if with_stats else {}
     return {'records': genotypes, 'stats': stats}
+
+
+_abort_if_none = abort_if_none_for('genotype')
+
+
+def star_genotype(run_id,
+                  contig=None, position=None, reference=None, alternates=None,
+                  sample_name=None, starred=None):
+    with tables(db.engine, 'genotypes') as (con, genotypes):
+        q = genotypes.update(
+        ).where(genotypes.c.vcf_id == run_id
+        ).where(genotypes.c.contig == contig
+        ).where(genotypes.c.position == position
+        ).where(genotypes.c.reference == reference
+        ).where(genotypes.c.sample_name == sample_name
+        ).where(genotypes.c.alternates == alternates
+        ).values(
+            **{'annotations:starred': starred}
+        ).returning(*genotypes.c)
+        _abort_if_none(q.execute().fetchone(), '')
+    return True
 
 
 @forever.memoize

@@ -345,6 +345,23 @@ a.download-vcf {
   text-align: left;
 }
 
+/*------[ Stars ]------*/
+.vcf-table td span.starred {
+    @extend .glyphicon;
+    @extend .glyphicon-star;
+    color: #F3CE43;
+}
+.vcf-table td.is-starred span.not-starred {
+    @extend .glyphicon;
+    @extend .glyphicon-star-empty;
+    color: #F3CE43;
+    cursor: pointer;
+    opacity: 0;
+}
+.vcf-table td.is-starred:hover span.not-starred {
+    opacity: 0.8;
+}
+
 /*------[ Comments ]------*/
 .vcf-table .comment-edit-container, .vcf-table .comment-view-container {
   @extend .col-md-6;

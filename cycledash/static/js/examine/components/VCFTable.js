@@ -24,6 +24,7 @@ var VCFTable = React.createClass({
     handleRequestPage: React.PropTypes.func.isRequired,
     handleSetComment: React.PropTypes.func.isRequired,
     handleDeleteComment: React.PropTypes.func.isRequired,
+    handleStarGenotype: React.PropTypes.func.isRequired,
     currentUser: React.PropTypes.object.isRequired
   },
   // Call this to scroll a record to somewhere close to the top of the page.
@@ -53,7 +54,8 @@ var VCFTable = React.createClass({
                       handleSelectRecord={this.props.handleSelectRecord}
                       handleOpenViewer={this.props.handleOpenViewer}
                       handleSetComment={this.props.handleSetComment}
-                      handleDeleteComment={this.props.handleDeleteComment} />
+                      handleDeleteComment={this.props.handleDeleteComment}
+                      handleStarGenotype={this.props.handleStarGenotype} />
       </table>
     );
   }
@@ -87,6 +89,7 @@ var VCFTableHeader = React.createClass({
           'sorting-by': posSorts.length > 0
         }),
         leftSideTableHeaders = [
+            <th key='is-starred'></th>,
             <th className='has-comment tag' key='has-comment' />,
             <th className='true-positive tag' key='true-positive' />,
             <th key='contig-position' data-attribute='position'>
@@ -226,6 +229,7 @@ var VCFTableBody = React.createClass({
     handleRequestPage: React.PropTypes.func.isRequired,
     handleSetComment: React.PropTypes.func.isRequired,
     handleDeleteComment: React.PropTypes.func.isRequired,
+    handleStarGenotype: React.PropTypes.func.isRequired,
     currentUser: React.PropTypes.object.isRequired
   },
   BOTTOM_BUFFER: 5000, // distance in px from bottom at which we load more records
@@ -262,7 +266,8 @@ var VCFTableBody = React.createClass({
                        columns={this.props.columns}
                        key={key}
                        isSelected={selectedRecord === record}
-                       handleSelectRecord={this.props.handleSelectRecord} />
+                       handleSelectRecord={this.props.handleSelectRecord}
+                       handleStarGenotype={this.props.handleStarGenotype} />
           ];
           if (selectedRecord === record) {
             elements.push(
@@ -294,7 +299,8 @@ var VCFRecord = React.createClass({
     record: React.PropTypes.object.isRequired,
     columns: React.PropTypes.object.isRequired,
     isSelected: React.PropTypes.bool.isRequired,
-    handleSelectRecord: React.PropTypes.func.isRequired
+    handleSelectRecord: React.PropTypes.func.isRequired,
+    handleStarGenotype: React.PropTypes.func.isRequired
   },
   handleClick: function() {
     // If the same record is selected, treat that as a deselect toggle.
@@ -307,6 +313,11 @@ var VCFRecord = React.createClass({
   formatCell: function(val) {
     return val === null ? '-' : String(val);
   },
+  starGenotype: function(e) {
+    e.stopPropagation();
+    var starred = this.props.record['annotations:starred'];
+    this.props.handleStarGenotype(!starred, this.props.record);
+  },
   render: function() {
     var hasComments = _.has(this.props.record, 'comments') &&
         this.props.record.comments.length > 0;
@@ -314,6 +325,10 @@ var VCFRecord = React.createClass({
       'comment-bubble': hasComments
     });
     var tds = [
+      <td key='is-starred' className='is-starred' onClick={this.starGenotype}>
+        <span className={this.props.record['annotations:starred'] ? 'starred' : 'not-starred'}>
+        </span>
+      </td>,
       <td key='has-comment'>
         <span className={commentBubbleClass}></span>
         <span>

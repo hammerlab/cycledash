@@ -60,9 +60,6 @@ def restart_failed_tasks_for(vcf_id):
              .where(tasks.c.state == 'FAILURE')
              .returning(tasks.c.type))
         names = [r[0] for r in q.execute().fetchall()]
-        print 'NAMES:'
-        print names
-        print 'NAMES ^^^'
     workers.runner.restart_failed_tasks(names, vcf_id)
 
 
