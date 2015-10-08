@@ -38,8 +38,7 @@ class Genotypes(Resource):
 
     @validate_with(StarGenotype)
     def put(self, run_id):
-        star_genotype(run_id, **request.validated_body)
-        return {}, 200
+        return star_genotype(run_id, **request.validated_body)
 
 
   ##############################################################################
@@ -165,8 +164,7 @@ def star_genotype(run_id,
         ).values(
             **{'annotations:starred': starred}
         ).returning(*genotypes.c)
-        _abort_if_none(q.execute().fetchone(), '')
-    return True
+        return dict(_abort_if_none(q.execute().fetchone(), ''))
 
 
 @forever.memoize

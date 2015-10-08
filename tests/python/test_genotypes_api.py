@@ -13,7 +13,7 @@ from test_runs_api import create_run_with_uri
 import helpers
 
 
-class TestGenotypesAPI(object):
+class TestGenotypesAPI(helpers.ResourceTest):
 
     @classmethod
     def setUpClass(cls):
@@ -22,10 +22,60 @@ class TestGenotypesAPI(object):
         _extract(cls.chr_run['id'])
         cls.no_chr_run = create_run_with_uri(cls.project['id'], '/tests/data/diverse.nochr.vcf')
         _extract(cls.no_chr_run['id'])
+        return super(TestGenotypesAPI, cls).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
         helpers.delete_all_records(db)
+
+    def test_starring_a_genotype(self):
+        run_id = self.chr_run['id']
+        r = self.put('/api/runs/{}/genotypes'.format(run_id),
+                 data={
+                     'contig': 'chrX',
+                     'position': 2,
+                     'reference': 'G',
+                     'alternates': 'C',
+                     'sample_name': 'normal',
+                     'starred': True
+                 })
+        assert r.status_code == 200
+        data = json.loads(r.data)
+        assert data['contig'] == 'chrX'
+        assert data['position'] == 2
+        assert data['annotations:starred']
+
+    def test_starring_a_non_existant_genotype(self):
+        run_id = self.chr_run['id']
+        r = self.put('/api/runs/{}/genotypes'.format(run_id),
+                 data={
+                     'contig': 'chrXYZ',
+                     'position': 2,
+                     'reference': 'G',
+                     'alternates': 'C',
+                     'sample_name': 'normal',
+                     'starred': True
+                 })
+        assert r.status_code == 404
+        data = json.loads(r.data)
+        assert 'message' in data
+
+    def test_unstarring_a_genotype(self):
+        run_id = self.chr_run['id']
+        r = self.put('/api/runs/{}/genotypes'.format(run_id),
+                 data={
+                     'contig': 'chrX',
+                     'position': 2,
+                     'reference': 'G',
+                     'alternates': 'C',
+                     'sample_name': 'normal',
+                     'starred': False
+                 })
+        assert r.status_code == 200
+        data = json.loads(r.data)
+        assert data['contig'] == 'chrX'
+        assert data['position'] == 2
+        assert not data['annotations:starred']
 
     def test_number_of_genotypes_normal_sample_name(self):
         run_id = self.chr_run['id']

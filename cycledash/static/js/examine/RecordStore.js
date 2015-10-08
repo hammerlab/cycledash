@@ -267,11 +267,16 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
     return oldComment;
   }
 
-  function starGenotypeAndNotify(star, record) {
-    var recordFinder = _.pick(
+
+  // Given a boolean star or not star, and a record containing contig, position,
+  // reference, alternates, and sample_name, set 'annotations:starred' to star
+  // for the record with the matching contig, position, etc attributes.
+  // Notifies listening componenets once done.
+  function setLocalStarAndNotify(star, record) {
+    var recordConditions = _.pick(
       record, 'contig', 'position', 'reference', 'alternates', 'sample_name');
-    var realRecord = _.findWhere(records, recordFinder);
-    realRecord['annotations:starred'] = star;
+    record = _.findWhere(records, recordConditions);
+    record['annotations:starred'] = star;
     notifyChange();
   }
 
@@ -319,6 +324,9 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
       });
   }
 
+  // Stars (boolean star) the genotype with matching contig, position, reference
+  // alternates, and sample_name optimistically locally, and then requests that
+  // the API star it server-side. If it fails, the starring is rolled back.
   function starGenotype(star, record) {
     var data = {
       starred: star,
@@ -330,11 +338,11 @@ function createRecordStore(run, igvHttpfsUrl, dispatcher, opt_testDataSource) {
     },
         url = '/api/runs/' + record.vcf_id + '/genotypes';
 
-    starGenotypeAndNotify(star, record);  // optimistic UI update
+    setLocalStarAndNotify(star, record);  // optimistic UI update
     $.when(
       callbackToPromise(dataSource, url, 'PUT', data)
     ).fail((e) => {
-      starGenotypeAndNotify(!star, record);  // rollback optimism
+      setLocalStarAndNotify(!star, record);  // rollback optimism
       console.error('Failed to star', record, e);
     });
   }

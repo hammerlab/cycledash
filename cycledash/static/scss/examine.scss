@@ -358,7 +358,7 @@ a.download-vcf {
     cursor: pointer;
     opacity: 0;
 }
-.vcf-table td.is-starred:hover span.not-starred {
+.vcf-table tr:hover span.not-starred {
     opacity: 0.8;
 }
 
