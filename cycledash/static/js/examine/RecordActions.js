@@ -9,7 +9,8 @@ var ACTION_TYPES = {
   SET_COMMENT: 'SET_COMMENT',
   SET_QUERY: 'SET_QUERY',
   SET_VIEWER_OPEN: 'SET_VIEWER_OPEN',
-  SORT_BY: 'SORT_BY'
+  SORT_BY: 'SORT_BY',
+  STAR_GENOTYPE: 'STAR_GENOTYPE'
 };
 
 function getRecordActions(dispatcher) {
@@ -60,6 +61,13 @@ function getRecordActions(dispatcher) {
       dispatcher.dispatch({
         actionType: ACTION_TYPES.DELETE_COMMENT,
         comment,
+        record
+      });
+    },
+    starGenotype: function(star, record) {
+      dispatcher.dispatch({
+        actionType: ACTION_TYPES.STAR_GENOTYPE,
+        star,
         record
       });
     }

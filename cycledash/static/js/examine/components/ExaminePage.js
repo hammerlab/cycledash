@@ -74,6 +74,9 @@ var ExaminePage = React.createClass({
   handleDeleteComment: function(comment, record) {
     this.props.recordActions.deleteComment(comment, record);
   },
+  handleStarGenotype: function(star, record) {
+    this.props.recordActions.starGenotype(star, record);
+  },
   render: function() {
     var state = this.state,
         props = this.props,
@@ -147,7 +150,8 @@ var ExaminePage = React.createClass({
                       handleSelectRecord={this.handleSelectRecord}
                       handleOpenViewer={this.handleOpenViewer}
                       handleSetComment={this.handleSetComment}
-                      handleDeleteComment={this.handleDeleteComment} />
+                      handleDeleteComment={this.handleDeleteComment}
+                      handleStarGenotype={this.handleStarGenotype} />
           </div>
           {pileupViewer}
         </div>

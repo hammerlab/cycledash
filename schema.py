@@ -85,6 +85,9 @@ Table('genotypes', metadata,
     Column('annotations:effect_notation', String()),
     Column('annotations:effect_type', String()),
 
+    # This is the star/flag
+    Column('annotations:starred', Boolean, default=False),
+
     # Many of the below values taken from VCF4.2 spec examples
     # some taken from existing VCFs.
     # INFO columns

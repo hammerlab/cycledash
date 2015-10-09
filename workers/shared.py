@@ -8,6 +8,7 @@ from collections import defaultdict
 import vcf as pyvcf
 import celery
 from sqlalchemy import select, func, create_engine, MetaData, bindparam, not_, or_
+import sqlalchemy
 import pywebhdfs.webhdfs
 import pywebhdfs.errors
 import varcode
@@ -28,6 +29,8 @@ CONCORDANCE_URL = 'http://localhost:{}/runs/{}/concordance'
 DATABASE_URI = os.environ['DATABASE_URI']
 
 TEMPORARY_DIR = config.TEMPORARY_DIR
+
+EXCLUDED_FROM_EXTANT_COLUMNS = ['annotations:starred']
 
 worker = celery.Celery(broker=CELERY_BROKER, backend=CELERY_BACKEND)
 worker.config_from_object({
@@ -149,12 +152,15 @@ def update_extant_columns(metadata, connection, vcf_id):
 
 
 def extant_columns(metadata, connection, vcf_id):
-    """Return list of column names which have values in this VCF."""
+    """Return list of column names which have values in this VCF
+    (except those in EXCLUDED_FROM_EXTANT_COLUMNS, which we ignore).
+    """
     genotypes = metadata.tables.get('genotypes')
     columns = (col.name for col in genotypes.columns
-               if col.name.startswith('info:') or
-               col.name.startswith('sample:') or
-               col.name.startswith('annotations:'))
+               if col.name not in EXCLUDED_FROM_EXTANT_COLUMNS
+               and (col.name.startswith('info:') or
+                    col.name.startswith('sample:') or
+                    col.name.startswith('annotations:')))
     query = 'SELECT '
     query += ', '.join('max("{c}") as "{c}"'.format(c=col) for col in columns)
     query += ' FROM genotypes WHERE vcf_id = ' + str(vcf_id)
