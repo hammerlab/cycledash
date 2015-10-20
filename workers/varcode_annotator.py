@@ -31,7 +31,7 @@ from workers.shared import (worker, DATABASE_URI, TEMPORARY_DIR,
                             update_extant_columns, register_running_task)
 
 from pyensembl import EnsemblRelease
-from varcode import Variant
+from varcode import Variant, Intragenic
 
 @worker.task(bind=True)
 def annotate(self, vcf_id):
@@ -132,7 +132,10 @@ def get_varcode_annotations(genotypes, vcf_id, ensembl_release_num):
         best_effect = variant.effects().top_priority_effect()
         gene_name = best_effect.gene_name
         transcript = best_effect.transcript_id
-        notation = best_effect.short_description
+        if best_effect.__class__.__name__ == "Intragenic":
+            notation = "intragenic"
+        else:
+            notation = best_effect.short_description
         effect_type = type(best_effect).__name__
         # Make it human readable
         effect_type = re.sub("([a-z])([A-Z])","\g<1> \g<2>", effect_type)

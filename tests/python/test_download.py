@@ -43,4 +43,4 @@ class TestDownload(helpers.ResourceTest):
                    urllib.quote(queryStr))
         r = self.get(downUrl)
         assert r.status_code == 200  # no fail
-        assert len(r.data) == 1193  # might differ from the original file
+        assert len(r.data) == 1226  # might differ from the original file
