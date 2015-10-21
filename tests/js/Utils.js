@@ -11,7 +11,7 @@ var _ = require('underscore'),
  * Apply a CSS selector to a React tree. Returns an array of DOM nodes.
  */
 function findInComponent(selector, component) {
-  return _.toArray(component.getDOMNode().querySelectorAll(selector));
+  return _.toArray(component.querySelectorAll(selector));
 }
 
 /**

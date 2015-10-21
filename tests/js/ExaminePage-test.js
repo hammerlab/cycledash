@@ -2,7 +2,8 @@
 'use strict';
 
 require('./testdom')('<html><body></body></html>');
-var React = require('react/addons'),
+var React = require('react'),
+    TestUtils = require('react-addons-test-utils'),
     assert = require('assert'),
     _ = require('underscore');
 
@@ -12,7 +13,6 @@ var ExaminePage = require('../../cycledash/static/js/examine/components/ExamineP
     createRecordStore = require('../../cycledash/static/js/examine/RecordStore'),
     RecordActions = require('../../cycledash/static/js/examine/RecordActions'),
     Dispatcher = require('../../cycledash/static/js/examine/Dispatcher'),
-    TestUtils = React.addons.TestUtils,
     Utils = require('./Utils'),
     DataUtils = require('./DataUtils');
 

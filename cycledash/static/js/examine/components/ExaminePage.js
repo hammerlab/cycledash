@@ -1,7 +1,7 @@
 "use strict";
 
 var React = require('react'),
-    // PileupViewer = require('./PileupViewer'),
+    PileupViewer = require('./PileupViewer'),
     StatsSummary = require('./StatsSummary'),
     RecordsShown = require('./RecordsShown'),
     VCFTable = require('./VCFTable'),
@@ -84,20 +84,19 @@ var ExaminePage = React.createClass({
 
     // The pileup viewer still needs to be created, even if it's not visible,
     // so that it will pre-fetch the index chunks.
-    var pileupViewer = null;
-    // (
-    //   <PileupViewer key="pileup-viewer"
-    //                 vcfPath={run.uri}
-    //                 normalBamPath={run.normal_bam && run.normal_bam.uri}
-    //                 tumorBamPath={run.tumor_bam && run.tumor_bam.uri}
-    //                 igvHttpfsUrl={props.igvHttpfsUrl}
-    //                 selectedRecord={state.selectedRecord}
-    //                 columns={state.columns}
-    //                 isOpen={state.isViewerOpen}
-    //                 handlePreviousRecord={this.handlePreviousRecord}
-    //                 handleNextRecord={this.handleNextRecord}
-    //                 handleClose={this.handleCloseViewer} />
-    // );
+    var pileupViewer = (
+      <PileupViewer key="pileup-viewer"
+                    vcfPath={run.uri}
+                    normalBamPath={run.normal_bam && run.normal_bam.uri}
+                    tumorBamPath={run.tumor_bam && run.tumor_bam.uri}
+                    igvHttpfsUrl={props.igvHttpfsUrl}
+                    selectedRecord={state.selectedRecord}
+                    columns={state.columns}
+                    isOpen={state.isViewerOpen}
+                    handlePreviousRecord={this.handlePreviousRecord}
+                    handleNextRecord={this.handleNextRecord}
+                    handleClose={this.handleCloseViewer} />
+    );
 
     if (state.isViewerOpen) {
       return (

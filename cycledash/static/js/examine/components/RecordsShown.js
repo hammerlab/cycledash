@@ -1,7 +1,7 @@
 "use strict";
 
 var d3 = require('d3'),
-    React = require('react/addons');
+    React = require('react');
 
 var RecordsShown = React.createClass({
   propTypes: {

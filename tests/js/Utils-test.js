@@ -3,7 +3,8 @@
 require('./testdom')('<html><body></body></html>');
 var Utils = require('./Utils'),
     assert = require('assert'),
-    React = require('react/addons');
+    React = require('react'),
+    TestUtils = require('react-addons-test-utils');
 
 describe('Utils', function() {
   describe('makeObj', function() {
@@ -21,7 +22,7 @@ describe('Utils', function() {
 
   describe('stubReactMethod', function() {
     it('should stub a React class method, then restore it', function() {
-      var TestUtils = React.addons.TestUtils;
+      var TestUtils = require('react-addons-test-utils');
       var captured = [];
       var RC = React.createClass({
         render: function() {

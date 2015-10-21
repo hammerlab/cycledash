@@ -2,7 +2,7 @@
 
 var _ = require('underscore'),
     utils = require('../utils'),
-    React = require('react/addons'),
+    React = require('react'),
     classnames = require('classnames'),
     $ = require('jquery'),
     CommentBox = require('./CommentBox');
@@ -32,7 +32,7 @@ var VCFTable = React.createClass({
   scrollRecordToTop: function(record) {
     var idx = this.props.records.indexOf(record);
     if (idx >= 0) {
-      var row = $(this.refs.vcfTable.getDOMNode()).find('tr').get(idx);
+      var row = $(this.refs.vcfTable).find('tr').get(idx);
       $('html,body').animate({
         scrollTop: $(row).offset().top - 70
       }, 250 /* ms */);
@@ -239,7 +239,7 @@ var VCFTableBody = React.createClass({
     $(window).on('scroll.vcftable', () => {
       // Show more rows if the browser viewport is close to the bottom and
       // there are more rows to be shown.
-      var $table = $(this.refs.lazyload.getDOMNode()),
+      var $table = $(this.refs.lazyload),
           tableBottom = $table.position().top + $table.height(),
           windowBottom = $(window).scrollTop() + $(window).height();
       if (tableBottom < windowBottom + this.BOTTOM_BUFFER) {
@@ -250,7 +250,7 @@ var VCFTableBody = React.createClass({
   getInitialState: () => ({hasOpenedIGV: false}),
   componentWillUnmount: function() {
     $(window).off('scroll.vcftable');
-    $(this.refs.lazyload.getDOMNode()).off('click');
+    $(this.refs.lazyload).off('click');
   },
   render: function() {
     var selectedRecord = this.props.selectedRecord,

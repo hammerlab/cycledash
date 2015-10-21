@@ -1,5 +1,5 @@
 'use strict';
-var React = require('react/addons');
+var React = require('react');
 
 
 // Sentinel value to indicate no chromosome restriction
