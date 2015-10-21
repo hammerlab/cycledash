@@ -330,11 +330,11 @@ var VCFRecord = React.createClass({
         <span className={this.props.record['annotations:starred'] ? 'starred' : 'not-starred'}>
         </span>
       </td>,
-      <td key='has-comment'>
-        <span className={commentBubbleClass}></span>
+      <td className="comment-count" key='has-comment'>
         <span>
           {hasComments ? this.props.record.comments.length : ''}
         </span>
+        <span className={commentBubbleClass}></span>
       </td>,
       <td title="This record is a true positive." key='true-positive'>
         {this.props.record['tag:true-positive'] ? '✓' : ''}

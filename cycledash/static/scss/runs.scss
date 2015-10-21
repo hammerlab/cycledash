@@ -13,7 +13,6 @@
   @extend .col-md-2;
   font-size: 0.875em;
   h4 {
-    font-size: 1rem;
     margin: 0;
   }
   padding: 1rem;
@@ -76,7 +75,7 @@ form.add-form {
   z-index: 1;
 }
 .add-form-submit {
-  @extend .btn, .btn-primary;
+  @extend .btn, .btn-success;
   float: right;
 }
 
@@ -101,7 +100,7 @@ div.project-header h2 {
   margin: 0;
 }
 div.project-header .notes {
-  margin: 0.25rem 0 0 0;
+  margin: 0.625rem 0 0 0;
 }
 .project-stats .add button {
   margin-left: 1em;
