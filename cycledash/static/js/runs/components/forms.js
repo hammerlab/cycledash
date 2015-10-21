@@ -1,5 +1,6 @@
 'use strict';
 var React = require('react'),
+    classnames = require('classnames'),
     d3 = require('d3'),
     $ = require('jquery'),
     _ = require('underscore');
@@ -236,13 +237,15 @@ var TextInput = React.createClass({
       });
   },
   render: function() {
-    var formClasses = React.addons.classSet({
+    var formClasses = classnames({
       uploadable: this.props.uploadable,
       'receiving-drag': this.state.receivingDrag,
       'form-control': true
     });
-    var divClasses = React.addons.classSet({required: this.props.required,
-                                            'form-group add-form-input-full': true});
+    var divClasses = classnames({
+      required: this.props.required,
+      'form-group add-form-input-full': true
+    });
     return (
         <div className={divClasses}>
           <label className='control-label'>{this.props.label}</label>

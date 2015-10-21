@@ -5,6 +5,7 @@
 'use strict';
 
 var React = require('react'),
+    classnames = require('classnames'),
     QueryLanguage = require('../../QueryLanguage'),
     QueryCompletion = require('../../QueryCompletion'),
     utils = require('../utils'),
@@ -118,7 +119,7 @@ var QueryBox = React.createClass({
   },
 
   render: function() {
-    var statusClasses = React.addons.classSet({
+    var statusClasses = classnames({
       'query-status': true,
       'good': this.state.errorMessage === null,
       'bad': this.state.errorMessage !== null,
