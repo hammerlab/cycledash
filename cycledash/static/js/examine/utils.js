@@ -34,9 +34,12 @@ function makeIGVLink(run, igvHttpfsUrl) {
   function fileUrl(file) {
     return igvHttpfsUrl + file;
   }
+  function isFileURL(file) {
+    return file.indexOf('file://') >= 0;
+  }
 
   var sources = [
-      {name: 'Run',    format: 'vcf', uri: run.uri},
+      {name: 'Run',    format: 'vcf', uri: !isFileURL(run.uri) && run.uri},
       {name: 'Normal', format: 'bam', uri: run.normal_bam && run.normal_bam.uri},
       {name: 'Tumor',  format: 'bam', uri: run.tumor_bam && run.tumor_bam.uri}
   ].filter(x => x.uri);
