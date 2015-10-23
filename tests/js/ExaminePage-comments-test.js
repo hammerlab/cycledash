@@ -194,6 +194,7 @@ describe('ExaminePage Comments', function() {
   });
 
   it('should undo actions when server fails', function() {
+    this.timeout(5000);
     examine = renderExamine({
       'PUT': ['/api/runs/1/comments/17'],
       'POST': ['/api/runs/1/comments'],
