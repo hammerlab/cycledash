@@ -5,6 +5,7 @@
 'use strict';
 
 var React = require('react'),
+    classnames = require('classnames'),
     QueryLanguage = require('../../QueryLanguage'),
     QueryCompletion = require('../../QueryCompletion'),
     utils = require('../utils'),
@@ -54,7 +55,7 @@ var QueryBox = React.createClass({
   },
   // Called when column names become available.
   initQueryBox: function() {
-    var $input = $(this.refs.input.getDOMNode());
+    var $input = $(this.refs.input);
     var handleChange = (e) => {
       this.parseAndUpdate($input.val());
     };
@@ -97,10 +98,10 @@ var QueryBox = React.createClass({
 
   // Update the CQL box to reflect this.props.query.
   setQueryBoxToQuery: function() {
-    if (document.activeElement == this.refs.input.getDOMNode()) {
+    if (document.activeElement == this.refs.input) {
       return;  // never change the text while the user is typing.
     }
-    var textBoxQuery = this.parseQuery(this.refs.input.getDOMNode().value);
+    var textBoxQuery = this.parseQuery(this.refs.input.value);
 
     // don't change the text box if its contents parse to the same thing.
     if (!QueryLanguage.isEquivalent(textBoxQuery, this.props.query)) {
@@ -113,12 +114,12 @@ var QueryBox = React.createClass({
    * This is factored out for easy intercepting while testing.
    */
   setDisplayedQuery: function(str) {
-    var $input = $(this.refs.input.getDOMNode());
+    var $input = $(this.refs.input);
     $input.typeahead('val', str);
   },
 
   render: function() {
-    var statusClasses = React.addons.classSet({
+    var statusClasses = classnames({
       'query-status': true,
       'good': this.state.errorMessage === null,
       'bad': this.state.errorMessage !== null,

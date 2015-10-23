@@ -2,7 +2,8 @@
 
 var _ = require('underscore'),
     utils = require('../utils'),
-    React = require('react/addons'),
+    React = require('react'),
+    classnames = require('classnames'),
     $ = require('jquery'),
     CommentBox = require('./CommentBox');
 
@@ -31,7 +32,7 @@ var VCFTable = React.createClass({
   scrollRecordToTop: function(record) {
     var idx = this.props.records.indexOf(record);
     if (idx >= 0) {
-      var row = $(this.refs.vcfTable.getDOMNode()).find('tr').get(idx);
+      var row = $(this.refs.vcfTable).find('tr').get(idx);
       $('html,body').animate({
         scrollTop: $(row).offset().top - 70
       }, 250 /* ms */);
@@ -82,7 +83,7 @@ var VCFTableHeader = React.createClass({
     var uberColumns = [],
         columnHeaders = [],
         posSorts = this.props.sortBys.filter(c => _.contains(['position', 'contig'], c.columnName)),
-        posSorterClasses = React.addons.classSet({
+        posSorterClasses = classnames({
           'sort': true,
           'desc': posSorts[0] && posSorts[0].order === 'desc',
           'asc': posSorts[0] && posSorts[0].order === 'asc',
@@ -170,7 +171,7 @@ var ColumnHeader = React.createClass({
       sortingBy = true;
       order = sortBy.order;
     }
-    var aClasses = React.addons.classSet({
+    var aClasses = classnames({
         'sorting-by': sortingBy,
         'desc': sortingBy && order === 'desc',
         'asc': sortingBy && order === 'asc',
@@ -238,7 +239,7 @@ var VCFTableBody = React.createClass({
     $(window).on('scroll.vcftable', () => {
       // Show more rows if the browser viewport is close to the bottom and
       // there are more rows to be shown.
-      var $table = $(this.refs.lazyload.getDOMNode()),
+      var $table = $(this.refs.lazyload),
           tableBottom = $table.position().top + $table.height(),
           windowBottom = $(window).scrollTop() + $(window).height();
       if (tableBottom < windowBottom + this.BOTTOM_BUFFER) {
@@ -249,7 +250,7 @@ var VCFTableBody = React.createClass({
   getInitialState: () => ({hasOpenedIGV: false}),
   componentWillUnmount: function() {
     $(window).off('scroll.vcftable');
-    $(this.refs.lazyload.getDOMNode()).off('click');
+    $(this.refs.lazyload).off('click');
   },
   render: function() {
     var selectedRecord = this.props.selectedRecord,
@@ -321,7 +322,7 @@ var VCFRecord = React.createClass({
   render: function() {
     var hasComments = _.has(this.props.record, 'comments') &&
         this.props.record.comments.length > 0;
-    var commentBubbleClass = React.addons.classSet({
+    var commentBubbleClass = classnames({
       'comment-bubble': hasComments
     });
     var tds = [
@@ -368,7 +369,7 @@ var VCFRecord = React.createClass({
         );
       }
     });
-    var recordClasses = React.addons.classSet({selected: this.props.isSelected});
+    var recordClasses = classnames({selected: this.props.isSelected});
     return (
       <tr className={recordClasses} onClick={this.handleClick}>
         {tds}

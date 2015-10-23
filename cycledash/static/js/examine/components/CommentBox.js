@@ -9,7 +9,7 @@
 
 var _ = require('underscore'),
     utils = require('../utils'),
-    React = require('react/addons'),
+    React = require('react'),
     marked = require('marked'),
     moment = require('moment');
 

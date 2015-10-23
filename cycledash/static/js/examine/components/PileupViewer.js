@@ -144,7 +144,7 @@ var PileupViewer = React.createClass({
       sources = sources.concat(bamSource('Tumor', 'tumor', this.props.tumorBamPath, this.state.tumorBaiChunks));
     }
 
-    var pileupEl = this.refs.pileupElement.getDOMNode();
+    var pileupEl = this.refs.pileupElement;
 
     this.browser = pileup.create(pileupEl, {
       range: this.rangeForRecord(this.props.selectedRecord),

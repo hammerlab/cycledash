@@ -1,5 +1,6 @@
 'use strict';
 var React = require('react'),
+    classnames = require('classnames'),
     d3 = require('d3'),
     $ = require('jquery'),
     _ = require('underscore');
@@ -48,7 +49,7 @@ var NewRunForm = React.createClass({
     projectName: React.PropTypes.string.isRequired
   },
   componentDidMount: function() {
-    ajaxifyForm(this.refs.runForm.getDOMNode());
+    ajaxifyForm(this.refs.runForm);
   },
   render: function() {
     var props = this.props;
@@ -88,7 +89,7 @@ var NewBAMForm = React.createClass({
     projectName: React.PropTypes.string.isRequired
   },
   componentDidMount: function() {
-    ajaxifyForm(this.refs.bamForm.getDOMNode());
+    ajaxifyForm(this.refs.bamForm);
   },
   render: function() {
     return (
@@ -121,7 +122,7 @@ var NewBAMForm = React.createClass({
 
 var NewProjectForm = React.createClass({
   componentDidMount: function() {
-    ajaxifyForm(this.refs.projectForm.getDOMNode());
+    ajaxifyForm(this.refs.projectForm);
   },
   render: function() {
     return (
@@ -157,7 +158,7 @@ var TextInput = React.createClass({
     return {receivingDrag: false};
   },
   componentDidMount: function(prevProps, prevState) {
-    var $input = $(this.refs.input.getDOMNode());
+    var $input = $(this.refs.input);
     if (this.props.completions) {
       $input
         .typeahead({
@@ -198,7 +199,7 @@ var TextInput = React.createClass({
       if (files.length > 1) {
         window.alert('You may only upload one file at a time.');
       } else {
-        this._upload(files[0], this.refs.input.getDOMNode());
+        this._upload(files[0], this.refs.input);
       }
     }
   },
@@ -236,13 +237,15 @@ var TextInput = React.createClass({
       });
   },
   render: function() {
-    var formClasses = React.addons.classSet({
+    var formClasses = classnames({
       uploadable: this.props.uploadable,
       'receiving-drag': this.state.receivingDrag,
       'form-control': true
     });
-    var divClasses = React.addons.classSet({required: this.props.required,
-                                            'form-group add-form-input-full': true});
+    var divClasses = classnames({
+      required: this.props.required,
+      'form-group add-form-input-full': true
+    });
     return (
         <div className={divClasses}>
           <label className='control-label'>{this.props.label}</label>

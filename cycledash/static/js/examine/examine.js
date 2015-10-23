@@ -1,6 +1,7 @@
 "use strict";
 
 var React = require('react'),
+    ReactDOM = require('react-dom'),
     ExaminePage = require('./components/ExaminePage'),
     Dispatcher = require('./Dispatcher'),
     createRecordStore = require('./RecordStore'),
@@ -12,10 +13,10 @@ window.renderExaminePage = function(el, vcf, comparableVcfs,
   var dispatcher = new Dispatcher();
   var recordActions = getRecordActions(dispatcher);
   var recordStore = createRecordStore(vcf, igvHttpfsUrl, dispatcher);
-  React.render(<ExaminePage recordStore={recordStore}
-                            recordActions={recordActions}
-                            comparableVcfs={comparableVcfs}
-                            vcf={vcf}
-                            currentUser={currentUser}
-                            igvHttpfsUrl={igvHttpfsUrl} />, el);
+  ReactDOM.render(<ExaminePage recordStore={recordStore}
+                               recordActions={recordActions}
+                               comparableVcfs={comparableVcfs}
+                               vcf={vcf}
+                               currentUser={currentUser}
+                               igvHttpfsUrl={igvHttpfsUrl} />, el);
 };

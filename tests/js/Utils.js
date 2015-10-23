@@ -19,7 +19,7 @@ function findInComponent(selector, component) {
  * Returns the Sinon stub. Don't forget to call .restore() on it!
  */
 function stubReactMethod(ReactClass, method, fn) {
-  return sinon.stub(ReactClass.type.prototype.__reactAutoBindMap, method, fn);
+  return sinon.stub(ReactClass.prototype.__reactAutoBindMap, method, fn);
 }
 
 function makeObj(list, keyValFn) {

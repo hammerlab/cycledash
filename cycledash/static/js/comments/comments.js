@@ -1,8 +1,9 @@
 'use strict';
 var React = require('react'),
+    ReactDOM = require('react-dom'),
     CommentsPage = require('./components/comment').CommentsPage;
 
 
 window.renderCommentsPage = function(el, comments) {
-  React.render(<CommentsPage comments={comments} />, el);
+  ReactDOM.render(<CommentsPage comments={comments} />, el);
 };

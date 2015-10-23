@@ -1,7 +1,8 @@
 'use strict';
 
 require('./testdom')('<html><body></body></html>');
-var React = require('react/addons'),
+var React = require('react'),
+    TestUtils = require('react-addons-test-utils'),
     assert = require('assert'),
     _ = require('underscore'),
     sinon = require('sinon');
@@ -11,7 +12,6 @@ var ExaminePage = require('../../cycledash/static/js/examine/components/ExamineP
     createRecordStore = require('../../cycledash/static/js/examine/RecordStore'),
     RecordActions = require('../../cycledash/static/js/examine/RecordActions'),
     Dispatcher = require('../../cycledash/static/js/examine/Dispatcher'),
-    TestUtils = React.addons.TestUtils,
     Utils = require('./Utils'),
     CommentUtils = require('./CommentUtils');
 
@@ -194,6 +194,7 @@ describe('ExaminePage Comments', function() {
   });
 
   it('should undo actions when server fails', function() {
+    this.timeout(5000);
     examine = renderExamine({
       'PUT': ['/api/runs/1/comments/17'],
       'POST': ['/api/runs/1/comments'],

@@ -5,12 +5,12 @@
 'use strict';
 
 require('./testdom')('<html><body></body></html>');
-var React = require('react/addons'),
+var React = require('react'),
+    TestUtils = require('react-addons-test-utils'),
     assert = require('assert'),
     _ = require('underscore');
 
 var CommentBox = require('../../cycledash/static/js/examine/components/CommentBox'),
-    TestUtils = React.addons.TestUtils,
     Utils = require('./Utils'),
     DataUtils = require('./DataUtils');
 

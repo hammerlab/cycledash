@@ -279,7 +279,7 @@ var RunRow = React.createClass({
     handleClick: React.PropTypes.func.isRequired
   },
   handleClick: function(evt) {
-    if (evt.target == this.refs.link.getDOMNode()) return;
+    if (evt.target == this.refs.link) return;
     this.props.handleClick();
   },
   render: function() {
