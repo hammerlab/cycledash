@@ -3,8 +3,7 @@
 require('./testdom')('<html><body></body></html>');
 var Utils = require('./Utils'),
     assert = require('assert'),
-    React = require('react'),
-    TestUtils = require('react-addons-test-utils');
+    React = require('react');
 
 describe('Utils', function() {
   describe('makeObj', function() {

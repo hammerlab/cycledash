@@ -11,7 +11,7 @@ var _ = require('underscore'),
  * Apply a CSS selector to a React tree. Returns an array of DOM nodes.
  */
 function findInComponent(selector, component) {
-  return _.toArray(component.querySelectorAll(selector));
+  return _.toArray(component.getDOMNode().querySelectorAll(selector));
 }
 
 /**
@@ -19,7 +19,7 @@ function findInComponent(selector, component) {
  * Returns the Sinon stub. Don't forget to call .restore() on it!
  */
 function stubReactMethod(ReactClass, method, fn) {
-  return sinon.stub(ReactClass.type.prototype.__reactAutoBindMap, method, fn);
+  return sinon.stub(ReactClass.prototype.__reactAutoBindMap, method, fn);
 }
 
 function makeObj(list, keyValFn) {
