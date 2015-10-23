@@ -72,6 +72,9 @@ var PileupViewer = React.createClass({
   hdfsUrl: function(path) {
     return this.props.igvHttpfsUrl + path;
   },
+  canDisplayPath: function(path) {
+    return path && path.indexOf('file://') == -1;
+  },
   handleClose: function(e) {
     e.preventDefault();
     this.props.handleClose();
@@ -130,10 +133,14 @@ var PileupViewer = React.createClass({
         {
           name: 'Location',
           viz: pileup.viz.location()
-        },
-        vcfSource('Run VCF', this.props.vcfPath)
+        }
     ];
-    if (this.props.truthVcfPath) {
+
+    // See https://github.com/hammerlab/cycledash/issues/525
+    if (this.canDisplayPath(this.props.vcfPath)) {
+      sources.push(vcfSource('Run VCF', this.props.vcfPath));
+    }
+    if (this.canDisplayPath(this.props.truthVcfPath)) {
       sources.push(vcfSource('Truth VCF', this.props.truthVcfPath));
     }
 
