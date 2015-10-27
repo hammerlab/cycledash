@@ -495,8 +495,11 @@ a.download-vcf {
 }
 .vcf-table span.comment-bubble {
   @extend .glyphicon, .glyphicon-comment;
-  margin-right: 0.5em;
+  margin-left: 0.5em;
   font-size: 0.625rem;
+}
+.comment-count {
+  text-align: right;
 }
 .vcf-table td {
   white-space: nowrap;
