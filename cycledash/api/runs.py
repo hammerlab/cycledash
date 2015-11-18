@@ -78,7 +78,7 @@ run_fields = {
     Doc('vcf_header', 'The raw VCF text of the header.'):
         Any(basestring, None),
     Doc('vcf_release', 'ENSEMBL Release for the reference'):
-        Any(long, None),
+        Any(int, None),
     Doc('project_id', 'The internal ID of the Project this Run belongs to.'):
         long,
     Doc('normal_bam_id',
