@@ -9,7 +9,7 @@ from test_projects_api import create_project_with_name
 import helpers
 
 
-def create_bam_with_name(project_id, name, uri='hdfs://testbam.bam'):
+def create_bam_with_name(project_id, name, uri='http://testbam.bam'):
     with tables(db.engine, 'bams') as (con, bams):
         res = bams.insert(
             {'name': name,
@@ -21,7 +21,7 @@ def create_bam_with_name(project_id, name, uri='hdfs://testbam.bam'):
 class TestBamsAPI(helpers.ResourceTest):
     PROJECT_NAME = 'TEST PROJECT BAM'
     BAM_NAME = 'something bam name'
-    PATH = 'hdfs://somebam.bam'
+    PATH = 'http://somebam.bam'
 
     @classmethod
     def setUpClass(cls):

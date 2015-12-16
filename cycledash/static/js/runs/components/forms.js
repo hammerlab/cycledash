@@ -60,7 +60,7 @@ var NewRunForm = React.createClass({
             <TextInput label='Variant Caller Name' name='callerName'
                        placeholder='Guacamole::Somatic' />
             <TextInput label='VCF Path' name='uri'
-                       placeholder='/data/somevcf.vcf'
+                       placeholder='Drag a VCF here to upload it.'
                        required={true}
                        uploadable={true} uploadPath={'/upload'} />
             <TextInput label='Tumor BAM URI' name='tumorBamUri'
@@ -100,7 +100,7 @@ var NewBAMForm = React.createClass({
                        placeholder='...' />
             <TextInput label='BAM URI' name='uri'
                        required={true}
-                       placeholder='hdfs:///data/somebam.bam' />
+                       placeholder='http://cluster.example.com/hdfs/data/somebam.bam' />
             <TextInput label='Resection Date' name='resectionDate'
                        placeholder='2015-08-14' />
             <TextInput label='Tissues' name='tissues'

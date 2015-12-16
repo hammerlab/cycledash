@@ -7,7 +7,7 @@ from voluptuous import Schema, Any, Required, Exclusive, Coerce
 
 from cycledash import db
 from cycledash.helpers import get_id_where, get_where, abort_if_none_for
-from cycledash.validations import Doc, expect_one_of, PathString
+from cycledash.validations import Doc, expect_one_of, FilePathString, HttpPathString
 from common.helpers import tables
 import workers.runner
 
@@ -15,7 +15,7 @@ from . import genotypes, bams, marshal_with, validate_with, projects, Resource
 
 
 CreateRun = Schema({
-    Required('uri'): PathString,
+    Required('uri'): FilePathString,
 
     # One of `project` is required, but not supported in voluptuous, so we
     # enforce this in code. cf. https://github.com/alecthomas/voluptuous/issues/115
@@ -23,15 +23,14 @@ CreateRun = Schema({
     Exclusive('project_name', 'project'): unicode,
 
     Exclusive('normal_bam_id', 'normal_bam'): Coerce(int),
-    Exclusive('normal_bam_uri', 'normal_bam'): PathString,
+    Exclusive('normal_bam_uri', 'normal_bam'): HttpPathString,
     Exclusive('tumor_bam_id', 'tumor_bam'): Coerce(int),
-    Exclusive('tumor_bam_uri', 'tumor_bam'): PathString,
+    Exclusive('tumor_bam_uri', 'tumor_bam'): HttpPathString,
 
     'caller_name': unicode,
     'project_id': Coerce(int),
     'tumor_dataset_id': Coerce(int),
     'normal_dataset_id': Coerce(int),
-    'truth_vcf_path': PathString,
     'is_validation': bool,
     'notes': unicode,
     'dataset': unicode,
@@ -44,9 +43,9 @@ UpdateRun = Schema({
     'caller_name': unicode,
 
     Exclusive('normal_bam_id', 'normal_bam'): Coerce(int),
-    Exclusive('normal_bam_uri', 'normal_bam'): PathString,
+    Exclusive('normal_bam_uri', 'normal_bam'): HttpPathString,
     Exclusive('tumor_bam_id', 'tumor_bam'): Coerce(int),
-    Exclusive('tumor_bam_uri', 'tumor_bam'): PathString,
+    Exclusive('tumor_bam_uri', 'tumor_bam'): HttpPathString,
 
     'notes': unicode,
     'vcf_header': unicode,
@@ -64,7 +63,7 @@ run_fields = {
         long,
     Doc('extant_columns', 'A list of all the columns the Run has.'):
         Any(basestring, None),
-    Doc('uri', 'The HDFS or NFS URI of the VCF this run was based on.'):
+    Doc('uri', 'The URL of the VCF this run was based on.'):
         basestring,
     Doc('caller_name',
         'The name of the variant caller used to generate this Run.'):

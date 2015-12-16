@@ -49,7 +49,7 @@ class TestViews(object):
                  'vcf_header': ''}
             ).returning(*runs.c).execute()
             cls.run = dict(res.fetchone())
-        cls.run2 = create_run_with_uri(cls.project['id'], 'hdfs://someuri.vcf')
+        cls.run2 = create_run_with_uri(cls.project['id'], 'http://someuri.vcf')
         cls.comment1 = create_comment_with_text(cls.run['id'], 'this is some text')
         cls.comment2 = create_comment_with_text(cls.run['id'], 'more text')
 

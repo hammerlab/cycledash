@@ -22,8 +22,17 @@ def expect_one_of(dct, *args):
     raise MultipleInvalid(errors=[error])
 
 
-def is_path(s):
-    return s[0] == '/' or s.startswith('file://') or s.startswith('hdfs://')
+def is_http_path(s):
+    for start in ['http://', 'https://']:
+        if s.startswith(start):
+            return True
+    return False
+
+
+def is_file_path(s):
+    if s.startswith('file'):
+        return True
+    return False
 
 
 def is_email(s):
@@ -34,10 +43,13 @@ def to_epoch(v):
     return common.helpers.to_epoch(v)
 
 
-PathString = All(unicode,
-                 Length(min=1),
-                 Msg(truth(is_path),
-                     'path must start with "/", "file://" or "hdfs://"'))
+HttpPathString = All(unicode,
+                 Msg(truth(is_http_path),
+                     'path must start with "http[s]://"'))
+
+FilePathString = All(unicode,
+                 Msg(truth(is_file_path),
+                     'path must start with "file://"'))
 
 
 class Doc(Marker):

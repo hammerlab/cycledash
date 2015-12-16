@@ -6,7 +6,7 @@ import voluptuous
 from voluptuous import Schema, Required, Any, Exclusive, Coerce
 
 from common.helpers import tables, find
-from cycledash.validations import expect_one_of, PathString, Doc
+from cycledash.validations import expect_one_of, HttpPathString, Doc
 from cycledash import db
 from cycledash.helpers import abort_if_none_for
 from cycledash.validations import Doc
@@ -17,7 +17,7 @@ from . import Resource, marshal_with, validate_with
 
 
 CreateBam = Schema({
-    Required('uri'): PathString,
+    Required('uri'): HttpPathString,
 
     # One of `project` is required, but not supported in voluptuous, so we
     # enforce this in code. cf. https://github.com/alecthomas/voluptuous/issues/115
@@ -35,7 +35,7 @@ UpdateBam = Schema({
     'notes': unicode,
     'tissues': unicode,
     'resection_date': unicode,
-    'uri': PathString
+    'uri': HttpPathString
 })
 
 BamFields = Schema({
@@ -49,7 +49,7 @@ BamFields = Schema({
     Doc('normal',
         'Whether or not the sample is from normal tissue.'): Any(bool, None),
     Doc('tissues', 'Tissue type of sample.'): Any(basestring, None),
-    Doc('uri', 'The URI of the BAM on HDFS.'): PathString
+    Doc('uri', 'The URL of the BAM.'): HttpPathString
 })
 
 
@@ -67,7 +67,7 @@ class BamList(Resource):
     def post(self):
         """Create a new BAM.
 
-        This will index the BAM index on HDFS if it's not already indexed."""
+        This will index the BAM index if it's not already indexed."""
         try:
             expect_one_of(request.validated_body, 'project_name', 'project_id')
         except voluptuous.MultipleInvalid as e:
