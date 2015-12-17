@@ -55,7 +55,9 @@ var PileupViewer = React.createClass({
                 handleSelectRecord={_.noop}
                 handleOpenViewer={_.noop}
                 handleSetComment={_.noop}
-                handleDeleteComment={_.noop} />
+                handleDeleteComment={_.noop}
+                currentUser={{}}
+                handleStarGenotype={_.noop} />
     );
 
     return (
@@ -203,8 +205,6 @@ var PileupViewer = React.createClass({
   },
   componentDidUpdate: function() {
     this.update();
-  },
-  componentWillUnmount: function() {
   },
   shouldComponentUpdate: function(nextProps, nextState) {
     return ((nextProps.isOpen != this.props.isOpen) ||
