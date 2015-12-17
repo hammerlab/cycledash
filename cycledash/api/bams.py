@@ -65,9 +65,7 @@ class BamList(Resource):
     @validate_with(CreateBam)
     @marshal_with(BamFields)
     def post(self):
-        """Create a new BAM.
-
-        This will index the BAM index if it's not already indexed."""
+        """Create a new BAM."""
         try:
             expect_one_of(request.validated_body, 'project_name', 'project_id')
         except voluptuous.MultipleInvalid as e:
@@ -81,7 +79,6 @@ class BamList(Resource):
             result = bams.insert(
                 request.validated_body).returning(*bams.c).execute()
             bam = dict(result.fetchone())
-        workers.indexer.index.delay(bam['id'])
         return bam, 201
 
 
