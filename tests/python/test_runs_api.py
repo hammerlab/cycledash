@@ -23,7 +23,7 @@ class TestRunsAPI(helpers.ResourceTest):
     PROJECT_NAME = 'TEST PROJECT RUN'
     BAM_NAME = 'something bam name'
     BAM_PATH = 'http://somebam.bam'
-    RUN_PATH = 'http://somevcf.vcf'
+    RUN_PATH = 'file://somevcf.vcf'
 
     @classmethod
     def setUpClass(cls):
