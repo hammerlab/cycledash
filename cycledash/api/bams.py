@@ -10,7 +10,6 @@ from cycledash.validations import expect_one_of, HttpPathString, Doc
 from cycledash import db
 from cycledash.helpers import abort_if_none_for
 from cycledash.validations import Doc
-import workers.indexer
 
 import projects
 from . import Resource, marshal_with, validate_with
