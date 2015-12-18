@@ -1,5 +1,5 @@
 """Test rendered views of Cycledash."""
-from flask.ext.login import login_user
+from flask_login import login_user
 import mock
 import nose
 import nose.tools as asserts

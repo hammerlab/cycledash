@@ -36,7 +36,6 @@ class TestRunsAPI(helpers.ResourceTest):
         helpers.delete_table(db, 'vcfs')
 
     @mock.patch('workers.runner', autospec=True)
-    @mock.patch('workers.indexer', autospec=True)
     def test_create_run(self, *args):
         caller_name = 'The Testing Caller'
         r = self.post('/api/runs',
@@ -56,7 +55,6 @@ class TestRunsAPI(helpers.ResourceTest):
         assert json.loads(r.data)['callerName'] == caller_name
 
     @mock.patch('workers.runner', autospec=True)
-    @mock.patch('workers.indexer', autospec=True)
     def test_create_run_with_project_and_bam_names(self, *args):
         r = self.post('/api/runs',
                       data={'normalBamUri': self.BAM_PATH,

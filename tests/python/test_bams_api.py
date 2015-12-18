@@ -31,7 +31,6 @@ class TestBamsAPI(helpers.ResourceTest):
     def tearDown(self):
         helpers.delete_table(db, 'bams')
 
-    @mock.patch('workers.indexer.index.delay', lambda *args, **kwargs: True)
     def test_create_bam(self):
         NOTES = 'random notes'
         TISSUES = 'left ovary etc'
@@ -49,7 +48,6 @@ class TestBamsAPI(helpers.ResourceTest):
         assert json.loads(r.data)['notes'] == NOTES
         assert json.loads(r.data)['uri'] == self.PATH
 
-    @mock.patch('workers.indexer.index.delay', lambda *args, **kwargs: True)
     def test_create_bam_with_project_name(self):
         r = self.post('/api/bams',
                       data={'name': self.BAM_NAME,

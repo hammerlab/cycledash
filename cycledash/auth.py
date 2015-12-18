@@ -1,6 +1,6 @@
 """Module to manage user authentication and identification."""
 from flask import request, redirect, render_template
-from flask.ext.login import login_user, logout_user
+from flask_login import login_user, logout_user
 from sqlalchemy import exc
 import voluptuous
 import base64

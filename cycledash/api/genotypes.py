@@ -3,7 +3,7 @@ from collections import OrderedDict
 import copy
 import json
 from flask import request
-import flask.ext.restful as restful
+import flask_restful as restful
 from plone.memoize import forever
 from sqlalchemy import (select, func, types, cast, join, outerjoin, asc, desc,
                         and_, Integer, Float, String, distinct)

@@ -1,6 +1,6 @@
 import datetime
 from flask import request
-from flask.ext.restful import abort, fields
+from flask_restful import abort, fields
 from sqlalchemy import select, desc, func
 import voluptuous
 from voluptuous import Schema, Any, Required, Exclusive, Coerce

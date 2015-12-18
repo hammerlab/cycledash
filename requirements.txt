@@ -23,7 +23,7 @@ requests==2.3.0
 voluptuous==0.8.7
 wsgiref==0.1.2
 psycopg2==2.5.4
-pylint==1.4.1
+pylint==1.5.0
 humanize==0.5.1
 varcode==0.3.11
 mock==1.0.1

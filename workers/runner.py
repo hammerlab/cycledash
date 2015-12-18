@@ -1,7 +1,6 @@
 from celery import chain
 import json
 
-import indexer
 from genotype_extractor import extract as extract_genotype
 from varcode_annotator import annotate as varcode_genes
 

@@ -1,6 +1,6 @@
 """Defines the API for Projects."""
 from flask import request, redirect, jsonify, url_for, render_template
-from flask.ext.restful import fields, abort
+from flask_restful import fields, abort
 from sqlalchemy import exc, select, func, desc
 import voluptuous
 from voluptuous import Schema, Required, Any
