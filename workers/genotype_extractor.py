@@ -26,7 +26,7 @@ def extract(self, vcf_id):
 
 
 def _extract(vcf_id):
-    """Extract the genotypes from an on-disk or HDFS VCF and insert into the DB.
+    """Extract the genotypes from a VCF and insert into the DB.
 
     This also fills in a few fields in the vcfs table which aren't available
     until the entire VCF has been read, e.g. the variant count.

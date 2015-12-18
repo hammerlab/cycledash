@@ -15,7 +15,7 @@ JSON should be POSTed to <tt>/api/runs</tt> with following fields:
 <dl class="dl-horizontal">
   <dt>uri</dt>
   <dd>
-    The path on HDFS where the VCF can be found.
+    The URL where the VCF can be found.
     (e.g. <tt>/users/cycledasher/pt-123.vcf</tt>)
     This should be immutable, as CycleDash expects
     to be able to find the VCF here at any time.
@@ -30,11 +30,11 @@ JSON should be POSTed to <tt>/api/runs</tt> with following fields:
 
 <dl class="dl-horizontal">
   <dt>tumorBamUri</dt>
-  <dd>The path on HDFS of the tumor BAM on which the caller was run. The BAM must already be in the database.</dd>
+  <dd>The URL of the tumor BAM on which the caller was run. The BAM must already be in the database.</dd>
    <dt>tumorBamId</dt>
   <dd>The ID of the BAM.</dd>
    <dt>normalBamUri</dt>
-  <dd>The path on HDFS of the normalBAM on which the caller was run. The BAM must already be in the database.</dd>
+  <dd>The URL of the normalBAM on which the caller was run. The BAM must already be in the database.</dd>
    <dt>normalBamId</dt>
   <dd>The ID of the BAM.</dd>
    <dt>params</dt>
@@ -76,7 +76,7 @@ JSON should be POSTed to <tt>/api/bams</tt> with following fields:
 
 <dl class="dl-horizontal">
   <dt>uri</dt>
-  <dd>The URI of the BAM on HDFS. Should start with 'hdfs://'.</dd>
+  <dd>The URL of the BAM. Should start with 'http[s]://'.</dd>
   <dt>projectName (or projectId)</dt>
   <dd>
     The name of the project that the run related to.

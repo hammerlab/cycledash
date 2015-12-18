@@ -1,7 +1,7 @@
 """Methods for working with Celery task states."""
 from collections import defaultdict
 from sqlalchemy import select
-from flask.ext.restful import abort, fields
+from flask_restful import abort, fields
 from voluptuous import Schema, Any
 
 from common.helpers import tables

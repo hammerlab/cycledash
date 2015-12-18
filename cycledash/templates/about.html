@@ -32,7 +32,7 @@
         <dl class="dl-horizontal">
           <dt>uri</dt>
           <dd>
-            The path on HDFS where the VCF can be found.
+            The URL where the VCF was uploaded to (returned by the /upload endpoint).
             (e.g. <tt>/users/cycledasher/pt-123.vcf</tt>)
             This should be immutable, as Cycledash expects
             to be able to find the VCF here at any time.
@@ -45,13 +45,13 @@
         <h4>Optional</h4>
         <dl class="dl-horizontal">
           <dt>tumorBamUri</dt>
-          <dd>The path on HDFS of the tumor BAM on which the caller was run. The BAM must already be in the database.</dd>
+          <dd>The URL where the tumor BAM on which the caller was run can be found. The BAM must already be in the database.</dd>
 
           <dt>tumorBamId</dt>
           <dd>The ID of the BAM.</dd>
 
           <dt>normalBamUri</dt>
-          <dd>The path on HDFS of the normalBAM on which the caller was run. The BAM must already be in the database.</dd>
+          <dd>The URL where the normal BAM on which the caller was run can be found. The BAM must already be in the database.</dd>
 
           <dt>normalBamId</dt>
           <dd>The ID of the BAM.</dd>
@@ -100,7 +100,7 @@
         <h4>Required</h4>
         <dl class="dl-horizontal">
           <dt>uri</dt>
-          <dd>The URI of the BAM on HDFS. Should start with 'hdfs://'.</dd>
+          <dd>The URI of the BAM. Should start with 'http[s]://'.</dd>
           <dt>projectName/projectId</dt>
           <dd>
             The name or ID of the project that the run related to.

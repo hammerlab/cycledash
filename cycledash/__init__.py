@@ -1,7 +1,9 @@
 from flask import Flask, jsonify, request, make_response, current_app
 import flask.json
 from flask_sqlalchemy import SQLAlchemy
-from flask.ext import restful, login, bcrypt
+import flask_restful as restful
+import flask_login as login
+import flask_bcrypt as bcrypt
 import humanize
 import logging
 import sys

@@ -22,8 +22,8 @@ class TestRunsAPI(helpers.ResourceTest):
     NOTES = '--with-awesome=9001'
     PROJECT_NAME = 'TEST PROJECT RUN'
     BAM_NAME = 'something bam name'
-    BAM_PATH = 'hdfs://somebam.bam'
-    RUN_PATH = 'hdfs://somevcf.vcf'
+    BAM_PATH = 'http://somebam.bam'
+    RUN_PATH = 'file://somevcf.vcf'
 
     @classmethod
     def setUpClass(cls):
@@ -36,7 +36,6 @@ class TestRunsAPI(helpers.ResourceTest):
         helpers.delete_table(db, 'vcfs')
 
     @mock.patch('workers.runner', autospec=True)
-    @mock.patch('workers.indexer', autospec=True)
     def test_create_run(self, *args):
         caller_name = 'The Testing Caller'
         r = self.post('/api/runs',
@@ -56,7 +55,6 @@ class TestRunsAPI(helpers.ResourceTest):
         assert json.loads(r.data)['callerName'] == caller_name
 
     @mock.patch('workers.runner', autospec=True)
-    @mock.patch('workers.indexer', autospec=True)
     def test_create_run_with_project_and_bam_names(self, *args):
         r = self.post('/api/runs',
                       data={'normalBamUri': self.BAM_PATH,
@@ -96,7 +94,7 @@ class TestRunsAPI(helpers.ResourceTest):
 
     def test_get_runs(self):
         run1 = create_run_with_uri(self.project['id'], self.RUN_PATH)
-        run2 = create_run_with_uri(self.project['id'], 'hdfs://otherpath.vcf')
+        run2 = create_run_with_uri(self.project['id'], 'http://otherpath.vcf')
         r = self.get('/api/runs')
         runs = json.loads(r.data)['runs']
         assert r.status_code == 200

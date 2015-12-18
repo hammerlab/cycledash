@@ -9,7 +9,7 @@ from cycledash import db
 from common.helpers import tables, to_epoch
 
 from flask import jsonify, request, url_for, redirect
-import flask.ext.restful, flask.ext.restful.fields
+import flask_restful, flask_restful.fields
 import voluptuous
 from werkzeug.utils import secure_filename
 
@@ -188,7 +188,7 @@ def abort_if_none_for(obj_name):
     def abort_if_none(obj, obj_id):
         """Abort request with a 404 if object is None."""
         if obj is None:
-            flask.ext.restful.abort(
+            flask_restful.abort(
                 404,
                 message='No {} with id={} found.'.format(obj_name, obj_id))
         else:

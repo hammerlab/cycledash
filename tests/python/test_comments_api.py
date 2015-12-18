@@ -29,7 +29,7 @@ class TestCommentsAPI(helpers.ResourceTest):
     @classmethod
     def setUpClass(cls):
         cls.project = create_project_with_name('project')
-        cls.run = create_run_with_uri(cls.project['id'], 'hdfs://somevcf.vcf')
+        cls.run = create_run_with_uri(cls.project['id'], 'http://somevcf.vcf')
         return super(TestCommentsAPI, cls).setUpClass()
 
     def tearDown(self):

@@ -3,14 +3,14 @@
 import json
 import tempfile
 from flask import request, redirect, render_template, send_file, Response
-from flask.ext.login import login_required
+from flask_login import login_required
 from sqlalchemy import select, desc, exc
 import voluptuous
 
 from common.relational_vcf import genotypes_to_file
 from common.helpers import tables
 from cycledash import app, db, api, login_manager, bcrypt
-import cycledash.auth as auth
+import cycledash.auth
 from cycledash.helpers import (error_response, get_secure_unique_filename,
                                camelcase_dict, prepare_request_data)
 import cycledash.api
@@ -81,12 +81,12 @@ def login():
     if request.method == 'GET':
         return render_template('login.html')
     else:
-        return auth.login()
+        return cycledash.auth.login()
 
 
 @app.route('/logout', methods=['POST'])
 def logout():
-    auth.logout()
+    cycledash.auth.logout()
     return redirect('about')
 
 
@@ -95,7 +95,7 @@ def register_user():
     if request.method == 'GET':
         return render_template('register.html')
     else:
-        return auth.register()
+        return cycledash.auth.register()
 
 
 @app.route('/')

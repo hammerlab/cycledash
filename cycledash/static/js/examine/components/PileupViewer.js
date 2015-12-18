@@ -55,7 +55,9 @@ var PileupViewer = React.createClass({
                 handleSelectRecord={_.noop}
                 handleOpenViewer={_.noop}
                 handleSetComment={_.noop}
-                handleDeleteComment={_.noop} />
+                handleDeleteComment={_.noop}
+                currentUser={{}}
+                handleStarGenotype={_.noop} />
     );
 
     return (
@@ -68,12 +70,9 @@ var PileupViewer = React.createClass({
       </div>
     );
   },
-  // Convert an HDFS path to a browser-accessible URL via igv-httpfs.
-  hdfsUrl: function(path) {
-    return this.props.igvHttpfsUrl + path;
-  },
   canDisplayPath: function(path) {
-    return path && path.indexOf('file://') == -1;
+    return path &&
+      (path.indexOf('http://') > -1 || path.indexOf('https://') > -1);
   },
   handleClose: function(e) {
     e.preventDefault();
@@ -95,14 +94,14 @@ var PileupViewer = React.createClass({
       name: name,
       viz: pileup.viz.variants(),
       data: pileup.formats.vcf({
-        url: this.hdfsUrl(path)
+        url: path
       })
     });
 
     var bamSource = (name, cssClass, path, chunks) => {
       var data = pileup.formats.bam({
-          url: this.hdfsUrl(path),
-          indexUrl: this.hdfsUrl(path + '.bai'),
+          url: path,
+          indexUrl: path + '.bai',
           indexChunks: chunks
         });
       return [
@@ -189,7 +188,7 @@ var PileupViewer = React.createClass({
         }
 
         var chunkPath = bamPath.replace('.bam', '.bam.bai.json');
-        $.getJSON(this.hdfsUrl(chunkPath))
+        $.getJSON(chunkPath)
           .done((chunks) => {
             this.setState(_.object([propName], [chunks]));
           }).fail((jqXHR, error, textStatus) => {
@@ -206,8 +205,6 @@ var PileupViewer = React.createClass({
   },
   componentDidUpdate: function() {
     this.update();
-  },
-  componentWillUnmount: function() {
   },
   shouldComponentUpdate: function(nextProps, nextState) {
     return ((nextProps.isOpen != this.props.isOpen) ||

@@ -1,8 +1,8 @@
 """API for user comments."""
 from collections import defaultdict
 from flask import jsonify, request
-from flask.ext.restful import abort, fields
-from flask.ext.login import current_user
+from flask_restful import abort, fields
+from flask_login import current_user
 from sqlalchemy import select, func, desc
 from voluptuous import Any, Required, Coerce, Schema
 

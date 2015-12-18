@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from flask import request
-import flask.ext.restful
-from flask.ext.login import current_user
+import flask_restful
+from flask_login import current_user
 import functools
 import voluptuous
 
@@ -10,7 +10,7 @@ from cycledash.auth import check_login
 from cycledash.helpers import prepare_request_data, camelcase_dict
 
 
-class Resource(flask.ext.restful.Resource, object):
+class Resource(flask_restful.Resource, object):
     """Extends Resource by adding an authentication check for basic auth or
     valid session cokie.
     """
@@ -33,7 +33,7 @@ class Resource(flask.ext.restful.Resource, object):
                     authorized = True
             if not authorized:
                 auth_msg = 'Correct username/password required.'
-                return flask.ext.restful.abort(401, message=auth_msg)
+                return flask_restful.abort(401, message=auth_msg)
         return super(Resource, self).dispatch_request(*args, **kwargs)
 
 
@@ -88,12 +88,12 @@ def validate_with(schema):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
             if not (request.json or request.data or request.form):
-                flask.ext.restful.abort(400, message='Validation error.',
+                flask_restful.abort(400, message='Validation error.',
                                         errors=['No data provided.'])
             try:
                 data = schema(prepare_request_data(request))
             except voluptuous.MultipleInvalid as err:
-                flask.ext.restful.abort(400,
+                flask_restful.abort(400,
                                         message='Validation error.',
                                         errors=[str(e) for e in err.errors])
             setattr(request, 'validated_body', data)
